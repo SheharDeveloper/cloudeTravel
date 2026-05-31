@@ -85,6 +85,14 @@ const mobileResponsiveStyles = `
         .navbar-hamburger {
             display: none !important;
         }
+
+        .mobile-menu {
+            display: none !important;
+        }
+
+        .landing-topbar {
+            display: flex !important;
+        }
     }
 `;
 

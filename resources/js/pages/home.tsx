@@ -356,6 +356,13 @@ export default function Home() {
                                 gap: 10px !important;
                             }
                         }
+
+                        @media (min-width: 769px) {
+                            .testimonials-slider-container { flex: 1; overflow: hidden; min-width: 0; }
+                            .testimonials-slider { gap: 20px !important; flex-wrap: nowrap !important; }
+                            .testimonial-card { flex: 0 0 calc(33.33333% - 13.33px) !important; padding: 30px !important; }
+                            .testimonials-nav { gap: 30px !important; }
+                        }
                     `}</style>
                     <div style={{ maxWidth: '1200px', margin: '0 auto' }} className="testimonials-section">
                         <div style={{ textAlign: 'center', marginBottom: '50px' }}>
@@ -367,7 +374,13 @@ export default function Home() {
                         <div className="testimonials-nav" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '20px', justifyContent: 'center' }}>
                             {/* Previous Button */}
                             <button
-                                onClick={() => setCurrentTestimonialIndex((prev) => (prev === 0 ? testimonials.length - 1 : prev - 1))}
+                                onClick={() => {
+                                    const cardsPerView = window.innerWidth >= 769 ? 3 : 1;
+                                    setCurrentTestimonialIndex((prev) => {
+                                        const newIndex = prev - cardsPerView;
+                                        return newIndex < 0 ? Math.max(0, testimonials.length - cardsPerView) : newIndex;
+                                    });
+                                }}
                                 style={{ background: '#003d82', color: '#fff', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}
                             >
                                 <i className="fa fa-chevron-left"></i>
@@ -375,7 +388,7 @@ export default function Home() {
 
                             {/* Testimonial Slider */}
                             <div className="testimonials-slider-container" style={{ flex: 1, overflow: 'hidden', minWidth: 0 }}>
-                                <div className="testimonials-slider" style={{ display: 'flex', gap: '20px', transition: 'transform 0.5s ease-in-out', transform: `translateX(-${currentTestimonialIndex * 100}%)`, flexWrap: 'nowrap' }}>
+                                <div className="testimonials-slider" style={{ display: 'flex', gap: '20px', transition: 'transform 0.5s ease-in-out', transform: `translateX(calc(-${currentTestimonialIndex * (100/Math.max(1, window.innerWidth >= 769 ? 3 : 1))}%))`, flexWrap: 'nowrap' }}>
                                     {testimonials.map((testimonial) => (
                                         <div key={testimonial.id} className="testimonial-card" style={{ background: '#fff', padding: '30px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,.1)', textAlign: 'center', flex: '0 0 100%', minWidth: 0 }}>
                                             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
@@ -399,7 +412,13 @@ export default function Home() {
 
                             {/* Next Button */}
                             <button
-                                onClick={() => setCurrentTestimonialIndex((prev) => (prev === testimonials.length - 1 ? 0 : prev + 1))}
+                                onClick={() => {
+                                    const cardsPerView = window.innerWidth >= 769 ? 3 : 1;
+                                    setCurrentTestimonialIndex((prev) => {
+                                        const newIndex = prev + cardsPerView;
+                                        return newIndex >= testimonials.length ? 0 : newIndex;
+                                    });
+                                }}
                                 style={{ background: '#003d82', color: '#fff', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}
                             >
                                 <i className="fa fa-chevron-right"></i>
