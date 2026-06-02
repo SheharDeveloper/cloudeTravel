@@ -43,5 +43,12 @@ export const apiFetch = async (url: string, options: RequestInit = {}) => {
 
     console.log('API Response Status:', response.status, 'Content-Type:', response.headers.get('content-type'));
 
+    // Handle 401 Unauthenticated responses by redirecting to login
+    if (response.status === 401) {
+        clearAuthToken();
+        window.location.href = '/login';
+        return response;
+    }
+
     return response;
 };

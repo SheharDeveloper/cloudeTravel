@@ -13,18 +13,20 @@ return new class extends Migration
     {
         Schema::create('tours', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // Tours Name
-            $table->string('image')->nullable(); // Tour image
-            $table->string('duration'); // Time/Duration (e.g., "7 Days")
-            $table->string('subtitle'); // Subtitle
-            $table->longText('description'); // Description
-            $table->longText('highlights')->nullable(); // Highlights (JSON array)
-            $table->longText('itinerary')->nullable(); // Itinerary details (JSON array)
-            $table->longText('package_includes')->nullable(); // What's included (JSON array)
-            $table->longText('package_excludes')->nullable(); // What's not included (JSON array)
-            $table->longText('terms_conditions')->nullable(); // T&C
-            $table->decimal('price', 10, 2)->nullable(); // Price
-            $table->string('location')->nullable(); // Location
+            $table->string('tour_title'); // Tour title
+            $table->string('hero_title'); // Hero section title
+            $table->text('hero_subtitle')->nullable(); // Hero subtitle
+            $table->text('short_description')->nullable(); // Short description
+            $table->longText('full_description')->nullable(); // Full description
+            $table->string('country'); // Country name
+            $table->string('city'); // City name
+            $table->integer('duration_days'); // Tour duration in days
+            $table->date('start_date'); // Tour start date
+            $table->date('end_date'); // Tour end date
+            $table->enum('status', ['active', 'inactive', 'draft'])->default('draft'); // Tour status
+            $table->string('early_booking_price_text')->nullable(); // Early booking text
+            $table->string('feature_image')->nullable(); // Feature image path
+            $table->json('banner_images')->nullable(); // Multiple banner images
             $table->timestamps();
         });
     }

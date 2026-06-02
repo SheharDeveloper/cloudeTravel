@@ -12,17 +12,30 @@ const menuItems: MenuItem[] = [
 
     { type: 'link', icon: 'fa-solid fa-house', label: 'Dashboard', href: '/dashboard' },
 
-    // { type: 'link', icon: 'fa-solid fa-house', label: 'Agency', href: '/agency' },
+    { type: 'title', label: 'TOUR MANAGEMENT' },
+
+    {
+        type: 'dropdown',
+        icon: 'fa-solid fa-plane',
+        label: 'Tours',
+        children: [
+            { label: 'All Tours', href: '/admin/tours' },
+            { label: 'Add New Tour', href: '/admin/tours/create' },
+        ],
+    },
 
     { type: 'title', label: 'WEBSITE MANAGEMENT' },
 
-    { type: 'link', icon: 'fa-solid fa-plane', label: 'Tours', href: '/admin/tours' },
-
-    { type: 'link', icon: 'fa-solid fa-star', label: 'Special Offer', href: '/admin/special-offer' },
-
-    { type: 'link', icon: 'fa-solid fa-image', label: 'Hero Images', href: '/admin/hero-image' },
-
-    { type: 'link', icon: 'fa-solid fa-comments', label: 'Testimonials', href: '/admin/testimonial' },
+    {
+        type: 'dropdown',
+        icon: 'fa-solid fa-home',
+        label: 'Home',
+        children: [
+            { label: 'Special Offer', href: '/admin/special-offer' },
+            { label: 'Hero Images', href: '/admin/hero-image' },
+            { label: 'Testimonials', href: '/admin/testimonial' },
+        ],
+    },
 
     { type: 'link', icon: 'fa-solid fa-phone', label: 'Contact Info', href: '/admin/contact-info' },
 

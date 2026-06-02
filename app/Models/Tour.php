@@ -3,49 +3,51 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/**
- * Tour Model
- * Represents a tour package with all details including itinerary, highlights, and terms
- *
- * Attributes:
- * - name: Tour name/title
- * - image: Tour image path
- * - duration: Tour duration (e.g., "7 Days")
- * - subtitle: Tour subtitle
- * - description: Detailed description
- * - highlights: Tour highlights (JSON)
- * - itinerary: Day-by-day itinerary (JSON)
- * - package_includes: What's included (JSON)
- * - package_excludes: What's not included (JSON)
- * - terms_conditions: Terms and conditions
- * - price: Tour price
- * - location: Tour location
- */
 class Tour extends Model
 {
-    use HasFactory;
-
     protected $fillable = [
-        'name',
-        'image',
-        'duration',
-        'subtitle',
-        'description',
-        'highlights',
-        'itinerary',
-        'package_includes',
-        'package_excludes',
-        'terms_conditions',
-        'price',
-        'location',
+        'tour_title',
+        'hero_title',
+        'hero_subtitle',
+        'short_description',
+        'full_description',
+        'country',
+        'city',
+        'duration_days',
+        'start_date',
+        'end_date',
+        'status',
+        'featured',
+        'early_booking_price_text',
+        'feature_image',
+        'banner_images',
     ];
 
     protected $casts = [
-        'highlights' => 'array',
-        'itinerary' => 'array',
-        'package_includes' => 'array',
-        'package_excludes' => 'array',
+        'banner_images' => 'json',
+        'start_date' => 'date',
+        'end_date' => 'date',
     ];
+
+    public function highlights(): HasMany
+    {
+        return $this->hasMany(Highlight::class);
+    }
+
+    public function itineraries(): HasMany
+    {
+        return $this->hasMany(Itinerary::class);
+    }
+
+    public function keyDestinations(): HasMany
+    {
+        return $this->hasMany(KeyDestination::class);
+    }
+
+    public function termsConditions(): HasMany
+    {
+        return $this->hasMany(TermsCondition::class);
+    }
 }

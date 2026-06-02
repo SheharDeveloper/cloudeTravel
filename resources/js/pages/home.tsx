@@ -4,6 +4,7 @@ import { specialOfferService } from '@/services/specialOfferService';
 import { heroImageService } from '@/services/heroImageService';
 import { testimonialService } from '@/services/testimonialService';
 import { contactInfoService } from '@/services/contactInfoService';
+import { getTours } from '@/services/tourService';
 
 /**
  * Home/Landing page component with multiple sections
@@ -18,6 +19,8 @@ export default function Home() {
     const [testimonials, setTestimonials] = useState<any[]>([]);
     const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
     const [contactInfo, setContactInfo] = useState<any>(null);
+    const [tours, setTours] = useState<any[]>([]);
+    const [currency, setCurrency] = useState({ symbol: '£', code: 'GBP' });
     const autoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const heroAutoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const testimonialAutoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -27,6 +30,7 @@ export default function Home() {
         loadHeroImages();
         loadTestimonials();
         loadContactInfo();
+        loadTours();
     }, []);
 
     useEffect(() => {
@@ -62,6 +66,20 @@ export default function Home() {
     const loadContactInfo = async () => {
         const data = await contactInfoService.get();
         setContactInfo(data);
+    };
+
+    const loadTours = async () => {
+        try {
+            const response = await getTours(1, 6, 'active', undefined, true);
+            if (response.success) {
+                setTours(response.data.data || []);
+                if (response.currency) {
+                    setCurrency(response.currency);
+                }
+            }
+        } catch (err) {
+            console.error('Failed to load tours:', err);
+        }
     };
 
     const startAutoPlay = () => {
@@ -245,31 +263,57 @@ export default function Home() {
                         <p style={{ color: '#777', fontSize: '12.5px', lineHeight: 1.7 }}>We understand that travel is not just about destinations. Destinations, it is about the journeys and the experiences</p>
                     </div>
 
-                    <div className="tours-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', marginBottom: '30px' }}>
-                        {[
-                            { title: 'Beautiful Bali, Catch Vibes Now', price: '£999', image: 'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=400&q=80', badge: 'AFRICA' },
-                            { title: 'Moroccan Miracle 2024', price: '£1,299', image: 'https://images.unsplash.com/photo-1489749798305-4fea3ba63d60?w=400&q=80', badge: 'AFRICA' },
-                            { title: 'Dream India Tour Sep-Oct', price: '£899', image: 'https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?w=400&q=80', badge: 'AFRICA' },
-                            { title: 'European Adventure 2024', price: '£1,599', image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=400&q=80', badge: 'EUROPE' },
-                        ].map((tour, idx) => (
-                            <div key={idx} style={{ background: '#f9f9f9', borderRadius: '8px', overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,.1)', position: 'relative' }}>
-                                <div style={{ position: 'relative', height: '200px', overflow: 'hidden' }}>
-                                    <img src={tour.image} alt={tour.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                                    <span style={{ position: 'absolute', top: '10px', right: '10px', background: '#ff6b35', color: '#fff', padding: '4px 10px', borderRadius: '4px', fontSize: '10px', fontWeight: 700 }}>{tour.badge}</span>
+                    <div className="tours-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '30px', marginBottom: '15px' }}>
+                        {tours.length > 0 ? tours.map((tour, idx) => (
+                            <div key={idx} style={{
+                                background: '#f8fafb',
+                                borderRadius: '10px',
+                                overflow: 'hidden',
+                                boxShadow: '0 2px 12px rgba(0,0,0,.08)',
+                                position: 'relative',
+                                border: '1px solid #f0f0f0',
+                                transition: 'all 0.3s ease',
+                                cursor: 'pointer'
+                            }} onMouseEnter={(e) => {
+                                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,.12)';
+                                e.currentTarget.style.transform = 'translateY(-5px)';
+                            }} onMouseLeave={(e) => {
+                                e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,.08)';
+                                e.currentTarget.style.transform = 'translateY(0)';
+                            }}>
+                                <div style={{ position: 'relative', height: '220px', overflow: 'hidden' }}>
+                                    <img src={tour.feature_image || '/images/dummy.jpg'} alt={tour.tour_title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} />
+                                    {tour.featured && (
+                                        <span style={{ position: 'absolute', top: '12px', left: '12px', background: '#ff6b35', color: '#fff', padding: '6px 12px', borderRadius: '4px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>⭐ Featured</span>
+                                    )}
+                                    <span style={{ position: 'absolute', top: '12px', right: '12px', background: '#003d82', color: '#fff', padding: '6px 12px', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>{tour.country}</span>
+                                    <span style={{ position: 'absolute', bottom: '12px', left: '12px', background: 'rgba(0,0,0,.6)', color: '#fff', padding: '6px 12px', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>{tour.duration_days} Days</span>
                                 </div>
-                                <div style={{ padding: '20px' }}>
-                                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#003d82', marginBottom: '10px' }}>{tour.title}</h3>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                        <span style={{ fontSize: '16px', fontWeight: 700, color: '#ff6b35' }}>{tour.price}</span>
-                                        <button style={{ background: '#003d82', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '4px', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>Details</button>
+                                <div style={{ padding: '20px 25px' }}>
+                                    <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#003d82', marginBottom: '10px', lineHeight: 1.3 }}>{tour.tour_title}</h3>
+                                    <p style={{ fontSize: '13px', color: '#666', marginBottom: '12px', lineHeight: 1.5 }}>
+                                        {tour.short_description ? tour.short_description.substring(0, 80) + '...' : 'Explore this amazing destination with our curated tour package.'}
+                                    </p>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #f0f0f0' }}>
+                                        <div>
+                                            <p style={{ fontSize: '11px', color: '#999', margin: '0 0 4px 0', textTransform: 'uppercase', fontWeight: 700 }}>Starting from</p>
+                                            <span style={{ fontSize: '18px', fontWeight: 700, color: '#ff6b35' }}>
+                                                {tour.early_booking_price_text ? `${currency.symbol}${tour.early_booking_price_text}` : 'Inquire'}
+                                            </span>
+                                        </div>
+                                        <a href={`/tours/${tour.id}`} style={{ background: '#003d82', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: '4px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', display: 'inline-block', transition: 'all 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#002050'} onMouseLeave={(e) => e.currentTarget.style.background = '#003d82'}>View Details</a>
                                     </div>
                                 </div>
                             </div>
-                        ))}
+                        )) : (
+                            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: '#999' }}>
+                                <p>No tours available at the moment.</p>
+                            </div>
+                        )}
                     </div>
 
                     <div style={{ textAlign: 'center' }}>
-                        <button style={{ background: '#003d82', color: '#fff', border: 'none', padding: '10px 30px', borderRadius: '4px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>More Tours</button>
+                        <a href="/tours" style={{ background: '#003d82', color: '#fff', border: 'none', padding: '10px 30px', borderRadius: '4px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', display: 'inline-block' }}>More Tours</a>
                     </div>
                 </div>
             </section>

@@ -7,6 +7,7 @@ use App\Http\Controllers\Web\AgencyServiceController;
 
 // Landing/Public routes
 Route::inertia('/', 'home')->name('home');
+Route::inertia('/tours/{id}', 'TourDetail')->name('tours.show');
 Route::inertia('/tours', 'tours')->name('tours');
 Route::inertia('/tickets', 'tickets')->name('tickets');
 Route::inertia('/visa-services', 'visa-services')->name('visa-services');
@@ -20,13 +21,10 @@ Route::inertia('dashboard', 'dashboard')->name('dashboard');
 
 // Admin Routes (frontend pages only - API calls handle auth)
 Route::prefix('admin')->group(function () {
-    // Tours Management
-    Route::get('tours', [\App\Http\Controllers\Admin\TourController::class, 'index'])->name('admin.tours.index');
-    Route::get('tours/create', [\App\Http\Controllers\Admin\TourController::class, 'create'])->name('admin.tours.create');
-    Route::post('tours', [\App\Http\Controllers\Admin\TourController::class, 'store'])->name('admin.tours.store');
-    Route::get('tours/{tour}/edit', [\App\Http\Controllers\Admin\TourController::class, 'edit'])->name('admin.tours.edit');
-    Route::put('tours/{tour}', [\App\Http\Controllers\Admin\TourController::class, 'update'])->name('admin.tours.update');
-    Route::delete('tours/{tour}', [\App\Http\Controllers\Admin\TourController::class, 'destroy'])->name('admin.tours.destroy');
+    // Tours Management (React Components via Inertia)
+    Route::inertia('tours', 'Admin/Tour/Index')->name('admin.tours.index');
+    Route::inertia('tours/create', 'Admin/Tour/Create')->name('admin.tours.create');
+    Route::inertia('tours/{tour}/edit', 'Admin/Tour/Edit')->name('admin.tours.edit');
 
     // Special Offer Management (Inertia Page)
     Route::inertia('special-offer', 'Admin/SpecialOffer/Index')->name('admin.special-offer.index');

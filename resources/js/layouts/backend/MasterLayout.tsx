@@ -42,15 +42,6 @@ export default function MasterLayout({ children, title }: MasterLayoutProps) {
         // Re-apply in case of SSR hydration
         applyBodyAttrs();
 
-        // Load JS scripts sequentially
-        const scripts = [
-            '/backend/assets/vendor/jquery/dist/jquery.min_3.js',
-            '/backend/assets/vendor/bootstrap/dist/js/bootstrap.bundle.min_3.js',
-            '/backend/assets/vendor/bootstrap-select/dist/js/bootstrap-select.min_3.js',
-            '/backend/assets/vendor/metismenu/dist/metisMenu.min_3.js',
-            '/backend/assets/js/custom_3.js',
-        ];
-
         const loadedScripts: HTMLScriptElement[] = [];
 
         // Show main wrapper immediately — don't wait for preloader
@@ -58,6 +49,12 @@ export default function MasterLayout({ children, title }: MasterLayoutProps) {
         if (wrapper) wrapper.classList.add('show');
         const preloader = document.getElementById('preloader');
         if (preloader) preloader.style.display = 'none';
+
+        // Load JS scripts sequentially from CDN (local assets not available in dev)
+        const scripts = [
+            'https://code.jquery.com/jquery-3.6.0.min.js',
+            'https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js',
+        ];
 
         const loadNext = (index: number) => {
             if (index >= scripts.length) return;
@@ -75,6 +72,7 @@ export default function MasterLayout({ children, title }: MasterLayoutProps) {
 
         loadNext(0);
 
+        // Cleanup on unmount
         return () => {
             loadedScripts.forEach((s) => s.remove());
         };
@@ -94,7 +92,7 @@ export default function MasterLayout({ children, title }: MasterLayoutProps) {
     return (
         <>
             <Head title={title}>
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3H0DmJwNmKktHrywFFUcpkAtgqisB2Zl8kQKeK2tYeZszBg5+d+gfeXsNMic32dEVVZ1PsLIYEg==" crossOrigin="anonymous" referrerPolicy="no-referrer" />
+                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossOrigin="anonymous" referrerPolicy="no-referrer" />
                 <link rel="stylesheet" href="/backend/assets/vendor/bootstrap-select/dist/css/bootstrap-select.min_4.css" />
                 <link rel="stylesheet" href="/backend/assets/css/switcher_4.css" className="main-switcher" />
                 <link rel="stylesheet" href="/backend/assets/css/plugins_4.css" className="main-plugins" />

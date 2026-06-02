@@ -15,7 +15,10 @@ class DatabaseSeeder extends Seeder
     {
         // Seed admin user
         $this->call(AdminUserSeeder::class);
-
-     
+        $this->call(ContactInfoSeeder::class);
+        $this->call(HeroImageSeeder::class);
+        $this->call(SpecialOfferSeeder::class);
+        $this->call(TestimonialSeeder::class);
+        $this->call(TourSeeder::class);
     }
 }

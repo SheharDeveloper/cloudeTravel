@@ -1,512 +1,291 @@
-	<!-- Start - Content Body -->
-        <main class="content-body">
-			
-			<!-- Start - Page Title & Breadcrumb -->
-			<div class="page-title">
-				<nav aria-label="breadcrumb">
-    <ol class="breadcrumb">
-        <li><h1>Projects</h1></li>
-        <li class="breadcrumb-item">
-            <a href="index.html">
-                <svg width="16" height="16" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M2.125 6.375L8.5 1.41667L14.875 6.375V14.1667C14.875 14.5424 14.7257 14.9027 14.4601 15.1684C14.1944 15.4341 13.8341 15.5833 13.4583 15.5833H3.54167C3.16594 15.5833 2.80561 15.4341 2.53993 15.1684C2.27426 14.9027 2.125 14.5424 2.125 14.1667V6.375Z" stroke="var(--bs-body-color)" stroke-linecap="round" stroke-linejoin="round"/>
-                    <path d="M6.375 15.5833V8.5H10.625V15.5833" stroke="var(--bs-body-color)" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-                Home
-            </a>
-        </li>
-        <li class="breadcrumb-item active" aria-current="page">Projects</li>
-    </ol>
-</nav>
-			</div>
-			<!-- End - Page Title & Breadcrumb --> 
-			
-			<div class="card border-top-0 border-start-0 border-end-0 rounded-0 h-auto mb-0 px-md-2 pt-md-2">
+1. Tour Table
 
-				<!-- Start - Profile Header -->
-				<div class="card-body d-flex py-md-4">
-					<div class="clearfix">
-						<div class="d-inline-block position-relative me-sm-4 me-3 mb-3 mb-lg-0">
-							<img src="assets/images/avatar/large/avatar5.webp" class="avatar avatar-xxl" alt="">
-							<span class="fa fa-circle border border-3 border-white text-success position-absolute bottom-0 end-0 rounded-circle"></span>
-						</div>
-					</div>
-					<div class="clearfix d-xl-flex flex-grow-1">
-						<div class="clearfix pe-md-5">
-							<h3 class="fw-semibold mb-1">Amelia Rose<img src="assets/images/blue-tick.png" alt="Blue Tick"></h3>
-							<ul class="d-flex flex-wrap align-items-center">
-								<li class="me-3 d-inline-flex align-items-center"><i class="las la-user me-1"></i>Web Designer</li>
-								<li class="me-3 d-inline-flex align-items-center"><i class="las la-map-marker me-1"></i>420 City Path, AU 123-456</li>
-								<li class="me-3 d-inline-flex align-items-center"><i class="las la-envelope me-1"></i><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="e78e898188a78a868e8bc984888a">[email&#160;protected]</a></li>
-							</ul>
-							<div class="d-md-flex d-none flex-wrap">
-								<div class="border outline-dashed rounded p-2 d-flex align-items-center me-3 mt-3">
-									<div class="avatar avatar-sm avatar-primary">
-										<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-											<path d="M12 1V23" stroke="var(--bs-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-											<path d="M17 5H9.5C8.57174 5 7.6815 5.36875 7.02513 6.02513C6.36875 6.6815 6 7.57174 6 8.5C6 9.42826 6.36875 10.3185 7.02513 10.9749C7.6815 11.6313 8.57174 12 9.5 12H14.5C15.4283 12 16.3185 12.3687 16.9749 13.0251C17.6313 13.6815 18 14.5717 18 15.5C18 16.4283 17.6313 17.3185 16.9749 17.9749C16.3185 18.6313 15.4283 19 14.5 19H6" stroke="var(--bs-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-										</svg>
-									</div>
-									<div class="clearfix ms-2">
-										<h3 class="mb-0 fw-semibold lh-1">$1,250</h3>
-										<span class="small">Total Earnings</span>
-									</div>
-								</div>
-								<div class="border outline-dashed rounded p-2 d-flex align-items-center me-3 mt-3">
-									<div class="avatar avatar-sm avatar-primary">
-										<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-											<path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="var(--bs-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-											<path d="M9 11C11.2091 11 13 9.20914 13 7C13 4.79086 11.2091 3 9 3C6.79086 3 5 4.79086 5 7C5 9.20914 6.79086 11 9 11Z" stroke="var(--bs-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-											<path d="M23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13" stroke="var(--bs-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-											<path d="M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89318 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="var(--bs-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-										</svg>
-									</div>
-									<div class="clearfix ms-2">
-										<h3 class="mb-0 fw-semibold lh-1">125</h3>
-										<span class="small">New Referrals</span>
-									</div>
-								</div>
-								<div class="border outline-dashed rounded p-2 d-flex align-items-center me-3 mt-3">
-									<div class="avatar avatar-sm avatar-primary">
-										<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-											<path d="M20 7H4C2.89543 7 2 7.89543 2 9V19C2 20.1046 2.89543 21 4 21H20C21.1046 21 22 20.1046 22 19V9C22 7.89543 21.1046 7 20 7Z" stroke="var(--bs-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-											<path d="M16 21V5C16 4.46957 15.7893 3.96086 15.4142 3.58579C15.0391 3.21071 14.5304 3 14 3H10C9.46957 3 8.96086 3.21071 8.58579 3.58579C8.21071 3.96086 8 4.46957 8 5V21" stroke="var(--bs-primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-										</svg>
-									</div>
-									<div class="clearfix ms-2">
-										<h3 class="mb-0 fw-semibold lh-1">25</h3>
-										<span class="small">New Deals</span>
-									</div>
-								</div>
-							</div>
-						</div>
-						<div class="clearfix mt-3 mt-xl-0 ms-auto d-flex flex-column col-xl-3">
-							<div class="clearfix mb-3 text-xl-end">
-								<a href="javascript:void(0);" class="btn btn-light me-1 me-sm-2 mb-1 btn-active">
-									<span class="active-before">Follow</span>
-									<span class="active-after">Following</span>
-								</a>
-								<a href="javascript:void(0);" class="btn btn-primary mb-1">Offer a Deal</a>
-							</div>
-							<div class="mt-auto d-flex align-items-center">
-								<div class="clearfix me-3">
-									<span class="fw-medium text-black d-block mb-1">Progress</span>
-									<p class="mb-0 d-flex">
-										<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-											<path d="M5.83334 14.1668L14.1667 5.8335" stroke="var(--bs-success)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-											<path d="M5.83334 5.8335H14.1667V14.1668" stroke="var(--bs-success)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-										</svg>
-										<span class="text-success me-1">+3.50%</span>
-									</p>
-								</div>
-								<div id="chartProfileProgress"></div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<!-- End - Profile Header -->
-				
-				<!-- Start - Profile Navigation -->
-				<div class="card-footer py-0 d-flex flex-wrap justify-content-between align-items-center mx-sm-4 px-0">
-					<ul class="nav nav-underline gap-3 nav-scroll nav-scroll-auto-xl px-3 px-sm-0" id="tabMyProfileBottom" role="tablist">
-						<li class="nav-item" role="presentation">
-							<a href="profile/overview.html" class="nav-link py-3 px-1 border-3">Overview</a>
-						</li>
-						<li class="nav-item" role="presentation">
-							<a href="profile/projects.html" class="nav-link py-3 px-1 border-3 active">Projects</a>
-						</li>
-						<li class="nav-item" role="presentation">
-							<a href="profile/campaigns.html" class="nav-link py-3 px-1 border-3">Campaigns</a>
-						</li>
-						<li class="nav-item" role="presentation">
-							<a href="profile/documents.html" class="nav-link py-3 px-1 border-3">Documents</a>
-						</li>
-						<li class="nav-item" role="presentation">
-							<a href="profile/followers.html" class="nav-link py-3 px-1 border-3">Followers</a>
-						</li>
-						<li class="nav-item" role="presentation">
-							<a href="profile/activity.html" class="nav-link py-3 px-1 border-3">Activity</a>
-						</li>
-					</ul>
-					<ul class="d-xl-flex d-none py-2">
-						<li class="px-1">
-							<a class="btn btn-square btn-light btn-sm" href="javascript:void(0);">
-								<i class="fa-brands fa-linkedin-in"></i>
-							</a>
-						</li>
-						<li class="px-1">
-							<a class="btn btn-square btn-light btn-sm" href="javascript:void(0);">
-								<i class="fa-brands fa-instagram"></i>
-							</a>
-						</li>
-						<li class="px-1">
-							<a class="btn btn-square btn-light btn-sm" href="javascript:void(0);">
-								<i class="fa-brands fa-facebook-f"></i>
-							</a>
-						</li>
-						<li class="px-1">
-							<a class="btn btn-square btn-light btn-sm" href="javascript:void(0);">
-								<i class="fa-brands fa-telegram"></i>
-							</a>
-						</li>
-						<li class="px-1">
-							<a class="btn btn-square btn-light btn-sm" href="javascript:void(0);">
-								<i class="fa-brands fa-youtube"></i>
-							</a>
-						</li>
-					</ul>
-				</div>
-				<!-- End - Profile Navigation -->
-			</div>
-			
-			<div class="container-fluid">
-				<div class="tab-content" id="tabContentMyProfileBottom">
-					<div class="row">
+| Column Name              |                        Type | Description            |
+| ------------------------ | --------------------------: | ---------------------- |
+| id                       |                 bigint (PK) | Primary key            |
+| tour_title               |                     varchar | Tour title             |
+| hero_title               |                     varchar | Hero section title     |
+| hero_subtitle            |              text / varchar | Hero subtitle          |
+| short_description        |                        text | Short description      |
+| country                  |                     varchar | Country name           |
+| city                     |                     varchar | City name              |
+| duration_days            |                     integer | Tour duration in days  |
+| start_date               |                        date | Tour start date        |
+| end_date                 |                        date | Tour end date          |
+| status                   | enum(active,inactive,draft) | Tour status            |
+| early_booking_price_text |                     varchar | Early booking text     |
+| feature_image            |                     varchar | Feature image path     |
+| banner_images            |                        json | Multiple banner images |
+| created_at               |                   timestamp | Created date           |
+| updated_at               |                   timestamp | Updated date           |
 
-						<!-- Start - My Projects -->
-						<div class="col-lg-12">
-							<div class="d-flex justify-content-between align-items-center mb-3">
-								<h5 class="mb-0">My Projects</h5>
-								<div class="d-flex align-items-center">
-									<a href="javascript:void(0)" class="btn btn-primary btn-sm ms-2">+ New Project</a>
-								</div>
-							</div>
-						</div>
-						<!-- End - My Projects -->
 
-						<!-- Start - Figma Design -->
-						<div class="col-xxl-3 col-xl-4 col-sm-6">
-							<div class="card">
-								<div class="card-body">
-									<div class="clearfix d-flex">
-										<div class="avatar avatar-sm rounded me-3 p-2">
-											<img src="assets/images/logo/figma.png" alt="">
-										</div>
-										<div class="clearfix">
-											<h6 class="mb-0 fw-semibold"><a href="profile/projects-details.html" class="stretched-link">Figma Design</a></h6>
-											<span class="small">There are many variations</span>	
-										</div>	
-									</div>
-									<p class="my-3">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-									<div class="clearfix">
-										<h6 class="mb-1 fw-medium">Team</h6>
-										<div class="avatar-list avatar-list-stacked">
-											<img src="assets/images/avatar/small/avatar4.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar5.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar6.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar7.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-										</div>
-									</div>
-									<div class="mt-3">
-										<div class="d-flex justify-content-between">
-											<span>Project Complete</span>
-											<span>60%</span>
-										</div>
-										<div class="progress mt-2">
-											<div class="progress-bar bg-purple" style="width:60%;" role="progressbar"></div>
-										</div>
-									</div>
-								</div>
-								<div class="card-footer d-flex justify-content-between flex-wrap">
-									<p class="mb-0 fw-medium">Due <span class="text-purple">: 2023-06-02</span></p>
-									<span class="badge badge-sm badge-primary light">In Progress</span>
-								</div>
-							</div>
-						</div>
-						<!-- End - Figma Design -->
+2. Highlights Table
 
-						<!-- Start - Github Repository -->
-						<div class="col-xxl-3 col-xl-4 col-sm-6">
-							<div class="card">
-								<div class="card-body">
-									<div class="clearfix d-flex">
-										<div class="avatar avatar-sm rounded me-3 p-2">
-											<img src="assets/images/logo/github.png" alt="">
-										</div>
-										<div class="clearfix">
-											<h6 class="mb-0 fw-semibold"><a href="profile/projects-details.html" class="stretched-link">Github Repository</a></h6>
-											<span class="small">There are many variations</span>	
-										</div>
-									</div>
-									<p class="my-3">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-									<div>
-										<h6 class="mb-1 fw-medium">Team</h6>
-										<div class="avatar-list avatar-list-stacked">
-											<img src="assets/images/avatar/small/avatar4.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar5.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar6.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar7.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-										</div>
-									</div>
-									<div class="mt-3">
-										<div class="d-flex justify-content-between">
-											<span>Project Complete</span>
-											<span>69%</span>
-										</div>
-										<div class="progress mt-2">
-											<div class="progress-bar bg-danger" style="width:69%;" role="progressbar"></div>
-										</div>
-									</div>
-								</div>
-								<div class="card-footer d-flex justify-content-between flex-wrap">
-									<p class="mb-0 fw-medium">Due <span class="text-dabger">: 2023-06-02</span></p>
-									<span class="badge badge-sm badge-danger light">Pending</span>
-								</div>
-							</div>
-						</div>
-						<!-- End - Github Repository -->
-						
-						<!-- Start - Music App -->
-						<div class="col-xxl-3 col-xl-4 col-sm-6">
-							<div class="card">
-								<div class="card-body">
-									<div class="clearfix d-flex"> 
-										<div class="avatar avatar-sm rounded me-3 p-2">
-											<img src="assets/images/logo/spotify.png" alt=""> 
-										</div>
-										<div class="clearfix">
-											<h6 class="mb-0 fw-semibold"><a href="profile/projects-details.html" class="stretched-link">Music App</a></h6>
-											<span class="small">There are many variations</span>	
-										</div>
-									</div>
-									<p class="my-3">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-									<div>
-										<h6 class="mb-1 fw-medium">Team</h6>
-										<div class="avatar-list avatar-list-stacked">
-											<img src="assets/images/avatar/small/avatar4.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar5.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar6.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar7.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-										</div>
-									</div>
-									<div class="mt-3">
-										<div class="d-flex justify-content-between">
-											<span>Project Complete</span>
-											<span>75%</span>
-										</div>
-										<div class="progress mt-2">
-											<div class="progress-bar bg-purple" style="width:75%;" role="progressbar"></div>
-										</div>
-									</div>
-								</div>
-								<div class="card-footer d-flex justify-content-between flex-wrap">
-									<p class="mb-0 fw-medium">Due <span class="text-purple">: 2023-06-02</span></p>
-									<span class="badge badge-sm badge-success light">Complete</span>
-								</div>
-							</div>
-						</div>
-						<!-- End - Music App -->
-						
-						<!-- Start - Banking System -->
-						<div class="col-xxl-3 col-xl-4 col-sm-6">
-							<div class="card">
-								<div class="card-body">
-									<div class="clearfix d-flex">
-										<div class="avatar avatar-sm rounded me-3 p-2">
-											<img src="assets/images/logo/twitch.png" alt="">
-										</div>
-										<div class="clearfix">
-											<h6 class="mb-0 fw-semibold"><a href="profile/projects-details.html" class="stretched-link">Banking System</a></h6>
-											<span class="small">There are many variations</span>	
-										</div>
-									</div>
-									<p class="my-3">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-									<div>
-										<h6 class="mb-1 fw-medium">Team</h6>
-										<div class="avatar-list avatar-list-stacked">
-											<img src="assets/images/avatar/small/avatar4.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar5.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar6.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar7.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-										</div>
-									</div>
-									<div class="mt-3">
-										<div class="d-flex justify-content-between">
-											<span>Project Complete</span>
-											<span>92%</span>
-										</div>
-										<div class="progress mt-2">
-											<div class="progress-bar bg-danger" style="width:92%;" role="progressbar"></div>
-										</div>
-									</div>
-								</div>
-								<div class="card-footer d-flex justify-content-between flex-wrap">
-									<p class="mb-0 fw-medium">Due <span class="text-dabger">: 2023-06-02</span></p>
-									<span class="badge badge-sm badge-warning light">Testing</span>
-								</div>
-							</div>
-						</div>
-						<!-- End - Banking System -->
-						
-						<!-- Start - Cloud Store -->
-						<div class="col-xxl-3 col-xl-4 col-sm-6">
-							<div class="card">
-								<div class="card-body">
-									<div class="clearfix d-flex">
-										<div class="avatar avatar-sm rounded me-3 p-2">
-											<img src="assets/images/logo/dropbox.png" alt="">
-										</div>
-										<div class="clearfix">
-											<h6 class="mb-0 fw-semibold"><a href="profile/projects-details.html" class="stretched-link">Cloud Store</a></h6>
-											<span class="small">There are many variations</span>	
-										</div>
-									</div>
-									<p class="my-3">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-									<div>
-										<h6 class="mb-1 fw-medium">Team</h6>
-										<div class="avatar-list avatar-list-stacked">
-											<img src="assets/images/avatar/small/avatar4.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar5.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar6.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar7.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-										</div>
-									</div>
-									<div class="mt-3">
-										<div class="d-flex justify-content-between">
-											<span>Project Complete</span>
-											<span>68%</span>
-										</div>
-										<div class="progress mt-2">
-											<div class="progress-bar bg-danger" style="width:68%;" role="progressbar"></div>
-										</div>
-									</div>
-								</div>
-								<div class="card-footer d-flex justify-content-between flex-wrap">
-									<p class="mb-0 fw-medium">Due <span class="text-dabger">: 2023-06-02</span></p>
-									<span class="badge badge-sm badge-danger light">Pending</span>
-								</div>
-							</div>
-						</div>
-						<!-- End - Cloud Store -->
-						
-						<!-- Start - HTML Design -->
-						<div class="col-xxl-3 col-xl-4 col-sm-6">
-							<div class="card">
-								<div class="card-body">
-									<div class="clearfix d-flex">
-										<div class="avatar avatar-sm rounded me-3 p-2">
-											<img src="assets/images/logo/html.png" alt="">
-										</div>
-										<div class="clearfix">
-											<h6 class="mb-0 fw-semibold"><a href="profile/projects-details.html" class="stretched-link">HTML Design</a></h6>
-											<span class="small">There are many variations</span>	
-										</div>
-									</div>
-									<p class="my-3">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-									<div>
-										<h6 class="mb-1 fw-medium">Team</h6>
-										<div class="avatar-list avatar-list-stacked">
-											<img src="assets/images/avatar/small/avatar4.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar5.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar6.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar7.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-										</div>
-									</div>
-									<div class="mt-3">
-										<div class="d-flex justify-content-between">
-											<span>Project Complete</span>
-											<span>68%</span>
-										</div>
-										<div class="progress mt-2">
-											<div class="progress-bar bg-danger" style="width:68%;" role="progressbar"></div>
-										</div>
-									</div>
-								</div>
-								<div class="card-footer d-flex justify-content-between flex-wrap">
-									<p class="mb-0 fw-medium">Due <span class="text-dabger">: 2023-06-02</span></p>
-									<span class="badge badge-sm badge-success light">Complete</span>
-								</div>
-							</div>
-						</div>
-						<!-- End - HTML Design -->
-						
-						<!-- Start - eCommerce Theme -->
-						<div class="col-xxl-3 col-xl-4 col-sm-6">
-							<div class="card">
-								<div class="card-body">
-									<div class="clearfix d-flex">
-										<div class="avatar avatar-sm rounded me-3 p-2">
-											<img src="assets/images/logo/amazon.png" alt="">
-										</div>
-										<div class="clearfix">
-											<h6 class="mb-0 fw-semibold"><a href="profile/projects-details.html" class="stretched-link">eCommerce Theme</a></h6>
-											<span class="small">There are many variations</span>	
-										</div>
-									</div>
-									<p class="my-3">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-									<div>
-										<h6 class="mb-1 fw-medium">Team</h6>
-										<div class="avatar-list avatar-list-stacked">
-											<img src="assets/images/avatar/small/avatar4.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar5.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar6.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar7.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-										</div>
-									</div>
-									<div class="mt-3">
-										<div class="d-flex justify-content-between">
-											<span>Project Complete</span>
-											<span>86%</span>
-										</div>
-										<div class="progress mt-2">
-											<div class="progress-bar bg-purple" style="width:86%;" role="progressbar"></div>
-										</div>
-									</div>
-								</div>
-								<div class="card-footer d-flex justify-content-between flex-wrap">
-									<p class="mb-0 fw-medium">Due <span class="text-purple">: 2023-06-02</span></p>
-									<span class="badge badge-sm badge-warning light">Testing</span>
-								</div>
-							</div>
-						</div>
-						<!-- End - eCommerce Theme -->
-						
-						<!-- Start - Music App -->
-						<div class="col-xxl-3 col-xl-4 col-sm-6">
-							<div class="card">
-								<div class="card-body">
-									<div class="clearfix d-flex">
-										<div class="avatar avatar-sm rounded me-3 p-2">
-											<img src="assets/images/logo/slack.png" alt="">
-										</div>
-										<div class="clearfix">
-											<h6 class="mb-0 fw-semibold"><a href="profile/projects-details.html" class="stretched-link">Music App</a></h6>
-											<span class="small">There are many variations</span>	
-										</div>
-									</div>
-									<p class="my-3">Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-									<div>
-										<h6 class="mb-1 fw-medium">Team</h6>
-										<div class="avatar-list avatar-list-stacked">
-											<img src="assets/images/avatar/small/avatar4.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar5.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar6.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-											<img src="assets/images/avatar/small/avatar7.webp" class="avatar avatar-xs rounded-circle border border-2 border-white" alt="">
-										</div>
-									</div>
-									<div class="mt-3">
-										<div class="d-flex justify-content-between">
-											<span>Project Complete</span>
-											<span>69%</span>
-										</div>
-										<div class="progress mt-2">
-											<div class="progress-bar bg-danger" style="width:69%;" role="progressbar"></div>
-										</div>
-									</div>
-								</div>
-								<div class="card-footer d-flex justify-content-between flex-wrap">
-									<p class="mb-0 fw-medium">Due <span class="text-dabger">: 2023-06-02</span></p>
-									<span class="badge badge-sm badge-danger light">Pending</span>
-								</div>
-							</div>
-						</div>
-						<!-- End - Music App -->
-						
-					</div>
-				</div>
-				
-			</div>
-			
-		</main>
-		<!-- End - Content Body -->
-		
+| Column Name |        Type | Description             |
+| ----------- | ----------: | ----------------------- |
+| id          | bigint (PK) | Primary key             |
+| tour_id     | bigint (FK) | Reference to tour table |
+| title       |     varchar | Highlight title         |
+| description |        text | Highlight description   |
+| short_order |     integer | Display order           |
+| created_at  |   timestamp | Created date            |
+| updated_at  |   timestamp | Updated date            |
+
+
+3. Itinerary Table
+
+| Column Name |        Type | Description             |
+| ----------- | ----------: | ----------------------- |
+| id          | bigint (PK) | Primary key             |
+| tour_id     | bigint (FK) | Reference to tour table |
+| day         |     integer | Day number              |
+| date        |        date | Travel date             |
+| title       |     varchar | Itinerary title         |
+| location    |     varchar | Location name           |
+| description |    longText | Full description        |
+| images      |        json | Multiple images         |
+| short_order |     integer | Display order           |
+| created_at  |   timestamp | Created date            |
+| updated_at  |   timestamp | Updated date            |
+
+
+4. Key Destinations Table
+
+| Column Name      |        Type | Description             |
+| ---------------- | ----------: | ----------------------- |
+| id               | bigint (PK) | Primary key             |
+| tour_id          | bigint (FK) | Reference to tour table |
+| destination_name |     varchar | Destination name        |
+| location         |     varchar | Destination location    |
+| description      |        text | Destination description |
+| created_at       |   timestamp | Created date            |
+| updated_at       |   timestamp | Updated date            |
+
+
+5. Terms & Conditions Table
+
+| Column Name |                                             Type | Description               |
+| ----------- | -----------------------------------------------: | ------------------------- |
+| id          |                                      bigint (PK) | Primary key               |
+| tour_id     |                                      bigint (FK) | Reference to tour table   |
+| type        | enum(package_includes, package_does_not_include) | Policy type               |
+| policy      |                                             text | Terms & condition content |
+| created_at  |                                        timestamp | Created date              |
+| updated_at  |                                        timestamp | Updated date              |
+
+
+
+Relationship Structure
+Tour
+ ├── Highlights (One to Many)
+ ├── Itinerary (One to Many)
+ ├── Key Destinations (One to Many)
+ └── Terms & Conditions (One to Many)
+
+
+## API Implementation
+
+### API Endpoints (Resource Routes)
+All endpoints use Laravel Resource routing pattern. Base URL: `/api/tours`
+
+#### Tour CRUD Endpoints
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---|
+| GET | `/api/tours` | List all tours with pagination & filtering | Yes |
+| POST | `/api/tours` | Create new tour with all relations | Yes |
+| GET | `/api/tours/{id}` | Get single tour with all relations | Yes |
+| PUT/PATCH | `/api/tours/{id}` | Update tour with all relations | Yes |
+| DELETE | `/api/tours/{id}` | Delete tour and all related data | Yes |
+
+### Query Parameters for List Endpoint
+- `page` - Page number (default: 1)
+- `per_page` - Records per page (default: 15)
+- `status` - Filter by status (active, inactive, draft)
+- `search` - Search by tour title, country, or city
+
+### Request/Response Format
+
+#### Create Tour Request (POST /api/tours)
+Content-Type: multipart/form-data
+
+**Basic Fields:**
+```json
+{
+  "tour_title": "string",
+  "hero_title": "string",
+  "hero_subtitle": "string (optional)",
+  "short_description": "string (optional)",
+  "country": "string",
+  "city": "string",
+  "duration_days": "integer",
+  "start_date": "date (YYYY-MM-DD)",
+  "end_date": "date (YYYY-MM-DD)",
+  "status": "active|inactive|draft",
+  "early_booking_price_text": "string (optional)",
+  "feature_image": "file (image, max 10MB)",
+  "banner_images[]": "file (image, max 10MB)"
+}
+```
+
+**Highlights Array:**
+```json
+{
+  "highlights": [
+    {
+      "title": "string",
+      "description": "string (optional)",
+      "short_order": "integer (optional)"
+    }
+  ]
+}
+```
+
+**Itineraries Array:**
+```json
+{
+  "itineraries": [
+    {
+      "day": "integer",
+      "date": "date (YYYY-MM-DD)",
+      "title": "string",
+      "location": "string",
+      "description": "string (optional)",
+      "image": "file (image, optional, max 10MB)"
+    }
+  ]
+}
+```
+
+**Key Destinations Array:**
+```json
+{
+  "key_destinations": [
+    {
+      "destination_name": "string",
+      "location": "string (optional)",
+      "description": "string (optional)"
+    }
+  ]
+}
+```
+
+**Terms & Conditions Array:**
+```json
+{
+  "terms_conditions": [
+    {
+      "type": "package_includes|package_does_not_include",
+      "policy": "string"
+    }
+  ]
+}
+```
+
+#### Success Response (201 Created / 200 OK)
+```json
+{
+  "success": true,
+  "message": "Tour created/updated successfully",
+  "data": {
+    "id": 1,
+    "tour_title": "...",
+    "hero_title": "...",
+    "country": "...",
+    "city": "...",
+    "duration_days": 12,
+    "start_date": "2026-06-01",
+    "end_date": "2026-06-12",
+    "status": "active",
+    "feature_image": "storage/tours/featured/...",
+    "banner_images": ["storage/tours/banners/..."],
+    "created_at": "2026-05-31T10:30:00Z",
+    "updated_at": "2026-05-31T10:30:00Z",
+    "highlights": [...],
+    "itineraries": [...],
+    "key_destinations": [...],
+    "terms_conditions": [...]
+  }
+}
+```
+
+#### Error Response (422 Validation / 500 Server Error)
+```json
+{
+  "success": false,
+  "message": "Validation error|Error message",
+  "errors": {
+    "tour_title": ["Tour title is required"],
+    "country": ["Country is required"]
+  }
+}
+```
+
+### Backend Implementation Files
+
+**Controllers:**
+- `app/Http/Controllers/Api/TourController.php` - CRUD operations with all methods
+- Methods: index(), store(), show(), update(), destroy()
+- All methods include error handling and validation
+
+**Services:**
+- `app/Services/TourService.php` - Business logic for tour operations
+- Methods: 
+  - `getAllTours()` - Get paginated tours with filtering
+  - `createTourWithRelations()` - Create tour with all child records
+  - `updateTourWithRelations()` - Update tour with all child records
+  - `uploadImage()` - Handle image uploads to storage
+
+**Requests:**
+- `app/Http/Requests/StoreTourRequest.php` - Input validation rules
+- Validates all fields including file types and sizes
+- Custom error messages for better UX
+
+**Routes:**
+- `routes/api.php` - Resource route registered
+- `Route::resource('tours', TourController::class);`
+- Automatically creates: index, store, show, update, destroy
+
+**Models:**
+- `app/Models/Tour.php` - Main tour model with relationships
+- `app/Models/Highlight.php` - Highlight model (belongs to Tour)
+- `app/Models/Itinerary.php` - Itinerary model (belongs to Tour)
+- `app/Models/KeyDestination.php` - Destination model (belongs to Tour)
+- `app/Models/TermsCondition.php` - Terms & Conditions model (belongs to Tour)
+
+### Frontend Implementation Files
+
+**Services:**
+- `resources/js/services/tourService.ts` - API client functions
+- Functions:
+  - `createTour(formData)` - POST /api/tours
+  - `updateTour(id, formData)` - PATCH /api/tours/{id}
+  - `getTours(page, perPage, status, search)` - GET /api/tours
+  - `getTour(id)` - GET /api/tours/{id}
+  - `deleteTour(id)` - DELETE /api/tours/{id}
+
+**Components:**
+- `resources/js/pages/Admin/Tour/Create.tsx` - Multi-step tour creation form
+- Handles form submission via tourService
+- Shows loading state and error/success messages
+- Auto-redirects to tours list on success
+
+### Authentication
+All endpoints require Sanctum authentication with `auth:sanctum` middleware
+- Include Bearer token in Authorization header
+- Token obtained from login endpoint
+- Invalid/expired tokens redirect to /login automatically
+
+### Image Handling
+- Images stored in `storage/app/public/tours/` directory
+- Subdirectories: featured/, banners/, itineraries/
+- Maximum file size: 10MB
+- Supported formats: jpg, jpeg, png, gif, webp
+- Auto-delete old images on update
+- Returned as full URLs in API response
+
+### Error Codes
+- `422` - Validation error (check errors field)
+- `401` - Unauthenticated (redirect to login)
+- `403` - Unauthorized
+- `500` - Server error
