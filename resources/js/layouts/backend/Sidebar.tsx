@@ -24,6 +24,10 @@ const menuItems: MenuItem[] = [
         ],
     },
 
+    { type: 'title', label: 'BOOKING MANAGEMENT' },
+
+    { type: 'link', icon: 'fa-solid fa-calendar-check', label: 'Bookings', href: '/admin/bookings' },
+
     { type: 'title', label: 'WEBSITE MANAGEMENT' },
 
     {

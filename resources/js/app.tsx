@@ -20,6 +20,15 @@ createInertiaApp({
             case name === 'welcome':
                 return null;
             case name === 'home':
+            case name === 'Flights':
+            case name === 'Hotels':
+            case name === 'Visas':
+            case name === 'frontend/flight/flight':
+            case name === 'frontend/hotel/hotels':
+            case name === 'frontend/visa/visas':
+            case name === 'frontend/flight/flight-results':
+            case name === 'frontend/hotel/hotel-results':
+            case name === 'frontend/visa/visa-results':
             case name === 'tours':
             case name === 'TourDetail':
             case name === 'tickets':
@@ -34,11 +43,15 @@ createInertiaApp({
                 return [AppLayout, SettingsLayout];
             // Admin pages use MasterLayout
             case name.startsWith('Admin/'):
+            case name === 'admin/bookings':
                 return MasterLayout;
             // Backend pages manage their own layout via MasterLayout
             case name === 'dashboard':
             case name.startsWith('agency/'):
                 return null;
+            // Frontend service pages use LandingLayout
+            case name.startsWith('frontend/'):
+                return LandingLayout;
             default:
                 return AppLayout;
         }

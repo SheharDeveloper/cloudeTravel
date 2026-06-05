@@ -13,6 +13,8 @@ use App\Http\Controllers\Api\HeroImageController;
 use App\Http\Controllers\Api\TestimonialController;
 use App\Http\Controllers\Api\ContactInfoController;
 use App\Http\Controllers\Api\TourController;
+use App\Http\Controllers\Api\BookingController;
+use App\Http\Controllers\Api\BookingNoteController;
 
 // Public auth endpoints (no authentication required)
 Route::post('auth/login', [AuthController::class, 'login'])->name('auth.login');
@@ -29,6 +31,17 @@ Route::get('testimonials', [TestimonialController::class, 'index'])->name('testi
 
 // Public contact info endpoint
 Route::get('contact-info', [ContactInfoController::class, 'index'])->name('contact-info.index');
+
+// Public booking endpoints (no authentication required)
+Route::get('bookings', [BookingController::class, 'index'])->name('bookings.index');
+Route::get('bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+Route::post('bookings', [BookingController::class, 'store'])->name('bookings.store');
+Route::patch('bookings/{booking}', [BookingController::class, 'update'])->name('bookings.update');
+
+// Booking Notes endpoints
+Route::get('bookings/{booking}/notes', [BookingNoteController::class, 'index'])->name('booking-notes.index');
+Route::post('bookings/{booking}/notes', [BookingNoteController::class, 'store'])->name('booking-notes.store');
+Route::delete('bookings/{booking}/notes/{note}', [BookingNoteController::class, 'destroy'])->name('booking-notes.destroy');
 
 // Public tour endpoints (no authentication required)
 Route::get('tours', [TourController::class, 'index'])->name('tours.index');

@@ -4,9 +4,18 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use App\Http\Controllers\Web\AgencyController;
 use App\Http\Controllers\Web\AgencyServiceController;
+use App\Http\Controllers\SearchController;
 
 // Landing/Public routes
 Route::inertia('/', 'home')->name('home');
+Route::inertia('/flights', 'frontend/flight/flight')->name('flights');
+Route::inertia('/hotels', 'frontend/hotel/hotels')->name('hotels');
+Route::inertia('/visas', 'frontend/visa/visas')->name('visas');
+
+// Search results routes
+Route::post('/search/flight', [SearchController::class, 'flightSearch'])->name('search.flight');
+Route::post('/search/hotel', [SearchController::class, 'hotelSearch'])->name('search.hotel');
+Route::post('/search/visa', [SearchController::class, 'visaSearch'])->name('search.visa');
 Route::inertia('/tours/{id}', 'TourDetail')->name('tours.show');
 Route::inertia('/tours', 'tours')->name('tours');
 Route::inertia('/tickets', 'tickets')->name('tickets');
@@ -25,6 +34,10 @@ Route::prefix('admin')->group(function () {
     Route::inertia('tours', 'Admin/Tour/Index')->name('admin.tours.index');
     Route::inertia('tours/create', 'Admin/Tour/Create')->name('admin.tours.create');
     Route::inertia('tours/{tour}/edit', 'Admin/Tour/Edit')->name('admin.tours.edit');
+
+    // Bookings Management (Inertia Pages)
+    Route::inertia('bookings', 'Admin/Bookings/Index')->name('admin.bookings.index');
+    Route::inertia('bookings/{id}', 'Admin/Bookings/Show')->name('admin.bookings.show');
 
     // Special Offer Management (Inertia Page)
     Route::inertia('special-offer', 'Admin/SpecialOffer/Index')->name('admin.special-offer.index');
