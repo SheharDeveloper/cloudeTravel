@@ -1,324 +1,157 @@
 import { useState } from 'react';
 import { router } from '@inertiajs/react';
 import CalendarDateRangePicker from '@/components/CalendarDateRangePicker';
-import VisaServiceForm from '@/components/VisaServiceForm';
-import CarRentalForm from '@/components/CarRentalForm';
 
 export default function PackageSearchForm(): React.ReactElement {
-    const [tripType, setTripType] = useState('roundtrip');
-    const [selectedClass, setSelectedClass] = useState('Economy');
-    const [fromCity, setFromCity] = useState('');
-    const [toCity, setToCity] = useState('');
-    const [fromSearch, setFromSearch] = useState('');
-    const [toSearch, setToSearch] = useState('');
-    const [showFromDropdown, setShowFromDropdown] = useState(false);
-    const [showToDropdown, setShowToDropdown] = useState(false);
-    const [departureDate, setDepartureDate] = useState('');
-    const [returnDate, setReturnDate] = useState('');
-    const [showDateRangePicker, setShowDateRangePicker] = useState(false);
     const [hotelCity, setHotelCity] = useState('');
     const [hotelSearch, setHotelSearch] = useState('');
     const [showHotelDropdown, setShowHotelDropdown] = useState(false);
+    const [departureAirport, setDepartureAirport] = useState('');
     const [checkInDate, setCheckInDate] = useState('');
-    const [checkOutDate, setCheckOutDate] = useState('');
-    const [adults, setAdults] = useState(1);
-    const [children, setChildren] = useState(0);
-    const [infants, setInfants] = useState(0);
-    const [rooms, setRooms] = useState(1);
-    const [showPassengerModal, setShowPassengerModal] = useState(false);
-    const [showRoomModal, setShowRoomModal] = useState(false);
-    const [showFlightDatePicker, setShowFlightDatePicker] = useState(false);
-    const [showHotelDatePicker, setShowHotelDatePicker] = useState(false);
-    const [addVisa, setAddVisa] = useState(false);
-    const [addCarRental, setAddCarRental] = useState(false);
+    const [nights, setNights] = useState(7);
+    const [showNightsDropdown, setShowNightsDropdown] = useState(false);
+    const [showCheckInCalendar, setShowCheckInCalendar] = useState(false);
+    const [adults] = useState(1);
+    const [rooms] = useState(1);
 
-    const cityList = [
+    const weeklyOptions = [7, 14, 21, 28];
+    const dailyOptions = [2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+    const calculateCheckoutDate = () => {
+        if (!checkInDate) return '';
+        const checkin = new Date(checkInDate);
+        const checkout = new Date(checkin);
+        checkout.setDate(checkout.getDate() + nights);
+        return checkout.toISOString().split('T')[0];
+    };
+
+    const checkOutDate = calculateCheckoutDate();
+
+    const hotelList = [
         { code: 'LON', name: 'London' },
         { code: 'DEL', name: 'Delhi' },
         { code: 'BOM', name: 'Mumbai' },
         { code: 'NYC', name: 'New York' },
         { code: 'LAX', name: 'Los Angeles' },
         { code: 'CDG', name: 'Paris' },
-        { code: 'LHR', name: 'London Heathrow' },
+        { code: 'DXB', name: 'Dubai' },
+        { code: 'SIN', name: 'Singapore' },
+    ];
+
+    const airportList = [
+        { code: 'LON', name: 'London' },
+        { code: 'NYC', name: 'New York' },
+        { code: 'LAX', name: 'Los Angeles' },
+        { code: 'CDG', name: 'Paris' },
         { code: 'DXB', name: 'Dubai' },
         { code: 'SIN', name: 'Singapore' },
         { code: 'HND', name: 'Tokyo' },
+        { code: 'BOM', name: 'Mumbai' },
     ];
 
-    const filterCities = (search: string) => {
-        if (!search) return cityList;
-        return cityList.filter(city =>
-            city.code.toLowerCase().includes(search.toLowerCase()) ||
-            city.name.toLowerCase().includes(search.toLowerCase())
+    const filterHotels = (search: string) => {
+        if (!search) return hotelList;
+        return hotelList.filter(h =>
+            h.code.toLowerCase().includes(search.toLowerCase()) ||
+            h.name.toLowerCase().includes(search.toLowerCase())
         );
     };
 
-    const handlePackageSearch = () => {
-        if (!fromCity || !toCity || !departureDate || !hotelCity || !checkInDate || !checkOutDate) {
+    const handleSearch = () => {
+        if (!hotelCity || !departureAirport || !checkInDate || !checkOutDate) {
             alert('Please fill in all required fields');
             return;
         }
 
         router.post('/search/package', {
-            tripType,
-            selectedClass,
-            fromCity,
-            toCity,
-            departureDate,
-            returnDate: tripType === 'roundtrip' ? returnDate : '',
             hotelCity,
+            departureAirport,
             checkInDate,
             checkOutDate,
             adults,
-            children,
-            infants,
             rooms,
         });
     };
 
     return (
         <div>
-            {/* Trip Type & Class Dropdowns - Top Row */}
-            <div style={{ display: 'flex', gap: '16px', marginBottom: '14px', paddingBottom: '0px', borderBottom: 'none' }}>
-                {/* Trip Type Dropdown */}
-                <select
-                    value={tripType}
-                    onChange={(e) => setTripType(e.target.value as 'oneway' | 'roundtrip')}
-                    style={{ padding: '10px 16px', border: '2px solid #ddd', borderRadius: '24px', fontSize: '14px', fontWeight: 600, height: '40px', boxSizing: 'border-box', cursor: 'pointer', backgroundColor: '#fff', transition: 'all 0.3s ease' }}
-                >
-                    <option value="oneway">One Way</option>
-                    <option value="roundtrip">Round-trip</option>
-                </select>
-
-                {/* Class Selector Dropdown */}
-                <select
-                    value={selectedClass}
-                    onChange={(e) => setSelectedClass(e.target.value)}
-                    style={{ padding: '10px 16px', border: '2px solid #ddd', borderRadius: '24px', fontSize: '14px', fontWeight: 600, height: '40px', boxSizing: 'border-box', cursor: 'pointer', backgroundColor: '#fff', transition: 'all 0.3s ease' }}
-                >
-                    {['Economy', 'Premium Economy', 'Business', 'First Class'].map(cls => (
-                        <option key={cls} value={cls}>{cls}</option>
-                    ))}
-                </select>
-            </div>
-
-            {/* Row 1: From, Swap, To, Departure Dates */}
-            <div className="package-search-row1" style={{ display: 'grid', gridTemplateColumns: '1.2fr auto 1.2fr 1.2fr', gap: '16px', marginBottom: '12px', alignItems: 'flex-start', position: 'relative' }}>
-                {/* FROM CITY */}
-                <div style={{ position: 'relative', width: '100%', margin: 0, padding: 0 }}>
-                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600, margin: 0, padding: 0 }}>Flying From</label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
-                        <i className="fa fa-plane"></i>
-                    </div>
-                    <input
-                        type="text"
-                        placeholder="Flying from"
-                        value={fromCity ? `${cityList.find(c => c.code === fromCity)?.code} - ${cityList.find(c => c.code === fromCity)?.name}` : fromSearch}
-                        onChange={(e) => {
-                            setFromSearch(e.target.value);
-                            setFromCity('');
-                            setShowFromDropdown(true);
-                        }}
-                        onFocus={() => setShowFromDropdown(true)}
-                        style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '14px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s' }}
-                    />
-                    {showFromDropdown && (
-                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '200px', overflowY: 'auto' }}>
-                            {filterCities(fromSearch).length > 0 ? (
-                                filterCities(fromSearch).map(city => (
-                                    <div
-                                        key={city.code}
-                                        onClick={() => {
-                                            setFromCity(city.code);
-                                            setFromSearch('');
-                                            setShowFromDropdown(false);
-                                        }}
-                                        style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#333', transition: 'background 0.2s' }}
-                                        onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
-                                        onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
-                                    >
-                                        <strong>{city.code}</strong> - {city.name}
-                                    </div>
-                                ))
-                            ) : (
-                                <div style={{ padding: '12px', color: '#999', fontSize: '13px', textAlign: 'center' }}>No cities found</div>
-                            )}
-                        </div>
-                    )}
-                </div>
-
-                {/* SWAP BUTTON - Centered between From and To */}
-                <button
-                    onClick={() => {
-                        const tempCity = fromCity;
-                        setFromCity(toCity);
-                        setToCity(tempCity);
-                        setFromSearch('');
-                        setToSearch('');
-                        setShowFromDropdown(false);
-                        setShowToDropdown(false);
-                    }}
-                    style={{ alignSelf: 'flex-end', marginBottom: '6px', background: '#fff', border: '1px solid #ccc', borderRadius: '50%', cursor: 'pointer', fontSize: '13px', transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '36px', width: '36px', zIndex: 15, boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.background = '#f0f8ff';
-                        e.currentTarget.style.borderColor = '#0066cc';
-                        e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,102,204,0.2)';
-                        e.currentTarget.style.transform = 'scale(1.1)';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.background = '#fff';
-                        e.currentTarget.style.borderColor = '#e0e0e0';
-                        e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.08)';
-                        e.currentTarget.style.transform = 'scale(1)';
-                    }}
-                >⇄</button>
-
-                {/* TO CITY */}
-                <div style={{ position: 'relative', width: '100%', margin: 0, padding: 0 }}>
-                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600, margin: 0, padding: 0 }}>Flying To</label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
-                        <i className="fa fa-map-marker"></i>
-                    </div>
-                    <input
-                        type="text"
-                        placeholder="Flying to"
-                        value={toCity ? `${cityList.find(c => c.code === toCity)?.code} - ${cityList.find(c => c.code === toCity)?.name}` : toSearch}
-                        onChange={(e) => {
-                            setToSearch(e.target.value);
-                            setToCity('');
-                            setShowToDropdown(true);
-                        }}
-                        onFocus={() => setShowToDropdown(true)}
-                        style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '14px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s' }}
-                    />
-                    {showToDropdown && (
-                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '200px', overflowY: 'auto' }}>
-                            {filterCities(toSearch).length > 0 ? (
-                                filterCities(toSearch).map(city => (
-                                    <div
-                                        key={city.code}
-                                        onClick={() => {
-                                            setToCity(city.code);
-                                            setToSearch('');
-                                            setShowToDropdown(false);
-                                        }}
-                                        style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#333', transition: 'background 0.2s' }}
-                                        onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
-                                        onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
-                                    >
-                                        <strong>{city.code}</strong> - {city.name}
-                                    </div>
-                                ))
-                            ) : (
-                                <div style={{ padding: '12px', color: '#999', fontSize: '13px', textAlign: 'center' }}>No cities found</div>
-                            )}
-                        </div>
-                    )}
-                </div>
-
-                {/* Flight Dates */}
-                <div style={{ width: '100%', position: 'relative' }}>
-                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Departure</label>
-                    <div
-                        onClick={() => {
-                            setShowFlightDatePicker(!showFlightDatePicker);
-                            if (!showFlightDatePicker) setShowHotelDatePicker(false);
-                        }}
-                        style={{ display: 'flex', alignItems: 'center', height: '54px', border: '1.5px solid #e0e0e0', borderRadius: '10px', background: '#fff', transition: 'border-color 0.3s', cursor: 'pointer', padding: '0 16px' }}
-                        onMouseEnter={(e) => e.currentTarget.style.borderColor = '#d0d0d0'}
-                        onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e0e0e0'}
-                    >
-                        <div style={{ fontSize: '16px', color: '#999', marginRight: '12px', display: 'flex', alignItems: 'center' }}>
-                            <i className="fa fa-calendar"></i>
-                        </div>
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                            <div style={{ fontSize: '13px', color: '#333', fontWeight: 600 }}>
-                                {departureDate ? new Date(departureDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Departure'}
-                            </div>
-                        </div>
-                        {tripType === 'roundtrip' && <div style={{ width: '1px', height: '30px', backgroundColor: '#e0e0e0', margin: '0 12px' }}></div>}
-                        {tripType === 'roundtrip' && (
-                            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                <div style={{ fontSize: '13px', color: '#333', fontWeight: 600 }}>
-                                    {returnDate ? new Date(returnDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Return'}
-                                </div>
-                            </div>
-                        )}
-                        <div style={{ fontSize: '14px', color: '#999', marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
-                            <i className="fa fa-chevron-down"></i>
-                        </div>
-                    </div>
-                    {showFlightDatePicker && (
-                        <CalendarDateRangePicker
-                            departureDate={departureDate}
-                            returnDate={returnDate}
-                            tripType={tripType as 'oneway' | 'roundtrip'}
-                            onDateChange={(departure, returnDateStr) => {
-                                setDepartureDate(departure);
-                                setReturnDate(returnDateStr);
-                            }}
-                            onClose={() => setShowFlightDatePicker(false)}
-                        />
-                    )}
-                </div>
-            </div>
-
-            {/* Row 2: Hotel Destination & Hotel Dates */}
-            <div className="package-search-row2" style={{ display: 'grid', gridTemplateColumns: '2fr 1.2fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
-                {/* Staying At - Wider width */}
+            {/* Row 1: Destination, Airport, Check-in */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1.2fr 1.2fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
+                {/* Destination */}
                 <div style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Staying At</label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Destination or Hotel</label>
+                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '16px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-building"></i>
                     </div>
                     <input
                         type="text"
-                        placeholder="Enter a destination or property"
-                        value={hotelCity ? `${cityList.find(c => c.code === hotelCity)?.code} - ${cityList.find(c => c.code === hotelCity)?.name}` : hotelSearch}
+                        placeholder="Enter destination"
+                        value={hotelSearch || (hotelCity ? `${hotelList.find(h => h.code === hotelCity)?.name}` : '')}
                         onChange={(e) => {
                             setHotelSearch(e.target.value);
                             setHotelCity('');
                             setShowHotelDropdown(true);
                         }}
                         onFocus={() => setShowHotelDropdown(true)}
-                        style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '14px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s' }}
+                        style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '13px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s' }}
+                        onMouseEnter={(e) => e.currentTarget.style.borderColor = '#ccc'}
+                        onMouseLeave={(e) => e.currentTarget.style.borderColor = '#ddd'}
                     />
                     {showHotelDropdown && (
                         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '200px', overflowY: 'auto' }}>
-                            {filterCities(hotelSearch).length > 0 ? (
-                                filterCities(hotelSearch).map(city => (
-                                    <div
-                                        key={city.code}
-                                        onClick={() => {
-                                            setHotelCity(city.code);
-                                            setHotelSearch('');
-                                            setShowHotelDropdown(false);
-                                        }}
-                                        style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#333', transition: 'background 0.2s' }}
-                                        onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
-                                        onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
-                                    >
-                                        <strong>{city.code}</strong> - {city.name}
-                                    </div>
-                                ))
-                            ) : (
-                                <div style={{ padding: '12px', color: '#999', fontSize: '13px', textAlign: 'center' }}>No cities found</div>
-                            )}
+                            {filterHotels(hotelSearch).map(hotel => (
+                                <div
+                                    key={hotel.code}
+                                    onClick={() => {
+                                        setHotelCity(hotel.code);
+                                        setHotelSearch('');
+                                        setShowHotelDropdown(false);
+                                    }}
+                                    style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#333', transition: 'background 0.2s' }}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
+                                >
+                                    <strong>{hotel.code}</strong> - {hotel.name}
+                                </div>
+                            ))}
                         </div>
                     )}
                 </div>
 
-                {/* Hotel Dates */}
-                <div style={{ width: '100%', position: 'relative' }}>
-                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Hotel Dates</label>
+                {/* Departure Airport */}
+                <div style={{ position: 'relative', width: '100%' }}>
+                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Departure Airport</label>
+                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '16px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                        <i className="fa fa-plane"></i>
+                    </div>
+                    <select
+                        value={departureAirport}
+                        onChange={(e) => setDepartureAirport(e.target.value)}
+                        style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '13px', height: '54px', boxSizing: 'border-box', backgroundColor: '#fff', cursor: 'pointer', transition: 'border-color 0.3s', appearance: 'none' }}
+                        onMouseEnter={(e) => e.currentTarget.style.borderColor = '#ccc'}
+                        onMouseLeave={(e) => e.currentTarget.style.borderColor = '#ddd'}
+                    >
+                        <option value="">Select airport</option>
+                        {airportList.map(a => (
+                            <option key={a.code} value={a.code}>{a.code} - {a.name}</option>
+                        ))}
+                    </select>
+                    <div style={{ position: 'absolute', right: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '12px', color: '#999', pointerEvents: 'none' }}>
+                        <i className="fa fa-chevron-down"></i>
+                    </div>
+                </div>
+
+                {/* Check-in Date - Calendar Picker */}
+                <div style={{ position: 'relative', width: '100%' }}>
+                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Check-in Date</label>
                     <div
                         onClick={() => {
-                            setShowHotelDatePicker(!showHotelDatePicker);
-                            if (!showHotelDatePicker) setShowFlightDatePicker(false);
+                            setShowCheckInCalendar(!showCheckInCalendar);
+                            setShowNightsDropdown(false);
                         }}
-                        style={{ display: 'flex', alignItems: 'center', height: '54px', border: '1.5px solid #e0e0e0', borderRadius: '10px', background: '#fff', transition: 'border-color 0.3s', cursor: 'pointer', padding: '0 16px' }}
-                        onMouseEnter={(e) => e.currentTarget.style.borderColor = '#d0d0d0'}
-                        onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e0e0e0'}
+                        style={{ display: 'flex', alignItems: 'center', height: '54px', border: '1.5px solid #ddd', borderRadius: '10px', background: '#fff', transition: 'border-color 0.3s', cursor: 'pointer', padding: '0 16px' }}
+                        onMouseEnter={(e) => e.currentTarget.style.borderColor = '#ccc'}
+                        onMouseLeave={(e) => e.currentTarget.style.borderColor = '#ddd'}
                     >
                         <div style={{ fontSize: '16px', color: '#999', marginRight: '12px', display: 'flex', alignItems: 'center' }}>
                             <i className="fa fa-calendar"></i>
@@ -328,197 +161,123 @@ export default function PackageSearchForm(): React.ReactElement {
                                 {checkInDate ? new Date(checkInDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Check-in'}
                             </div>
                         </div>
-                        <div style={{ width: '1px', height: '30px', backgroundColor: '#e0e0e0', margin: '0 12px' }}></div>
-                        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                            <div style={{ fontSize: '13px', color: '#333', fontWeight: 600 }}>
-                                {checkOutDate ? new Date(checkOutDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Check-out'}
-                            </div>
-                        </div>
-                        <div style={{ fontSize: '14px', color: '#999', marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                        <div style={{ fontSize: '12px', color: '#999', marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
                             <i className="fa fa-chevron-down"></i>
                         </div>
                     </div>
-                    {showHotelDatePicker && (
+
+                    {/* Calendar Date Picker */}
+                    {showCheckInCalendar && (
                         <CalendarDateRangePicker
                             departureDate={checkInDate}
-                            returnDate={checkOutDate}
-                            tripType="roundtrip"
-                            onDateChange={(checkin, checkout) => {
-                                setCheckInDate(checkin);
-                                setCheckOutDate(checkout);
+                            returnDate={checkInDate ? checkOutDate : ""}
+                            tripType={checkInDate ? "roundtrip" : "oneway"}
+                            onDateChange={(departure) => {
+                                setCheckInDate(departure);
                             }}
-                            onClose={() => setShowHotelDatePicker(false)}
+                            onClose={() => setShowCheckInCalendar(false)}
                         />
                     )}
                 </div>
             </div>
 
-            {/* Row 3: Passengers & Rooms */}
-            <div className="package-search-row3" style={{ display: 'grid', gridTemplateColumns: '2fr 1.2fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
-                {/* Passengers */}
+            {/* Row 2: Nights, Guests */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.5fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
+                {/* Nights Selector */}
                 <div style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Passengers</label>
+                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Nights</label>
                     <div
-                        onClick={() => {
-                            setShowPassengerModal(!showPassengerModal);
-                            if (!showPassengerModal) setShowRoomModal(false);
-                        }}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '54px', border: '1.5px solid #e0e0e0', borderRadius: '10px', background: '#fff', padding: '12px 16px', cursor: 'pointer', transition: 'border-color 0.3s' }}
-                        onMouseEnter={(e) => e.currentTarget.style.borderColor = '#d0d0d0'}
-                        onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e0e0e0'}
+                        onClick={() => setShowNightsDropdown(!showNightsDropdown)}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '54px', border: '1.5px solid #ddd', borderRadius: '10px', background: '#fff', padding: '0 16px', cursor: 'pointer', transition: 'border-color 0.3s', position: 'relative' }}
+                        onMouseEnter={(e) => e.currentTarget.style.borderColor = '#ccc'}
+                        onMouseLeave={(e) => e.currentTarget.style.borderColor = '#ddd'}
                     >
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                            <div style={{ fontSize: '13px', color: '#333', fontWeight: 600 }}>
-                                {adults} Adult{adults > 1 ? 's' : ''} • {selectedClass}
-                            </div>
-                            <div style={{ fontSize: '12px', color: '#999' }}>
-                                {children > 0 || infants > 0 ? `${children} Child${children !== 1 ? 'ren' : ''}, ${infants} Infant${infants !== 1 ? 's' : ''}` : 'No children'}
-                            </div>
+                        <div style={{ display: 'flex', alignItems: 'center' }}>
+                            <i className="fa fa-moon" style={{ marginRight: '8px', color: '#999' }}></i>
+                            <span style={{ fontSize: '13px', color: '#333', fontWeight: 600 }}>{nights} night{nights !== 1 ? 's' : ''}</span>
                         </div>
-                        <div style={{ fontSize: '16px', color: '#666' }}>
-                            <i className="fa fa-chevron-down"></i>
-                        </div>
+                        <i className="fa fa-chevron-down" style={{ fontSize: '12px', color: '#999' }}></i>
                     </div>
-
-                    {/* PASSENGERS MODAL - Adults, Children, Infants & Class */}
-                    {showPassengerModal && (
-                        <div style={{ position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', marginTop: '12px', background: '#fff', width: 'clamp(320px, 90vw, 480px)', maxHeight: '650px', overflowY: 'auto', borderRadius: '12px', padding: '24px', boxShadow: '0 12px 48px rgba(0,0,0,.3)', zIndex: 9999, border: '1px solid #e0e0e0' }}>
-                            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#333', marginBottom: '18px' }}>Passengers</h3>
-
-                            {/* Adults */}
-                            <div style={{ marginBottom: '20px' }}>
-                                <p style={{ fontSize: '11px', color: '#666', marginBottom: '8px', fontWeight: 600 }}>Adults <span style={{ fontSize: '9px', color: '#999' }}>12 yrs or above</span></p>
-                                <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
-                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-                                        <button key={n} onClick={() => setAdults(n)} style={{ background: adults === n ? '#0066cc' : '#fff', color: adults === n ? '#fff' : '#666', border: adults === n ? 'none' : '1px solid #ddd', width: adults === n ? '32px' : '28px', height: adults === n ? '32px' : '28px', borderRadius: '4px', cursor: 'pointer', fontSize: adults === n ? '11px' : '10px', fontWeight: adults === n ? 700 : 500 }}>{n}</button>
-                                    ))}
-                                </div>
+                    {showNightsDropdown && (
+                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '300px', overflowY: 'auto' }}>
+                            <div style={{ padding: '12px 0', borderBottom: '1px solid #f0f0f0' }}>
+                                <div style={{ fontSize: '11px', fontWeight: 700, color: '#666', padding: '8px 16px', textTransform: 'uppercase' }}>Weekly</div>
+                                {weeklyOptions.map(n => (
+                                    <div
+                                        key={n}
+                                        onClick={() => {
+                                            setNights(n);
+                                            setShowNightsDropdown(false);
+                                        }}
+                                        style={{ padding: '10px 16px', cursor: 'pointer', fontSize: '13px', color: nights === n ? '#fff' : '#333', background: nights === n ? '#0066cc' : 'transparent', transition: 'background 0.2s' }}
+                                        onMouseEnter={(e) => {
+                                            if (nights !== n) e.currentTarget.style.background = '#f5f5f5';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (nights !== n) e.currentTarget.style.background = 'transparent';
+                                        }}
+                                    >
+                                        {n} nights
+                                    </div>
+                                ))}
                             </div>
-
-                            {/* Children */}
-                            <div style={{ marginBottom: '20px' }}>
-                                <p style={{ fontSize: '11px', color: '#666', marginBottom: '8px', fontWeight: 600 }}>Children <span style={{ fontSize: '9px', color: '#999' }}>2 - 12 yrs</span></p>
-                                <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
-                                    {[0, 1, 2, 3, 4, 5, 6, 7, 8].map(n => (
-                                        <button key={n} onClick={() => setChildren(n)} style={{ background: children === n ? '#0066cc' : '#fff', color: children === n ? '#fff' : '#666', border: children === n ? 'none' : '1px solid #ddd', width: children === n ? '32px' : '28px', height: children === n ? '32px' : '28px', borderRadius: '4px', cursor: 'pointer', fontSize: children === n ? '11px' : '10px', fontWeight: children === n ? 700 : 500 }}>{n}</button>
-                                    ))}
-                                </div>
+                            <div style={{ padding: '12px 0' }}>
+                                <div style={{ fontSize: '11px', fontWeight: 700, color: '#666', padding: '8px 16px', textTransform: 'uppercase' }}>Daily</div>
+                                {dailyOptions.map(n => (
+                                    <div
+                                        key={n}
+                                        onClick={() => {
+                                            setNights(n);
+                                            setShowNightsDropdown(false);
+                                        }}
+                                        style={{ padding: '10px 16px', cursor: 'pointer', fontSize: '13px', color: nights === n ? '#fff' : '#333', background: nights === n ? '#0066cc' : 'transparent', transition: 'background 0.2s' }}
+                                        onMouseEnter={(e) => {
+                                            if (nights !== n) e.currentTarget.style.background = '#f5f5f5';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            if (nights !== n) e.currentTarget.style.background = 'transparent';
+                                        }}
+                                    >
+                                        {n} nights
+                                    </div>
+                                ))}
                             </div>
-
-                            {/* Infants */}
-                            <div style={{ marginBottom: '20px' }}>
-                                <p style={{ fontSize: '11px', color: '#666', marginBottom: '8px', fontWeight: 600 }}>Infants <span style={{ fontSize: '9px', color: '#999' }}>0 - 2 yrs</span></p>
-                                <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
-                                    {[0, 1, 2, 3, 4].map(n => (
-                                        <button key={n} onClick={() => setInfants(n)} style={{ background: infants === n ? '#0066cc' : '#fff', color: infants === n ? '#fff' : '#666', border: infants === n ? 'none' : '1px solid #ddd', width: infants === n ? '32px' : '28px', height: infants === n ? '32px' : '28px', borderRadius: '4px', cursor: 'pointer', fontSize: infants === n ? '11px' : '10px', fontWeight: infants === n ? 700 : 500 }}>{n}</button>
-                                    ))}
-                                </div>
+                            <div style={{ padding: '12px 16px', borderTop: '1px solid #f0f0f0' }}>
+                                <button
+                                    onClick={() => {
+                                        handleSearch();
+                                        setShowNightsDropdown(false);
+                                    }}
+                                    style={{ width: '100%', padding: '10px', background: '#0066cc', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', transition: 'background 0.2s' }}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = '#0052a3'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = '#0066cc'}
+                                >
+                                    Search
+                                </button>
                             </div>
-
-                            {/* Class Selection */}
-                            <div style={{ marginBottom: '20px' }}>
-                                <p style={{ fontSize: '12px', color: '#333', marginBottom: '10px', fontWeight: 600 }}>Class</p>
-                                <div style={{ display: 'flex', gap: '8px' }}>
-                                    {['Economy', 'Premium Economy', 'Business'].map(cls => (
-                                        <button key={cls} onClick={() => setSelectedClass(cls)} style={{ background: selectedClass === cls ? '#0066cc' : '#fff', color: selectedClass === cls ? '#fff' : '#333', border: '1px solid ' + (selectedClass === cls ? '#0066cc' : '#ddd'), padding: '8px 14px', borderRadius: '20px', fontSize: '11px', fontWeight: 600, cursor: 'pointer' }}>{cls}</button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <button onClick={() => setShowPassengerModal(false)} style={{ background: '#ff6b35', color: '#fff', border: 'none', width: '100%', padding: '12px', borderRadius: '6px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Done</button>
                         </div>
                     )}
                 </div>
 
-                {/* Rooms */}
+                {/* Guests and Rooms */}
                 <div style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Rooms</label>
-                    <div
-                        onClick={() => {
-                            setShowRoomModal(!showRoomModal);
-                            if (!showRoomModal) setShowPassengerModal(false);
-                        }}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '54px', border: '1.5px solid #e0e0e0', borderRadius: '10px', background: '#fff', padding: '12px 16px', cursor: 'pointer', transition: 'border-color 0.3s' }}
-                        onMouseEnter={(e) => e.currentTarget.style.borderColor = '#d0d0d0'}
-                        onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e0e0e0'}
+                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Guests & Rooms</label>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '54px', border: '1.5px solid #ddd', borderRadius: '10px', background: '#fff', padding: '0 16px', cursor: 'pointer', transition: 'border-color 0.3s' }}
+                        onMouseEnter={(e) => e.currentTarget.style.borderColor = '#ccc'}
+                        onMouseLeave={(e) => e.currentTarget.style.borderColor = '#ddd'}
                     >
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
-                            <i className="fa fa-bed" style={{ fontSize: '14px', color: '#0066cc' }}></i>
-                            <div style={{ fontSize: '13px', color: '#333', fontWeight: 600 }}>{rooms} Room{rooms > 1 ? 's' : ''}</div>
-                        </div>
-                        <div style={{ fontSize: '14px', color: '#666' }}>
-                            <i className="fa fa-chevron-down"></i>
+                        <div style={{ fontSize: '13px', color: '#333', fontWeight: 600 }}>
+                            <i className="fa fa-users" style={{ marginRight: '8px', color: '#0066cc' }}></i>
+                            {adults} Adult{adults !== 1 ? 's' : ''} • {rooms} Room{rooms !== 1 ? 's' : ''}
                         </div>
                     </div>
-
-                    {/* ROOMS MODAL - Only Rooms */}
-                    {showRoomModal && (
-                        <div style={{ position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', marginTop: '12px', background: '#fff', width: 'clamp(320px, 90vw, 480px)', maxHeight: '400px', overflowY: 'auto', borderRadius: '12px', padding: '24px', boxShadow: '0 12px 48px rgba(0,0,0,.3)', zIndex: 9999, border: '1px solid #e0e0e0' }}>
-                            <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#333', marginBottom: '18px' }}>Select Rooms</h3>
-
-                            {/* Rooms */}
-                            <div style={{ marginBottom: '20px' }}>
-                                <p style={{ fontSize: '11px', color: '#666', marginBottom: '10px', fontWeight: 600 }}>Rooms</p>
-                                <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
-                                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => (
-                                        <button key={n} onClick={() => setRooms(n)} style={{ background: rooms === n ? '#0066cc' : '#fff', color: rooms === n ? '#fff' : '#666', border: rooms === n ? 'none' : '1px solid #ddd', width: rooms === n ? '32px' : '28px', height: rooms === n ? '32px' : '28px', borderRadius: '4px', cursor: 'pointer', fontSize: rooms === n ? '11px' : '10px', fontWeight: rooms === n ? 700 : 500 }}>{n}</button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <button onClick={() => setShowRoomModal(false)} style={{ background: '#ff6b35', color: '#fff', border: 'none', width: '100%', padding: '12px', borderRadius: '6px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Done</button>
-                        </div>
-                    )}
                 </div>
-
             </div>
-
-            {/* Add-ons Toggles */}
-            <div style={{ display: 'flex', gap: '20px', marginBottom: '14px', padding: '12px 16px', backgroundColor: '#f9f9f9', borderRadius: '8px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#333', fontWeight: 500 }}>
-                    <input
-                        type="checkbox"
-                        checked={addVisa}
-                        onChange={(e) => setAddVisa(e.target.checked)}
-                        style={{ width: '16px', height: '16px', cursor: 'pointer' }}
-                    />
-                    <span>Add Visa Service</span>
-                </label>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#333', fontWeight: 500 }}>
-                    <input
-                        type="checkbox"
-                        checked={addCarRental}
-                        onChange={(e) => setAddCarRental(e.target.checked)}
-                        style={{ width: '16px', height: '16px', cursor: 'pointer' }}
-                    />
-                    <span>Add Car Rental</span>
-                </label>
-            </div>
-
-            {/* Visa Service Component */}
-            {addVisa && (
-                <div style={{ marginBottom: '14px', padding: '14px', backgroundColor: '#f0f7ff', borderRadius: '8px', border: '1px solid #d0e8ff', position: 'relative', overflow: 'visible', zIndex: 1 }}>
-                    <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#0066cc', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px', margin: '0 0 10px 0' }}>
-                        <i className="fa fa-passport"></i> Visa Service
-                    </h4>
-                    <VisaServiceForm travelDate={departureDate} tripType={tripType} />
-                </div>
-            )}
-
-            {/* Car Rental Component */}
-            {addCarRental && (
-                <div style={{ marginBottom: '14px', padding: '14px', backgroundColor: '#f5f5f5', borderRadius: '8px', border: '1px solid #e0e0e0' }}>
-                    <h4 style={{ fontSize: '13px', fontWeight: 600, color: '#333', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px', margin: '0 0 10px 0' }}>
-                        <i className="fa fa-car"></i> Car Rental
-                    </h4>
-                    <CarRentalForm />
-                </div>
-            )}
 
             {/* Search Button */}
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0px', marginTop: '6px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                 <button
-                    onClick={handlePackageSearch}
+                    onClick={handleSearch}
                     style={{
                         background: 'linear-gradient(135deg, #0066cc 0%, #0052a3 100%)',
                         color: '#fff',
@@ -552,7 +311,7 @@ export default function PackageSearchForm(): React.ReactElement {
                         e.currentTarget.style.transform = 'translateY(-3px) scale(1)';
                     }}
                 >
-                    SEARCH PACKAGE
+                    SEARCH
                 </button>
             </div>
         </div>
