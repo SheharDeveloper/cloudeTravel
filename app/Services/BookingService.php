@@ -135,6 +135,31 @@ class BookingService
     }
 
     /**
+     * Create package booking
+     */
+    public function createPackageBooking(array $formData, array $searchParams): Booking
+    {
+        $data = [
+            'service' => 'package',
+            'name' => $formData['firstName'] ?? 'Guest',
+            'email' => $formData['email'],
+            'phone' => $formData['phone'] ?? null,
+            'country' => $searchParams['hotelCity'] ?? null,
+            'hotel_city' => $searchParams['hotelCity'] ?? null,
+            'check_in_date' => $searchParams['checkInDate'] ?? null,
+            'check_out_date' => $searchParams['checkOutDate'] ?? null,
+            'rooms' => $searchParams['rooms'] ?? 1,
+            'guests' => $searchParams['adults'] ?? 1,
+            'total_members' => $searchParams['adults'] ?? 1,
+            'from_city' => $searchParams['departureAirport'] ?? null,
+            'notes' => $this->generatePackageNotes($searchParams),
+            'status' => 'pending',
+        ];
+
+        return $this->create($data);
+    }
+
+    /**
      * Update booking status
      */
     public function updateStatus(Booking $booking, string $status): Booking
@@ -203,6 +228,21 @@ class BookingService
             'Passport Country: %s, Destination: %s',
             $searchParams['passportCountry'] ?? 'N/A',
             $searchParams['destination'] ?? 'N/A'
+        );
+    }
+
+    /**
+     * Generate package booking notes
+     */
+    private function generatePackageNotes(array $searchParams): string
+    {
+        return sprintf(
+            'Hotel City: %s, Departure Airport: %s, Nights: %d, Adults: %d, Rooms: %d',
+            $searchParams['hotelCity'] ?? 'N/A',
+            $searchParams['departureAirport'] ?? 'N/A',
+            $searchParams['nights'] ?? 0,
+            $searchParams['adults'] ?? 1,
+            $searchParams['rooms'] ?? 1
         );
     }
 }
