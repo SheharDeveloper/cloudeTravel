@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { router } from '@inertiajs/react';
 import CalendarDateRangePicker from '@/components/CalendarDateRangePicker';
+import BookingModal from '@/components/BookingModal';
 
 interface FlightSearchFormProps {
     showDateRangePicker: boolean;
@@ -28,6 +29,7 @@ export default function FlightSearchForm({
     const [showToDropdown, setShowToDropdown] = useState(false);
     const [departureDate, setDepartureDate] = useState('');
     const [returnDate, setReturnDate] = useState('');
+    const [showBookingModal, setShowBookingModal] = useState(false);
 
     const cityList = [
         { code: 'LON', name: 'London' },
@@ -57,17 +59,20 @@ export default function FlightSearchForm({
             return;
         }
 
-        router.post('/search/flight', {
-            tripType,
-            fromCity,
-            toCity,
-            departureDate,
-            returnDate: tripType === 'roundtrip' ? returnDate : '',
-            adults,
-            children,
-            infants,
-            selectedClass,
-        });
+        setShowBookingModal(true);
+    };
+
+    const handleCloseBookingModal = () => {
+        setShowBookingModal(false);
+        setFromCity('');
+        setToCity('');
+        setFromSearch('');
+        setToSearch('');
+        setDepartureDate('');
+        setReturnDate('');
+        setTripType('roundtrip');
+        setShowDateRangePicker(false);
+        setShowTravellerModal(false);
     };
 
     return (
@@ -447,6 +452,23 @@ export default function FlightSearchForm({
                     SEARCH FLIGHTS
                 </button>
             </div>
+
+            {/* Booking Modal */}
+            <BookingModal
+                isOpen={showBookingModal}
+                onClose={handleCloseBookingModal}
+                searchDetails={{
+                    fromCity,
+                    toCity,
+                    departureDate,
+                    returnDate: tripType === 'roundtrip' ? returnDate : '',
+                    adults,
+                    children,
+                    infants,
+                    selectedClass,
+                }}
+                serviceType="flight"
+            />
         </div>
     );
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { router } from '@inertiajs/react';
 import CalendarDateRangePicker from '@/components/CalendarDateRangePicker';
+import BookingModal from '@/components/BookingModal';
 
 export default function HotelsSearchForm(): React.ReactElement {
     const [stayType, setStayType] = useState('overnight');
@@ -14,6 +14,7 @@ export default function HotelsSearchForm(): React.ReactElement {
     const [rooms, setRooms] = useState(1);
     const [adults, setAdults] = useState(1);
     const [children, setChildren] = useState(0);
+    const [showBookingModal, setShowBookingModal] = useState(false);
 
     const cityList = [
         { code: 'LON', name: 'London' },
@@ -42,15 +43,18 @@ export default function HotelsSearchForm(): React.ReactElement {
             return;
         }
 
-        router.post('/search/hotel', {
-            stayType,
-            hotelCity,
-            checkInDate,
-            checkOutDate: stayType === 'overnight' ? checkOutDate : checkInDate,
-            rooms,
-            adults,
-            children,
-        });
+        setShowBookingModal(true);
+    };
+
+    const handleCloseBookingModal = () => {
+        setShowBookingModal(false);
+        setHotelCity('');
+        setHotelSearch('');
+        setCheckInDate('');
+        setCheckOutDate('');
+        setStayType('overnight');
+        setShowDatePicker(false);
+        setShowGuestModal(false);
     };
 
     return (
@@ -333,6 +337,22 @@ export default function HotelsSearchForm(): React.ReactElement {
                     SEARCH HOTELS
                 </button>
             </div>
+
+            {/* Booking Modal */}
+            <BookingModal
+                isOpen={showBookingModal}
+                onClose={handleCloseBookingModal}
+                searchDetails={{
+                    hotelCity,
+                    stayType,
+                    checkInDate,
+                    checkOutDate: stayType === 'overnight' ? checkOutDate : checkInDate,
+                    rooms,
+                    adults,
+                    children,
+                }}
+                serviceType="hotel"
+            />
         </div>
     );
 }
