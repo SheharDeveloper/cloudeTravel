@@ -50,10 +50,10 @@ class BookingController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'service' => 'required|string|in:flight,hotel,visa,package',
+            'service' => 'required|string|in:flight,hotel,visa,package,airport-transfer',
             'formData' => 'array',
-            'formData.firstName' => 'required_if:service,flight,hotel,visa,package|string',
-            'formData.email' => 'required_if:service,flight,hotel,visa,package|email',
+            'formData.firstName' => 'required_if:service,flight,hotel,visa,package,airport-transfer|string',
+            'formData.email' => 'required_if:service,flight,hotel,visa,package,airport-transfer|email',
             'formData.phone' => 'nullable|string',
             'searchParams' => 'array',
         ]);
@@ -68,6 +68,7 @@ class BookingController extends Controller
                 'hotel' => $this->bookingService->createHotelBooking($formData, $searchParams),
                 'visa' => $this->bookingService->createVisaBooking($formData, $searchParams),
                 'package' => $this->bookingService->createPackageBooking($formData, $searchParams),
+                'airport-transfer' => $this->bookingService->createAirportTransferBooking($formData, $searchParams),
                 default => null,
             };
 

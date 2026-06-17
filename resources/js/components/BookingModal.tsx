@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
 interface BookingModalProps {
@@ -20,7 +20,7 @@ interface BookingModalProps {
         selectedClass?: string;
         [key: string]: any;
     };
-    serviceType: 'flight' | 'hotel' | 'visa' | 'package';
+    serviceType: 'flight' | 'hotel' | 'visa' | 'package' | 'airport-transfer';
 }
 
 export default function BookingModal({ isOpen, onClose, searchDetails, serviceType }: BookingModalProps) {
@@ -93,8 +93,8 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
 
     if (!isOpen) return null;
 
-    const emoji = serviceType === 'flight' ? '✈️' : serviceType === 'hotel' ? '🏨' : serviceType === 'visa' ? '🛂' : '📦';
-    const title = serviceType === 'flight' ? 'Flight' : serviceType === 'hotel' ? 'Hotel' : serviceType === 'visa' ? 'Visa' : 'Package';
+    const emoji = serviceType === 'flight' ? '✈️' : serviceType === 'hotel' ? '🏨' : serviceType === 'visa' ? '🛂' : serviceType === 'package' ? '📦' : '🚗';
+    const title = serviceType === 'flight' ? 'Flight' : serviceType === 'hotel' ? 'Hotel' : serviceType === 'visa' ? 'Visa' : serviceType === 'package' ? 'Package' : 'Airport Transfer';
 
     const modalContent = (
         <>

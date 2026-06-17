@@ -160,6 +160,28 @@ class BookingService
     }
 
     /**
+     * Create airport transfer booking
+     */
+    public function createAirportTransferBooking(array $formData, array $searchParams): Booking
+    {
+        $data = [
+            'service' => 'airport-transfer',
+            'name' => $formData['firstName'] ?? 'Guest',
+            'email' => $formData['email'],
+            'phone' => $formData['phone'] ?? null,
+            'country' => $searchParams['pickupAirport'] ?? null,
+            'from_city' => $searchParams['pickupAirport'] ?? null,
+            'to_city' => $searchParams['destinationLocation'] ?? null,
+            'travel_date' => $searchParams['pickupDate'] ?? null,
+            'total_members' => $searchParams['passengers'] ?? 1,
+            'notes' => $this->generateAirportTransferNotes($searchParams),
+            'status' => 'pending',
+        ];
+
+        return $this->create($data);
+    }
+
+    /**
      * Update booking status
      */
     public function updateStatus(Booking $booking, string $status): Booking
@@ -243,6 +265,22 @@ class BookingService
             $searchParams['nights'] ?? 0,
             $searchParams['adults'] ?? 1,
             $searchParams['rooms'] ?? 1
+        );
+    }
+
+    /**
+     * Generate airport transfer booking notes
+     */
+    private function generateAirportTransferNotes(array $searchParams): string
+    {
+        return sprintf(
+            'Trip Type: %s, Pickup Airport: %s, Destination: %s, Pickup Date: %s, Pickup Time: %s, Passengers: %d',
+            $searchParams['tripType'] ?? 'N/A',
+            $searchParams['pickupAirport'] ?? 'N/A',
+            $searchParams['destinationLocation'] ?? 'N/A',
+            $searchParams['pickupDate'] ?? 'N/A',
+            $searchParams['pickupTime'] ?? 'N/A',
+            $searchParams['passengers'] ?? 1
         );
     }
 }

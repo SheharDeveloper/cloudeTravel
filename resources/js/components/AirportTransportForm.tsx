@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { router } from '@inertiajs/react';
+import BookingModal from '@/components/BookingModal';
 
 export default function AirportTransportForm(): React.ReactElement {
     const [tripType, setTripType] = useState('from');
@@ -12,6 +12,7 @@ export default function AirportTransportForm(): React.ReactElement {
     const [passengers, setPassengers] = useState(1);
     const [showPickupDropdown, setShowPickupDropdown] = useState(false);
     const [showDestinationDropdown, setShowDestinationDropdown] = useState(false);
+    const [showBookingModal, setShowBookingModal] = useState(false);
 
     const airportList = [
         { code: 'LON', name: 'London - Heathrow Airport' },
@@ -56,14 +57,16 @@ export default function AirportTransportForm(): React.ReactElement {
             return;
         }
 
-        router.post('/search/airport-transfer', {
-            tripType,
-            pickupAirport,
-            destinationLocation,
-            pickupDate,
-            pickupTime,
-            passengers,
-        });
+        setShowBookingModal(true);
+    };
+
+    const handleCloseBookingModal = () => {
+        setShowBookingModal(false);
+        setPickupAirport('');
+        setDestinationLocation('');
+        setPickupDate('');
+        setPickupTime('12:00');
+        setPassengers(1);
     };
 
     return (
@@ -325,6 +328,21 @@ export default function AirportTransportForm(): React.ReactElement {
                     SEARCH
                 </button>
             </div>
+
+            {/* Booking Modal */}
+            <BookingModal
+                isOpen={showBookingModal}
+                onClose={handleCloseBookingModal}
+                searchDetails={{
+                    tripType,
+                    pickupAirport,
+                    destinationLocation,
+                    pickupDate,
+                    pickupTime,
+                    passengers,
+                }}
+                serviceType="airport-transfer"
+            />
         </div>
     );
 }
