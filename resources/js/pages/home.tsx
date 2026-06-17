@@ -4,12 +4,13 @@ import { specialOfferService } from '@/services/specialOfferService';
 import { heroImageService } from '@/services/heroImageService';
 import { testimonialService } from '@/services/testimonialService';
 import { contactInfoService } from '@/services/contactInfoService';
-import { getTours } from '@/services/tourService';
 import FlightSearchForm from '@/components/FlightSearchForm';
 import HotelsSearchForm from '@/components/HotelsSearchForm';
 import VisasSearchForm from '@/components/VisasSearchForm';
 import PackageSearchForm from '@/components/PackageSearchForm';
 import AirportTransportForm from '@/components/AirportTransportForm';
+import AirlineLogoSlider from '@/components/AirlineLogoSlider';
+import ImageWithFallback from '@/components/ImageWithFallback';
 
 /**
  * Home/Landing page component with multiple sections
@@ -27,7 +28,6 @@ export default function Home() {
     const [testimonials, setTestimonials] = useState<any[]>([]);
     const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
     const [contactInfo, setContactInfo] = useState<any>(null);
-    const [tours, setTours] = useState<any[]>([]);
     const [currency, setCurrency] = useState({ symbol: '£', code: 'GBP' });
     const autoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const heroAutoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -38,7 +38,6 @@ export default function Home() {
         loadHeroImages();
         loadTestimonials();
         loadContactInfo();
-        loadTours();
     }, []);
 
     useEffect(() => {
@@ -74,20 +73,6 @@ export default function Home() {
     const loadContactInfo = async () => {
         const data = await contactInfoService.get();
         setContactInfo(data);
-    };
-
-    const loadTours = async () => {
-        try {
-            const response = await getTours(1, 6, 'active', undefined, true);
-            if (response.success) {
-                setTours(response.data.data || []);
-                if (response.currency) {
-                    setCurrency(response.currency);
-                }
-            }
-        } catch (err) {
-            console.error('Failed to load tours:', err);
-        }
     };
 
     const startAutoPlay = () => {
@@ -450,69 +435,38 @@ export default function Home() {
                 </div>
             )}
 
-            {/* TOURS SECTION */}
-            <section className="tours-section" style={{ padding: '50px 40px', background: '#fff' }}>
+            {/* VISA SERVICES SECTION */}
+            <section style={{ padding: '50px 40px', background: '#fff', borderTop: '1px solid #f0f0f0' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-                        <h2 className="tours-heading" style={{ fontFamily: "'Playfair Display', serif", fontSize: '28px', color: '#003d82', marginBottom: '8px' }}>Our Tours</h2>
-                        <div style={{ width: '40px', height: '2px', background: '#ff6b35', margin: '10px auto 14px' }}></div>
-                        <p style={{ color: '#777', fontSize: '12.5px', lineHeight: 1.7 }}>We understand that travel is not just about destinations. Destinations, it is about the journeys and the experiences</p>
-                    </div>
-
-                    <div className="tours-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '30px', marginBottom: '15px' }}>
-                        {tours.length > 0 ? tours.map((tour, idx) => (
-                            <div key={idx} style={{
-                                background: '#f8fafb',
-                                borderRadius: '10px',
-                                overflow: 'hidden',
-                                boxShadow: '0 2px 12px rgba(0,0,0,.08)',
-                                position: 'relative',
-                                border: '1px solid #f0f0f0',
-                                transition: 'all 0.3s ease',
-                                cursor: 'pointer'
-                            }} onMouseEnter={(e) => {
-                                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,.12)';
-                                e.currentTarget.style.transform = 'translateY(-5px)';
-                            }} onMouseLeave={(e) => {
-                                e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,.08)';
-                                e.currentTarget.style.transform = 'translateY(0)';
-                            }}>
-                                <div style={{ position: 'relative', height: '220px', overflow: 'hidden' }}>
-                                    <img src={tour.feature_image || '/images/dummy.jpg'} alt={tour.tour_title} style={{ width: '100%', height: '100%', objectFit: 'cover', transition: 'transform 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'} />
-                                    {tour.featured && (
-                                        <span style={{ position: 'absolute', top: '12px', left: '12px', background: '#ff6b35', color: '#fff', padding: '6px 12px', borderRadius: '4px', fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>⭐ Featured</span>
-                                    )}
-                                    <span style={{ position: 'absolute', top: '12px', right: '12px', background: '#003d82', color: '#fff', padding: '6px 12px', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>{tour.country}</span>
-                                    <span style={{ position: 'absolute', bottom: '12px', left: '12px', background: 'rgba(0,0,0,.6)', color: '#fff', padding: '6px 12px', borderRadius: '4px', fontSize: '11px', fontWeight: 700 }}>{tour.duration_days} Days</span>
-                                </div>
-                                <div style={{ padding: '20px 25px' }}>
-                                    <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#003d82', marginBottom: '10px', lineHeight: 1.3 }}>{tour.tour_title}</h3>
-                                    <p style={{ fontSize: '13px', color: '#666', marginBottom: '12px', lineHeight: 1.5 }}>
-                                        {tour.short_description ? tour.short_description.substring(0, 80) + '...' : 'Explore this amazing destination with our curated tour package.'}
-                                    </p>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '10px', borderTop: '1px solid #f0f0f0' }}>
-                                        <div>
-                                            <p style={{ fontSize: '11px', color: '#999', margin: '0 0 4px 0', textTransform: 'uppercase', fontWeight: 700 }}>Starting from</p>
-                                            <span style={{ fontSize: '18px', fontWeight: 700, color: '#ff6b35' }}>
-                                                {tour.early_booking_price_text ? `${currency.symbol}${tour.early_booking_price_text}` : 'Inquire'}
-                                            </span>
-                                        </div>
-                                        <a href={`/tours/${tour.id}`} style={{ background: '#003d82', color: '#fff', border: 'none', padding: '10px 16px', borderRadius: '4px', fontSize: '12px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', display: 'inline-block', transition: 'all 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#002050'} onMouseLeave={(e) => e.currentTarget.style.background = '#003d82'}>View Details</a>
-                                    </div>
-                                </div>
+                    <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#003d82', marginBottom: '30px', textAlign: 'center' }}>🛂 Visa Services</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
+                        {['Schengen Visa', 'India Visa', 'USA ESTA', 'Canada ETA'].map((visa, idx) => (
+                            <div key={idx} style={{ padding: '40px 24px', background: '#f0f4ff', borderRadius: '10px', border: '1.5px solid #d4dff5', textAlign: 'center', transition: 'all 0.3s', cursor: 'pointer' }} onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,102,204,.15)'; e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = '#e8f0ff'; }} onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = '#f0f4ff'; }}>
+                                <div style={{ fontSize: '40px', marginBottom: '16px' }}>📋</div>
+                                <p style={{ fontSize: '15px', fontWeight: 600, color: '#003d82', margin: 0, lineHeight: 1.4 }}>{visa}</p>
                             </div>
-                        )) : (
-                            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '40px', color: '#999' }}>
-                                <p>No tours available at the moment.</p>
-                            </div>
-                        )}
-                    </div>
-
-                    <div style={{ textAlign: 'center' }}>
-                        <a href="/tours" style={{ background: '#003d82', color: '#fff', border: 'none', padding: '10px 30px', borderRadius: '4px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', display: 'inline-block' }}>More Tours</a>
+                        ))}
                     </div>
                 </div>
             </section>
+
+            {/* TRAVEL PACKAGES SECTION */}
+            <section style={{ padding: '50px 40px', background: '#f5f5f5' }}>
+                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                    <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#003d82', marginBottom: '30px', textAlign: 'center' }}>📦 Travel Packages</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
+                        {['Honeymoon Package', 'Family Tour', 'Adventure Trip', 'Beach Retreat'].map((pkg, idx) => (
+                            <div key={idx} style={{ padding: '40px 24px', background: '#fff8f0', borderRadius: '10px', border: '1.5px solid #f5d9c3', textAlign: 'center', transition: 'all 0.3s', cursor: 'pointer' }} onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 8px 16px rgba(255,107,53,.15)'; e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = '#fffaf5'; }} onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = '#fff8f0'; }}>
+                                <div style={{ fontSize: '40px', marginBottom: '16px' }}>✈️</div>
+                                <p style={{ fontSize: '15px', fontWeight: 600, color: '#003d82', margin: 0, lineHeight: 1.4 }}>{pkg}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* AIRLINE LOGO SLIDER SECTION */}
+            <AirlineLogoSlider />
 
             {/* VISA & OTHER SERVICES SECTION */}
             <section style={{ padding: '60px 40px', background: '#f5f5f5' }}>
@@ -632,9 +586,10 @@ export default function Home() {
                                     {testimonials.map((testimonial) => (
                                         <div key={testimonial.id} className="testimonial-card" style={{ background: '#fff', padding: '30px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,.1)', textAlign: 'center', flex: '0 0 100%', minWidth: 0 }}>
                                             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-                                                <img
+                                                <ImageWithFallback
                                                     src={testimonial.client_image}
                                                     alt={testimonial.client_name}
+                                                    fallbackSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%23f0f0f0'/%3E%3Ctext x='40' y='40' font-size='28' fill='%23999' text-anchor='middle' dy='.3em'%3E%3F%3C/text%3E%3C/svg%3E"
                                                     style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #ff6b35' }}
                                                 />
                                             </div>
