@@ -2,9 +2,11 @@
  * Image Service - Handles image paths, validation, and fallbacks
  */
 
-const DEFAULT_FALLBACK_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23e0e0e0" width="400" height="300"/%3E%3Ctext x="200" y="150" font-size="16" fill="%23999" text-anchor="middle" dy=".3em"%3EImage not available%3C/text%3E%3C/svg%3E';
-
-const FALLBACK_PROFILE_IMAGE = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="80"%3E%3Ccircle cx="40" cy="40" r="40" fill="%23f0f0f0"/%3E%3Ctext x="40" y="45" font-size="32" fill="%23999" text-anchor="middle"%3E%3F%3C/text%3E%3C/svg%3E';
+const DEFAULT_FALLBACK_IMAGE = '/images/noimages-flight.png';
+const VISA_FALLBACK_IMAGE = '/images/noimages-visa.png';
+const PACKAGE_FALLBACK_IMAGE = '/images/noimages-pacakage.png';
+const HOTEL_FALLBACK_IMAGE = '/images/noimages-hotel.png';
+const FALLBACK_PROFILE_IMAGE = '/images/noimages-flight.png';
 
 export const imageService = {
     /**
@@ -22,13 +24,19 @@ export const imageService = {
 
     /**
      * Get fallback image for different types
-     * @param type - 'profile' | 'gallery' | 'default'
-     * @returns SVG fallback image data URL
+     * @param type - 'profile' | 'visa' | 'package' | 'hotel' | 'gallery' | 'default'
+     * @returns Fallback image URL
      */
-    getFallbackImage(type: 'profile' | 'gallery' | 'default' = 'default'): string {
+    getFallbackImage(type: 'profile' | 'visa' | 'package' | 'hotel' | 'gallery' | 'default' = 'default'): string {
         switch (type) {
             case 'profile':
                 return FALLBACK_PROFILE_IMAGE;
+            case 'visa':
+                return VISA_FALLBACK_IMAGE;
+            case 'package':
+                return PACKAGE_FALLBACK_IMAGE;
+            case 'hotel':
+                return HOTEL_FALLBACK_IMAGE;
             case 'gallery':
                 return DEFAULT_FALLBACK_IMAGE;
             default:

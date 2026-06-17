@@ -451,7 +451,7 @@ export default function Home() {
                                 <ImageWithFallback
                                     src={imageService.getImagePath('visas', visa.img)}
                                     alt={visa.name}
-                                    fallbackSrc={imageService.getFallbackImage('gallery')}
+                                    fallbackSrc={imageService.getFallbackImage('visa')}
                                     style={{ width: '100%', height: '160px', objectFit: 'cover', borderRadius: '8px', marginBottom: '12px' }}
                                 />
                                 <p style={{ fontSize: '15px', fontWeight: 600, color: '#003d82', margin: 0, lineHeight: 1.4 }}>{visa.name}</p>
@@ -476,7 +476,7 @@ export default function Home() {
                                 <ImageWithFallback
                                     src={imageService.getImagePath('packages', pkg.img)}
                                     alt={pkg.name}
-                                    fallbackSrc={imageService.getFallbackImage('gallery')}
+                                    fallbackSrc={imageService.getFallbackImage('package')}
                                     style={{ width: '100%', height: '160px', objectFit: 'cover', borderRadius: '8px', marginBottom: '12px' }}
                                 />
                                 <p style={{ fontSize: '15px', fontWeight: 600, color: '#003d82', margin: 0, lineHeight: 1.4 }}>{pkg.name}</p>
