@@ -4,6 +4,7 @@ import { specialOfferService } from '@/services/specialOfferService';
 import { heroImageService } from '@/services/heroImageService';
 import { testimonialService } from '@/services/testimonialService';
 import { contactInfoService } from '@/services/contactInfoService';
+import { imageService } from '@/services/imageService';
 import FlightSearchForm from '@/components/FlightSearchForm';
 import HotelsSearchForm from '@/components/HotelsSearchForm';
 import VisasSearchForm from '@/components/VisasSearchForm';
@@ -440,10 +441,20 @@ export default function Home() {
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#003d82', marginBottom: '30px', textAlign: 'center' }}>🛂 Visa Services</h3>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
-                        {['Schengen Visa', 'India Visa', 'USA ESTA', 'Canada ETA'].map((visa, idx) => (
-                            <div key={idx} style={{ padding: '40px 24px', background: '#f0f4ff', borderRadius: '10px', border: '1.5px solid #d4dff5', textAlign: 'center', transition: 'all 0.3s', cursor: 'pointer' }} onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,102,204,.15)'; e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = '#e8f0ff'; }} onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = '#f0f4ff'; }}>
-                                <div style={{ fontSize: '40px', marginBottom: '16px' }}>📋</div>
-                                <p style={{ fontSize: '15px', fontWeight: 600, color: '#003d82', margin: 0, lineHeight: 1.4 }}>{visa}</p>
+                        {[
+                            { name: 'Schengen Visa', img: 'schengen.jpg', icon: '📋' },
+                            { name: 'India Visa', img: 'india.jpg', icon: '📋' },
+                            { name: 'USA ESTA', img: 'usa.jpg', icon: '📋' },
+                            { name: 'Canada ETA', img: 'canada.jpg', icon: '📋' }
+                        ].map((visa, idx) => (
+                            <div key={idx} style={{ padding: '20px', background: '#f0f4ff', borderRadius: '10px', border: '1.5px solid #d4dff5', textAlign: 'center', transition: 'all 0.3s', cursor: 'pointer', overflow: 'hidden' }} onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,102,204,.15)'; e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = '#e8f0ff'; }} onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = '#f0f4ff'; }}>
+                                <ImageWithFallback
+                                    src={imageService.getImagePath('visas', visa.img)}
+                                    alt={visa.name}
+                                    fallbackSrc={imageService.getFallbackImage('gallery')}
+                                    style={{ width: '100%', height: '160px', objectFit: 'cover', borderRadius: '8px', marginBottom: '12px' }}
+                                />
+                                <p style={{ fontSize: '15px', fontWeight: 600, color: '#003d82', margin: 0, lineHeight: 1.4 }}>{visa.name}</p>
                             </div>
                         ))}
                     </div>
@@ -455,10 +466,20 @@ export default function Home() {
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#003d82', marginBottom: '30px', textAlign: 'center' }}>📦 Travel Packages</h3>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
-                        {['Honeymoon Package', 'Family Tour', 'Adventure Trip', 'Beach Retreat'].map((pkg, idx) => (
-                            <div key={idx} style={{ padding: '40px 24px', background: '#fff8f0', borderRadius: '10px', border: '1.5px solid #f5d9c3', textAlign: 'center', transition: 'all 0.3s', cursor: 'pointer' }} onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 8px 16px rgba(255,107,53,.15)'; e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = '#fffaf5'; }} onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = '#fff8f0'; }}>
-                                <div style={{ fontSize: '40px', marginBottom: '16px' }}>✈️</div>
-                                <p style={{ fontSize: '15px', fontWeight: 600, color: '#003d82', margin: 0, lineHeight: 1.4 }}>{pkg}</p>
+                        {[
+                            { name: 'Honeymoon Package', img: 'honeymoon.jpg', icon: '✈️' },
+                            { name: 'Family Tour', img: 'family.jpg', icon: '✈️' },
+                            { name: 'Adventure Trip', img: 'adventure.jpg', icon: '✈️' },
+                            { name: 'Beach Retreat', img: 'beach.jpg', icon: '✈️' }
+                        ].map((pkg, idx) => (
+                            <div key={idx} style={{ padding: '20px', background: '#fff8f0', borderRadius: '10px', border: '1.5px solid #f5d9c3', textAlign: 'center', transition: 'all 0.3s', cursor: 'pointer', overflow: 'hidden' }} onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 8px 16px rgba(255,107,53,.15)'; e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = '#fffaf5'; }} onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = '#fff8f0'; }}>
+                                <ImageWithFallback
+                                    src={imageService.getImagePath('packages', pkg.img)}
+                                    alt={pkg.name}
+                                    fallbackSrc={imageService.getFallbackImage('gallery')}
+                                    style={{ width: '100%', height: '160px', objectFit: 'cover', borderRadius: '8px', marginBottom: '12px' }}
+                                />
+                                <p style={{ fontSize: '15px', fontWeight: 600, color: '#003d82', margin: 0, lineHeight: 1.4 }}>{pkg.name}</p>
                             </div>
                         ))}
                     </div>
