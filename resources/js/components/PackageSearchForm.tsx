@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { router } from '@inertiajs/react';
 import CalendarDateRangePicker from '@/components/CalendarDateRangePicker';
+import BookingModal from '@/components/BookingModal';
 
 export default function PackageSearchForm(): React.ReactElement {
     const [hotelCity, setHotelCity] = useState('');
@@ -11,8 +12,10 @@ export default function PackageSearchForm(): React.ReactElement {
     const [nights, setNights] = useState(7);
     const [showNightsDropdown, setShowNightsDropdown] = useState(false);
     const [showCheckInCalendar, setShowCheckInCalendar] = useState(false);
-    const [adults] = useState(1);
-    const [rooms] = useState(1);
+    const [adults, setAdults] = useState(1);
+    const [rooms, setRooms] = useState(1);
+    const [showGuestModal, setShowGuestModal] = useState(false);
+    const [showBookingModal, setShowBookingModal] = useState(false);
 
     const weeklyOptions = [7, 14, 21, 28];
     const dailyOptions = [2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -63,14 +66,17 @@ export default function PackageSearchForm(): React.ReactElement {
             return;
         }
 
-        router.post('/search/package', {
-            hotelCity,
-            departureAirport,
-            checkInDate,
-            checkOutDate,
-            adults,
-            rooms,
-        });
+        setShowBookingModal(true);
+    };
+
+    const handleCloseBookingModal = () => {
+        setShowBookingModal(false);
+        setHotelCity('');
+        setDepartureAirport('');
+        setCheckInDate('');
+        setAdults(1);
+        setRooms(1);
+        setNights(7);
     };
 
     return (
@@ -262,7 +268,9 @@ export default function PackageSearchForm(): React.ReactElement {
                 {/* Guests and Rooms */}
                 <div style={{ position: 'relative', width: '100%' }}>
                     <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Guests & Rooms</label>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '54px', border: '1.5px solid #ddd', borderRadius: '10px', background: '#fff', padding: '0 16px', cursor: 'pointer', transition: 'border-color 0.3s' }}
+                    <div
+                        onClick={() => setShowGuestModal(!showGuestModal)}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '54px', border: '1.5px solid #ddd', borderRadius: '10px', background: '#fff', padding: '0 16px', cursor: 'pointer', transition: 'border-color 0.3s' }}
                         onMouseEnter={(e) => e.currentTarget.style.borderColor = '#ccc'}
                         onMouseLeave={(e) => e.currentTarget.style.borderColor = '#ddd'}
                     >
@@ -270,7 +278,61 @@ export default function PackageSearchForm(): React.ReactElement {
                             <i className="fa fa-users" style={{ marginRight: '8px', color: '#0066cc' }}></i>
                             {adults} Adult{adults !== 1 ? 's' : ''} • {rooms} Room{rooms !== 1 ? 's' : ''}
                         </div>
+                        <i className="fa fa-chevron-down" style={{ fontSize: '12px', color: '#999' }}></i>
                     </div>
+
+                    {/* Guest & Room Selector Modal */}
+                    {showGuestModal && (
+                        <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '6px', background: '#fff', borderRadius: '8px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, minWidth: '300px', padding: '20px' }}>
+                            {/* Adults Selection */}
+                            <div style={{ marginBottom: '20px' }}>
+                                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#333', marginBottom: '10px' }}>Adults</label>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <button
+                                        onClick={() => setAdults(Math.max(1, adults - 1))}
+                                        style={{ width: '36px', height: '36px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff', cursor: 'pointer', fontSize: '16px', fontWeight: 600, color: '#333' }}
+                                    >
+                                        −
+                                    </button>
+                                    <span style={{ flex: 1, textAlign: 'center', fontSize: '16px', fontWeight: 600 }}>{adults}</span>
+                                    <button
+                                        onClick={() => setAdults(Math.min(8, adults + 1))}
+                                        style={{ width: '36px', height: '36px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff', cursor: 'pointer', fontSize: '16px', fontWeight: 600, color: '#333' }}
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Rooms Selection */}
+                            <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #eee' }}>
+                                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#333', marginBottom: '10px' }}>Rooms</label>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <button
+                                        onClick={() => setRooms(Math.max(1, rooms - 1))}
+                                        style={{ width: '36px', height: '36px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff', cursor: 'pointer', fontSize: '16px', fontWeight: 600, color: '#333' }}
+                                    >
+                                        −
+                                    </button>
+                                    <span style={{ flex: 1, textAlign: 'center', fontSize: '16px', fontWeight: 600 }}>{rooms}</span>
+                                    <button
+                                        onClick={() => setRooms(Math.min(8, rooms + 1))}
+                                        style={{ width: '36px', height: '36px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff', cursor: 'pointer', fontSize: '16px', fontWeight: 600, color: '#333' }}
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Close Button */}
+                            <button
+                                onClick={() => setShowGuestModal(false)}
+                                style={{ width: '100%', padding: '10px', background: '#0066cc', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+                            >
+                                Done
+                            </button>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -314,6 +376,22 @@ export default function PackageSearchForm(): React.ReactElement {
                     SEARCH
                 </button>
             </div>
+
+            {/* Booking Modal */}
+            <BookingModal
+                isOpen={showBookingModal}
+                onClose={handleCloseBookingModal}
+                searchDetails={{
+                    hotelCity,
+                    departureAirport,
+                    checkInDate,
+                    checkOutDate,
+                    nights,
+                    adults,
+                    rooms,
+                }}
+                serviceType="package"
+            />
         </div>
     );
 }
