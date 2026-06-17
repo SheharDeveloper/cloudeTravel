@@ -489,43 +489,6 @@ export default function Home() {
             {/* AIRLINE LOGO SLIDER SECTION */}
             <AirlineLogoSlider />
 
-            {/* VISA & OTHER SERVICES SECTION */}
-            <section style={{ padding: '60px 40px', background: '#f5f5f5' }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '60px' }}>
-                        {/* Visa Services */}
-                        <div>
-                            <h3 style={{ fontSize: '28px', fontWeight: 700, color: '#ff6b35', marginBottom: '30px' }}>Visa Services</h3>
-                            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                                {['Schengen Visa', 'India Visa', 'USA ESTA', 'Canada ETA', 'Sri Lanka Visa', 'Turkey Visa', 'Dubai Visa'].map((visa, idx) => (
-                                    <li key={idx} style={{ padding: '15px 0', borderBottom: '1px solid #ddd', color: '#333', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                        <i className="fa fa-check" style={{ color: '#ff6b35', fontSize: '14px', fontWeight: 'bold' }}></i>
-                                        {visa}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-
-                        {/* Other Services */}
-                        <div>
-                            <h3 style={{ fontSize: '28px', fontWeight: 700, color: '#ff6b35', marginBottom: '30px' }}>Other Services</h3>
-                            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                                {['New Indian Passport', 'Passport Renewal', 'Indian Passport Surrender', 'New OCI', 'OCI Update', 'PAN Card Service'].map((service, idx) => (
-                                    <li key={idx} style={{ padding: '15px 0', borderBottom: '1px solid #ddd', color: '#333', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                        <i className="fa fa-check" style={{ color: '#ff6b35', fontSize: '14px', fontWeight: 'bold' }}></i>
-                                        {service}
-                                    </li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div style={{ background: '#fff', padding: '20px 30px', borderRadius: '4px', marginTop: '40px', fontSize: '13px', color: '#666' }}>
-                        <p style={{ margin: 0 }}><strong>Note:</strong> We provide visa assistance for Indian passport holders for Canada, USA (American and Schengen countries.</p>
-                    </div>
-                </div>
-            </section>
-
             {/* CONTACT FORM SECTION */}
             <section className="contact-section" style={{ padding: '50px 40px', background: '#fff' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
