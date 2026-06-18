@@ -303,7 +303,7 @@ export default function AirportTransportForm(): React.ReactElement {
 
                     {/* Return Row 1: Return Locations */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
-                        {/* Return Pickup Location */}
+                        {/* Return Pickup Location - Auto-filled from outbound drop-off */}
                         <div style={{ position: 'relative', width: '100%' }}>
                             <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Return Pick-up Location</label>
                             <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
@@ -312,13 +312,15 @@ export default function AirportTransportForm(): React.ReactElement {
                             <input
                                 type="text"
                                 placeholder='Return pick-up location'
-                                value={returnPickupLocation}
+                                value={returnPickupLocation || destinationLocation}
                                 onChange={(e) => setReturnPickupLocation(e.target.value)}
-                                style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '14px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s' }}
+                                disabled={!destinationLocation}
+                                style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '14px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s', backgroundColor: !destinationLocation ? '#f9f9f9' : '#fff', cursor: !destinationLocation ? 'not-allowed' : 'text' }}
                             />
+                            {!destinationLocation && <span style={{ fontSize: '11px', color: '#999' }}>Select drop-off location first</span>}
                         </div>
 
-                        {/* Return Drop-off Location */}
+                        {/* Return Drop-off Location - Auto-filled from outbound pickup */}
                         <div style={{ position: 'relative', width: '100%' }}>
                             <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Return Drop-off Location</label>
                             <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
@@ -327,10 +329,12 @@ export default function AirportTransportForm(): React.ReactElement {
                             <input
                                 type="text"
                                 placeholder='Return drop-off location'
-                                value={returnDestinationLocation}
+                                value={returnDestinationLocation || pickupAirport}
                                 onChange={(e) => setReturnDestinationLocation(e.target.value)}
-                                style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '14px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s' }}
+                                disabled={!pickupAirport}
+                                style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '14px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s', backgroundColor: !pickupAirport ? '#f9f9f9' : '#fff', cursor: !pickupAirport ? 'not-allowed' : 'text' }}
                             />
+                            {!pickupAirport && <span style={{ fontSize: '11px', color: '#999' }}>Select pick-up location first</span>}
                         </div>
                     </div>
 
