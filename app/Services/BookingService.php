@@ -274,8 +274,8 @@ class BookingService
      */
     private function generateAirportTransferNotes(array $searchParams): string
     {
-        return sprintf(
-            'Trip Type: %s, Pickup Airport: %s, Destination: %s, Pickup Date: %s, Pickup Time: %s, Passengers: %d',
+        $notes = sprintf(
+            'Trip Type: %s, Pickup From: %s, Drop-off At: %s, Pickup Date: %s, Pickup Time: %s, Passengers: %d',
             $searchParams['tripType'] ?? 'N/A',
             $searchParams['pickupAirport'] ?? 'N/A',
             $searchParams['destinationLocation'] ?? 'N/A',
@@ -283,5 +283,15 @@ class BookingService
             $searchParams['pickupTime'] ?? 'N/A',
             $searchParams['passengers'] ?? 1
         );
+
+        // Add return trip details if it's a return trip
+        if (($searchParams['tripType'] ?? '') === 'return') {
+            $notes .= ' | Return Trip - Pickup From: ' . ($searchParams['returnPickupLocation'] ?? 'N/A')
+                . ', Drop-off At: ' . ($searchParams['returnDestinationLocation'] ?? 'N/A')
+                . ', Date: ' . ($searchParams['returnDate'] ?? 'N/A')
+                . ', Time: ' . ($searchParams['returnTime'] ?? 'N/A');
+        }
+
+        return $notes;
     }
 }

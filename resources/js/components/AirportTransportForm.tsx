@@ -2,13 +2,17 @@ import { useState } from 'react';
 import BookingModal from '@/components/BookingModal';
 
 export default function AirportTransportForm(): React.ReactElement {
-    const [tripType, setTripType] = useState('from');
+    const [tripType, setTripType] = useState('oneway');
     const [pickupAirport, setPickupAirport] = useState('');
     const [pickupSearch, setPickupSearch] = useState('');
     const [destinationLocation, setDestinationLocation] = useState('');
     const [destinationSearch, setDestinationSearch] = useState('');
     const [pickupDate, setPickupDate] = useState('');
     const [pickupTime, setPickupTime] = useState('12:00');
+    const [returnDate, setReturnDate] = useState('');
+    const [returnTime, setReturnTime] = useState('12:00');
+    const [returnPickupLocation, setReturnPickupLocation] = useState('');
+    const [returnDestinationLocation, setReturnDestinationLocation] = useState('');
     const [passengers, setPassengers] = useState(1);
     const [showPickupDropdown, setShowPickupDropdown] = useState(false);
     const [showDestinationDropdown, setShowDestinationDropdown] = useState(false);
@@ -66,6 +70,10 @@ export default function AirportTransportForm(): React.ReactElement {
         setDestinationLocation('');
         setPickupDate('');
         setPickupTime('12:00');
+        setReturnDate('');
+        setReturnTime('12:00');
+        setReturnPickupLocation('');
+        setReturnDestinationLocation('');
         setPassengers(1);
     };
 
@@ -74,11 +82,11 @@ export default function AirportTransportForm(): React.ReactElement {
             {/* Trip Type Toggle */}
             <div style={{ display: 'flex', gap: '10px', marginBottom: '16px', paddingBottom: '0px', borderBottom: 'none' }}>
                 <button
-                    onClick={() => setTripType('from')}
+                    onClick={() => setTripType('oneway')}
                     style={{
-                        background: tripType === 'from' ? '#e8f1ff' : '#fff',
-                        color: tripType === 'from' ? '#0066cc' : '#666',
-                        border: `2px solid ${tripType === 'from' ? '#0066cc' : '#ddd'}`,
+                        background: tripType === 'oneway' ? '#e8f1ff' : '#fff',
+                        color: tripType === 'oneway' ? '#0066cc' : '#666',
+                        border: `2px solid ${tripType === 'oneway' ? '#0066cc' : '#ddd'}`,
                         padding: '10px 28px',
                         borderRadius: '24px',
                         fontSize: '14px',
@@ -87,7 +95,7 @@ export default function AirportTransportForm(): React.ReactElement {
                         transition: 'all 0.3s ease'
                     }}
                     onMouseEnter={(e) => {
-                        if (tripType !== 'from') {
+                        if (tripType !== 'oneway') {
                             e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
                             e.currentTarget.style.transform = 'translateY(-2px)';
                         }
@@ -97,14 +105,14 @@ export default function AirportTransportForm(): React.ReactElement {
                         e.currentTarget.style.transform = 'translateY(0)';
                     }}
                 >
-                    From airport
+                    One Way
                 </button>
                 <button
-                    onClick={() => setTripType('to')}
+                    onClick={() => setTripType('return')}
                     style={{
-                        background: tripType === 'to' ? '#e8f1ff' : '#fff',
-                        color: tripType === 'to' ? '#0066cc' : '#666',
-                        border: `2px solid ${tripType === 'to' ? '#0066cc' : '#ddd'}`,
+                        background: tripType === 'return' ? '#e8f1ff' : '#fff',
+                        color: tripType === 'return' ? '#0066cc' : '#666',
+                        border: `2px solid ${tripType === 'return' ? '#0066cc' : '#ddd'}`,
                         padding: '10px 28px',
                         borderRadius: '24px',
                         fontSize: '14px',
@@ -113,7 +121,7 @@ export default function AirportTransportForm(): React.ReactElement {
                         transition: 'all 0.3s ease'
                     }}
                     onMouseEnter={(e) => {
-                        if (tripType !== 'to') {
+                        if (tripType !== 'return') {
                             e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
                             e.currentTarget.style.transform = 'translateY(-2px)';
                         }
@@ -123,7 +131,7 @@ export default function AirportTransportForm(): React.ReactElement {
                         e.currentTarget.style.transform = 'translateY(0)';
                     }}
                 >
-                    To airport
+                    Return
                 </button>
             </div>
 
@@ -132,14 +140,14 @@ export default function AirportTransportForm(): React.ReactElement {
                 {/* Pickup Airport */}
                 <div style={{ position: 'relative', width: '100%' }}>
                     <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>
-                        {tripType === 'from' ? 'Pick-up airport' : 'Drop-off airport'}
+                        Pick-up Location
                     </label>
                     <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-plane"></i>
                     </div>
                     <input
                         type="text"
-                        placeholder={tripType === 'from' ? 'Pick-up airport' : 'Drop-off airport'}
+                        placeholder='Pick-up location'
                         value={pickupAirport ? `${airportList.find(a => a.code === pickupAirport)?.code} - ${airportList.find(a => a.code === pickupAirport)?.name}` : pickupSearch}
                         onChange={(e) => {
                             setPickupSearch(e.target.value);
@@ -174,17 +182,17 @@ export default function AirportTransportForm(): React.ReactElement {
                     )}
                 </div>
 
-                {/* Destination Location */}
+                {/* Drop-off Location */}
                 <div style={{ position: 'relative', width: '100%' }}>
                     <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>
-                        {tripType === 'from' ? 'Destination location' : 'Pickup location'}
+                        Drop-off Location
                     </label>
                     <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-map-marker"></i>
                     </div>
                     <input
                         type="text"
-                        placeholder={tripType === 'from' ? 'Destination location' : 'Pickup location'}
+                        placeholder='Drop-off location'
                         value={destinationLocation || destinationSearch}
                         onChange={(e) => {
                             setDestinationSearch(e.target.value);
@@ -288,6 +296,77 @@ export default function AirportTransportForm(): React.ReactElement {
                 </div>
             </div>
 
+            {/* Return Trip Section - Only show for Return trips */}
+            {tripType === 'return' && (
+                <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '2px solid #f0f0f0' }}>
+                    <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#003d82', marginBottom: '16px' }}>Return Trip</h4>
+
+                    {/* Return Row 1: Return Locations */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
+                        {/* Return Pickup Location */}
+                        <div style={{ position: 'relative', width: '100%' }}>
+                            <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Return Pick-up Location</label>
+                            <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                                <i className="fa fa-map-marker"></i>
+                            </div>
+                            <input
+                                type="text"
+                                placeholder='Return pick-up location'
+                                value={returnPickupLocation}
+                                onChange={(e) => setReturnPickupLocation(e.target.value)}
+                                style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '14px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s' }}
+                            />
+                        </div>
+
+                        {/* Return Drop-off Location */}
+                        <div style={{ position: 'relative', width: '100%' }}>
+                            <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Return Drop-off Location</label>
+                            <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                                <i className="fa fa-map-marker"></i>
+                            </div>
+                            <input
+                                type="text"
+                                placeholder='Return drop-off location'
+                                value={returnDestinationLocation}
+                                onChange={(e) => setReturnDestinationLocation(e.target.value)}
+                                style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '14px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s' }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Return Row 2: Return Date & Time */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
+                        {/* Return Date */}
+                        <div style={{ position: 'relative', width: '100%' }}>
+                            <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Return Date</label>
+                            <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                                <i className="fa fa-calendar"></i>
+                            </div>
+                            <input
+                                type="date"
+                                value={returnDate}
+                                onChange={(e) => setReturnDate(e.target.value)}
+                                style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '13px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s', cursor: 'pointer' }}
+                            />
+                        </div>
+
+                        {/* Return Time */}
+                        <div style={{ position: 'relative', width: '100%' }}>
+                            <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Return Pick-up Time</label>
+                            <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                                <i className="fa fa-clock-o"></i>
+                            </div>
+                            <input
+                                type="time"
+                                value={returnTime}
+                                onChange={(e) => setReturnTime(e.target.value)}
+                                style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '13px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s', cursor: 'pointer' }}
+                            />
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Search Button */}
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                 <button
@@ -339,6 +418,10 @@ export default function AirportTransportForm(): React.ReactElement {
                     destinationLocation,
                     pickupDate,
                     pickupTime,
+                    returnDate: tripType === 'return' ? returnDate : undefined,
+                    returnTime: tripType === 'return' ? returnTime : undefined,
+                    returnPickupLocation: tripType === 'return' ? returnPickupLocation : undefined,
+                    returnDestinationLocation: tripType === 'return' ? returnDestinationLocation : undefined,
                     passengers,
                 }}
                 serviceType="airport-transfer"
