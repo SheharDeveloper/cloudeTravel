@@ -71,7 +71,7 @@ class BookingService
     {
         $data = [
             'service' => 'flight',
-            'name' => $this->formatName($formData['firstName'], $formData['lastName']),
+            'name' => $this->formatName($formData['firstName'], $formData['lastName'] ?? null),
             'email' => $formData['email'],
             'phone' => $formData['phone'] ?? null,
             'country' => $searchParams['fromCity'] ?? null,
@@ -96,7 +96,7 @@ class BookingService
     {
         $data = [
             'service' => 'hotel',
-            'name' => $this->formatName($formData['firstName'], $formData['lastName']),
+            'name' => $this->formatName($formData['firstName'], $formData['lastName'] ?? null),
             'email' => $formData['email'],
             'phone' => $formData['phone'] ?? null,
             'country' => $searchParams['city'] ?? null,
@@ -120,7 +120,7 @@ class BookingService
     {
         $data = [
             'service' => 'visa',
-            'name' => $this->formatName($formData['firstName'], $formData['lastName']),
+            'name' => $this->formatName($formData['firstName'], $formData['lastName'] ?? null),
             'email' => $formData['email'],
             'phone' => $formData['phone'] ?? null,
             'country' => $searchParams['destination'] ?? null,
@@ -209,8 +209,9 @@ class BookingService
     /**
      * Format full name from first and last name
      */
-    private function formatName(string $firstName, string $lastName): string
+    private function formatName(string $firstName, ?string $lastName = null): string
     {
+        $lastName = $lastName ?? '';
         return trim("{$firstName} {$lastName}");
     }
 
