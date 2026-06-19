@@ -277,7 +277,7 @@ export default function PackageSearchForm(): React.ReactElement {
                     >
                         <div style={{ fontSize: '13px', color: '#333', fontWeight: 600 }}>
                             <i className="fa fa-users" style={{ marginRight: '8px', color: '#0066cc' }}></i>
-                            {adults} Adult{adults !== 1 ? 's' : ''} {children > 0 && `• ${children} Child${children !== 1 ? 'ren' : ''}`} • {rooms} Room{rooms !== 1 ? 's' : ''}
+                            {adults} Adult{adults !== 1 ? 's' : ''} • {children} Child{children !== 1 ? 'ren' : ''} • {rooms} Room{rooms !== 1 ? 's' : ''}
                         </div>
                         <i className="fa fa-chevron-down" style={{ fontSize: '12px', color: '#999' }}></i>
                     </div>
