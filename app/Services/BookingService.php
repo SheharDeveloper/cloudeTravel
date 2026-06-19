@@ -260,11 +260,12 @@ class BookingService
     private function generatePackageNotes(array $searchParams): string
     {
         return sprintf(
-            'Hotel City: %s, Departure Airport: %s, Nights: %d, Adults: %d, Rooms: %d',
+            'Hotel City: %s, Departure Airport: %s, Nights: %d, Adults: %d, Children: %d, Rooms: %d',
             $searchParams['hotelCity'] ?? 'N/A',
             $searchParams['departureAirport'] ?? 'N/A',
             $searchParams['nights'] ?? 0,
             $searchParams['adults'] ?? 1,
+            $searchParams['children'] ?? 0,
             $searchParams['rooms'] ?? 1
         );
     }

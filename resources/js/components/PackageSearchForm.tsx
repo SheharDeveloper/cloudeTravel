@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { router } from '@inertiajs/react';
 import CalendarDateRangePicker from '@/components/CalendarDateRangePicker';
 import BookingModal from '@/components/BookingModal';
 
@@ -13,6 +12,7 @@ export default function PackageSearchForm(): React.ReactElement {
     const [showNightsDropdown, setShowNightsDropdown] = useState(false);
     const [showCheckInCalendar, setShowCheckInCalendar] = useState(false);
     const [adults, setAdults] = useState(1);
+    const [children, setChildren] = useState(0);
     const [rooms, setRooms] = useState(1);
     const [showGuestModal, setShowGuestModal] = useState(false);
     const [showBookingModal, setShowBookingModal] = useState(false);
@@ -54,7 +54,7 @@ export default function PackageSearchForm(): React.ReactElement {
 
     const filterHotels = (search: string) => {
         if (!search) return hotelList;
-        return hotelList.filter(h =>
+        return hotelList.filter((h: any) =>
             h.code.toLowerCase().includes(search.toLowerCase()) ||
             h.name.toLowerCase().includes(search.toLowerCase())
         );
@@ -75,6 +75,7 @@ export default function PackageSearchForm(): React.ReactElement {
         setDepartureAirport('');
         setCheckInDate('');
         setAdults(1);
+        setChildren(0);
         setRooms(1);
         setNights(7);
     };
@@ -276,7 +277,7 @@ export default function PackageSearchForm(): React.ReactElement {
                     >
                         <div style={{ fontSize: '13px', color: '#333', fontWeight: 600 }}>
                             <i className="fa fa-users" style={{ marginRight: '8px', color: '#0066cc' }}></i>
-                            {adults} Adult{adults !== 1 ? 's' : ''} • {rooms} Room{rooms !== 1 ? 's' : ''}
+                            {adults} Adult{adults !== 1 ? 's' : ''} {children > 0 && `• ${children} Child${children !== 1 ? 'ren' : ''}`} • {rooms} Room{rooms !== 1 ? 's' : ''}
                         </div>
                         <i className="fa fa-chevron-down" style={{ fontSize: '12px', color: '#999' }}></i>
                     </div>
@@ -297,6 +298,26 @@ export default function PackageSearchForm(): React.ReactElement {
                                     <span style={{ flex: 1, textAlign: 'center', fontSize: '16px', fontWeight: 600 }}>{adults}</span>
                                     <button
                                         onClick={() => setAdults(Math.min(8, adults + 1))}
+                                        style={{ width: '36px', height: '36px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff', cursor: 'pointer', fontSize: '16px', fontWeight: 600, color: '#333' }}
+                                    >
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Children Selection */}
+                            <div style={{ marginBottom: '20px' }}>
+                                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#333', marginBottom: '10px' }}>Children (Age 0-12)</label>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                    <button
+                                        onClick={() => setChildren(Math.max(0, children - 1))}
+                                        style={{ width: '36px', height: '36px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff', cursor: 'pointer', fontSize: '16px', fontWeight: 600, color: '#333' }}
+                                    >
+                                        −
+                                    </button>
+                                    <span style={{ flex: 1, textAlign: 'center', fontSize: '16px', fontWeight: 600 }}>{children}</span>
+                                    <button
+                                        onClick={() => setChildren(Math.min(6, children + 1))}
                                         style={{ width: '36px', height: '36px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff', cursor: 'pointer', fontSize: '16px', fontWeight: 600, color: '#333' }}
                                     >
                                         +
@@ -388,6 +409,7 @@ export default function PackageSearchForm(): React.ReactElement {
                     checkOutDate,
                     nights,
                     adults,
+                    children,
                     rooms,
                 }}
                 serviceType="package"
