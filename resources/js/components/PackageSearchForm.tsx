@@ -3,10 +3,9 @@ import CalendarDateRangePicker from '@/components/CalendarDateRangePicker';
 import BookingModal from '@/components/BookingModal';
 
 export default function PackageSearchForm(): React.ReactElement {
-    const [hotelCity, setHotelCity] = useState('');
-    const [hotelSearch, setHotelSearch] = useState('');
-    const [showHotelDropdown, setShowHotelDropdown] = useState(false);
-    const [departureAirport, setDepartureAirport] = useState('');
+    const [selectedCountry, setSelectedCountry] = useState('');
+    const [selectedCity, setSelectedCity] = useState('');
+    const [selectedAirport, setSelectedAirport] = useState('');
     const [checkInDate, setCheckInDate] = useState('');
     const [nights, setNights] = useState(7);
     const [showNightsDropdown, setShowNightsDropdown] = useState(false);
@@ -16,6 +15,13 @@ export default function PackageSearchForm(): React.ReactElement {
     const [rooms, setRooms] = useState(1);
     const [showGuestModal, setShowGuestModal] = useState(false);
     const [showBookingModal, setShowBookingModal] = useState(false);
+    const [flexibleDays, setFlexibleDays] = useState(0);
+    const [countrySearch, setCountrySearch] = useState('');
+    const [citySearch, setCitySearch] = useState('');
+    const [airportSearch, setAirportSearch] = useState('');
+    const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+    const [showCityDropdown, setShowCityDropdown] = useState(false);
+    const [showAirportDropdown, setShowAirportDropdown] = useState(false);
 
     const weeklyOptions = [7, 14, 21, 28];
     const dailyOptions = [2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -30,38 +36,73 @@ export default function PackageSearchForm(): React.ReactElement {
 
     const checkOutDate = calculateCheckoutDate();
 
-    const hotelList = [
-        { code: 'LON', name: 'London' },
-        { code: 'DEL', name: 'Delhi' },
-        { code: 'BOM', name: 'Mumbai' },
-        { code: 'NYC', name: 'New York' },
-        { code: 'LAX', name: 'Los Angeles' },
-        { code: 'CDG', name: 'Paris' },
-        { code: 'DXB', name: 'Dubai' },
-        { code: 'SIN', name: 'Singapore' },
+    const countryData = [
+        {
+            code: 'UK',
+            name: 'United Kingdom',
+            cities: [
+                { code: 'LON', name: 'London', airports: [{ code: 'LHR', name: 'London Heathrow' }, { code: 'LGW', name: 'London Gatwick' }] },
+                { code: 'MAN', name: 'Manchester', airports: [{ code: 'MAN', name: 'Manchester Airport' }] },
+            ]
+        },
+        {
+            code: 'IN',
+            name: 'India',
+            cities: [
+                { code: 'DEL', name: 'Delhi', airports: [{ code: 'DEL', name: 'Indira Gandhi International' }] },
+                { code: 'BOM', name: 'Mumbai', airports: [{ code: 'BOM', name: 'Bombay International' }] },
+            ]
+        },
+        {
+            code: 'US',
+            name: 'United States',
+            cities: [
+                { code: 'NYC', name: 'New York', airports: [{ code: 'JFK', name: 'John F. Kennedy' }, { code: 'LGA', name: 'LaGuardia' }] },
+                { code: 'LAX', name: 'Los Angeles', airports: [{ code: 'LAX', name: 'Los Angeles International' }] },
+            ]
+        },
+        {
+            code: 'FR',
+            name: 'France',
+            cities: [
+                { code: 'PAR', name: 'Paris', airports: [{ code: 'CDG', name: 'Charles de Gaulle' }, { code: 'ORY', name: 'Orly' }] },
+            ]
+        },
+        {
+            code: 'AE',
+            name: 'United Arab Emirates',
+            cities: [
+                { code: 'DXB', name: 'Dubai', airports: [{ code: 'DXB', name: 'Dubai International' }] },
+            ]
+        },
+        {
+            code: 'SG',
+            name: 'Singapore',
+            cities: [
+                { code: 'SIN', name: 'Singapore', airports: [{ code: 'SIN', name: 'Changi Airport' }] },
+            ]
+        },
     ];
 
-    const airportList = [
-        { code: 'LON', name: 'London' },
-        { code: 'NYC', name: 'New York' },
-        { code: 'LAX', name: 'Los Angeles' },
-        { code: 'CDG', name: 'Paris' },
-        { code: 'DXB', name: 'Dubai' },
-        { code: 'SIN', name: 'Singapore' },
-        { code: 'HND', name: 'Tokyo' },
-        { code: 'BOM', name: 'Mumbai' },
-    ];
+    const getCitiesForCountry = (countryCode: string) => {
+        const country = countryData.find(c => c.code === countryCode);
+        return country ? country.cities : [];
+    };
 
-    const filterHotels = (search: string) => {
-        if (!search) return hotelList;
-        return hotelList.filter((h: any) =>
-            h.code.toLowerCase().includes(search.toLowerCase()) ||
-            h.name.toLowerCase().includes(search.toLowerCase())
-        );
+    const getAllAirports = () => {
+        const airports: any[] = [];
+        countryData.forEach(country => {
+            country.cities.forEach(city => {
+                city.airports.forEach(airport => {
+                    airports.push(airport);
+                });
+            });
+        });
+        return airports;
     };
 
     const handleSearch = () => {
-        if (!hotelCity || !departureAirport || !checkInDate || !checkOutDate) {
+        if (!selectedCountry || !selectedCity || !selectedAirport || !checkInDate || !checkOutDate) {
             alert('Please fill in all required fields');
             return;
         }
@@ -71,84 +112,157 @@ export default function PackageSearchForm(): React.ReactElement {
 
     const handleCloseBookingModal = () => {
         setShowBookingModal(false);
-        setHotelCity('');
-        setDepartureAirport('');
+        setSelectedCountry('');
+        setSelectedCity('');
+        setSelectedAirport('');
         setCheckInDate('');
         setAdults(1);
         setChildren(0);
         setRooms(1);
         setNights(7);
+        setFlexibleDays(0);
+        setCountrySearch('');
+        setCitySearch('');
+        setAirportSearch('');
+        setShowCountryDropdown(false);
+        setShowCityDropdown(false);
+        setShowAirportDropdown(false);
     };
 
     return (
         <div>
-            {/* Row 1: Destination, Airport, Check-in */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1.2fr 1.2fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
-                {/* Destination */}
+            {/* Row 1: Country, City */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
+                {/* Country Selector - Searchable */}
                 <div style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Destination or Hotel</label>
+                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Country</label>
                     <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '16px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
-                        <i className="fa fa-building"></i>
+                        <i className="fa fa-globe"></i>
                     </div>
                     <input
                         type="text"
-                        placeholder="Enter destination"
-                        value={hotelSearch || (hotelCity ? `${hotelList.find(h => h.code === hotelCity)?.name}` : '')}
+                        placeholder="Search country..."
+                        value={countrySearch || (selectedCountry ? countryData.find(c => c.code === selectedCountry)?.name || '' : '')}
                         onChange={(e) => {
-                            setHotelSearch(e.target.value);
-                            setHotelCity('');
-                            setShowHotelDropdown(true);
+                            setCountrySearch(e.target.value);
+                            setSelectedCountry('');
+                            setSelectedCity('');
+                            setShowCountryDropdown(true);
                         }}
-                        onFocus={() => setShowHotelDropdown(true)}
+                        onFocus={() => setShowCountryDropdown(true)}
                         style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '13px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s' }}
                         onMouseEnter={(e) => e.currentTarget.style.borderColor = '#ccc'}
                         onMouseLeave={(e) => e.currentTarget.style.borderColor = '#ddd'}
                     />
-                    {showHotelDropdown && (
-                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '200px', overflowY: 'auto' }}>
-                            {filterHotels(hotelSearch).map(hotel => (
+                    {showCountryDropdown && (
+                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '250px', overflowY: 'auto' }}>
+                            {countryData.filter(c => c.name.toLowerCase().includes(countrySearch.toLowerCase())).map(country => (
                                 <div
-                                    key={hotel.code}
+                                    key={country.code}
                                     onClick={() => {
-                                        setHotelCity(hotel.code);
-                                        setHotelSearch('');
-                                        setShowHotelDropdown(false);
+                                        setSelectedCountry(country.code);
+                                        setCountrySearch('');
+                                        setShowCountryDropdown(false);
+                                        setSelectedCity('');
                                     }}
                                     style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#333', transition: 'background 0.2s' }}
                                     onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
                                     onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
                                 >
-                                    <strong>{hotel.code}</strong> - {hotel.name}
+                                    {country.name}
                                 </div>
                             ))}
                         </div>
                     )}
                 </div>
 
-                {/* Departure Airport */}
+                {/* City Selector - Searchable */}
                 <div style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Departure Airport</label>
+                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>City</label>
+                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '16px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                        <i className="fa fa-building"></i>
+                    </div>
+                    <input
+                        type="text"
+                        placeholder={selectedCountry ? "Search city..." : "Select country first"}
+                        value={citySearch || (selectedCity ? getCitiesForCountry(selectedCountry).find(c => c.code === selectedCity)?.name || '' : '')}
+                        onChange={(e) => {
+                            setCitySearch(e.target.value);
+                            setSelectedCity('');
+                            setShowCityDropdown(true);
+                        }}
+                        onFocus={() => selectedCountry && setShowCityDropdown(true)}
+                        disabled={!selectedCountry}
+                        style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '13px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s', opacity: selectedCountry ? 1 : 0.6, cursor: selectedCountry ? 'text' : 'not-allowed' }}
+                        onMouseEnter={(e) => selectedCountry && (e.currentTarget.style.borderColor = '#ccc')}
+                        onMouseLeave={(e) => e.currentTarget.style.borderColor = '#ddd'}
+                    />
+                    {showCityDropdown && selectedCountry && (
+                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '250px', overflowY: 'auto' }}>
+                            {getCitiesForCountry(selectedCountry).filter(c => c.name.toLowerCase().includes(citySearch.toLowerCase())).map(city => (
+                                <div
+                                    key={city.code}
+                                    onClick={() => {
+                                        setSelectedCity(city.code);
+                                        setCitySearch('');
+                                        setShowCityDropdown(false);
+                                    }}
+                                    style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#333', transition: 'background 0.2s' }}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
+                                >
+                                    {city.name}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Row 2: Airport, Check-in Date */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
+                {/* Airport Selector - All Airports, Searchable */}
+                <div style={{ position: 'relative', width: '100%' }}>
+                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Airport</label>
                     <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '16px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-plane"></i>
                     </div>
-                    <select
-                        value={departureAirport}
-                        onChange={(e) => setDepartureAirport(e.target.value)}
-                        style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '13px', height: '54px', boxSizing: 'border-box', backgroundColor: '#fff', cursor: 'pointer', transition: 'border-color 0.3s', appearance: 'none' }}
+                    <input
+                        type="text"
+                        placeholder="Search airport..."
+                        value={airportSearch || (selectedAirport ? getAllAirports().find(a => a.code === selectedAirport)?.code + ' - ' + getAllAirports().find(a => a.code === selectedAirport)?.name || '' : '')}
+                        onChange={(e) => {
+                            setAirportSearch(e.target.value);
+                            setSelectedAirport('');
+                            setShowAirportDropdown(true);
+                        }}
+                        onFocus={() => setShowAirportDropdown(true)}
+                        style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '13px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s' }}
                         onMouseEnter={(e) => e.currentTarget.style.borderColor = '#ccc'}
                         onMouseLeave={(e) => e.currentTarget.style.borderColor = '#ddd'}
-                    >
-                        <option value="">Select airport</option>
-                        {airportList.map(a => (
-                            <option key={a.code} value={a.code}>{a.code} - {a.name}</option>
-                        ))}
-                    </select>
-                    <div style={{ position: 'absolute', right: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '12px', color: '#999', pointerEvents: 'none' }}>
-                        <i className="fa fa-chevron-down"></i>
-                    </div>
+                    />
+                    {showAirportDropdown && (
+                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '250px', overflowY: 'auto' }}>
+                            {getAllAirports().filter(a => a.code.toLowerCase().includes(airportSearch.toLowerCase()) || a.name.toLowerCase().includes(airportSearch.toLowerCase())).map(airport => (
+                                <div
+                                    key={airport.code}
+                                    onClick={() => {
+                                        setSelectedAirport(airport.code);
+                                        setAirportSearch('');
+                                        setShowAirportDropdown(false);
+                                    }}
+                                    style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#333', transition: 'background 0.2s' }}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
+                                >
+                                    <strong>{airport.code}</strong> - {airport.name}
+                                </div>
+                            ))}
+                        </div>
+                    )}
                 </div>
 
-                {/* Check-in Date - Calendar Picker */}
+                {/* Check-in Date */}
                 <div style={{ position: 'relative', width: '100%' }}>
                     <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Check-in Date</label>
                     <div
@@ -188,7 +302,7 @@ export default function PackageSearchForm(): React.ReactElement {
                 </div>
             </div>
 
-            {/* Row 2: Nights, Guests */}
+            {/* Row 3: Nights, Guests */}
             <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.5fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
                 {/* Nights Selector */}
                 <div style={{ position: 'relative', width: '100%' }}>
@@ -357,6 +471,46 @@ export default function PackageSearchForm(): React.ReactElement {
                 </div>
             </div>
 
+            {/* Row 3: Flexible Days Checkboxes */}
+            <div style={{ marginBottom: '20px', padding: '16px', background: '#f9f9f9', borderRadius: '10px' }}>
+                <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '12px', fontWeight: 600 }}>Flexible Dates</label>
+                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#333' }}>
+                        <input
+                            type="radio"
+                            name="flexibleDays"
+                            value="0"
+                            checked={flexibleDays === 0}
+                            onChange={() => setFlexibleDays(0)}
+                            style={{ cursor: 'pointer' }}
+                        />
+                        Exact dates
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#333' }}>
+                        <input
+                            type="radio"
+                            name="flexibleDays"
+                            value="2"
+                            checked={flexibleDays === 2}
+                            onChange={() => setFlexibleDays(2)}
+                            style={{ cursor: 'pointer' }}
+                        />
+                        Flexible +2 days
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#333' }}>
+                        <input
+                            type="radio"
+                            name="flexibleDays"
+                            value="3"
+                            checked={flexibleDays === 3}
+                            onChange={() => setFlexibleDays(3)}
+                            style={{ cursor: 'pointer' }}
+                        />
+                        Flexible +3 days
+                    </label>
+                </div>
+            </div>
+
             {/* Search Button */}
             <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
                 <button
@@ -403,14 +557,16 @@ export default function PackageSearchForm(): React.ReactElement {
                 isOpen={showBookingModal}
                 onClose={handleCloseBookingModal}
                 searchDetails={{
-                    hotelCity,
-                    departureAirport,
+                    selectedCountry,
+                    selectedCity,
+                    selectedAirport,
                     checkInDate,
                     checkOutDate,
                     nights,
                     adults,
                     children,
                     rooms,
+                    flexibleDays,
                 }}
                 serviceType="package"
             />

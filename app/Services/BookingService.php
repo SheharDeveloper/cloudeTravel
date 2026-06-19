@@ -144,14 +144,14 @@ class BookingService
             'name' => $formData['firstName'] ?? 'Guest',
             'email' => $formData['email'],
             'phone' => $formData['phone'] ?? null,
-            'country' => $searchParams['hotelCity'] ?? null,
-            'hotel_city' => $searchParams['hotelCity'] ?? null,
+            'country' => $searchParams['selectedCountry'] ?? null,
+            'hotel_city' => $searchParams['selectedCity'] ?? null,
             'check_in_date' => $searchParams['checkInDate'] ?? null,
             'check_out_date' => $searchParams['checkOutDate'] ?? null,
             'rooms' => $searchParams['rooms'] ?? 1,
             'guests' => $searchParams['adults'] ?? 1,
             'total_members' => $searchParams['adults'] ?? 1,
-            'from_city' => $searchParams['departureAirport'] ?? null,
+            'from_city' => $searchParams['selectedAirport'] ?? null,
             'notes' => $this->generatePackageNotes($searchParams),
             'status' => 'pending',
         ];
@@ -260,13 +260,15 @@ class BookingService
     private function generatePackageNotes(array $searchParams): string
     {
         return sprintf(
-            'Hotel City: %s, Departure Airport: %s, Nights: %d, Adults: %d, Children: %d, Rooms: %d',
-            $searchParams['hotelCity'] ?? 'N/A',
-            $searchParams['departureAirport'] ?? 'N/A',
+            'Country: %s, City: %s, Airport: %s, Nights: %d, Adults: %d, Children: %d, Rooms: %d, Flexible Days: %d',
+            $searchParams['selectedCountry'] ?? 'N/A',
+            $searchParams['selectedCity'] ?? 'N/A',
+            $searchParams['selectedAirport'] ?? 'N/A',
             $searchParams['nights'] ?? 0,
             $searchParams['adults'] ?? 1,
             $searchParams['children'] ?? 0,
-            $searchParams['rooms'] ?? 1
+            $searchParams['rooms'] ?? 1,
+            $searchParams['flexibleDays'] ?? 0
         );
     }
 
