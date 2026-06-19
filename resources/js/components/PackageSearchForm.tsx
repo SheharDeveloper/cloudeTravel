@@ -398,50 +398,6 @@ export default function PackageSearchForm(): React.ReactElement {
                 </button>
             </div>
 
-            {/* Popular Destinations Images */}
-            <div style={{ marginTop: '30px', paddingTop: '20px', borderTop: '1px solid #f0f0f0' }}>
-                <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#003d82', marginBottom: '16px', textAlign: 'center' }}>Popular Destinations</h4>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '16px' }}>
-                    {hotelList.map((destination, idx) => (
-                        <div
-                            key={idx}
-                            onClick={() => setHotelCity(destination.code)}
-                            style={{
-                                cursor: 'pointer',
-                                borderRadius: '8px',
-                                overflow: 'hidden',
-                                border: hotelCity === destination.code ? '3px solid #0066cc' : '2px solid #e0e0e0',
-                                transition: 'all 0.3s',
-                                height: '120px',
-                                background: hotelCity === destination.code ? '#e8f1ff' : '#f9f9f9',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                flexDirection: 'column',
-                                gap: '8px',
-                                padding: '12px',
-                                textAlign: 'center',
-                            }}
-                            onMouseEnter={(e) => {
-                                if (hotelCity !== destination.code) {
-                                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,.1)';
-                                    e.currentTarget.style.transform = 'translateY(-2px)';
-                                }
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.boxShadow = 'none';
-                                e.currentTarget.style.transform = 'translateY(0)';
-                            }}
-                        >
-                            <div style={{ fontSize: '32px' }}>📍</div>
-                            <span style={{ fontSize: '12px', fontWeight: 600, color: hotelCity === destination.code ? '#0066cc' : '#666' }}>
-                                {destination.name}
-                            </span>
-                        </div>
-                    ))}
-                </div>
-            </div>
-
             {/* Booking Modal */}
             <BookingModal
                 isOpen={showBookingModal}
