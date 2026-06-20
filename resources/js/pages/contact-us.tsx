@@ -42,9 +42,48 @@ export default function ContactUs() {
     return (
         <>
             <Head title="Contact Us - CloudTravel" />
-            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
-                <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#003d82', marginBottom: '20px' }}>Contact Us</h1>
-                <p style={{ color: '#666', marginBottom: '40px' }}>We'd love to hear from you. Get in touch with our team for any inquiries or assistance.</p>
+
+            {/* Hero Section */}
+            <div style={{
+                backgroundImage: 'url(https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200&h=400&fit=crop)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                height: '300px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: '#fff',
+                textAlign: 'center',
+                position: 'relative'
+            }}>
+                <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'linear-gradient(to bottom, rgba(0,20,60,.5) 0%, rgba(0,20,60,.3) 60%, rgba(0,20,60,.6) 100%)',
+                    zIndex: 1
+                }}></div>
+                <div style={{ position: 'relative', zIndex: 2 }}>
+                    <h1 style={{
+                        fontFamily: "'Playfair Display', serif",
+                        fontSize: '48px',
+                        fontWeight: 700,
+                        margin: 0,
+                        textShadow: '0 2px 12px rgba(0,0,0,.5)'
+                    }}>Contact Us</h1>
+                    <p style={{
+                        fontSize: '14px',
+                        color: 'rgba(255,255,255,.88)',
+                        margin: '12px 0 0 0',
+                        lineHeight: 1.6
+                    }}>Get in touch with our team. We're here to help with any travel inquiries.</p>
+                </div>
+            </div>
+
+            {/* Main Content */}
+            <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '60px 20px' }}>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '40px' }}>
                     {/* Contact Info */}
@@ -55,30 +94,30 @@ export default function ContactUs() {
                             <img
                                 src={contactInfo.get_in_touch_image}
                                 alt="Get in Touch"
-                                style={{ width: '100%', borderRadius: '8px', marginBottom: '30px', objectFit: 'cover', height: '200px' }}
+                                style={{ width: '100%', borderRadius: '8px', marginBottom: '30px', objectFit: 'contain', height: 'auto', maxHeight: '300px', backgroundColor: '#f5f5f5', padding: '10px' }}
                             />
                         )}
 
                         <div style={{ marginBottom: '25px' }}>
                             <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#003d82', marginBottom: '8px' }}>Address</h4>
                             <p style={{ fontSize: '13px', color: '#666', margin: 0, lineHeight: 1.6 }}>
-                                123 Travel Street<br />
-                                London, UK<br />
-                                SW1A 1AA
+                                62 King St<br />
+                                Southall UB2 4DB<br />
+                                UK
                             </p>
                         </div>
 
                         <div style={{ marginBottom: '25px' }}>
                             <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#003d82', marginBottom: '8px' }}>Phone</h4>
                             <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>
-                                <a href="tel:+442071946000" style={{ textDecoration: 'none', color: '#ff6b35', fontWeight: 600 }}>+44 (0)20 7194 6000</a>
+                                <a href="tel:02035000000" style={{ textDecoration: 'none', color: '#ff6b35', fontWeight: 600 }}>020 3500 0000</a>
                             </p>
                         </div>
 
                         <div style={{ marginBottom: '25px' }}>
                             <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#003d82', marginBottom: '8px' }}>Email</h4>
                             <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>
-                                <a href="mailto:info@cloudtravel.com" style={{ textDecoration: 'none', color: '#ff6b35', fontWeight: 600 }}>info@cloudtravel.com</a>
+                                <a href="mailto:info@cloudtravel.co.uk" style={{ textDecoration: 'none', color: '#ff6b35', fontWeight: 600 }}>info@cloudtravel.co.uk</a>
                             </p>
                         </div>
 
@@ -169,6 +208,25 @@ export default function ContactUs() {
                     </form>
                 </div>
             </div>
+
+            {/* Google Maps Section */}
+            <div style={{ marginTop: '60px', backgroundColor: '#f5f5f5', padding: '40px 20px' }}>
+                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                    <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#003d82', marginBottom: '30px', textAlign: 'center' }}>Our Location</h3>
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d639319.9569119832!2d-1.829651917124168!3d51.24958301798195!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x48760d52956b5cb9%3A0xf7c975d392a773ce!2sCloud%20Travel%C2%AE%20Southall!5e0!3m2!1sen!2sin!4v1781950847097!5m2!1sen!2sin"
+                            width="100%"
+                            height={450}
+                            style={{ border: '0', borderRadius: '8px', maxWidth: '1000px' }}
+                            allowFullScreen
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                        ></iframe>
+                    </div>
+                </div>
+            </div>
+
             <Toaster position="top-right" />
         </>
     );
