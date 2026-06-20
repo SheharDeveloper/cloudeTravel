@@ -30,6 +30,8 @@ export default function Home() {
     const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
     const [contactInfo, setContactInfo] = useState<any>(null);
     const [currency, setCurrency] = useState({ symbol: '£', code: 'GBP' });
+    const [heroImageLoading, setHeroImageLoading] = useState(true);
+    const isInitialLoadRef = useRef(true);
     const autoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const heroAutoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const testimonialAutoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -49,6 +51,19 @@ export default function Home() {
     useEffect(() => {
         startHeroAutoPlay();
         return () => stopHeroAutoPlay();
+    }, [heroImages]);
+
+    useEffect(() => {
+        // Only show loader on initial page load, not on every slider transition
+        if (isInitialLoadRef.current && heroImages.length > 0) {
+            setHeroImageLoading(true);
+            // Ensure loader shows for at least 3 seconds on initial load
+            const timer = setTimeout(() => {
+                setHeroImageLoading(false);
+                isInitialLoadRef.current = false;
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
     }, [heroImages]);
 
     useEffect(() => {
@@ -121,7 +136,26 @@ export default function Home() {
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
             </Head>
 
+            {/* Full-page white blur overlay when hero image is loading */}
+            {heroImageLoading && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'rgba(255, 255, 255, 0.4)',
+                    zIndex: 9998,
+                    backdropFilter: 'blur(6px)',
+                    WebkitBackdropFilter: 'blur(6px)',
+                }} />
+            )}
+
             <style>{`
+                @keyframes heroSpin {
+                    to { transform: rotate(360deg); }
+                }
+
                 * {
                     box-sizing: border-box;
                 }
@@ -229,6 +263,44 @@ export default function Home() {
             {/* HERO SECTION */}
             {heroImages.length > 0 && (
             <div className="hero-section" style={{ position: 'relative', minHeight: '280px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', textAlign: 'center', overflow: 'hidden', backgroundImage: `url(${heroImages[currentHeroIndex]?.image_url})`, backgroundSize: 'cover', backgroundPosition: 'center', transition: 'background-image 0.5s ease-in-out', marginBottom: '50px', paddingTop: '40px' }}>
+                {/* Hidden image to track loading */}
+                {heroImageLoading && (
+                    <img
+                        src={heroImages[currentHeroIndex]?.image_url}
+                        style={{ display: 'none' }}
+                        alt="hero"
+                    />
+                )}
+
+                {/* Loading Spinner */}
+                {heroImageLoading && (
+                    <div style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'transparent',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexDirection: 'column',
+                        zIndex: 100
+                    }}>
+                        <div style={{
+                            width: '100px',
+                            height: '100px',
+                            border: '10px solid #d0d0d0',
+                            borderTop: '10px solid #0066cc',
+                            borderRadius: '50%',
+                            animation: 'heroSpin 1s linear infinite',
+                            boxShadow: '0 8px 25px rgba(0, 102, 204, 0.4)',
+                            marginBottom: '20px'
+                        }} />
+                        <p style={{ color: '#0066cc', fontSize: '16px', fontWeight: 600, margin: 0 }}>Loading...</p>
+                    </div>
+                )}
+
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,20,60,.6) 0%, rgba(0,20,60,.3) 60%, rgba(0,20,60,.7) 100%)' }}></div>
                 <div style={{ position: 'relative', zIndex: 2, padding: '0 20px' }}>
                     <h3 className="hero-title" style={{ fontFamily: "'Playfair Display', serif", fontSize: '28px', fontWeight: 700, color: '#fff', marginBottom: '5px', textShadow: '0 2px 12px rgba(0,0,0,.5)', transition: 'opacity 0.5s ease-in-out' }}>

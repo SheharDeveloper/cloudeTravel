@@ -150,8 +150,6 @@ export default function LandingLayout({ children }: Props) {
 
                 <ul className="navbar-menu" style={{ display: 'flex', alignItems: 'center', gap: '28px', listStyle: 'none', margin: 0, padding: 0, flex: 1, justifyContent: 'center' }}>
                     <li><Link href="/" style={{ color: '#ff6b35', fontSize: '14px', fontWeight: 600, textDecoration: 'none', borderBottom: '3px solid #ff6b35', paddingBottom: '5px' }}>Home</Link></li>
-                    <li><Link href="/tours" style={{ color: '#333', fontSize: '14px', fontWeight: 500, textDecoration: 'none', transition: 'color 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#ff6b35'} onMouseLeave={(e) => e.currentTarget.style.color = '#333'}>Tours</Link></li>
-                    <li><Link href="/tickets" style={{ color: '#333', fontSize: '14px', fontWeight: 500, textDecoration: 'none', transition: 'color 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#ff6b35'} onMouseLeave={(e) => e.currentTarget.style.color = '#333'}>Tickets</Link></li>
 
                     {/* Visa Services Dropdown */}
                     <li
@@ -225,8 +223,6 @@ export default function LandingLayout({ children }: Props) {
             <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`} style={{ background: '#fff', borderTop: '1px solid #f0f0f0' }}>
                 <ul style={{ display: 'flex', flexDirection: 'column', gap: '10px', listStyle: 'none', margin: 0, padding: '15px 15px', textAlign: 'center' }}>
                     <li><Link href="/" style={{ color: '#ff6b35', fontSize: '14px', fontWeight: 500, textDecoration: 'none' }}>Home</Link></li>
-                    <li><Link href="/tours" style={{ color: '#333', fontSize: '14px', fontWeight: 500, textDecoration: 'none' }}>Tours</Link></li>
-                    <li><Link href="/tickets" style={{ color: '#333', fontSize: '14px', fontWeight: 500, textDecoration: 'none' }}>Tickets</Link></li>
                     <li><Link href="/about-us" style={{ color: '#333', fontSize: '14px', fontWeight: 500, textDecoration: 'none' }}>About Us</Link></li>
                     <li><Link href="/contact-us" style={{ color: '#333', fontSize: '14px', fontWeight: 500, textDecoration: 'none' }}>Contact Us</Link></li>
                     <li><a href="tel:+1234567890" style={{ background: '#ff6b35', color: '#fff', padding: '8px 15px', borderRadius: '4px', fontWeight: 700, fontSize: '13px', textDecoration: 'none', display: 'inline-block' }}>CALL NOW</a></li>
@@ -291,8 +287,6 @@ export default function LandingLayout({ children }: Props) {
                         <div>
                             <h4 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '15px', color: '#ff6b35' }}>Quick Links</h4>
                             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                                <li style={{ marginBottom: '8px' }}><a href="/tours" style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none', fontSize: '12px' }}>Tours</a></li>
-                                <li style={{ marginBottom: '8px' }}><a href="/tickets" style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none', fontSize: '12px' }}>Tickets</a></li>
                                 <li style={{ marginBottom: '8px' }}><a href="/visa-services" style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none', fontSize: '12px' }}>Visa Services</a></li>
                                 <li><a href="/contact-us" style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none', fontSize: '12px' }}>Contact Us</a></li>
                             </ul>

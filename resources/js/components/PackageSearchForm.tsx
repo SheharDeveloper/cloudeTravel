@@ -471,44 +471,17 @@ export default function PackageSearchForm(): React.ReactElement {
                 </div>
             </div>
 
-            {/* Row 3: Flexible Days Checkboxes */}
+            {/* Row 3: Flexible Days Checkbox */}
             <div style={{ marginBottom: '20px', padding: '16px', background: '#f9f9f9', borderRadius: '10px' }}>
-                <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '12px', fontWeight: 600 }}>Flexible Dates</label>
-                <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#333' }}>
-                        <input
-                            type="radio"
-                            name="flexibleDays"
-                            value="0"
-                            checked={flexibleDays === 0}
-                            onChange={() => setFlexibleDays(0)}
-                            style={{ cursor: 'pointer' }}
-                        />
-                        Exact dates
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#333' }}>
-                        <input
-                            type="radio"
-                            name="flexibleDays"
-                            value="2"
-                            checked={flexibleDays === 2}
-                            onChange={() => setFlexibleDays(2)}
-                            style={{ cursor: 'pointer' }}
-                        />
-                        Flexible +2 days
-                    </label>
-                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', color: '#333' }}>
-                        <input
-                            type="radio"
-                            name="flexibleDays"
-                            value="3"
-                            checked={flexibleDays === 3}
-                            onChange={() => setFlexibleDays(3)}
-                            style={{ cursor: 'pointer' }}
-                        />
-                        Flexible +3 days
-                    </label>
-                </div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', fontSize: '13px', color: '#333' }}>
+                    <input
+                        type="checkbox"
+                        checked={flexibleDays === 3}
+                        onChange={(e) => setFlexibleDays(e.target.checked ? 3 : 0)}
+                        style={{ cursor: 'pointer', width: '18px', height: '18px' }}
+                    />
+                    <span style={{ fontWeight: 500 }}>I'm flexible with dates ±3 days</span>
+                </label>
             </div>
 
             {/* Search Button */}
