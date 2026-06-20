@@ -1,25 +1,56 @@
 import { useState, useEffect } from 'react';
+import { airlineService } from '@/services/airlineService';
 
-const airlines = [
-    { name: 'Air India', logo: '🇮🇳' },
-    { name: 'Emirates', logo: '🇦🇪' },
-    { name: 'Qatar Airways', logo: '🇶🇦' },
-    { name: 'Lufthansa', logo: '🇩🇪' },
-    { name: 'British Airways', logo: '🇬🇧' },
-    { name: 'Turkish Airlines', logo: '🇹🇷' },
-    { name: 'Singapore Airlines', logo: '🇸🇬' },
-    { name: 'Thai Airways', logo: '🇹🇭' },
-];
+interface Airline {
+    id: string | number;
+    name: string;
+    iata?: string;
+    icao?: string;
+    country?: string;
+}
 
 export default function AirlineLogoSlider() {
+    const [airlines, setAirlines] = useState<Airline[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        fetchAirlines();
+    }, []);
+
+    const fetchAirlines = async () => {
+        try {
+            setLoading(true);
+            const data = await airlineService.getAirlines(20, 0);
+            // Filter airlines with valid IATA code
+            const airlinesWithIata = data.filter((airline: any) => airline.iata);
+            setAirlines(airlinesWithIata.length > 0 ? airlinesWithIata : getDefaultAirlines());
+        } catch (error) {
+            console.error('Error fetching airlines:', error);
+            setAirlines(getDefaultAirlines());
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const getDefaultAirlines = () => [
+        { id: 1, name: 'Air India', logo: '🇮🇳' },
+        { id: 2, name: 'Emirates', logo: '🇦🇪' },
+        { id: 3, name: 'Qatar Airways', logo: '🇶🇦' },
+        { id: 4, name: 'Lufthansa', logo: '🇩🇪' },
+        { id: 5, name: 'British Airways', logo: '🇬🇧' },
+        { id: 6, name: 'Turkish Airlines', logo: '🇹🇷' },
+        { id: 7, name: 'Singapore Airlines', logo: '🇸🇬' },
+        { id: 8, name: 'Thai Airways', logo: '🇹🇭' },
+    ];
+
+    useEffect(() => {
+        if (airlines.length === 0) return;
         const interval = setInterval(() => {
             setCurrentIndex((prev) => (prev + 1) % airlines.length);
         }, 4000);
         return () => clearInterval(interval);
-    }, []);
+    }, [airlines.length]);
 
     const handlePrev = () => {
         setCurrentIndex((prev) => (prev - 1 + airlines.length) % airlines.length);
@@ -37,12 +68,23 @@ export default function AirlineLogoSlider() {
         return visible;
     };
 
+    if (loading) {
+        return (
+            <section style={{ padding: '50px 40px', background: '#fff', borderTop: '1px solid #f0f0f0' }}>
+                <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
+                    <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#003d82', marginBottom: '30px' }}>✈️ Partner Airlines</h3>
+                    <p style={{ color: '#999' }}>Loading airlines...</p>
+                </div>
+            </section>
+        );
+    }
+
     return (
         <section style={{ padding: '50px 40px', background: '#fff', borderTop: '1px solid #f0f0f0' }}>
             <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                 <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#003d82', marginBottom: '30px', textAlign: 'center' }}>✈️ Partner Airlines</h3>
 
-                {/* Slider with 6 Airlines */}
+                {airlines && airlines.length > 0 ? (
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '16px' }}>
                     {/* Left Arrow */}
                     <button
@@ -76,7 +118,7 @@ export default function AirlineLogoSlider() {
 
                     {/* Airlines Grid (6 in a row) */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '16px', flex: 1 }}>
-                        {getVisibleAirlines().map((airline, idx) => (
+                        {getVisibleAirlines().filter((airline) => airline && airline.iata).map((airline, idx) => (
                             <div
                                 key={idx}
                                 style={{
@@ -102,10 +144,28 @@ export default function AirlineLogoSlider() {
                                     e.currentTarget.style.boxShadow = 'none';
                                 }}
                             >
-                                <div style={{ fontSize: '48px', lineHeight: 1 }}>{airline.logo}</div>
-                                <p style={{ fontSize: '11px', fontWeight: 600, color: '#666', margin: 0, textAlign: 'center', lineHeight: 1.2 }}>
-                                    {airline.name}
-                                </p>
+                                <div style={{
+                                    width: '60px',
+                                    height: '60px',
+                                    background: 'linear-gradient(135deg, #0066cc 0%, #0052a3 100%)',
+                                    borderRadius: '8px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    color: '#fff',
+                                    fontSize: '20px',
+                                    fontWeight: 700
+                                }}>
+                                    {airline.iata}
+                                </div>
+                                <div style={{ textAlign: 'center' }}>
+                                    <p style={{ fontSize: '11px', fontWeight: 600, color: '#333', margin: '8px 0 0 0', lineHeight: 1.2 }}>
+                                        {airline.name}
+                                    </p>
+                                    <p style={{ fontSize: '10px', color: '#999', margin: '2px 0 0 0' }}>
+                                        {airline.country}
+                                    </p>
+                                </div>
                             </div>
                         ))}
                     </div>
@@ -140,6 +200,11 @@ export default function AirlineLogoSlider() {
                         ›
                     </button>
                 </div>
+                ) : (
+                    <div style={{ textAlign: 'center', padding: '40px' }}>
+                        <p style={{ color: '#999', fontSize: '14px' }}>No airlines available</p>
+                    </div>
+                )}
             </div>
         </section>
     );
