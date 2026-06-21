@@ -117,7 +117,7 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
 
                         <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', alignItems: 'center', marginBottom: '20px' }}>
                             <p style={{ fontSize: '14px', color: '#333', margin: 0 }}>Need more info?</p>
-                            <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px', background: '#25D366', color: '#fff', borderRadius: '50%', fontSize: '20px', textDecoration: 'none', transition: 'transform 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                            <a href="https://wa.me/message/W5DBNURIYOKOF1" target="_blank" rel="noopener noreferrer" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '40px', height: '40px', background: '#25D366', color: '#fff', borderRadius: '50%', fontSize: '20px', textDecoration: 'none', transition: 'transform 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                                 <i className="fa fa-whatsapp"></i>
                             </a>
                         </div>

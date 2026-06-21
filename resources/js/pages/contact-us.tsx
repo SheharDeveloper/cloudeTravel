@@ -101,8 +101,9 @@ export default function ContactUs() {
                         <div style={{ marginBottom: '25px' }}>
                             <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#003d82', marginBottom: '8px' }}>Address</h4>
                             <p style={{ fontSize: '13px', color: '#666', margin: 0, lineHeight: 1.6 }}>
-                                62 King St<br />
-                                Southall UB2 4DB<br />
+                                62 King Street<br />
+                                Southall<br />
+                                Middlesex UB2 4DB<br />
                                 UK
                             </p>
                         </div>
@@ -110,14 +111,14 @@ export default function ContactUs() {
                         <div style={{ marginBottom: '25px' }}>
                             <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#003d82', marginBottom: '8px' }}>Phone</h4>
                             <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>
-                                <a href="tel:02035000000" style={{ textDecoration: 'none', color: '#ff6b35', fontWeight: 600 }}>020 3500 0000</a>
+                                <a href="tel:07944495552" style={{ textDecoration: 'none', color: '#ff6b35', fontWeight: 600 }}>07944495552</a>
                             </p>
                         </div>
 
                         <div style={{ marginBottom: '25px' }}>
                             <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#003d82', marginBottom: '8px' }}>Email</h4>
                             <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>
-                                <a href="mailto:info@cloudtravel.co.uk" style={{ textDecoration: 'none', color: '#ff6b35', fontWeight: 600 }}>info@cloudtravel.co.uk</a>
+                                <a href="mailto:info@cloudtravels.co.uk" style={{ textDecoration: 'none', color: '#ff6b35', fontWeight: 600 }}>info@cloudtravels.co.uk</a>
                             </p>
                         </div>
 
@@ -142,7 +143,7 @@ export default function ContactUs() {
                                 <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" style={{ width: 32, height: 32, borderRadius: '50%', background: '#E1306C', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
                                     <i className="fab fa-instagram"></i>
                                 </a>
-                                <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" style={{ width: 32, height: 32, borderRadius: '50%', background: '#25D366', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
+                                <a href="https://wa.me/message/W5DBNURIYOKOF1" target="_blank" rel="noopener noreferrer" style={{ width: 32, height: 32, borderRadius: '50%', background: '#25D366', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
                                     <i className="fab fa-whatsapp"></i>
                                 </a>
                             </div>

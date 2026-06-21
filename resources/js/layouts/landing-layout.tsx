@@ -235,7 +235,7 @@ export default function LandingLayout({ children }: Props) {
             </main>
 
             {/* WhatsApp Float */}
-            <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" style={{ position: 'fixed', right: '18px', bottom: '80px', width: '44px', height: '44px', background: '#25D366', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '22px', zIndex: 999, boxShadow: '0 3px 12px rgba(0,0,0,.25)', textDecoration: 'none' }}>
+            <a href="https://wa.me/message/W5DBNURIYOKOF1" target="_blank" rel="noopener noreferrer" style={{ position: 'fixed', right: '18px', bottom: '80px', width: '44px', height: '44px', background: '#25D366', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '22px', zIndex: 999, boxShadow: '0 3px 12px rgba(0,0,0,.25)', textDecoration: 'none' }}>
                 <i className="fab fa-whatsapp"></i>
             </a>
 

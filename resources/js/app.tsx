@@ -23,6 +23,7 @@ createInertiaApp({
             case name === 'Flights':
             case name === 'Hotels':
             case name === 'Visas':
+            case name === 'FlightResults':
             case name === 'frontend/flight/flight':
             case name === 'frontend/hotel/hotels':
             case name === 'frontend/visa/visas':

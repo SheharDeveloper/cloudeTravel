@@ -9,6 +9,7 @@ use App\Http\Controllers\SearchController;
 // Landing/Public routes
 Route::inertia('/', 'home')->name('home');
 Route::inertia('/flights', 'frontend/flight/flight')->name('flights');
+Route::inertia('/flights/results', 'FlightResults')->name('flights.results');
 Route::inertia('/hotels', 'frontend/hotel/hotels')->name('hotels');
 Route::inertia('/visas', 'frontend/visa/visas')->name('visas');
 
