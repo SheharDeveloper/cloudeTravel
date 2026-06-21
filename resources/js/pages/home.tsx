@@ -198,15 +198,28 @@ export default function Home() {
                 }
 
                 @media (max-width: 768px) {
+                    body, html {
+                        width: 100% !important;
+                        overflow-x: hidden !important;
+                    }
                     .hero-section {
                         min-height: 150px !important;
                         padding: 15px !important;
+                        width: 100% !important;
+                        margin-bottom: 20px !important;
                     }
                     .hero-title {
                         font-size: 20px !important;
                     }
                     .hero-subtitle {
                         font-size: 11px !important;
+                    }
+                    .booking-search-container {
+                        display: block !important;
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
                     }
                     .hero-buttons {
                         flex-direction: column !important;
@@ -242,15 +255,89 @@ export default function Home() {
                     }
                     .flight-search-row1 {
                         grid-template-columns: 1fr !important;
-                        gap: 12px !important;
+                        gap: 10px !important;
+                        margin-bottom: 10px !important;
                     }
                     .flight-search-row2 {
                         grid-template-columns: 1fr !important;
-                        gap: 12px !important;
+                        gap: 10px !important;
+                        margin-bottom: 10px !important;
                     }
                     .flight-search-row3 {
                         grid-template-columns: 1fr !important;
-                        gap: 12px !important;
+                        gap: 10px !important;
+                        margin-bottom: 10px !important;
+                    }
+                    .flight-search-container {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        padding: 15px !important;
+                    }
+                    .flight-search-form {
+                        width: 100% !important;
+                    }
+                    .trip-type-buttons {
+                        display: flex !important;
+                        gap: 8px !important;
+                        margin-bottom: 12px !important;
+                        justify-content: flex-start !important;
+                    }
+                    .trip-type-btn {
+                        flex: 1 !important;
+                        padding: 6px 10px !important;
+                        font-size: 11px !important;
+                        height: 36px !important;
+                    }
+                    /* Tab Navigation Mobile */
+                    .tabs-nav {
+                        gap: 10px !important;
+                        padding: 6px 4px !important;
+                        overflow-x: scroll !important;
+                        overflow-y: hidden !important;
+                        -webkit-overflow-scrolling: touch !important;
+                        scroll-behavior: smooth !important;
+                        justify-content: flex-start !important;
+                        display: flex !important;
+                        flex-wrap: nowrap !important;
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        margin: 0 auto !important;
+                        border-bottom: 2px solid #efefef !important;
+                        scroll-snap-type: x mandatory !important;
+                    }
+                    .tab-button {
+                        padding: 4px 4px !important;
+                        font-size: 7px !important;
+                        gap: 2px !important;
+                        flex-shrink: 0 !important;
+                        white-space: nowrap !important;
+                        border-radius: 4px !important;
+                        height: 36px !important;
+                        display: flex !important;
+                        flex-direction: column !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        scroll-snap-align: center !important;
+                        width: 45px !important;
+                        min-width: 45px !important;
+                        max-width: 45px !important;
+                    }
+                    .tab-button i {
+                        font-size: 13px !important;
+                        margin: 0 !important;
+                        line-height: 1 !important;
+                    }
+                    /* Hide Flying From arrow on mobile */
+                    .flying-from-swap {
+                        display: none !important;
+                    }
+                    /* Search Flights button mobile */
+                    .search-flights-btn {
+                        padding: 8px 16px !important;
+                        font-size: 12px !important;
+                        height: 40px !important;
+                        min-width: auto !important;
+                        width: 100% !important;
                     }
                     .hotel-search-row1 {
                         grid-template-columns: 1fr !important;
@@ -273,21 +360,57 @@ export default function Home() {
                     .tabs-container {
                         padding: 15px !important;
                     }
-                    .tab-button {
-                        padding: 10px 15px !important;
-                        font-size: 12px !important;
-                        flex: 1 !important;
-                    }
                     .visa-grid {
-                        grid-template-columns: 1fr !important;
+                        display: flex !important;
+                        grid-template-columns: unset !important;
                         gap: 15px !important;
+                        overflow-x: auto !important;
+                        overflow-y: hidden !important;
+                        -webkit-overflow-scrolling: touch !important;
+                        flex-wrap: nowrap !important;
+                        padding-bottom: 10px !important;
+                    }
+                    .visa-grid > div {
+                        flex-shrink: 0 !important;
+                        width: 160px !important;
+                        min-width: 160px !important;
                     }
                     .package-grid {
-                        grid-template-columns: 1fr !important;
+                        display: flex !important;
+                        grid-template-columns: unset !important;
                         gap: 15px !important;
+                        overflow-x: auto !important;
+                        overflow-y: hidden !important;
+                        -webkit-overflow-scrolling: touch !important;
+                        flex-wrap: nowrap !important;
+                        padding-bottom: 10px !important;
+                    }
+                    .package-grid > div {
+                        flex-shrink: 0 !important;
+                        width: 160px !important;
+                        min-width: 160px !important;
                     }
                     .airline-slider {
                         padding: 20px 10px !important;
+                    }
+                    .airline-slider-grid {
+                        display: flex !important;
+                        grid-template-columns: unset !important;
+                        gap: 12px !important;
+                        overflow-x: auto !important;
+                        overflow-y: hidden !important;
+                        -webkit-overflow-scrolling: touch !important;
+                        flex-wrap: nowrap !important;
+                        padding-bottom: 10px !important;
+                        flex: 1 !important;
+                    }
+                    .airline-slider-grid > div {
+                        flex-shrink: 0 !important;
+                        width: 120px !important;
+                        min-width: 120px !important;
+                    }
+                    .airline-slider-nav-btn {
+                        display: none !important;
                     }
                     .search-container {
                         padding: 20px 15px !important;
@@ -369,11 +492,11 @@ export default function Home() {
             )}
 
             {/* BOOKING SEARCH FORM WITH TABS */}
-            <div style={{ padding: '0 280px', position: 'relative', zIndex: 10, marginTop: '-200px', paddingBottom: '80px', overflow: 'visible' }}>
+            <div style={{ padding: 'clamp(15px, 10vw, 280px)', position: 'relative', zIndex: 10, marginTop: '-200px', paddingBottom: '80px', overflow: 'visible' }}>
                 <div style={{ maxWidth: '100%', margin: '0 auto', background: '#fff', borderRadius: '16px', boxShadow: '0 10px 40px rgba(0,0,0,.18)', overflow: 'visible' }}>
                     {/* Tab Navigation - Professional Style */}
-                    <div style={{ display: 'flex', gap: '8px', borderBottom: '2px solid #efefef', backgroundColor: '#fff', padding: '0 20px', justifyContent: 'center', flexWrap: 'nowrap', overflowX: 'auto', boxShadow: '0 2px 8px rgba(0,0,0,.08)' }}>
-                        <button
+                    <div className="tabs-nav" style={{ display: 'flex', gap: 'clamp(0px, 1vw, 8px)', borderBottom: '2px solid #efefef', backgroundColor: '#fff', padding: 'clamp(2px, 1vw, 20px)', justifyContent: 'center', flexWrap: 'nowrap', overflowX: 'auto', boxShadow: '0 2px 8px rgba(0,0,0,.08)' }}>
+                        <button className="tab-button"
                             onClick={() => setActiveService('flight')}
                             style={{
                                 padding: '15px 15px',
@@ -395,7 +518,7 @@ export default function Home() {
                         >
                             <i className="fa fa-plane" style={{ fontSize: '19px' }}></i> Flights
                         </button>
-                        <button
+                        <button className="tab-button"
                             onClick={() => setActiveService('hotel')}
                             style={{
                                 padding: '10px 10px',
@@ -417,7 +540,7 @@ export default function Home() {
                         >
                             <i className="fa fa-bed" style={{ fontSize: '19px' }}></i> Hotels
                         </button>
-                        <button
+                        <button className="tab-button"
                             onClick={() => setActiveService('flight-hotel')}
                             style={{
                                 padding: '10px 10px',
@@ -439,7 +562,7 @@ export default function Home() {
                         >
                             <i className="fa fa-cube" style={{ fontSize: '19px' }}></i> Package
                         </button>
-                        <button
+                        <button className="tab-button"
                             onClick={() => setActiveService('visa')}
                             style={{
                                 padding: '10px 10px',
@@ -461,7 +584,7 @@ export default function Home() {
                         >
                             <i className="fa fa-passport" style={{ fontSize: '19px' }}></i> Visa
                         </button>
-                        <button
+                        <button className="tab-button"
                             onClick={() => setActiveService('airport-transfer')}
                             style={{
                                 padding: '10px 10px',
@@ -566,7 +689,7 @@ export default function Home() {
             <section style={{ padding: '50px 40px', background: '#fff', borderTop: '1px solid #f0f0f0' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#003d82', marginBottom: '30px', textAlign: 'center' }}>🛂 Visa Services</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
+                    <div className="visa-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
                         {[
                             { name: 'Schengen Visa', img: 'schengen.jpg', icon: '📋' },
                             { name: 'India Visa', img: 'india.jpg', icon: '📋' },
@@ -591,7 +714,7 @@ export default function Home() {
             <section style={{ padding: '50px 40px', background: '#f5f5f5' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#003d82', marginBottom: '30px', textAlign: 'center' }}>📦 Travel Packages</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
+                    <div className="package-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
                         {[
                             { name: 'Honeymoon Package', img: 'honeymoon.jpg', icon: '✈️' },
                             { name: 'Family Tour', img: 'family.jpg', icon: '✈️' },

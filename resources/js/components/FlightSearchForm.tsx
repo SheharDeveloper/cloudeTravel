@@ -76,18 +76,19 @@ export default function FlightSearchForm({
     };
 
     return (
-        <div>
+        <div className="flight-search-form">
             {/* Trip Type Toggle */}
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '14px', paddingBottom: '0px', borderBottom: 'none' }}>
+            <div className="trip-type-buttons" style={{ display: 'flex', gap: '10px', marginBottom: '14px', paddingBottom: '0px', borderBottom: 'none' }}>
                 <button
                     onClick={() => setTripType('oneway')}
+                    className="trip-type-btn"
                     style={{
                         background: tripType === 'oneway' ? '#e8f1ff' : '#fff',
                         color: tripType === 'oneway' ? '#0066cc' : '#666',
                         border: `2px solid ${tripType === 'oneway' ? '#0066cc' : '#ddd'}`,
-                        padding: '10px 28px',
+                        padding: '10px 20px',
                         borderRadius: '24px',
-                        fontSize: '14px',
+                        fontSize: '13px',
                         fontWeight: 600,
                         cursor: 'pointer',
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -110,13 +111,14 @@ export default function FlightSearchForm({
                 </button>
                 <button
                     onClick={() => setTripType('roundtrip')}
+                    className="trip-type-btn"
                     style={{
                         background: tripType === 'roundtrip' ? '#e8f1ff' : '#fff',
                         color: tripType === 'roundtrip' ? '#0066cc' : '#666',
                         border: `2px solid ${tripType === 'roundtrip' ? '#0066cc' : '#ddd'}`,
-                        padding: '10px 28px',
+                        padding: '10px 20px',
                         borderRadius: '24px',
-                        fontSize: '14px',
+                        fontSize: '13px',
                         fontWeight: 600,
                         cursor: 'pointer',
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -231,6 +233,7 @@ export default function FlightSearchForm({
 
                 {/* SWAP BUTTON - Perfectly centered between inputs */}
                 <button
+                    className="flying-from-swap"
                     onClick={() => {
                         const tempCity = fromCity;
                         setFromCity(toCity);
@@ -415,6 +418,7 @@ export default function FlightSearchForm({
             {/* Search Button */}
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0px', marginTop: '6px' }}>
                 <button
+                    className="search-flights-btn"
                     onClick={handleFlightSearch}
                     style={{
                         background: 'linear-gradient(135deg, #0066cc 0%, #0052a3 100%)',

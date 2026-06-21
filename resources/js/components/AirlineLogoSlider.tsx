@@ -88,6 +88,7 @@ export default function AirlineLogoSlider() {
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '16px' }}>
                     {/* Left Arrow */}
                     <button
+                        className="airline-slider-nav-btn"
                         onClick={handlePrev}
                         style={{
                             background: '#0066cc',
@@ -117,7 +118,7 @@ export default function AirlineLogoSlider() {
                     </button>
 
                     {/* Airlines Grid (6 in a row) */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '16px', flex: 1 }}>
+                    <div className="airline-slider-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: '16px', flex: 1 }}>
                         {getVisibleAirlines().filter((airline) => airline && airline.iata).map((airline, idx) => (
                             <div
                                 key={idx}
@@ -172,6 +173,7 @@ export default function AirlineLogoSlider() {
 
                     {/* Right Arrow */}
                     <button
+                        className="airline-slider-nav-btn"
                         onClick={handleNext}
                         style={{
                             background: '#0066cc',
