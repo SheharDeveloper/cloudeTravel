@@ -136,7 +136,7 @@ export default function Home() {
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
             </Head>
 
-            {/* Full-page white blur overlay when hero image is loading */}
+            {/* Loading overlay when hero image is loading */}
             {heroImageLoading && (
                 <div style={{
                     position: 'fixed',
@@ -144,10 +144,8 @@ export default function Home() {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    background: 'rgba(255, 255, 255, 0.4)',
+                    background: 'rgba(255, 255, 255, 0.95)',
                     zIndex: 9998,
-                    backdropFilter: 'blur(6px)',
-                    WebkitBackdropFilter: 'blur(6px)',
                 }} />
             )}
 
@@ -201,14 +199,14 @@ export default function Home() {
 
                 @media (max-width: 768px) {
                     .hero-section {
-                        min-height: 300px !important;
-                        padding: 20px !important;
+                        min-height: 150px !important;
+                        padding: 15px !important;
                     }
                     .hero-title {
-                        font-size: 24px !important;
+                        font-size: 20px !important;
                     }
                     .hero-subtitle {
-                        font-size: 12px !important;
+                        font-size: 11px !important;
                     }
                     .hero-buttons {
                         flex-direction: column !important;
@@ -244,9 +242,65 @@ export default function Home() {
                     }
                     .flight-search-row1 {
                         grid-template-columns: 1fr !important;
+                        gap: 12px !important;
                     }
                     .flight-search-row2 {
                         grid-template-columns: 1fr !important;
+                        gap: 12px !important;
+                    }
+                    .flight-search-row3 {
+                        grid-template-columns: 1fr !important;
+                        gap: 12px !important;
+                    }
+                    .hotel-search-row1 {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .hotel-search-row2 {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .visa-search-row {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .package-search-row1 {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .package-search-row2 {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .package-search-row3 {
+                        grid-template-columns: 1fr !important;
+                    }
+                    .tabs-container {
+                        padding: 15px !important;
+                    }
+                    .tab-button {
+                        padding: 10px 15px !important;
+                        font-size: 12px !important;
+                        flex: 1 !important;
+                    }
+                    .visa-grid {
+                        grid-template-columns: 1fr !important;
+                        gap: 15px !important;
+                    }
+                    .package-grid {
+                        grid-template-columns: 1fr !important;
+                        gap: 15px !important;
+                    }
+                    .airline-slider {
+                        padding: 20px 10px !important;
+                    }
+                    .search-container {
+                        padding: 20px 15px !important;
+                        margin: 20px 0 !important;
+                    }
+                    .booking-search-form {
+                        padding: 20px 15px !important;
+                        margin: 0 !important;
+                        width: 100% !important;
+                    }
+                    button {
+                        width: 100% !important;
+                        max-width: 100% !important;
                     }
                 }
 

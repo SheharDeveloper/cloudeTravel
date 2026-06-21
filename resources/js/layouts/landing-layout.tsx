@@ -1,6 +1,7 @@
 import { Link, Head } from '@inertiajs/react';
 import { ReactNode, useState, useEffect } from 'react';
 import { contactInfoService } from '@/services/contactInfoService';
+import { logoConfig, LOGO_PATH, footerLogoConfig } from '@/config/logo';
 
 interface Props {
     children: ReactNode;
@@ -75,6 +76,31 @@ const mobileResponsiveStyles = `
             gap: 15px !important;
             text-align: center !important;
         }
+
+        .landing-footer {
+            padding: 20px !important;
+        }
+
+        .landing-footer h4 {
+            font-size: 12px !important;
+            margin-bottom: 10px !important;
+        }
+
+        .landing-footer p,
+        .landing-footer li,
+        .landing-footer a {
+            font-size: 11px !important;
+        }
+
+        .landing-footer ul {
+            margin: 0 !important;
+            padding: 0 !important;
+        }
+
+        .landing-footer img {
+            width: 50px !important;
+            height: 50px !important;
+        }
     }
 
     @media (min-width: 769px) {
@@ -84,6 +110,16 @@ const mobileResponsiveStyles = `
 
         .mobile-menu {
             display: none !important;
+        }
+
+        .landing-footer h4 {
+            font-size: 12px !important;
+        }
+
+        .landing-footer p,
+        .landing-footer li,
+        .landing-footer a {
+            font-size: 11px !important;
         }
     }
 `;
@@ -96,9 +132,19 @@ export default function LandingLayout({ children }: Props) {
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [contactInfo, setContactInfo] = useState<any>(null);
+    const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
         loadContactInfo();
+
+        // Detect mobile screen size
+        const checkMobile = () => {
+            setIsMobile(window.innerWidth <= 768);
+        };
+
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
     const loadContactInfo = async () => {
@@ -135,8 +181,8 @@ export default function LandingLayout({ children }: Props) {
             <div style={{ fontFamily: "'Open Sans', sans-serif", background: '#fff', color: '#333', fontSize: '13px', minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
             {/* NAVBAR */}
             <nav className="landing-navbar" style={{ background: '#FFFFFF', padding: '0 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '70px', borderBottom: '1px solid #f0f0f0', boxShadow: '0 2px 8px rgba(0,0,0,.06)' }}>
-                <Link className="navbar-logo" href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', minWidth: '120px' }}>
-                    <img src="/images/logo.png" alt="CloudTravel" style={{ width: 50, height: 50 }} />
+                <Link className="navbar-logo" href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', minWidth: isMobile ? '60px' : '120px' }}>
+                    <img src={LOGO_PATH} alt={logoConfig.alt} style={{ width: isMobile ? 45 : 150, height: isMobile ? 45 : 150, objectFit: 'contain' }} />
                 </Link>
 
                 {/* Hamburger Button */}
@@ -240,47 +286,34 @@ export default function LandingLayout({ children }: Props) {
             </a>
 
             {/* FOOTER */}
-            <footer className="landing-footer" style={{ background: '#003d82', color: '#fff', padding: '40px', marginTop: '40px', borderTop: '1px solid rgba(255,255,255,.1)' }}>
+            <footer className="landing-footer" style={{ background: '#003d82', color: '#fff', padding: '30px', marginTop: '40px', borderTop: '1px solid rgba(255,255,255,.1)' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     {/* Logo Section */}
                     <div style={{ marginBottom: '30px', paddingBottom: '20px', borderBottom: '1px solid rgba(255,255,255,.1)' }}>
-                        {contactInfo?.logo && (
-                            <img src={contactInfo.logo} alt="CloudTravel" style={{ width: 50, height: 50 }} />
-                        )}
+                        <img src={LOGO_PATH} alt={footerLogoConfig.alt} style={{ width: isMobile ? 40 : 75, height: isMobile ? 40 : 75, objectFit: 'contain' }} />
                     </div>
 
                     <div className="footer-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '30px', marginBottom: '30px' }}>
-                        {/* About */}
+                        {/* Contact Info - Detailed */}
                         <div>
-                            <h4 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '15px', color: '#ff6b35' }}>About CloudTravel</h4>
-                            <p style={{ fontSize: '12px', lineHeight: 1.6, color: 'rgba(255,255,255,.7)' }}>
-                                {contactInfo?.about_text || 'CloudTravel is your one-stop platform for booking flights, hotels, tours, and visa services worldwide. We make travel planning simple, affordable, and hassle-free.'}
-                            </p>
-                            {/* Social Media Links */}
-                            {contactInfo && (
-                                <div style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-                                    {contactInfo.facebook_url && (
-                                        <a href={contactInfo.facebook_url} target="_blank" rel="noopener noreferrer" style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#4267B2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', textDecoration: 'none', fontSize: '14px' }}>
-                                            <i className="fab fa-facebook-f"></i>
-                                        </a>
-                                    )}
-                                    {contactInfo.instagram_url && (
-                                        <a href={contactInfo.instagram_url} target="_blank" rel="noopener noreferrer" style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#E1306C', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', textDecoration: 'none', fontSize: '14px' }}>
-                                            <i className="fab fa-instagram"></i>
-                                        </a>
-                                    )}
-                                    {contactInfo.twitter_url && (
-                                        <a href={contactInfo.twitter_url} target="_blank" rel="noopener noreferrer" style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#1DA1F2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', textDecoration: 'none', fontSize: '14px' }}>
-                                            <i className="fab fa-twitter"></i>
-                                        </a>
-                                    )}
-                                    {contactInfo.linkedin_url && (
-                                        <a href={contactInfo.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#0A66C2', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', textDecoration: 'none', fontSize: '14px' }}>
-                                            <i className="fab fa-linkedin-in"></i>
-                                        </a>
-                                    )}
-                                </div>
-                            )}
+                            <h4 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '15px', color: '#ff6b35' }}>Contact Info</h4>
+                            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                                <li style={{ marginBottom: '10px', fontSize: '12px', color: 'rgba(255,255,255,.7)' }}>
+                                    <i className="fa fa-map-pin" style={{ color: '#ff6b35', marginRight: '8px' }}></i>
+                                    <strong>Address:</strong><br />
+                                    <span style={{ marginLeft: '20px', display: 'block' }}>62 King Street<br />Southall, Middlesex<br />UB2 4DB, United Kingdom</span>
+                                </li>
+                                <li style={{ marginBottom: '10px', fontSize: '12px', color: 'rgba(255,255,255,.7)' }}>
+                                    <i className="fa fa-phone" style={{ color: '#ff6b35', marginRight: '8px' }}></i>
+                                    <strong>Telephone:</strong><br />
+                                    <a href="tel:02035000000" style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none', marginLeft: '20px', display: 'block' }}>0203500 0000</a>
+                                </li>
+                                <li style={{ fontSize: '12px', color: 'rgba(255,255,255,.7)' }}>
+                                    <i className="fa fa-mobile" style={{ color: '#ff6b35', marginRight: '8px' }}></i>
+                                    <strong>Mobile:</strong><br />
+                                    <a href="tel:07944495552" style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none', marginLeft: '20px', display: 'block' }}>07944495552</a>
+                                </li>
+                            </ul>
                         </div>
 
                         {/* Quick Links */}
@@ -288,36 +321,30 @@ export default function LandingLayout({ children }: Props) {
                             <h4 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '15px', color: '#ff6b35' }}>Quick Links</h4>
                             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                                 <li style={{ marginBottom: '8px' }}><a href="/visa-services" style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none', fontSize: '12px' }}>Visa Services</a></li>
-                                <li><a href="/contact-us" style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none', fontSize: '12px' }}>Contact Us</a></li>
+                                <li style={{ marginBottom: '8px' }}><a href="/contact-us" style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none', fontSize: '12px' }}>Contact Us</a></li>
+                                <li><a href="/about-us" style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none', fontSize: '12px' }}>About Us</a></li>
                             </ul>
                         </div>
 
-                        {/* Contact Info */}
+                        {/* Documents */}
                         <div>
-                            <h4 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '15px', color: '#ff6b35' }}>Contact Info</h4>
+                            <h4 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '15px', color: '#ff6b35' }}>Documents</h4>
                             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                                {contactInfo?.phone && (
-                                    <li style={{ marginBottom: '8px', fontSize: '12px', color: 'rgba(255,255,255,.7)' }}>
-                                        <i className="fa fa-phone me-2" style={{ color: '#ff6b35', marginRight: '8px' }}></i>
-                                        <a href={`tel:${contactInfo.phone}`} style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none' }}>{contactInfo.phone}</a>
-                                    </li>
-                                )}
-                                {contactInfo?.email && (
-                                    <li style={{ marginBottom: '8px', fontSize: '12px', color: 'rgba(255,255,255,.7)' }}>
-                                        <i className="fa fa-envelope me-2" style={{ color: '#ff6b35', marginRight: '8px' }}></i>
-                                        <a href={`mailto:${contactInfo.email}`} style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none' }}>{contactInfo.email}</a>
-                                    </li>
-                                )}
-                                {contactInfo?.location && (
-                                    <li style={{ marginBottom: '8px', fontSize: '12px', color: 'rgba(255,255,255,.7)' }}>
-                                        <i className="fa fa-map-marker me-2" style={{ color: '#ff6b35', marginRight: '8px' }}></i>{contactInfo.location}
-                                    </li>
-                                )}
-                                {contactInfo?.address && (
-                                    <li style={{ fontSize: '12px', color: 'rgba(255,255,255,.7)' }}>
-                                        <i className="fa fa-building me-2" style={{ color: '#ff6b35', marginRight: '8px' }}></i>{contactInfo.address}
-                                    </li>
-                                )}
+                                <li style={{ marginBottom: '8px', fontSize: '11px' }}>
+                                    <a href="/conditions/Safari.pdf" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none' }}>
+                                        <i className="fa fa-file-pdf" style={{ marginRight: '6px' }}></i>Terms & Conditions 1
+                                    </a>
+                                </li>
+                                <li style={{ marginBottom: '8px', fontSize: '11px' }}>
+                                    <a href="/conditions/Safari (1).pdf" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none' }}>
+                                        <i className="fa fa-file-pdf" style={{ marginRight: '6px' }}></i>Terms & Conditions 2
+                                    </a>
+                                </li>
+                                <li style={{ fontSize: '11px' }}>
+                                    <a href="/conditions/Safari (2).pdf" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none' }}>
+                                        <i className="fa fa-file-pdf" style={{ marginRight: '6px' }}></i>Terms & Conditions 3
+                                    </a>
+                                </li>
                             </ul>
                         </div>
                     </div>

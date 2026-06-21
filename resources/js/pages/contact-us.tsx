@@ -104,7 +104,7 @@ export default function ContactUs() {
                                 62 King Street<br />
                                 Southall<br />
                                 Middlesex UB2 4DB<br />
-                                UK
+                                United Kingdom
                             </p>
                         </div>
 

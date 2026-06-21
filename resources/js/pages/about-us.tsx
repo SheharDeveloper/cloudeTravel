@@ -29,6 +29,10 @@ export default function AboutUs() {
         setCurrentServiceIndex((prev) => (prev + 1) % services.length);
     };
 
+    const handleServiceClick = (idx: number) => {
+        setCurrentServiceIndex(idx);
+    };
+
     return (
         <>
             <Head title="About Us - CloudTravel" />
@@ -205,7 +209,7 @@ export default function AboutUs() {
                                     transition: 'all 0.3s',
                                     textAlign: 'center'
                                 }}
-                                onClick={() => setCurrentServiceIndex(idx)}
+                                onClick={() => handleServiceClick(idx)}
                                 onMouseEnter={(e) => {
                                     if (currentServiceIndex !== idx) {
                                         e.currentTarget.style.background = '#f0f0f0';
@@ -228,100 +232,12 @@ export default function AboutUs() {
                     background: '#e8f4f8',
                     padding: '30px',
                     borderRadius: '8px',
-                    marginBottom: '50px',
                     borderLeft: '4px solid #0066cc'
                 }}>
                     <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#003d82', marginBottom: '12px' }}>Convenient Online Services</h3>
                     <p style={{ fontSize: '14px', color: '#666', margin: 0, lineHeight: 1.8 }}>
                         To provide greater convenience for our customers, many of our services are available through our online platform, allowing clients to access and manage their travel requirements anytime and from anywhere.
                     </p>
-                </div>
-
-                {/* Terms and Conditions Links */}
-                <div style={{
-                    background: '#f9f9f9',
-                    padding: '30px',
-                    borderRadius: '8px'
-                }}>
-                    <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#003d82', marginBottom: '20px', textAlign: 'center' }}>Documents & Resources</h3>
-                    <p style={{ fontSize: '14px', color: '#666', marginBottom: '25px', textAlign: 'center' }}>
-                        Download our terms, conditions, and important documents:
-                    </p>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px' }}>
-                        {[
-                            { name: 'Terms & Conditions 1', file: '/conditions/Safari.pdf' },
-                            { name: 'Terms & Conditions 2', file: '/conditions/Safari (1).pdf' },
-                            { name: 'Terms & Conditions 3', file: '/conditions/Safari (2).pdf' },
-                        ].map((doc, idx) => (
-                            <a
-                                key={idx}
-                                href={doc.file}
-                                download
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                style={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    padding: '25px',
-                                    background: '#fff',
-                                    border: '2px solid #0066cc',
-                                    borderRadius: '8px',
-                                    textDecoration: 'none',
-                                    transition: 'all 0.3s',
-                                    cursor: 'pointer'
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.background = '#0066cc';
-                                    e.currentTarget.style.transform = 'translateY(-4px)';
-                                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,102,204,.3)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.background = '#fff';
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.boxShadow = 'none';
-                                }}
-                            >
-                                <div style={{
-                                    fontSize: '40px',
-                                    marginBottom: '12px',
-                                    color: '#0066cc',
-                                    transition: 'color 0.3s'
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.color = '#fff';
-                                    const parent = e.currentTarget.closest('a');
-                                    parent.style.color = '#fff';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.color = '#0066cc';
-                                    const parent = e.currentTarget.closest('a');
-                                    parent.style.color = 'inherit';
-                                }}>
-                                    <i className="fa fa-file-pdf"></i>
-                                </div>
-                                <h4 style={{
-                                    fontSize: '14px',
-                                    fontWeight: 600,
-                                    color: '#333',
-                                    margin: '0 0 8px 0',
-                                    textAlign: 'center'
-                                }}>
-                                    {doc.name}
-                                </h4>
-                                <p style={{
-                                    fontSize: '12px',
-                                    color: '#666',
-                                    margin: '0',
-                                    textAlign: 'center'
-                                }}>
-                                    Click to Download
-                                </p>
-                            </a>
-                        ))}
-                    </div>
                 </div>
             </div>
         </>
