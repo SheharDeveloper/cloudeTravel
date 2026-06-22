@@ -214,6 +214,14 @@ export default function Home() {
                     .hero-subtitle {
                         font-size: 11px !important;
                     }
+                    .booking-form-container {
+                        margin-top: 20px !important;
+                        padding: 15px !important;
+                    }
+                    .booking-form-container > div {
+                        max-width: 100% !important;
+                        border-radius: 8px !important;
+                    }
                     .booking-search-container {
                         display: block !important;
                         width: 100% !important;
@@ -492,8 +500,8 @@ export default function Home() {
             )}
 
             {/* BOOKING SEARCH FORM WITH TABS */}
-            <div style={{ padding: 'clamp(15px, 10vw, 280px)', position: 'relative', zIndex: 10, marginTop: '-200px', paddingBottom: '80px', overflow: 'visible' }}>
-                <div style={{ maxWidth: '100%', margin: '0 auto', background: '#fff', borderRadius: '16px', boxShadow: '0 10px 40px rgba(0,0,0,.18)', overflow: 'visible' }}>
+            <div className="booking-form-container" style={{ padding: '0 20px', position: 'relative', zIndex: 10, marginTop: '-180px', paddingBottom: '80px', overflow: 'visible' }}>
+                <div style={{ maxWidth: '1500px', margin: '0 auto', background: '#fff', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,.12)', overflow: 'visible' }}>
                     {/* Tab Navigation - Professional Style */}
                     <div className="tabs-nav" style={{ display: 'flex', gap: 'clamp(0px, 1vw, 8px)', borderBottom: '2px solid #efefef', backgroundColor: '#fff', padding: 'clamp(2px, 1vw, 20px)', justifyContent: 'center', flexWrap: 'nowrap', overflowX: 'auto', boxShadow: '0 2px 8px rgba(0,0,0,.08)' }}>
                         <button className="tab-button"
