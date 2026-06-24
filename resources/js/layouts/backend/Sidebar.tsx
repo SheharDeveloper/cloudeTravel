@@ -43,6 +43,10 @@ const menuItems: MenuItem[] = [
 
     { type: 'link', icon: 'fa-solid fa-phone', label: 'Contact Info', href: '/admin/contact-info' },
 
+    { type: 'link', icon: 'fa-solid fa-passport', label: 'Visa Management', href: '/admin/visa-services' },
+    { type: 'link', icon: 'fa-solid fa-gift', label: 'Package Management', href: '/admin/packages' },
+    { type: 'link', icon: 'fa-solid fa-concierge-bell', label: 'Service Management', href: '/admin/services' },
+
     // { type: 'link', icon: 'fa-solid fa-passport', label: 'Visa Services', href: '/admin/visa-services' },
     // { type: 'link', icon: 'fa-solid fa-briefcase', label: 'Other Services', href: '/admin/other-services' },
     // { type: 'link', icon: 'fa-solid fa-images', label: 'Images', href: '/admin/images' },

@@ -51,6 +51,15 @@ Route::prefix('admin')->group(function () {
 
     // Contact Info Management (Inertia Page)
     Route::inertia('contact-info', 'Admin/ContactInfo/Index')->name('admin.contact-info.index');
+
+    // Visa Services Management (React Components via Inertia)
+    Route::inertia('visa-services', 'Admin/Visa/Index')->name('admin.visa-services.index');
+
+    // Services Management (React Components via Inertia)
+    Route::inertia('services', 'Admin/Services/Index')->name('admin.services.index');
+
+    // Packages Management (React Components via Inertia)
+    Route::inertia('packages', 'Admin/Packages/Index')->name('admin.packages.index');
 });
 
 // Agency routes (frontend pages only)

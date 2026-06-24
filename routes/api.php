@@ -15,6 +15,8 @@ use App\Http\Controllers\Api\ContactInfoController;
 use App\Http\Controllers\Api\TourController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\BookingNoteController;
+use App\Http\Controllers\Api\VisaController;
+use App\Http\Controllers\Api\PackageController;
 
 // Public auth endpoints (no authentication required)
 Route::post('auth/login', [AuthController::class, 'login'])->name('auth.login');
@@ -31,6 +33,14 @@ Route::get('testimonials', [TestimonialController::class, 'index'])->name('testi
 
 // Public contact info endpoint
 Route::get('contact-info', [ContactInfoController::class, 'index'])->name('contact-info.index');
+
+// Public visa endpoints (no authentication required)
+Route::get('visas', [VisaController::class, 'index'])->name('visas.index');
+Route::get('visas/{visa}', [VisaController::class, 'show'])->name('visas.show');
+
+// Public package endpoints (no authentication required)
+Route::get('packages', [PackageController::class, 'index'])->name('packages.index');
+Route::get('packages/{package}', [PackageController::class, 'show'])->name('packages.show');
 
 // Public booking endpoints (no authentication required)
 Route::get('bookings', [BookingController::class, 'index'])->name('bookings.index');
@@ -101,4 +111,16 @@ Route::middleware('auth:sanctum')->group(function () {
     // Contact Info routes (create/update)
     Route::post('contact-info', [ContactInfoController::class, 'store'])->name('contact-info.store');
     Route::put('contact-info', [ContactInfoController::class, 'update'])->name('contact-info.update');
+
+    // Visa resource routes (create, update, delete)
+    Route::post('visas', [VisaController::class, 'store'])->name('visas.store');
+    Route::put('visas/{visa}', [VisaController::class, 'update'])->name('visas.update');
+    Route::patch('visas/{visa}', [VisaController::class, 'update'])->name('visas.update');
+    Route::delete('visas/{visa}', [VisaController::class, 'destroy'])->name('visas.destroy');
+
+    // Package resource routes (create, update, delete)
+    Route::post('packages', [PackageController::class, 'store'])->name('packages.store');
+    Route::put('packages/{package}', [PackageController::class, 'update'])->name('packages.update');
+    Route::patch('packages/{package}', [PackageController::class, 'update'])->name('packages.update');
+    Route::delete('packages/{package}', [PackageController::class, 'destroy'])->name('packages.destroy');
 });

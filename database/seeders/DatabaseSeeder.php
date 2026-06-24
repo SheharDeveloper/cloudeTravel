@@ -20,5 +20,7 @@ class DatabaseSeeder extends Seeder
         $this->call(SpecialOfferSeeder::class);
         $this->call(TestimonialSeeder::class);
         $this->call(TourSeeder::class);
+        $this->call(VisaSeeder::class);
+        $this->call(PackageSeeder::class);
     }
 }

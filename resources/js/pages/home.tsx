@@ -5,6 +5,8 @@ import { heroImageService } from '@/services/heroImageService';
 import { testimonialService } from '@/services/testimonialService';
 import { contactInfoService } from '@/services/contactInfoService';
 import { imageService } from '@/services/imageService';
+import { fetchFeaturedVisas } from '@/services/visaService';
+import { fetchFeaturedPackages } from '@/services/packageService';
 import FlightSearchForm from '@/components/FlightSearchForm';
 import HotelsSearchForm from '@/components/HotelsSearchForm';
 import VisasSearchForm from '@/components/VisasSearchForm';
@@ -31,6 +33,8 @@ export default function Home() {
     const [contactInfo, setContactInfo] = useState<any>(null);
     const [currency, setCurrency] = useState({ symbol: '£', code: 'GBP' });
     const [heroImageLoading, setHeroImageLoading] = useState(true);
+    const [featuredVisas, setFeaturedVisas] = useState<any[]>([]);
+    const [featuredPackages, setFeaturedPackages] = useState<any[]>([]);
     const isInitialLoadRef = useRef(true);
     const autoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const heroAutoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -41,6 +45,8 @@ export default function Home() {
         loadHeroImages();
         loadTestimonials();
         loadContactInfo();
+        loadFeaturedVisas();
+        loadFeaturedPackages();
     }, []);
 
     useEffect(() => {
@@ -89,6 +95,16 @@ export default function Home() {
     const loadContactInfo = async () => {
         const data = await contactInfoService.get();
         setContactInfo(data);
+    };
+
+    const loadFeaturedVisas = async () => {
+        const visas = await fetchFeaturedVisas();
+        setFeaturedVisas(visas);
+    };
+
+    const loadFeaturedPackages = async () => {
+        const packages = await fetchFeaturedPackages();
+        setFeaturedPackages(packages);
     };
 
     const startAutoPlay = () => {
@@ -718,30 +734,314 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* TRAVEL PACKAGES SECTION */}
-            <section style={{ padding: '50px 40px', background: '#f5f5f5' }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#003d82', marginBottom: '30px', textAlign: 'center' }}>📦 Travel Packages</h3>
-                    <div className="package-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
-                        {[
-                            { name: 'Honeymoon Package', img: 'honeymoon.jpg', icon: '✈️' },
-                            { name: 'Family Tour', img: 'family.jpg', icon: '✈️' },
-                            { name: 'Adventure Trip', img: 'adventure.jpg', icon: '✈️' },
-                            { name: 'Beach Retreat', img: 'beach.jpg', icon: '✈️' }
-                        ].map((pkg, idx) => (
-                            <div key={idx} style={{ padding: '20px', background: '#fff8f0', borderRadius: '10px', border: '1.5px solid #f5d9c3', textAlign: 'center', transition: 'all 0.3s', cursor: 'pointer', overflow: 'hidden' }} onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 8px 16px rgba(255,107,53,.15)'; e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = '#fffaf5'; }} onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = '#fff8f0'; }}>
-                                <ImageWithFallback
-                                    src={imageService.getImagePath('packages', pkg.img)}
-                                    alt={pkg.name}
-                                    fallbackSrc={imageService.getFallbackImage('package')}
-                                    style={{ width: '100%', height: '160px', objectFit: 'cover', borderRadius: '8px', marginBottom: '12px' }}
-                                />
-                                <p style={{ fontSize: '15px', fontWeight: 600, color: '#003d82', margin: 0, lineHeight: 1.4 }}>{pkg.name}</p>
-                            </div>
-                        ))}
+
+            {/* FEATURED VISAS SECTION */}
+            {featuredVisas.length > 0 && (
+                <section style={{ padding: '50px 20px', background: '#fff' }}>
+                    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#003d82', marginBottom: '12px' }}>
+                                <i className="fa fa-star" style={{ color: '#ff6b35', marginRight: '10px' }}></i>
+                                Featured Visa Services
+                            </h2>
+                            <div style={{ width: '50px', height: '3px', background: '#ff6b35', margin: '0 auto 15px' }}></div>
+                            <p style={{ color: '#777', fontSize: '13px', maxWidth: '500px', margin: '0 auto' }}>
+                                Explore our most popular visa services for your travel needs
+                            </p>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '25px' }}>
+                            {featuredVisas.map((visa) => (
+                                <div key={visa.id} style={{
+                                    background: '#fff',
+                                    borderRadius: '12px',
+                                    overflow: 'hidden',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                                    cursor: 'pointer',
+                                    border: '2px solid #ff6b35'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-8px)';
+                                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                                }}>
+                                    {/* Image */}
+                                    <div style={{
+                                        height: '180px',
+                                        background: '#f0f0f0',
+                                        overflow: 'hidden',
+                                        position: 'relative'
+                                    }}>
+                                        {visa.image ? (
+                                            <ImageWithFallback
+                                                src={visa.image}
+                                                alt={visa.name}
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    objectFit: 'cover'
+                                                }}
+                                            />
+                                        ) : (
+                                            <div style={{
+                                                width: '100%',
+                                                height: '100%',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                color: '#fff',
+                                                fontSize: '48px'
+                                            }}>
+                                                <i className="fa fa-passport"></i>
+                                            </div>
+                                        )}
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: '10px',
+                                            right: '10px',
+                                            background: '#ff6b35',
+                                            color: '#fff',
+                                            padding: '6px 12px',
+                                            borderRadius: '20px',
+                                            fontSize: '11px',
+                                            fontWeight: 700,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '5px'
+                                        }}>
+                                            <i className="fa fa-star"></i> Featured
+                                        </div>
+                                    </div>
+
+                                    {/* Content */}
+                                    <div style={{ padding: '20px' }}>
+                                        <h3 style={{
+                                            fontSize: '16px',
+                                            fontWeight: 700,
+                                            color: '#003d82',
+                                            marginBottom: '8px'
+                                        }}>
+                                            {visa.name}
+                                        </h3>
+                                        <p style={{
+                                            fontSize: '12px',
+                                            color: '#ff6b35',
+                                            fontWeight: 600,
+                                            marginBottom: '10px'
+                                        }}>
+                                            {visa.title}
+                                        </p>
+                                        <p style={{
+                                            fontSize: '12px',
+                                            color: '#666',
+                                            lineHeight: '1.5',
+                                            marginBottom: '15px'
+                                        }}>
+                                            {visa.description ? visa.description.substring(0, 80) + '...' : 'Professional visa services'}
+                                        </p>
+                                        <button style={{
+                                            width: '100%',
+                                            background: '#003d82',
+                                            color: '#fff',
+                                            border: 'none',
+                                            padding: '10px',
+                                            borderRadius: '6px',
+                                            fontSize: '12px',
+                                            fontWeight: 700,
+                                            cursor: 'pointer',
+                                            transition: 'background 0.3s ease'
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.background = '#ff6b35'}
+                                        onMouseLeave={(e) => e.currentTarget.style.background = '#003d82'}
+                                        >
+                                            Learn More
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            )}
+
+            {/* FEATURED PACKAGES SECTION */}
+            {featuredPackages.length > 0 && (
+                <section style={{ padding: '50px 20px', background: '#f9f9f9' }}>
+                    <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#003d82', marginBottom: '12px' }}>
+                                <i className="fa fa-gift" style={{ color: '#ff6b35', marginRight: '10px' }}></i>
+                                Featured Travel Packages
+                            </h2>
+                            <div style={{ width: '50px', height: '3px', background: '#ff6b35', margin: '0 auto 15px' }}></div>
+                            <p style={{ color: '#777', fontSize: '13px', maxWidth: '500px', margin: '0 auto' }}>
+                                Explore our most popular travel packages for unforgettable adventures
+                            </p>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '25px' }}>
+                            {featuredPackages.map((pkg) => (
+                                <div key={pkg.id} style={{
+                                    background: '#fff',
+                                    borderRadius: '12px',
+                                    overflow: 'hidden',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                                    cursor: 'pointer',
+                                    border: '2px solid #ff6b35'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(-8px)';
+                                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                                }}>
+                                    {/* Image */}
+                                    <div style={{
+                                        height: '200px',
+                                        background: '#f0f0f0',
+                                        overflow: 'hidden',
+                                        position: 'relative'
+                                    }}>
+                                        {pkg.image ? (
+                                            <ImageWithFallback
+                                                src={pkg.image}
+                                                alt={pkg.name}
+                                                style={{
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    objectFit: 'cover'
+                                                }}
+                                            />
+                                        ) : (
+                                            <div style={{
+                                                width: '100%',
+                                                height: '100%',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                color: '#fff',
+                                                fontSize: '48px'
+                                            }}>
+                                                <i className="fa fa-gift"></i>
+                                            </div>
+                                        )}
+                                        <div style={{
+                                            position: 'absolute',
+                                            top: '10px',
+                                            right: '10px',
+                                            background: '#ff6b35',
+                                            color: '#fff',
+                                            padding: '6px 12px',
+                                            borderRadius: '20px',
+                                            fontSize: '11px',
+                                            fontWeight: 700,
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            gap: '5px'
+                                        }}>
+                                            <i className="fa fa-star"></i> Featured
+                                        </div>
+                                        <div style={{
+                                            position: 'absolute',
+                                            bottom: '10px',
+                                            left: '10px',
+                                            background: '#003d82',
+                                            color: '#fff',
+                                            padding: '4px 10px',
+                                            borderRadius: '4px',
+                                            fontSize: '10px',
+                                            fontWeight: 700
+                                        }}>
+                                            {pkg.origin_country || 'India'} → {pkg.destination_country}
+                                        </div>
+                                    </div>
+
+                                    {/* Content */}
+                                    <div style={{ padding: '20px' }}>
+                                        <h3 style={{
+                                            fontSize: '16px',
+                                            fontWeight: 700,
+                                            color: '#003d82',
+                                            marginBottom: '8px'
+                                        }}>
+                                            {pkg.name}
+                                        </h3>
+                                        <p style={{
+                                            fontSize: '12px',
+                                            color: '#ff6b35',
+                                            fontWeight: 600,
+                                            marginBottom: '10px'
+                                        }}>
+                                            {pkg.title}
+                                        </p>
+                                        <div style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            marginBottom: '15px',
+                                            fontSize: '12px',
+                                            color: '#666'
+                                        }}>
+                                            <span><i className="fa fa-calendar me-1"></i>{pkg.duration_days} Days</span>
+                                            <span><i className="fa fa-star me-1"></i>{pkg.hotel_stars} Stars</span>
+                                        </div>
+                                        <div style={{
+                                            fontSize: '18px',
+                                            fontWeight: 700,
+                                            color: '#003d82',
+                                            marginBottom: '15px'
+                                        }}>
+                                            {pkg.currency} {parseFloat(String(pkg.price)).toFixed(0)}
+                                        </div>
+                                        {(pkg.travel_export_included || pkg.visa_service_included) && (
+                                            <div style={{
+                                                display: 'flex',
+                                                gap: '5px',
+                                                marginBottom: '15px',
+                                                flexWrap: 'wrap',
+                                                fontSize: '10px'
+                                            }}>
+                                                {pkg.travel_export_included && (
+                                                    <span className="badge bg-success"><i className="fa fa-check me-1"></i>Travel Export</span>
+                                                )}
+                                                {pkg.visa_service_included && (
+                                                    <span className="badge bg-primary"><i className="fa fa-check me-1"></i>Visa Service</span>
+                                                )}
+                                            </div>
+                                        )}
+                                        <button style={{
+                                            width: '100%',
+                                            background: '#003d82',
+                                            color: '#fff',
+                                            border: 'none',
+                                            padding: '10px',
+                                            borderRadius: '6px',
+                                            fontSize: '12px',
+                                            fontWeight: 700,
+                                            cursor: 'pointer',
+                                            transition: 'background 0.3s ease'
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.background = '#ff6b35'}
+                                        onMouseLeave={(e) => e.currentTarget.style.background = '#003d82'}
+                                        >
+                                            Book Now
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            )}
 
             {/* AIRLINE LOGO SLIDER SECTION */}
             <AirlineLogoSlider />
