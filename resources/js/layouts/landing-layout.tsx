@@ -281,7 +281,7 @@ export default function LandingLayout({ children }: Props) {
                     <li><Link href="/about-us" style={{ color: '#333', fontSize: '14px', fontWeight: 500, textDecoration: 'none', transition: 'color 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#ff6b35'} onMouseLeave={(e) => e.currentTarget.style.color = '#333'}>About Us</Link></li>
                     <li><Link href="/contact-us" style={{ color: '#333', fontSize: '14px', fontWeight: 500, textDecoration: 'none', transition: 'color 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#ff6b35'} onMouseLeave={(e) => e.currentTarget.style.color = '#333'}>Contact Us</Link></li>
                 </ul>
-                <a className="navbar-cta" href="tel:+1234567890" style={{ background: '#ff6b35', color: '#fff', padding: '10px 22px', borderRadius: '4px', fontWeight: 700, fontSize: '13px', textDecoration: 'none', cursor: 'pointer', transition: 'all 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#e85a24'} onMouseLeave={(e) => e.currentTarget.style.background = '#ff6b35'}>CALL NOW</a>
+                <a className="navbar-cta" href="tel:+1234567890" style={{ background: '#0499ff', color: '#fff', padding: '10px 22px', borderRadius: '4px', fontWeight: 700, fontSize: '13px', textDecoration: 'none', cursor: 'pointer', transition: 'all 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#0277d8'} onMouseLeave={(e) => e.currentTarget.style.background = '#0499ff'}>CALL NOW</a>
             </nav>
 
             {/* MOBILE MENU */}
@@ -290,7 +290,7 @@ export default function LandingLayout({ children }: Props) {
                     <li><Link href="/" style={{ color: '#ff6b35', fontSize: '14px', fontWeight: 500, textDecoration: 'none' }}>Home</Link></li>
                     <li><Link href="/about-us" style={{ color: '#333', fontSize: '14px', fontWeight: 500, textDecoration: 'none' }}>About Us</Link></li>
                     <li><Link href="/contact-us" style={{ color: '#333', fontSize: '14px', fontWeight: 500, textDecoration: 'none' }}>Contact Us</Link></li>
-                    <li><a href="tel:+1234567890" style={{ background: '#ff6b35', color: '#fff', padding: '8px 15px', borderRadius: '4px', fontWeight: 700, fontSize: '13px', textDecoration: 'none', display: 'inline-block' }}>CALL NOW</a></li>
+                    <li><a href="tel:+1234567890" style={{ background: '#0499ff', color: '#fff', padding: '8px 15px', borderRadius: '4px', fontWeight: 700, fontSize: '13px', textDecoration: 'none', display: 'inline-block' }}>CALL NOW</a></li>
                 </ul>
             </div>
 

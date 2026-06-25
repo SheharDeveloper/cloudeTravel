@@ -293,7 +293,7 @@ export default function HotelsSearchForm(): React.ReactElement {
                     </div>
 
                     {/* Done Button */}
-                    <button onClick={() => setShowGuestModal(false)} style={{ background: '#ff6b35', color: '#fff', border: 'none', width: '100%', padding: '12px', borderRadius: '6px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Done</button>
+                    <button onClick={() => setShowGuestModal(false)} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '100%', padding: '12px', borderRadius: '6px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Done</button>
                 </div>
             )}
 

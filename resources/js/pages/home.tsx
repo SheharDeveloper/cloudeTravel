@@ -702,9 +702,9 @@ export default function Home() {
                         }
                     `}</style>
                     <div className="offer-marquee" key={currentOfferIndex}>
-                        <div style={{ display: 'inline-block', color: '#ff6b35', fontWeight: 700, fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', borderBottom: '1px solid #ff6b35', marginBottom: '4px' }}>Special Offer</div>
+                        <div style={{ display: 'inline-block', color: '#0499ff', fontWeight: 700, fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', borderBottom: '1px solid #0499ff', marginBottom: '4px' }}>Special Offer</div>
                         <br />
-                        ★ Special fares with <strong>{specialOffers[currentOfferIndex].airline}</strong> from {specialOffers[currentOfferIndex].from} to {specialOffers[currentOfferIndex].destinations} from <span style={{ color: '#c0392b', fontWeight: 700 }}>{specialOffers[currentOfferIndex].price}</span> <span style={{ color: '#ff6b35', fontWeight: 700 }}>→</span>
+                        ★ Special fares with <strong>{specialOffers[currentOfferIndex].airline}</strong> from {specialOffers[currentOfferIndex].from} to {specialOffers[currentOfferIndex].destinations} from <span style={{ color: '#c0392b', fontWeight: 700 }}>{specialOffers[currentOfferIndex].price}</span> <span style={{ color: '#0499ff', fontWeight: 700 }}>→</span>
                     </div>
                 </div>
             )}
@@ -741,10 +741,10 @@ export default function Home() {
                     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
                             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#003d82', marginBottom: '12px' }}>
-                                <i className="fa fa-star" style={{ color: '#ff6b35', marginRight: '10px' }}></i>
+                                <i className="fa fa-star" style={{ color: '#0499ff', marginRight: '10px' }}></i>
                                 Featured Visa Services
                             </h2>
-                            <div style={{ width: '50px', height: '3px', background: '#ff6b35', margin: '0 auto 15px' }}></div>
+                            <div style={{ width: '50px', height: '3px', background: '#0499ff', margin: '0 auto 15px' }}></div>
                             <p style={{ color: '#777', fontSize: '13px', maxWidth: '500px', margin: '0 auto' }}>
                                 Explore our most popular visa services for your travel needs
                             </p>
@@ -759,7 +759,7 @@ export default function Home() {
                                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                                     transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                                     cursor: 'pointer',
-                                    border: '2px solid #ff6b35'
+                                    border: '2px solid #0499ff'
                                 }}
                                 onMouseEnter={(e) => {
                                     e.currentTarget.style.transform = 'translateY(-8px)';
@@ -804,7 +804,7 @@ export default function Home() {
                                             position: 'absolute',
                                             top: '10px',
                                             right: '10px',
-                                            background: '#ff6b35',
+                                            background: '#0499ff',
                                             color: '#fff',
                                             padding: '6px 12px',
                                             borderRadius: '20px',
@@ -830,7 +830,7 @@ export default function Home() {
                                         </h3>
                                         <p style={{
                                             fontSize: '12px',
-                                            color: '#ff6b35',
+                                            color: '#0499ff',
                                             fontWeight: 600,
                                             marginBottom: '10px'
                                         }}>
@@ -846,7 +846,7 @@ export default function Home() {
                                         </p>
                                         <button style={{
                                             width: '100%',
-                                            background: '#003d82',
+                                            background: '#0499ff',
                                             color: '#fff',
                                             border: 'none',
                                             padding: '10px',
@@ -854,10 +854,16 @@ export default function Home() {
                                             fontSize: '12px',
                                             fontWeight: 700,
                                             cursor: 'pointer',
-                                            transition: 'background 0.3s ease'
+                                            transition: 'all 0.3s ease'
                                         }}
-                                        onMouseEnter={(e) => e.currentTarget.style.background = '#ff6b35'}
-                                        onMouseLeave={(e) => e.currentTarget.style.background = '#003d82'}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = '#0277d8';
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = '#0499ff';
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                        }}
                                         >
                                             Learn More
                                         </button>
@@ -875,10 +881,10 @@ export default function Home() {
                     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
                             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#003d82', marginBottom: '12px' }}>
-                                <i className="fa fa-gift" style={{ color: '#ff6b35', marginRight: '10px' }}></i>
-                                Featured Travel Packages
+                                <i className="fa fa-gift" style={{ color: '#0499ff', marginRight: '10px' }}></i>
+                                Featured Travel Package
                             </h2>
-                            <div style={{ width: '50px', height: '3px', background: '#ff6b35', margin: '0 auto 15px' }}></div>
+                            <div style={{ width: '50px', height: '3px', background: '#0499ff', margin: '0 auto 15px' }}></div>
                             <p style={{ color: '#777', fontSize: '13px', maxWidth: '500px', margin: '0 auto' }}>
                                 Explore our most popular travel packages for unforgettable adventures
                             </p>
@@ -893,7 +899,7 @@ export default function Home() {
                                     boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                                     transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                                     cursor: 'pointer',
-                                    border: '2px solid #ff6b35'
+                                    border: '2px solid #0499ff'
                                 }}
                                 onMouseEnter={(e) => {
                                     e.currentTarget.style.transform = 'translateY(-8px)';
@@ -938,7 +944,7 @@ export default function Home() {
                                             position: 'absolute',
                                             top: '10px',
                                             right: '10px',
-                                            background: '#ff6b35',
+                                            background: '#0499ff',
                                             color: '#fff',
                                             padding: '6px 12px',
                                             borderRadius: '20px',
@@ -977,7 +983,7 @@ export default function Home() {
                                         </h3>
                                         <p style={{
                                             fontSize: '12px',
-                                            color: '#ff6b35',
+                                            color: '#0499ff',
                                             fontWeight: 600,
                                             marginBottom: '10px'
                                         }}>
@@ -1020,7 +1026,7 @@ export default function Home() {
                                         )}
                                         <button style={{
                                             width: '100%',
-                                            background: '#003d82',
+                                            background: '#0499ff',
                                             color: '#fff',
                                             border: 'none',
                                             padding: '10px',
@@ -1028,10 +1034,16 @@ export default function Home() {
                                             fontSize: '12px',
                                             fontWeight: 700,
                                             cursor: 'pointer',
-                                            transition: 'background 0.3s ease'
+                                            transition: 'all 0.3s ease'
                                         }}
-                                        onMouseEnter={(e) => e.currentTarget.style.background = '#ff6b35'}
-                                        onMouseLeave={(e) => e.currentTarget.style.background = '#003d82'}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.background = '#0277d8';
+                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.background = '#0499ff';
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                        }}
                                         >
                                             Book Now
                                         </button>
@@ -1102,7 +1114,7 @@ export default function Home() {
                     <div style={{ maxWidth: '1200px', margin: '0 auto' }} className="testimonials-section">
                         <div style={{ textAlign: 'center', marginBottom: '50px' }}>
                             <h2 className="testimonials-heading" style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#003d82', marginBottom: '12px' }}>What Our Clients Say</h2>
-                            <div style={{ width: '50px', height: '3px', background: '#ff6b35', margin: '0 auto 15px' }}></div>
+                            <div style={{ width: '50px', height: '3px', background: '#0499ff', margin: '0 auto 15px' }}></div>
                             <p className="testimonials-paragraph" style={{ color: '#777', fontSize: '13px', maxWidth: '500px', margin: '0 auto' }}>Discover what travelers around the world think about our services</p>
                         </div>
 
@@ -1131,13 +1143,13 @@ export default function Home() {
                                                     src={testimonial.client_image}
                                                     alt={testimonial.client_name}
                                                     fallbackSrc="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ccircle cx='40' cy='40' r='40' fill='%23f0f0f0'/%3E%3Ctext x='40' y='40' font-size='28' fill='%23999' text-anchor='middle' dy='.3em'%3E%3F%3C/text%3E%3C/svg%3E"
-                                                    style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #ff6b35' }}
+                                                    style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #0499ff' }}
                                                 />
                                             </div>
                                             <h4 style={{ fontSize: '16px', fontWeight: 700, color: '#003d82', marginBottom: '8px' }}>{testimonial.client_name}</h4>
                                             <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '15px' }}>
                                                 {[...Array(testimonial.rating)].map((_, i) => (
-                                                    <span key={i} style={{ color: '#ff6b35', fontSize: '14px' }}>★</span>
+                                                    <span key={i} style={{ color: '#0499ff', fontSize: '14px' }}>★</span>
                                                 ))}
                                             </div>
                                             <p style={{ color: '#666', fontSize: '13px', lineHeight: 1.6, fontStyle: 'italic' }}>"{testimonial.message}"</p>
@@ -1167,7 +1179,7 @@ export default function Home() {
                                 <button
                                     key={idx}
                                     onClick={() => setCurrentTestimonialIndex(idx)}
-                                    style={{ width: '12px', height: '12px', borderRadius: '50%', border: 'none', background: idx === currentTestimonialIndex ? '#ff6b35' : '#ddd', cursor: 'pointer', transition: 'background 0.3s' }}
+                                    style={{ width: '12px', height: '12px', borderRadius: '50%', border: 'none', background: idx === currentTestimonialIndex ? '#0499ff' : '#ddd', cursor: 'pointer', transition: 'background 0.3s' }}
                                 />
                             ))}
                         </div>

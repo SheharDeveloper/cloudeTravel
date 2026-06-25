@@ -6,6 +6,7 @@ interface CalendarDateRangePickerProps {
     tripType: 'oneway' | 'roundtrip';
     onDateChange: (departure: string, returnDate: string) => void;
     onClose: () => void;
+    onTripTypeChange?: (tripType: 'oneway' | 'roundtrip') => void;
 }
 
 // Helper function to format date in local timezone (not UTC)
@@ -21,8 +22,10 @@ export default function CalendarDateRangePicker({
     returnDate,
     tripType,
     onDateChange,
-    onClose
+    onClose,
+    onTripTypeChange
 }: CalendarDateRangePickerProps) {
+    const [localTripType, setLocalTripType] = useState<'oneway' | 'roundtrip'>(tripType);
     const [currentMonth, setCurrentMonth] = useState(new Date());
     const [selectedStart, setSelectedStart] = useState<Date | null>(departureDate ? new Date(departureDate) : null);
     const [selectedEnd, setSelectedEnd] = useState<Date | null>(returnDate ? new Date(returnDate) : null);
@@ -36,8 +39,8 @@ export default function CalendarDateRangePicker({
         return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
     };
 
-    const handleDateClick = (day: number) => {
-        const clickedDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+    const handleDateClick = (day: number, monthDate: Date = currentMonth) => {
+        const clickedDate = new Date(monthDate.getFullYear(), monthDate.getMonth(), day);
 
         if (!isSelectingRange) {
             setSelectedStart(clickedDate);
@@ -126,12 +129,12 @@ export default function CalendarDateRangePicker({
                         return (
                             <button
                                 key={day}
-                                onClick={() => handleDateClick(day)}
+                                onClick={() => handleDateClick(day, monthDate)}
                                 style={{
                                     padding: '8px',
-                                    border: 'none',
+                                    border: isSelected ? '2px solid #0499ff' : 'none',
                                     borderRadius: '50%',
-                                    background: isSelected ? '#0066cc' : inRange ? '#e8f1ff' : 'transparent',
+                                    background: isSelected ? '#0499ff' : inRange ? '#e8f2ff' : 'transparent',
                                     color: isSelected ? '#fff' : '#333',
                                     fontSize: '12px',
                                     fontWeight: isSelected ? 600 : 500,
@@ -140,12 +143,12 @@ export default function CalendarDateRangePicker({
                                 }}
                                 onMouseEnter={(e) => {
                                     if (!isSelected) {
-                                        e.currentTarget.style.background = '#f0f0f0';
+                                        e.currentTarget.style.background = '#e8f2ff';
                                     }
                                 }}
                                 onMouseLeave={(e) => {
                                     if (!isSelected) {
-                                        e.currentTarget.style.background = inRange ? '#e8f1ff' : 'transparent';
+                                        e.currentTarget.style.background = inRange ? '#e8f2ff' : 'transparent';
                                     }
                                 }}
                             >
@@ -162,15 +165,6 @@ export default function CalendarDateRangePicker({
 
     return (
         <div style={{ position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', marginTop: '12px', background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 8px 32px rgba(0,0,0,.2)', zIndex: 9999, border: '1px solid #e0e0e0', minWidth: '520px' }}>
-            {/* Tabs */}
-            <div style={{ display: 'flex', gap: '16px', marginBottom: '20px', borderBottom: '1px solid #e0e0e0', paddingBottom: '12px' }}>
-                <button style={{ fontSize: '14px', fontWeight: 600, color: '#0066cc', border: 'none', background: 'none', cursor: 'pointer', paddingBottom: '4px', borderBottom: '2px solid #0066cc' }}>
-                    Calendar
-                </button>
-                <button style={{ fontSize: '14px', fontWeight: 500, color: '#999', border: 'none', background: 'none', cursor: 'pointer', paddingBottom: '4px' }}>
-                    I'm flexible
-                </button>
-            </div>
 
             {/* Calendar months */}
             <div style={{ display: 'flex', gap: '24px', marginBottom: '20px', justifyContent: 'space-between' }}>
@@ -182,13 +176,13 @@ export default function CalendarDateRangePicker({
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <button
                     onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}
-                    style={{ background: 'none', border: 'none', color: '#0066cc', cursor: 'pointer', fontSize: '16px' }}
+                    style={{ background: 'none', border: 'none', color: '#0499ff', cursor: 'pointer', fontSize: '16px' }}
                 >
                     <i className="fa fa-chevron-left"></i>
                 </button>
                 <button
                     onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
-                    style={{ background: 'none', border: 'none', color: '#0066cc', cursor: 'pointer', fontSize: '16px' }}
+                    style={{ background: 'none', border: 'none', color: '#0499ff', cursor: 'pointer', fontSize: '16px' }}
                 >
                     <i className="fa fa-chevron-right"></i>
                 </button>
