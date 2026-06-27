@@ -431,35 +431,46 @@ export default function FlightSearchForm({
                             )}
 
                             {/* Class Selection */}
-                            <div style={{ marginBottom: '20px' }}>
+                            <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #f0f0f0' }}>
                                 <p style={{ fontSize: '11px', color: '#666', marginBottom: '12px', fontWeight: 600 }}>Cabin Class</p>
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
                                     {['Economy', 'Premium Economy', 'Business'].map(cls => (
-                                        <div key={cls} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #f0f0f0' }}>
-                                            <span style={{ fontSize: '14px', color: '#333', fontWeight: selectedClass === cls ? 600 : 500 }}>{cls}</span>
-                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                                <button
-                                                    onClick={() => setSelectedClass(cls)}
-                                                    style={{
-                                                        width: '36px',
-                                                        height: '36px',
-                                                        background: selectedClass === cls ? '#0499ff' : '#fff',
-                                                        color: selectedClass === cls ? '#fff' : '#666',
-                                                        border: selectedClass === cls ? 'none' : '1px solid #ddd',
-                                                        borderRadius: '4px',
-                                                        cursor: 'pointer',
-                                                        fontSize: '18px',
-                                                        fontWeight: 700,
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center',
-                                                        transition: 'all 0.2s ease'
-                                                    }}
-                                                >
-                                                    {selectedClass === cls ? '✓' : '+'}
-                                                </button>
-                                            </div>
-                                        </div>
+                                        <button
+                                            key={cls}
+                                            onClick={() => setSelectedClass(cls)}
+                                            style={{
+                                                flex: 1,
+                                                padding: '12px 16px',
+                                                background: selectedClass === cls ? '#0499ff' : '#fff',
+                                                color: selectedClass === cls ? '#fff' : '#333',
+                                                border: selectedClass === cls ? 'none' : '1px solid #ddd',
+                                                borderRadius: '6px',
+                                                cursor: 'pointer',
+                                                fontSize: '13px',
+                                                fontWeight: selectedClass === cls ? 700 : 500,
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                gap: '6px',
+                                                transition: 'all 0.2s ease',
+                                                minHeight: '40px'
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                if (selectedClass !== cls) {
+                                                    e.currentTarget.style.borderColor = '#0499ff';
+                                                    e.currentTarget.style.transform = 'translateY(-2px)';
+                                                }
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                if (selectedClass !== cls) {
+                                                    e.currentTarget.style.borderColor = '#ddd';
+                                                    e.currentTarget.style.transform = 'translateY(0)';
+                                                }
+                                            }}
+                                        >
+                                            {cls}
+                                            {selectedClass === cls && <span>✓</span>}
+                                        </button>
                                     ))}
                                 </div>
                             </div>

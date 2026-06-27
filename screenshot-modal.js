@@ -43,7 +43,7 @@ import { chromium } from 'playwright';
     await page.waitForTimeout(1000);
 
     // Set a larger viewport to capture the entire modal
-    await page.setViewportSize({ width: 1366, height: 1000 });
+    await page.setViewportSize({ width: 1366, height: 1400 });
 
     // Scroll to center the modal in view
     await page.evaluate(() => {

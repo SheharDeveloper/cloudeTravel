@@ -131,11 +131,11 @@ export default function PackageSearchForm(): React.ReactElement {
 
     return (
         <div>
-            {/* Row 1: Country, City */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
+            {/* Row 1: Country, City, Airport - 3 columns */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px', alignItems: 'flex-start' }}>
                 {/* Country Selector - Searchable */}
                 <div style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Country</label>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Where</label>
                     <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '16px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-globe"></i>
                     </div>
@@ -149,10 +149,16 @@ export default function PackageSearchForm(): React.ReactElement {
                             setSelectedCity('');
                             setShowCountryDropdown(true);
                         }}
-                        onFocus={() => setShowCountryDropdown(true)}
-                        style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '13px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s' }}
-                        onMouseEnter={(e) => e.currentTarget.style.borderColor = '#ccc'}
-                        onMouseLeave={(e) => e.currentTarget.style.borderColor = '#ddd'}
+                        onFocus={(e) => {
+                            setShowCountryDropdown(true);
+                            e.currentTarget.style.borderColor = '#0499ff';
+                            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
+                        }}
+                        onBlur={(e) => {
+                            e.currentTarget.style.borderColor = '#ddd';
+                            e.currentTarget.style.boxShadow = 'none';
+                        }}
+                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
                     />
                     {showCountryDropdown && (
                         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '250px', overflowY: 'auto' }}>
@@ -178,7 +184,7 @@ export default function PackageSearchForm(): React.ReactElement {
 
                 {/* City Selector - Searchable */}
                 <div style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>City</label>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>City</label>
                     <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '16px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-building"></i>
                     </div>
@@ -191,11 +197,19 @@ export default function PackageSearchForm(): React.ReactElement {
                             setSelectedCity('');
                             setShowCityDropdown(true);
                         }}
-                        onFocus={() => selectedCountry && setShowCityDropdown(true)}
+                        onFocus={(e) => {
+                            if (selectedCountry) {
+                                setShowCityDropdown(true);
+                                e.currentTarget.style.borderColor = '#0499ff';
+                                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
+                            }
+                        }}
+                        onBlur={(e) => {
+                            e.currentTarget.style.borderColor = '#ddd';
+                            e.currentTarget.style.boxShadow = 'none';
+                        }}
                         disabled={!selectedCountry}
-                        style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '13px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s', opacity: selectedCountry ? 1 : 0.6, cursor: selectedCountry ? 'text' : 'not-allowed' }}
-                        onMouseEnter={(e) => selectedCountry && (e.currentTarget.style.borderColor = '#ccc')}
-                        onMouseLeave={(e) => e.currentTarget.style.borderColor = '#ddd'}
+                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500, opacity: selectedCountry ? 1 : 0.6, cursor: selectedCountry ? 'text' : 'not-allowed' }}
                     />
                     {showCityDropdown && selectedCountry && (
                         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '250px', overflowY: 'auto' }}>
@@ -236,10 +250,16 @@ export default function PackageSearchForm(): React.ReactElement {
                             setSelectedAirport('');
                             setShowAirportDropdown(true);
                         }}
-                        onFocus={() => setShowAirportDropdown(true)}
-                        style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '13px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s' }}
-                        onMouseEnter={(e) => e.currentTarget.style.borderColor = '#ccc'}
-                        onMouseLeave={(e) => e.currentTarget.style.borderColor = '#ddd'}
+                        onFocus={(e) => {
+                            setShowAirportDropdown(true);
+                            e.currentTarget.style.borderColor = '#0499ff';
+                            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
+                        }}
+                        onBlur={(e) => {
+                            e.currentTarget.style.borderColor = '#ddd';
+                            e.currentTarget.style.boxShadow = 'none';
+                        }}
+                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
                     />
                     {showAirportDropdown && (
                         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '250px', overflowY: 'auto' }}>
@@ -462,7 +482,7 @@ export default function PackageSearchForm(): React.ReactElement {
                             {/* Close Button */}
                             <button
                                 onClick={() => setShowGuestModal(false)}
-                                style={{ width: '100%', padding: '10px', background: '#0066cc', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+                                style={{ width: '100%', padding: '10px', background: '#0499ff', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
                             >
                                 Done
                             </button>
@@ -489,7 +509,7 @@ export default function PackageSearchForm(): React.ReactElement {
                 <button
                     onClick={handleSearch}
                     style={{
-                        background: 'linear-gradient(135deg, #0066cc 0%, #0052a3 100%)',
+                        background: '#0499ff',
                         color: '#fff',
                         border: 'none',
                         padding: '14px 120px',
@@ -500,14 +520,14 @@ export default function PackageSearchForm(): React.ReactElement {
                         height: '50px',
                         whiteSpace: 'nowrap',
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                        boxShadow: '0 8px 24px rgba(0, 102, 204, 0.35)',
+                        boxShadow: '0 8px 24px rgba(4, 153, 255, 0.35)',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         minWidth: '280px'
                     }}
                     onMouseEnter={(e) => {
-                        e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 102, 204, 0.45)';
+                        e.currentTarget.style.boxShadow = '0 12px 32px rgba(4, 153, 255, 0.45)';
                         e.currentTarget.style.transform = 'translateY(-3px)';
                     }}
                     onMouseLeave={(e) => {
