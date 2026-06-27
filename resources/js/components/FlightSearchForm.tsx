@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { router } from '@inertiajs/react';
 import CalendarDateRangePicker from '@/components/CalendarDateRangePicker';
 import BookingModal from '@/components/BookingModal';
@@ -31,6 +31,31 @@ export default function FlightSearchForm({
     const [returnDate, setReturnDate] = useState('');
     const [showBookingModal, setShowBookingModal] = useState(false);
     const [isFlexibleDates, setIsFlexibleDates] = useState(false);
+
+    const fromRef = useRef<HTMLDivElement>(null);
+    const toRef = useRef<HTMLDivElement>(null);
+    const calendarRef = useRef<HTMLDivElement>(null);
+    const travellerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (fromRef.current && !fromRef.current.contains(event.target as Node)) {
+                setShowFromDropdown(false);
+            }
+            if (toRef.current && !toRef.current.contains(event.target as Node)) {
+                setShowToDropdown(false);
+            }
+            if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
+                setShowDateRangePicker(false);
+            }
+            if (travellerRef.current && !travellerRef.current.contains(event.target as Node)) {
+                setShowTravellerModal(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const cityList = [
         { code: 'LON', name: 'London' },
@@ -145,7 +170,7 @@ export default function FlightSearchForm({
             {/* Row 1: From, Swap, To */}
             <div className="flight-search-row1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '50px', marginBottom: '20px', alignItems: 'flex-start', position: 'relative' }}>
                 {/* FROM CITY - Searchable Dropdown */}
-                <div style={{ position: 'relative', width: '100%', margin: 0, padding: 0 }}>
+                <div ref={fromRef} style={{ position: 'relative', width: '100%', margin: 0, padding: 0 }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, margin: 0, padding: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>From</label>
                     <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 16px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-plane"></i>
@@ -197,7 +222,7 @@ export default function FlightSearchForm({
                 </div>
 
                 {/* TO CITY - Searchable Dropdown */}
-                <div style={{ position: 'relative', width: '100%', margin: 0, padding: 0 }}>
+                <div ref={toRef} style={{ position: 'relative', width: '100%', margin: 0, padding: 0 }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, margin: 0, padding: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>To</label>
                     <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 16px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-map-marker"></i>
@@ -279,7 +304,7 @@ export default function FlightSearchForm({
             {/* Row 2: Date(s) and Travellers */}
             <div className="flight-search-row2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '50px', marginBottom: '16px', alignItems: 'flex-start', marginTop: '8px' }}>
                 {/* Combined Date Range Picker */}
-                <div style={{ width: '100%', position: 'relative' }}>
+                <div ref={calendarRef} style={{ width: '100%', position: 'relative' }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>When</label>
                     <div
                         onClick={() => {
@@ -344,7 +369,7 @@ export default function FlightSearchForm({
                 </div>
 
                 {/* Travellers & Class */}
-                <div style={{ position: 'relative', width: '100%' }}>
+                <div ref={travellerRef} style={{ position: 'relative', width: '100%' }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Who</label>
                     <div
                         onClick={() => {

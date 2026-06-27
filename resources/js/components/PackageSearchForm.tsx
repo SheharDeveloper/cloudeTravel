@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import CalendarDateRangePicker from '@/components/CalendarDateRangePicker';
 import BookingModal from '@/components/BookingModal';
 
@@ -12,6 +12,7 @@ export default function PackageSearchForm(): React.ReactElement {
     const [showCheckInCalendar, setShowCheckInCalendar] = useState(false);
     const [adults, setAdults] = useState(1);
     const [children, setChildren] = useState(0);
+    const [infants, setInfants] = useState(0);
     const [rooms, setRooms] = useState(1);
     const [showGuestModal, setShowGuestModal] = useState(false);
     const [showBookingModal, setShowBookingModal] = useState(false);
@@ -22,6 +23,35 @@ export default function PackageSearchForm(): React.ReactElement {
     const [showCountryDropdown, setShowCountryDropdown] = useState(false);
     const [showCityDropdown, setShowCityDropdown] = useState(false);
     const [showAirportDropdown, setShowAirportDropdown] = useState(false);
+
+    const countryRef = useRef<HTMLDivElement>(null);
+    const cityRef = useRef<HTMLDivElement>(null);
+    const airportRef = useRef<HTMLDivElement>(null);
+    const calendarRef = useRef<HTMLDivElement>(null);
+    const guestModalRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (countryRef.current && !countryRef.current.contains(event.target as Node)) {
+                setShowCountryDropdown(false);
+            }
+            if (cityRef.current && !cityRef.current.contains(event.target as Node)) {
+                setShowCityDropdown(false);
+            }
+            if (airportRef.current && !airportRef.current.contains(event.target as Node)) {
+                setShowAirportDropdown(false);
+            }
+            if (calendarRef.current && !calendarRef.current.contains(event.target as Node)) {
+                setShowCheckInCalendar(false);
+            }
+            if (guestModalRef.current && !guestModalRef.current.contains(event.target as Node)) {
+                setShowGuestModal(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const weeklyOptions = [7, 14, 21, 28];
     const dailyOptions = [2, 3, 4, 5, 6, 7, 8, 9, 10];
@@ -134,7 +164,7 @@ export default function PackageSearchForm(): React.ReactElement {
             {/* Row 1: Country, City, Airport - 3 columns */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px', alignItems: 'flex-start' }}>
                 {/* Country Selector - Searchable */}
-                <div style={{ position: 'relative', width: '100%' }}>
+                <div ref={countryRef} style={{ position: 'relative', width: '100%' }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Where</label>
                     <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '16px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-globe"></i>
@@ -183,7 +213,7 @@ export default function PackageSearchForm(): React.ReactElement {
                 </div>
 
                 {/* City Selector - Searchable */}
-                <div style={{ position: 'relative', width: '100%' }}>
+                <div ref={cityRef} style={{ position: 'relative', width: '100%' }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>City</label>
                     <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '16px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-building"></i>
@@ -233,7 +263,7 @@ export default function PackageSearchForm(): React.ReactElement {
                 </div>
 
                 {/* Airport Selector */}
-                <div style={{ position: 'relative', width: '100%' }}>
+                <div ref={airportRef} style={{ position: 'relative', width: '100%' }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Airport</label>
                     <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '16px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-plane"></i>
@@ -283,7 +313,7 @@ export default function PackageSearchForm(): React.ReactElement {
             {/* ROW 2: Check-in Date, Nights, Guests - 3 columns */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px', alignItems: 'flex-start' }}>
                 {/* Check-in Date */}
-                <div style={{ position: 'relative', width: '100%' }}>
+                <div ref={calendarRef} style={{ position: 'relative', width: '100%' }}>
                     <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Check-in Date</label>
                     <div
                         onClick={() => {
@@ -398,7 +428,7 @@ export default function PackageSearchForm(): React.ReactElement {
                 </div>
 
                 {/* Guests and Rooms */}
-                <div style={{ position: 'relative', width: '100%' }}>
+                <div ref={guestModalRef} style={{ position: 'relative', width: '100%' }}>
                     <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Guests & Rooms</label>
                     <div
                         onClick={() => setShowGuestModal(!showGuestModal)}
@@ -415,73 +445,72 @@ export default function PackageSearchForm(): React.ReactElement {
 
                     {/* Guest & Room Selector Modal */}
                     {showGuestModal && (
-                        <div style={{ position: 'absolute', top: '100%', right: 0, marginTop: '6px', background: '#fff', borderRadius: '8px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, minWidth: '300px', padding: '20px' }}>
+                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '12px', boxShadow: '0 12px 48px rgba(0,0,0,.3)', zIndex: 9999, border: '1px solid #e0e0e0', padding: '24px' }}>
+                            {/* Rooms Selection */}
+                            <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #f0f0f0' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div>
+                                        <p style={{ fontSize: '14px', color: '#333', margin: 0, fontWeight: 600 }}>Rooms</p>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <button onClick={() => setRooms(Math.max(1, rooms - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                                        <span style={{ fontSize: '16px', fontWeight: 600, color: '#333', minWidth: '24px', textAlign: 'center' }}>{rooms}</span>
+                                        <button onClick={() => setRooms(Math.min(8, rooms + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                                    </div>
+                                </div>
+                            </div>
+
                             {/* Adults Selection */}
-                            <div style={{ marginBottom: '20px' }}>
-                                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#333', marginBottom: '10px' }}>Adults</label>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <button
-                                        onClick={() => setAdults(Math.max(1, adults - 1))}
-                                        style={{ width: '36px', height: '36px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff', cursor: 'pointer', fontSize: '16px', fontWeight: 600, color: '#333' }}
-                                    >
-                                        −
-                                    </button>
-                                    <span style={{ flex: 1, textAlign: 'center', fontSize: '16px', fontWeight: 600 }}>{adults}</span>
-                                    <button
-                                        onClick={() => setAdults(Math.min(8, adults + 1))}
-                                        style={{ width: '36px', height: '36px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff', cursor: 'pointer', fontSize: '16px', fontWeight: 600, color: '#333' }}
-                                    >
-                                        +
-                                    </button>
+                            <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #f0f0f0' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div>
+                                        <p style={{ fontSize: '14px', color: '#333', margin: 0, fontWeight: 600 }}>Adults</p>
+                                        <p style={{ fontSize: '11px', color: '#999', margin: '4px 0 0 0' }}>18 yrs or above</p>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <button onClick={() => setAdults(Math.max(1, adults - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                                        <span style={{ fontSize: '16px', fontWeight: 600, color: '#333', minWidth: '24px', textAlign: 'center' }}>{adults}</span>
+                                        <button onClick={() => setAdults(Math.min(8, adults + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Children Selection */}
-                            <div style={{ marginBottom: '20px' }}>
-                                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#333', marginBottom: '10px' }}>Children (Age 0-12)</label>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <button
-                                        onClick={() => setChildren(Math.max(0, children - 1))}
-                                        style={{ width: '36px', height: '36px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff', cursor: 'pointer', fontSize: '16px', fontWeight: 600, color: '#333' }}
-                                    >
-                                        −
-                                    </button>
-                                    <span style={{ flex: 1, textAlign: 'center', fontSize: '16px', fontWeight: 600 }}>{children}</span>
-                                    <button
-                                        onClick={() => setChildren(Math.min(6, children + 1))}
-                                        style={{ width: '36px', height: '36px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff', cursor: 'pointer', fontSize: '16px', fontWeight: 600, color: '#333' }}
-                                    >
-                                        +
-                                    </button>
+                            <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #f0f0f0' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div>
+                                        <p style={{ fontSize: '14px', color: '#333', margin: 0, fontWeight: 600 }}>Children</p>
+                                        <p style={{ fontSize: '11px', color: '#999', margin: '4px 0 0 0' }}>0 - 17 yrs</p>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <button onClick={() => setChildren(Math.max(0, children - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                                        <span style={{ fontSize: '16px', fontWeight: 600, color: '#333', minWidth: '24px', textAlign: 'center' }}>{children}</span>
+                                        <button onClick={() => setChildren(Math.min(6, children + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Rooms Selection */}
-                            <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #eee' }}>
-                                <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#333', marginBottom: '10px' }}>Rooms</label>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <button
-                                        onClick={() => setRooms(Math.max(1, rooms - 1))}
-                                        style={{ width: '36px', height: '36px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff', cursor: 'pointer', fontSize: '16px', fontWeight: 600, color: '#333' }}
-                                    >
-                                        −
-                                    </button>
-                                    <span style={{ flex: 1, textAlign: 'center', fontSize: '16px', fontWeight: 600 }}>{rooms}</span>
-                                    <button
-                                        onClick={() => setRooms(Math.min(8, rooms + 1))}
-                                        style={{ width: '36px', height: '36px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff', cursor: 'pointer', fontSize: '16px', fontWeight: 600, color: '#333' }}
-                                    >
-                                        +
-                                    </button>
+                            {/* Infants Selection */}
+                            <div style={{ marginBottom: '20px', paddingBottom: '0' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div>
+                                        <p style={{ fontSize: '14px', color: '#333', margin: 0, fontWeight: 600 }}>Infants</p>
+                                        <p style={{ fontSize: '11px', color: '#999', margin: '4px 0 0 0' }}>Under 2 yrs</p>
+                                    </div>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                        <button onClick={() => setInfants(Math.max(0, infants - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                                        <span style={{ fontSize: '16px', fontWeight: 600, color: '#333', minWidth: '24px', textAlign: 'center' }}>{infants}</span>
+                                        <button onClick={() => setInfants(Math.min(6, infants + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                                    </div>
                                 </div>
                             </div>
 
                             {/* Close Button */}
                             <button
                                 onClick={() => setShowGuestModal(false)}
-                                style={{ width: '100%', padding: '10px', background: '#0499ff', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
+                                style={{ width: '100%', padding: '12px', background: '#0499ff', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', marginTop: '20px' }}
                             >
-                                Done
+                                Apply
                             </button>
                         </div>
                     )}

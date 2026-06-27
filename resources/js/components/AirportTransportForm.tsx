@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import BookingModal from '@/components/BookingModal';
 
 export default function AirportTransportForm(): React.ReactElement {
@@ -17,6 +17,23 @@ export default function AirportTransportForm(): React.ReactElement {
     const [showPickupDropdown, setShowPickupDropdown] = useState(false);
     const [showDestinationDropdown, setShowDestinationDropdown] = useState(false);
     const [showBookingModal, setShowBookingModal] = useState(false);
+
+    const pickupRef = useRef<HTMLDivElement>(null);
+    const destinationRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (pickupRef.current && !pickupRef.current.contains(event.target as Node)) {
+                setShowPickupDropdown(false);
+            }
+            if (destinationRef.current && !destinationRef.current.contains(event.target as Node)) {
+                setShowDestinationDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const airportList = [
         { code: 'LON', name: 'London - Heathrow Airport' },
@@ -138,7 +155,7 @@ export default function AirportTransportForm(): React.ReactElement {
             {/* Row 1: Airport & Location */}
             <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
                 {/* Pickup Airport */}
-                <div style={{ position: 'relative', width: '100%' }}>
+                <div ref={pickupRef} style={{ position: 'relative', width: '100%' }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                         FROM
                     </label>
@@ -154,9 +171,9 @@ export default function AirportTransportForm(): React.ReactElement {
                             setPickupAirport('');
                             setShowPickupDropdown(true);
                         }}
-                        onFocus={() => setShowPickupDropdown(true)}
                         style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
                         onFocus={(e) => {
+                            setShowPickupDropdown(true);
                             e.currentTarget.style.borderColor = '#0499ff';
                             e.currentTarget.style.boxShadow = '0 0 0 3px rgba(4, 153, 255, 0.1)';
                         }}
@@ -191,7 +208,7 @@ export default function AirportTransportForm(): React.ReactElement {
                 </div>
 
                 {/* Drop-off Location */}
-                <div style={{ position: 'relative', width: '100%' }}>
+                <div ref={destinationRef} style={{ position: 'relative', width: '100%' }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                         TO
                     </label>
@@ -207,9 +224,9 @@ export default function AirportTransportForm(): React.ReactElement {
                             setDestinationLocation('');
                             setShowDestinationDropdown(true);
                         }}
-                        onFocus={() => setShowDestinationDropdown(true)}
                         style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
                         onFocus={(e) => {
+                            setShowDestinationDropdown(true);
                             e.currentTarget.style.borderColor = '#0499ff';
                             e.currentTarget.style.boxShadow = '0 0 0 3px rgba(4, 153, 255, 0.1)';
                         }}

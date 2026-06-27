@@ -19,7 +19,17 @@ import ImageWithFallback from '@/components/ImageWithFallback';
  * Home/Landing page component with multiple sections
  */
 export default function Home() {
-    const [activeService, setActiveService] = useState('flight');
+    // Initialize activeService from URL parameter
+    const getInitialService = () => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search);
+            const tab = params.get('tab');
+            return tab || 'flight';
+        }
+        return 'flight';
+    };
+
+    const [activeService, setActiveService] = useState(getInitialService());
     const [showDateRangePicker, setShowDateRangePicker] = useState(false);
     const [showTravellerModal, setShowTravellerModal] = useState(false);
 
@@ -39,6 +49,14 @@ export default function Home() {
     const autoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const heroAutoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const testimonialAutoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+    // Update URL when activeService changes
+    const handleTabChange = (service: string) => {
+        setActiveService(service);
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', service);
+        window.history.pushState({}, '', url);
+    };
 
     useEffect(() => {
         loadSpecialOffers();
@@ -521,7 +539,7 @@ export default function Home() {
                     {/* Tab Navigation - Professional Style */}
                     <div className="tabs-nav" style={{ display: 'flex', gap: 'clamp(0px, 1vw, 8px)', borderBottom: '2px solid #efefef', backgroundColor: '#fff', padding: 'clamp(2px, 1vw, 20px)', justifyContent: 'center', flexWrap: 'nowrap', overflowX: 'auto', boxShadow: '0 2px 8px rgba(0,0,0,.08)' }}>
                         <button className="tab-button"
-                            onClick={() => setActiveService('flight')}
+                            onClick={() => handleTabChange('flight')}
                             style={{
                                 padding: '15px 15px',
                                 background: 'transparent',
@@ -543,7 +561,7 @@ export default function Home() {
                             <i className="fa fa-plane" style={{ fontSize: '19px' }}></i> Flights
                         </button>
                         <button className="tab-button"
-                            onClick={() => setActiveService('hotel')}
+                            onClick={() => handleTabChange('hotel')}
                             style={{
                                 padding: '10px 10px',
                                 background: 'transparent',
@@ -565,7 +583,7 @@ export default function Home() {
                             <i className="fa fa-bed" style={{ fontSize: '19px' }}></i> Hotels
                         </button>
                         <button className="tab-button"
-                            onClick={() => setActiveService('flight-hotel')}
+                            onClick={() => handleTabChange('flight-hotel')}
                             style={{
                                 padding: '10px 10px',
                                 background: 'transparent',
@@ -587,7 +605,7 @@ export default function Home() {
                             <i className="fa fa-cube" style={{ fontSize: '19px' }}></i> Package
                         </button>
                         <button className="tab-button"
-                            onClick={() => setActiveService('visa')}
+                            onClick={() => handleTabChange('visa')}
                             style={{
                                 padding: '10px 10px',
                                 background: 'transparent',
@@ -609,7 +627,7 @@ export default function Home() {
                             <i className="fa fa-passport" style={{ fontSize: '19px' }}></i> Visa
                         </button>
                         <button className="tab-button"
-                            onClick={() => setActiveService('airport-transfer')}
+                            onClick={() => handleTabChange('airport-transfer')}
                             style={{
                                 padding: '10px 10px',
                                 background: 'transparent',

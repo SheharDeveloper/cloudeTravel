@@ -1,16 +1,67 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { router } from '@inertiajs/react';
 
 export default function VisasSearchForm(): React.ReactElement {
     const [destinationCountry, setDestinationCountry] = useState('');
     const [passportCountry, setPassportCountry] = useState('');
-    const [visaType, setVisaType] = useState('tourist');
+    const [visaType, setVisaType] = useState('');
     const [numberOfTravelers, setNumberOfTravelers] = useState(1);
     const [travelDate, setTravelDate] = useState('');
     const [showDestinationDropdown, setShowDestinationDropdown] = useState(false);
     const [showPassportDropdown, setShowPassportDropdown] = useState(false);
     const [destinationSearch, setDestinationSearch] = useState('');
     const [passportSearch, setPassportSearch] = useState('');
+    const [visaTypesList, setVisaTypesList] = useState<any[]>([]);
+    const [visaSearch, setVisaSearch] = useState('');
+    const [showVisaDropdown, setShowVisaDropdown] = useState(false);
+
+    // Refs for click-outside detection
+    const destinationRef = useRef<HTMLDivElement>(null);
+    const passportRef = useRef<HTMLDivElement>(null);
+    const visaRef = useRef<HTMLDivElement>(null);
+
+    // Handle click outside to close dropdowns
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            const target = event.target as HTMLElement;
+
+            // Close destination dropdown if clicked outside
+            if (destinationRef.current && !destinationRef.current.contains(target)) {
+                setShowDestinationDropdown(false);
+            }
+            // Close passport dropdown if clicked outside
+            if (passportRef.current && !passportRef.current.contains(target)) {
+                setShowPassportDropdown(false);
+            }
+            // Close visa dropdown if clicked outside
+            if (visaRef.current && !visaRef.current.contains(target)) {
+                setShowVisaDropdown(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Fetch visa types from API
+    useEffect(() => {
+        const fetchVisaTypes = async () => {
+            try {
+                const response = await fetch('/api/visas');
+                const result = await response.json();
+
+                if (result.data) {
+                    setVisaTypesList(result.data);
+                    // Don't auto-select first visa - let user choose
+                }
+            } catch (error) {
+                console.error('Error fetching visa types:', error);
+                setVisaTypesList([]);
+            }
+        };
+
+        fetchVisaTypes();
+    }, []);
 
     const countryList = [
         { code: 'GB', name: 'United Kingdom' },
@@ -25,15 +76,6 @@ export default function VisasSearchForm(): React.ReactElement {
         { code: 'SG', name: 'Singapore' },
         { code: 'AE', name: 'United Arab Emirates' },
         { code: 'SG', name: 'Singapore' },
-    ];
-
-    const visaTypes = [
-        { value: 'tourist', label: 'Tourist Visa' },
-        { value: 'business', label: 'Business Visa' },
-        { value: 'student', label: 'Student Visa' },
-        { value: 'work', label: 'Work Visa' },
-        { value: 'family', label: 'Family Visit Visa' },
-        { value: 'multiple', label: 'Multiple Entry Visa' },
     ];
 
     const filterCountries = (search: string) => {
@@ -64,7 +106,7 @@ export default function VisasSearchForm(): React.ReactElement {
             {/* Row 1: Destination Country, Passport Country, Visa Type, Travel Date - 4 columns */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start', position: 'relative' }}>
                 {/* Destination Country */}
-                <div style={{ position: 'relative', width: '100%', margin: 0, padding: 0 }}>
+                <div ref={destinationRef} style={{ position: 'relative', width: '100%', margin: 0, padding: 0 }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>DESTINATION</label>
                     <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-globe"></i>
@@ -78,9 +120,9 @@ export default function VisasSearchForm(): React.ReactElement {
                             setDestinationCountry('');
                             setShowDestinationDropdown(true);
                         }}
-                        onFocus={() => setShowDestinationDropdown(true)}
                         style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
                         onFocus={(e) => {
+                            setShowDestinationDropdown(true);
                             e.currentTarget.style.borderColor = '#0499ff';
                             e.currentTarget.style.boxShadow = '0 0 0 3px rgba(4, 153, 255, 0.1)';
                         }}
@@ -115,7 +157,7 @@ export default function VisasSearchForm(): React.ReactElement {
                 </div>
 
                 {/* Passport Country */}
-                <div style={{ position: 'relative', width: '100%', margin: 0, padding: 0 }}>
+                <div ref={passportRef} style={{ position: 'relative', width: '100%', margin: 0, padding: 0 }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>PASSPORT</label>
                     <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-passport"></i>
@@ -129,9 +171,9 @@ export default function VisasSearchForm(): React.ReactElement {
                             setPassportCountry('');
                             setShowPassportDropdown(true);
                         }}
-                        onFocus={() => setShowPassportDropdown(true)}
                         style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
                         onFocus={(e) => {
+                            setShowPassportDropdown(true);
                             e.currentTarget.style.borderColor = '#0499ff';
                             e.currentTarget.style.boxShadow = '0 0 0 3px rgba(4, 153, 255, 0.1)';
                         }}
@@ -165,26 +207,62 @@ export default function VisasSearchForm(): React.ReactElement {
                     )}
                 </div>
 
-                {/* Visa Type */}
-                <div style={{ width: '100%', position: 'relative' }}>
+                {/* Visa Type - Searchable Dropdown */}
+                <div ref={visaRef} style={{ width: '100%', position: 'relative' }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>VISA TYPE</label>
-                    <select
-                        value={visaType}
-                        onChange={(e) => setVisaType(e.target.value)}
-                        style={{ width: '100%', padding: '16px 16px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', cursor: 'pointer', fontWeight: 500, transition: 'all 0.3s' }}
-                        onFocus={(e) => {
+                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '16px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                        <i className="fa fa-passport"></i>
+                    </div>
+                    <input
+                        type="text"
+                        placeholder="Select /Search Visa Type"
+                        value={visaType ? visaTypesList.find(v => v.name === visaType)?.name || visaSearch : visaSearch}
+                        onChange={(e) => {
+                            setVisaSearch(e.target.value);
+                            setVisaType('');
+                            setShowVisaDropdown(true);
+                        }}
+                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
+                        onFocus={(e: any) => {
+                            setShowVisaDropdown(true);
                             e.currentTarget.style.borderColor = '#0499ff';
                             e.currentTarget.style.boxShadow = '0 0 0 3px rgba(4, 153, 255, 0.1)';
                         }}
-                        onBlur={(e) => {
+                        onBlur={(e: any) => {
                             e.currentTarget.style.borderColor = '#ddd';
                             e.currentTarget.style.boxShadow = 'none';
                         }}
-                    >
-                        {visaTypes.map(type => (
-                            <option key={type.value} value={type.value}>{type.label}</option>
-                        ))}
-                    </select>
+                    />
+                    {showVisaDropdown && (
+                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '250px', overflowY: 'auto' }}>
+                            {visaTypesList.filter(visa =>
+                                visa.title.toLowerCase().includes(visaSearch.toLowerCase()) ||
+                                visa.name.toLowerCase().includes(visaSearch.toLowerCase())
+                            ).length > 0 ? (
+                                visaTypesList.filter(visa =>
+                                    visa.title.toLowerCase().includes(visaSearch.toLowerCase()) ||
+                                    visa.name.toLowerCase().includes(visaSearch.toLowerCase())
+                                ).map(visa => (
+                                    <div
+                                        key={visa.id}
+                                        onClick={() => {
+                                            setVisaType(visa.name);
+                                            setVisaSearch('');
+                                            setShowVisaDropdown(false);
+                                        }}
+                                        style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#333', transition: 'background 0.2s' }}
+                                        onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
+                                        onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
+                                    >
+                                        <strong>{visa.name}</strong>
+                                        <div style={{ fontSize: '11px', color: '#999', marginTop: '2px' }}>{visa.title}</div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div style={{ padding: '12px', color: '#999', fontSize: '13px', textAlign: 'center' }}>No visas found</div>
+                            )}
+                        </div>
+                    )}
                 </div>
 
                 {/* Travel Date */}
@@ -199,14 +277,14 @@ export default function VisasSearchForm(): React.ReactElement {
                             value={travelDate}
                             onChange={(e) => setTravelDate(e.target.value)}
                             style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
-                        onFocus={(e) => {
-                            e.currentTarget.style.borderColor = '#0499ff';
-                            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(4, 153, 255, 0.1)';
-                        }}
-                        onBlur={(e) => {
-                            e.currentTarget.style.borderColor = '#ddd';
-                            e.currentTarget.style.boxShadow = 'none';
-                        }}
+                            onFocus={(e: any) => {
+                                e.currentTarget.style.borderColor = '#0499ff';
+                                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(4, 153, 255, 0.1)';
+                            }}
+                            onBlur={(e: any) => {
+                                e.currentTarget.style.borderColor = '#ddd';
+                                e.currentTarget.style.boxShadow = 'none';
+                            }}
                         />
                     </div>
                 </div>

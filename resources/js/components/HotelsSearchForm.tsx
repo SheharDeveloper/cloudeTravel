@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import CalendarDateRangePicker from '@/components/CalendarDateRangePicker';
 import BookingModal from '@/components/BookingModal';
 
@@ -14,7 +14,29 @@ export default function HotelsSearchForm(): React.ReactElement {
     const [rooms, setRooms] = useState(1);
     const [adults, setAdults] = useState(1);
     const [children, setChildren] = useState(0);
+    const [infants, setInfants] = useState(0);
     const [showBookingModal, setShowBookingModal] = useState(false);
+
+    const hotelRef = useRef<HTMLDivElement>(null);
+    const datePickerRef = useRef<HTMLDivElement>(null);
+    const guestModalRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (hotelRef.current && !hotelRef.current.contains(event.target as Node)) {
+                setShowHotelDropdown(false);
+            }
+            if (datePickerRef.current && !datePickerRef.current.contains(event.target as Node)) {
+                setShowDatePicker(false);
+            }
+            if (guestModalRef.current && !guestModalRef.current.contains(event.target as Node)) {
+                setShowGuestModal(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     const cityList = [
         { code: 'LON', name: 'London' },
@@ -124,7 +146,7 @@ export default function HotelsSearchForm(): React.ReactElement {
             {/* Row 1: Hotel City, Dates & Guests */}
             <div className="hotel-search-row1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px', alignItems: 'flex-start' }}>
                 {/* Hotel City */}
-                <div style={{ position: 'relative', width: '100%' }}>
+                <div ref={hotelRef} style={{ position: 'relative', width: '100%' }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Where</label>
                     <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-map-marker"></i>
@@ -175,7 +197,7 @@ export default function HotelsSearchForm(): React.ReactElement {
                 </div>
 
                 {/* Dates */}
-                <div style={{ position: 'relative' }}>
+                <div ref={datePickerRef} style={{ position: 'relative' }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                         When
                     </label>
@@ -247,7 +269,7 @@ export default function HotelsSearchForm(): React.ReactElement {
                 </div>
 
                 {/* Room & Guest Selection Card - In the same row */}
-                <div style={{ position: 'relative' }}>
+                <div ref={guestModalRef} style={{ position: 'relative' }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Who</label>
                     <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '58px', border: '1.5px solid #ddd', borderRadius: '10px', background: '#fff', padding: '16px', cursor: 'pointer', transition: 'all 0.3s' }}
                         onClick={() => {
@@ -275,12 +297,10 @@ export default function HotelsSearchForm(): React.ReactElement {
                             <i className="fa fa-chevron-down"></i>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            {/* Guest Modal - Like Flight Traveler Style */}
-            {showGuestModal && (
-                <div style={{ position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', marginTop: '12px', background: '#fff', width: 'clamp(320px, 90vw, 480px)', maxHeight: '650px', overflowY: 'auto', borderRadius: '12px', padding: '24px', boxShadow: '0 12px 48px rgba(0,0,0,.3)', zIndex: 9999, border: '1px solid #e0e0e0' }}>
+                    {/* Guest Modal - Like Flight Traveler Style */}
+                    {showGuestModal && (
+                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 12px 48px rgba(0,0,0,.3)', zIndex: 9999, border: '1px solid #e0e0e0' }}>
                     <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#333', marginBottom: '18px' }}>Room & Guests</h3>
 
                     {/* Room Selector */}
@@ -290,10 +310,10 @@ export default function HotelsSearchForm(): React.ReactElement {
                                 <p style={{ fontSize: '14px', color: '#333', margin: 0, fontWeight: 600 }}>Rooms</p>
                                 <p style={{ fontSize: '11px', color: '#999', margin: '4px 0 0 0' }}></p>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <button onClick={() => setRooms(Math.max(1, rooms - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-                                <span style={{ fontSize: '16px', fontWeight: 600, color: '#333', minWidth: '24px', textAlign: 'center' }}>{rooms}</span>
-                                <button onClick={() => setRooms(Math.min(9, rooms + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
+                                <button onClick={() => setRooms(Math.max(1, rooms - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '40px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                                <span style={{ fontSize: '16px', fontWeight: 600, color: '#333', minWidth: '24px', textAlign: 'center', flex: 1 }}>{rooms}</span>
+                                <button onClick={() => setRooms(Math.min(9, rooms + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '40px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                             </div>
                         </div>
                     </div>
@@ -305,10 +325,10 @@ export default function HotelsSearchForm(): React.ReactElement {
                                 <p style={{ fontSize: '14px', color: '#333', margin: 0, fontWeight: 600 }}>Adults</p>
                                 <p style={{ fontSize: '11px', color: '#999', margin: '4px 0 0 0' }}>18 yrs or above</p>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <button onClick={() => setAdults(Math.max(1, adults - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-                                <span style={{ fontSize: '16px', fontWeight: 600, color: '#333', minWidth: '24px', textAlign: 'center' }}>{adults}</span>
-                                <button onClick={() => setAdults(Math.min(9, adults + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
+                                <button onClick={() => setAdults(Math.max(1, adults - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '40px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                                <span style={{ fontSize: '16px', fontWeight: 600, color: '#333', minWidth: '24px', textAlign: 'center', flex: 1 }}>{adults}</span>
+                                <button onClick={() => setAdults(Math.min(9, adults + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '40px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                             </div>
                         </div>
                     </div>
@@ -320,18 +340,35 @@ export default function HotelsSearchForm(): React.ReactElement {
                                 <p style={{ fontSize: '14px', color: '#333', margin: 0, fontWeight: 600 }}>Children</p>
                                 <p style={{ fontSize: '11px', color: '#999', margin: '4px 0 0 0' }}>0 - 17 yrs</p>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                <button onClick={() => setChildren(Math.max(0, children - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-                                <span style={{ fontSize: '16px', fontWeight: 600, color: '#333', minWidth: '24px', textAlign: 'center' }}>{children}</span>
-                                <button onClick={() => setChildren(Math.min(8, children + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
+                                <button onClick={() => setChildren(Math.max(0, children - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '40px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                                <span style={{ fontSize: '16px', fontWeight: 600, color: '#333', minWidth: '24px', textAlign: 'center', flex: 1 }}>{children}</span>
+                                <button onClick={() => setChildren(Math.min(8, children + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '40px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Infants Selector */}
+                    <div style={{ marginBottom: '20px', paddingBottom: '0' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                            <div>
+                                <p style={{ fontSize: '14px', color: '#333', margin: 0, fontWeight: 600 }}>Infants</p>
+                                <p style={{ fontSize: '11px', color: '#999', margin: '4px 0 0 0' }}>Under 2 yrs</p>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
+                                <button onClick={() => setInfants(Math.max(0, infants - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '40px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                                <span style={{ fontSize: '16px', fontWeight: 600, color: '#333', minWidth: '24px', textAlign: 'center', flex: 1 }}>{infants}</span>
+                                <button onClick={() => setInfants(Math.min(8, infants + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '40px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                             </div>
                         </div>
                     </div>
 
                     {/* Done Button */}
                     <button onClick={() => setShowGuestModal(false)} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '100%', padding: '12px', borderRadius: '6px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Apply</button>
+                        </div>
+                    )}
                 </div>
-            )}
+            </div>
 
             {/* Search Button */}
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0px', marginTop: '6px' }}>
