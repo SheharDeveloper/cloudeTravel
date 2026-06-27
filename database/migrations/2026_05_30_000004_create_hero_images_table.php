@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('hero_images', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uid')->unique();
             $table->string('image_url');
             $table->string('title')->nullable();
             $table->text('subtitle')->nullable();

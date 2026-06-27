@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('contact_info', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uid')->unique();
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
             $table->string('location')->nullable();

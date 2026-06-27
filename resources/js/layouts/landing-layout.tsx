@@ -173,18 +173,6 @@ export default function LandingLayout({ children }: Props) {
         setContactInfo(data);
     };
 
-    const visaServices = [
-        'Schengen Visa',
-        'India Visa',
-        'USA ESTA',
-        'Canada ETA',
-        'Sri Lanka Visa',
-        'Turkey Visa',
-        'Dubai Visa',
-        'Egypt Visa',
-        'Thailand Visa',
-    ];
-
     const otherServices = [
         'New Indian Passport',
         'Passport Renewal',
@@ -219,36 +207,8 @@ export default function LandingLayout({ children }: Props) {
                     {/* HOME - Active state indicator: orange color + underline when on home page */}
                     <li><Link href="/" style={{ color: isCurrentUrl('/') ? '#ff6b35' : '#333', fontSize: '14px', fontWeight: isCurrentUrl('/') ? 600 : 500, textDecoration: 'none', borderBottom: isCurrentUrl('/') ? '3px solid #ff6b35' : 'none', paddingBottom: '5px', transition: 'all 0.3s' }} onMouseEnter={(e) => !isCurrentUrl('/') && (e.currentTarget.style.color = '#ff6b35')} onMouseLeave={(e) => !isCurrentUrl('/') && (e.currentTarget.style.color = '#333')}>Home</Link></li>
 
-                    {/* Visa Services Dropdown */}
-                    <li
-                        style={{ position: 'relative' }}
-                        onMouseEnter={() => setOpenDropdown('visa')}
-                        onMouseLeave={() => setOpenDropdown(null)}
-                    >
-                        <button
-                            onClick={() => setOpenDropdown(openDropdown === 'visa' ? null : 'visa')}
-                            style={{ background: 'none', border: 'none', color: '#333', fontSize: '14px', fontWeight: 500, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', padding: 0, transition: 'color 0.3s' }}
-                            onMouseEnter={(e) => e.currentTarget.style.color = '#ff6b35'}
-                            onMouseLeave={(e) => e.currentTarget.style.color = '#333'}
-                        >
-                            Visa Services <i className="fa fa-chevron-down" style={{ fontSize: '10px' }}></i>
-                        </button>
-                        {openDropdown === 'visa' && (
-                            <div style={{ position: 'absolute', top: '100%', left: 0, background: '#fff', minWidth: '200px', borderRadius: '6px', marginTop: '8px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 1000, border: '1px solid #f0f0f0' }}>
-                                {visaServices.map((service) => (
-                                    <a
-                                        key={service}
-                                        href="#"
-                                        style={{ display: 'block', padding: '12px 15px', color: '#333', textDecoration: 'none', fontSize: '13px', borderBottom: '1px solid #f5f5f5', transition: 'background 0.3s' }}
-                                        onMouseEnter={(e) => (e.currentTarget.style.background = '#f9f9f9')}
-                                        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
-                                    >
-                                        {service}
-                                    </a>
-                                ))}
-                            </div>
-                        )}
-                    </li>
+                    {/* Visa Services Link */}
+                    <li><Link href="/visa-services" style={{ color: isCurrentUrl('/visa-services') ? '#ff6b35' : '#333', fontSize: '14px', fontWeight: isCurrentUrl('/visa-services') ? 600 : 500, textDecoration: 'none', borderBottom: isCurrentUrl('/visa-services') ? '3px solid #ff6b35' : 'none', paddingBottom: '5px', transition: 'all 0.3s' }} onMouseEnter={(e) => !isCurrentUrl('/visa-services') && (e.currentTarget.style.color = '#ff6b35')} onMouseLeave={(e) => !isCurrentUrl('/visa-services') && (e.currentTarget.style.color = '#333')}>Visa Services</Link></li>
 
                     {/* Other Services Dropdown */}
                     <li

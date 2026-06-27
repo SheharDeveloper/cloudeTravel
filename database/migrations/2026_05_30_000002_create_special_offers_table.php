@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('special_offers', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uid')->unique();
             $table->string('airline');
             $table->string('from');
             $table->string('destinations');

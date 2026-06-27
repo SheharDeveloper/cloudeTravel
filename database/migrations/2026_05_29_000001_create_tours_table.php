@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('tours', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uid')->unique();
             $table->string('tour_title'); // Tour title
             $table->string('hero_title'); // Hero section title
             $table->text('hero_subtitle')->nullable(); // Hero subtitle

@@ -1,10 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
-import { router } from '@inertiajs/react';
+import BookingModal from '@/components/BookingModal';
 
-export default function VisasSearchForm(): React.ReactElement {
+interface VisasSearchFormProps {
+    prefilledVisaType?: string;
+    disableVisaType?: boolean;
+}
+
+export default function VisasSearchForm({ prefilledVisaType = '', disableVisaType = false }: VisasSearchFormProps = {}): React.ReactElement {
     const [destinationCountry, setDestinationCountry] = useState('');
     const [passportCountry, setPassportCountry] = useState('');
-    const [visaType, setVisaType] = useState('');
+    const [visaType, setVisaType] = useState(prefilledVisaType);
     const [numberOfTravelers, setNumberOfTravelers] = useState(1);
     const [travelDate, setTravelDate] = useState('');
     const [showDestinationDropdown, setShowDestinationDropdown] = useState(false);
@@ -14,6 +19,7 @@ export default function VisasSearchForm(): React.ReactElement {
     const [visaTypesList, setVisaTypesList] = useState<any[]>([]);
     const [visaSearch, setVisaSearch] = useState('');
     const [showVisaDropdown, setShowVisaDropdown] = useState(false);
+    const [showBookingModal, setShowBookingModal] = useState(false);
 
     // Refs for click-outside detection
     const destinationRef = useRef<HTMLDivElement>(null);
@@ -92,13 +98,19 @@ export default function VisasSearchForm(): React.ReactElement {
             return;
         }
 
-        router.post('/search/visa', {
-            destinationCountry,
-            passportCountry,
-            visaType,
-            numberOfTravelers,
-            travelDate,
-        });
+        setShowBookingModal(true);
+    };
+
+    const handleCloseBookingModal = () => {
+        setShowBookingModal(false);
+        setDestinationCountry('');
+        setPassportCountry('');
+        setVisaType('');
+        setTravelDate('');
+        setNumberOfTravelers(1);
+        setDestinationSearch('');
+        setPassportSearch('');
+        setVisaSearch('');
     };
 
     return (
@@ -218,15 +230,20 @@ export default function VisasSearchForm(): React.ReactElement {
                         placeholder="Select /Search Visa Type"
                         value={visaType ? visaTypesList.find(v => v.name === visaType)?.name || visaSearch : visaSearch}
                         onChange={(e) => {
-                            setVisaSearch(e.target.value);
-                            setVisaType('');
-                            setShowVisaDropdown(true);
+                            if (!disableVisaType) {
+                                setVisaSearch(e.target.value);
+                                setVisaType('');
+                                setShowVisaDropdown(true);
+                            }
                         }}
-                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
+                        disabled={disableVisaType}
+                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500, backgroundColor: disableVisaType ? '#f5f5f5' : '#fff', cursor: disableVisaType ? 'not-allowed' : 'text', opacity: disableVisaType ? 0.7 : 1 }}
                         onFocus={(e: any) => {
-                            setShowVisaDropdown(true);
-                            e.currentTarget.style.borderColor = '#0499ff';
-                            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(4, 153, 255, 0.1)';
+                            if (!disableVisaType) {
+                                setShowVisaDropdown(true);
+                                e.currentTarget.style.borderColor = '#0499ff';
+                                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(4, 153, 255, 0.1)';
+                            }
                         }}
                         onBlur={(e: any) => {
                             e.currentTarget.style.borderColor = '#ddd';
@@ -354,6 +371,19 @@ export default function VisasSearchForm(): React.ReactElement {
                     SEARCH VISAS
                 </button>
             </div>
+
+            <BookingModal
+                isOpen={showBookingModal}
+                onClose={handleCloseBookingModal}
+                searchDetails={{
+                    destinationCountry,
+                    passportCountry,
+                    visaType,
+                    numberOfTravelers,
+                    travelDate,
+                }}
+                serviceType="visa"
+            />
         </div>
     );
 }

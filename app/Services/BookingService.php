@@ -123,10 +123,12 @@ class BookingService
             'name' => $this->formatName($formData['firstName'], $formData['lastName'] ?? null),
             'email' => $formData['email'],
             'phone' => $formData['phone'] ?? null,
-            'country' => $searchParams['destination'] ?? null,
+            'country' => $searchParams['destinationCountry'] ?? null,
             'travel_date' => $searchParams['travelDate'] ?? null,
-            'destination' => $searchParams['destination'] ?? null,
+            'destination' => $searchParams['destinationCountry'] ?? null,
             'passport_country' => $searchParams['passportCountry'] ?? null,
+            'visa_type' => $searchParams['visaType'] ?? null,
+            'total_members' => $searchParams['numberOfTravelers'] ?? 1,
             'notes' => $this->generateVisaNotes($searchParams),
             'status' => 'pending',
         ];
@@ -248,9 +250,12 @@ class BookingService
     private function generateVisaNotes(array $searchParams): string
     {
         return sprintf(
-            'Passport Country: %s, Destination: %s',
+            'Passport Country: %s, Destination: %s, Visa Type: %s, Travelers: %d, Travel Date: %s',
             $searchParams['passportCountry'] ?? 'N/A',
-            $searchParams['destination'] ?? 'N/A'
+            $searchParams['destinationCountry'] ?? 'N/A',
+            $searchParams['visaType'] ?? 'N/A',
+            $searchParams['numberOfTravelers'] ?? 1,
+            $searchParams['travelDate'] ?? 'N/A'
         );
     }
 

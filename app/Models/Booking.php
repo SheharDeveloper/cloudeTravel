@@ -25,6 +25,7 @@ class Booking extends Model
         'travel_class',
         'destination',
         'passport_country',
+        'visa_type',
         'hotel_city',
         'check_in_date',
         'check_out_date',

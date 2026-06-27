@@ -8,12 +8,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
     use HasFactory, HasApiTokens;
 
     protected $fillable = [
+        'uid',
         'name',
         'email',
         'password',
@@ -37,5 +39,16 @@ class User extends Authenticatable
     public function agencies(): HasMany
     {
         return $this->hasMany(Agency::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->uid)) {
+                $model->uid = Str::uuid();
+            }
+        });
     }
 }

@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('travel_class')->nullable()->comment('Economy, Business, etc');
             $table->string('destination')->nullable()->comment('For visas');
             $table->string('passport_country')->nullable()->comment('For visas');
+            $table->string('visa_type')->nullable()->comment('Visa type for visa bookings');
             $table->string('hotel_city')->nullable()->comment('For hotels');
             $table->date('check_in_date')->nullable()->comment('For hotels');
             $table->date('check_out_date')->nullable()->comment('For hotels');

@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Tour extends Model
 {
     protected $fillable = [
+        'uid',
         'tour_title',
         'hero_title',
         'hero_subtitle',
@@ -49,5 +51,16 @@ class Tour extends Model
     public function termsConditions(): HasMany
     {
         return $this->hasMany(TermsCondition::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->uid)) {
+                $model->uid = Str::uuid();
+            }
+        });
     }
 }

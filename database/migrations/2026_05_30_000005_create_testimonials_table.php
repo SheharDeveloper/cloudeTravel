@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('testimonials', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uid')->unique();
             $table->string('client_name');
             $table->string('client_image')->nullable();
             $table->text('message');

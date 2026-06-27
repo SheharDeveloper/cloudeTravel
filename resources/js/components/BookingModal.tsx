@@ -96,6 +96,49 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
     const emoji = serviceType === 'flight' ? '✈️' : serviceType === 'hotel' ? '🏨' : serviceType === 'visa' ? '🛂' : serviceType === 'package' ? '📦' : '🚗';
     const title = serviceType === 'flight' ? 'Flight' : serviceType === 'hotel' ? 'Hotel' : serviceType === 'visa' ? 'Visa' : serviceType === 'package' ? 'Package' : 'Airport Transfer';
 
+    const renderSearchDetails = () => {
+        if (serviceType === 'visa') {
+            return (
+                <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', marginBottom: '24px', border: '1px solid #e9ecef' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#003d82', marginBottom: '12px', margin: '0 0 12px 0' }}>Booking Details</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        {searchDetails.destinationCountry && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Destination Country</p>
+                                <p style={{ fontSize: '13px', color: '#003d82', margin: 0, fontWeight: 500 }}>{searchDetails.destinationCountry}</p>
+                            </div>
+                        )}
+                        {searchDetails.passportCountry && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Passport Country</p>
+                                <p style={{ fontSize: '13px', color: '#003d82', margin: 0, fontWeight: 500 }}>{searchDetails.passportCountry}</p>
+                            </div>
+                        )}
+                        {searchDetails.visaType && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Visa Type</p>
+                                <p style={{ fontSize: '13px', color: '#003d82', margin: 0, fontWeight: 500 }}>{searchDetails.visaType}</p>
+                            </div>
+                        )}
+                        {searchDetails.numberOfTravelers && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Number of Travelers</p>
+                                <p style={{ fontSize: '13px', color: '#003d82', margin: 0, fontWeight: 500 }}>{searchDetails.numberOfTravelers}</p>
+                            </div>
+                        )}
+                        {searchDetails.travelDate && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Travel Date</p>
+                                <p style={{ fontSize: '13px', color: '#003d82', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.travelDate).toLocaleDateString()}</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+        return null;
+    };
+
     const modalContent = (
         <>
             {/* Dark Overlay */}
@@ -131,6 +174,9 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
                             </h2>
                             <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999' }}>×</button>
                         </div>
+
+                        {/* Search Details Section */}
+                        {renderSearchDetails()}
 
                         {/* Form Fields */}
                         <div style={{ display: 'grid', gap: '14px', marginBottom: '24px' }}>

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Laravel\Fortify\Features;
 use App\Http\Controllers\Web\AgencyController;
 use App\Http\Controllers\Web\AgencyServiceController;
+use App\Http\Controllers\Web\VisaController;
 use App\Http\Controllers\SearchController;
 
 // Landing/Public routes
@@ -21,6 +22,7 @@ Route::inertia('/tours/{id}', 'TourDetail')->name('tours.show');
 Route::inertia('/tours', 'tours')->name('tours');
 Route::inertia('/tickets', 'tickets')->name('tickets');
 Route::inertia('/visa-services', 'visa-services')->name('visa-services');
+Route::get('/visa/{visa}', [VisaController::class, 'show'])->name('visa.show');
 Route::inertia('/other-services', 'other-services')->name('other-services');
 Route::inertia('/about-us', 'about-us')->name('about-us');
 Route::inertia('/contact-us', 'contact-us')->name('contact-us');
