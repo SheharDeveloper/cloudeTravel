@@ -231,13 +231,10 @@ export default function PackageSearchForm(): React.ReactElement {
                         </div>
                     )}
                 </div>
-            </div>
 
-            {/* Row 2: Airport, Check-in Date */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
-                {/* Airport Selector - All Airports, Searchable */}
+                {/* Airport Selector */}
                 <div style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Airport</label>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Airport</label>
                     <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '16px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-plane"></i>
                     </div>
@@ -281,7 +278,10 @@ export default function PackageSearchForm(): React.ReactElement {
                         </div>
                     )}
                 </div>
+            </div>
 
+            {/* ROW 2: Check-in Date, Nights, Guests - 3 columns */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px', alignItems: 'flex-start' }}>
                 {/* Check-in Date */}
                 <div style={{ position: 'relative', width: '100%' }}>
                     <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Check-in Date</label>
@@ -320,10 +320,7 @@ export default function PackageSearchForm(): React.ReactElement {
                         />
                     )}
                 </div>
-            </div>
 
-            {/* Row 3: Nights, Guests */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.5fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
                 {/* Nights Selector */}
                 <div style={{ position: 'relative', width: '100%' }}>
                     <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Nights</label>
