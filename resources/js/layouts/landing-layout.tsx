@@ -2,6 +2,7 @@ import { Link, Head } from '@inertiajs/react';
 import { ReactNode, useState, useEffect } from 'react';
 import { contactInfoService } from '@/services/contactInfoService';
 import { logoConfig, LOGO_PATH, footerLogoConfig } from '@/config/logo';
+import { useCurrentUrl } from '@/hooks/use-current-url';
 
 interface Props {
     children: ReactNode;
@@ -148,6 +149,7 @@ const mobileResponsiveStyles = `
  * Landing layout with header, footer and content area
  */
 export default function LandingLayout({ children }: Props) {
+    const { isCurrentUrl } = useCurrentUrl();
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [contactInfo, setContactInfo] = useState<any>(null);
@@ -214,7 +216,8 @@ export default function LandingLayout({ children }: Props) {
                 </button>
 
                 <ul className="navbar-menu" style={{ display: 'flex', alignItems: 'center', gap: '28px', listStyle: 'none', margin: 0, padding: 0, flex: 1, justifyContent: 'center' }}>
-                    <li><Link href="/" style={{ color: '#ff6b35', fontSize: '14px', fontWeight: 600, textDecoration: 'none', borderBottom: '3px solid #ff6b35', paddingBottom: '5px' }}>Home</Link></li>
+                    {/* HOME - Active state indicator: orange color + underline when on home page */}
+                    <li><Link href="/" style={{ color: isCurrentUrl('/') ? '#ff6b35' : '#333', fontSize: '14px', fontWeight: isCurrentUrl('/') ? 600 : 500, textDecoration: 'none', borderBottom: isCurrentUrl('/') ? '3px solid #ff6b35' : 'none', paddingBottom: '5px', transition: 'all 0.3s' }} onMouseEnter={(e) => !isCurrentUrl('/') && (e.currentTarget.style.color = '#ff6b35')} onMouseLeave={(e) => !isCurrentUrl('/') && (e.currentTarget.style.color = '#333')}>Home</Link></li>
 
                     {/* Visa Services Dropdown */}
                     <li
@@ -278,8 +281,11 @@ export default function LandingLayout({ children }: Props) {
                         )}
                     </li>
 
-                    <li><Link href="/about-us" style={{ color: '#333', fontSize: '14px', fontWeight: 500, textDecoration: 'none', transition: 'color 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#ff6b35'} onMouseLeave={(e) => e.currentTarget.style.color = '#333'}>About Us</Link></li>
-                    <li><Link href="/contact-us" style={{ color: '#333', fontSize: '14px', fontWeight: 500, textDecoration: 'none', transition: 'color 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.color = '#ff6b35'} onMouseLeave={(e) => e.currentTarget.style.color = '#333'}>Contact Us</Link></li>
+                    {/* ABOUT US - Active state indicator: orange color + underline when on about-us page */}
+                    <li><Link href="/about-us" style={{ color: isCurrentUrl('/about-us') ? '#ff6b35' : '#333', fontSize: '14px', fontWeight: isCurrentUrl('/about-us') ? 600 : 500, textDecoration: 'none', borderBottom: isCurrentUrl('/about-us') ? '3px solid #ff6b35' : 'none', paddingBottom: '5px', transition: 'all 0.3s' }} onMouseEnter={(e) => !isCurrentUrl('/about-us') && (e.currentTarget.style.color = '#ff6b35')} onMouseLeave={(e) => !isCurrentUrl('/about-us') && (e.currentTarget.style.color = '#333')}>About Us</Link></li>
+
+                    {/* CONTACT US - Active state indicator: orange color + underline when on contact-us page */}
+                    <li><Link href="/contact-us" style={{ color: isCurrentUrl('/contact-us') ? '#ff6b35' : '#333', fontSize: '14px', fontWeight: isCurrentUrl('/contact-us') ? 600 : 500, textDecoration: 'none', borderBottom: isCurrentUrl('/contact-us') ? '3px solid #ff6b35' : 'none', paddingBottom: '5px', transition: 'all 0.3s' }} onMouseEnter={(e) => !isCurrentUrl('/contact-us') && (e.currentTarget.style.color = '#ff6b35')} onMouseLeave={(e) => !isCurrentUrl('/contact-us') && (e.currentTarget.style.color = '#333')}>Contact Us</Link></li>
                 </ul>
                 <a className="navbar-cta" href="tel:+1234567890" style={{ background: '#0499ff', color: '#fff', padding: '10px 22px', borderRadius: '4px', fontWeight: 700, fontSize: '13px', textDecoration: 'none', cursor: 'pointer', transition: 'all 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#0277d8'} onMouseLeave={(e) => e.currentTarget.style.background = '#0499ff'}>CALL NOW</a>
             </nav>
@@ -287,9 +293,15 @@ export default function LandingLayout({ children }: Props) {
             {/* MOBILE MENU */}
             <div className={`mobile-menu ${mobileMenuOpen ? 'open' : ''}`} style={{ background: '#fff', borderTop: '1px solid #f0f0f0' }}>
                 <ul style={{ display: 'flex', flexDirection: 'column', gap: '10px', listStyle: 'none', margin: 0, padding: '15px 15px', textAlign: 'center' }}>
-                    <li><Link href="/" style={{ color: '#ff6b35', fontSize: '14px', fontWeight: 500, textDecoration: 'none' }}>Home</Link></li>
-                    <li><Link href="/about-us" style={{ color: '#333', fontSize: '14px', fontWeight: 500, textDecoration: 'none' }}>About Us</Link></li>
-                    <li><Link href="/contact-us" style={{ color: '#333', fontSize: '14px', fontWeight: 500, textDecoration: 'none' }}>Contact Us</Link></li>
+                    {/* HOME - Active state in mobile menu */}
+                    <li><Link href="/" style={{ color: isCurrentUrl('/') ? '#ff6b35' : '#333', fontSize: '14px', fontWeight: isCurrentUrl('/') ? 600 : 500, textDecoration: 'none' }}>Home</Link></li>
+
+                    {/* ABOUT US - Active state in mobile menu */}
+                    <li><Link href="/about-us" style={{ color: isCurrentUrl('/about-us') ? '#ff6b35' : '#333', fontSize: '14px', fontWeight: isCurrentUrl('/about-us') ? 600 : 500, textDecoration: 'none' }}>About Us</Link></li>
+
+                    {/* CONTACT US - Active state in mobile menu */}
+                    <li><Link href="/contact-us" style={{ color: isCurrentUrl('/contact-us') ? '#ff6b35' : '#333', fontSize: '14px', fontWeight: isCurrentUrl('/contact-us') ? 600 : 500, textDecoration: 'none' }}>Contact Us</Link></li>
+
                     <li><a href="tel:+1234567890" style={{ background: '#0499ff', color: '#fff', padding: '8px 15px', borderRadius: '4px', fontWeight: 700, fontSize: '13px', textDecoration: 'none', display: 'inline-block' }}>CALL NOW</a></li>
                 </ul>
             </div>

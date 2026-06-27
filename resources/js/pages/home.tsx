@@ -19,16 +19,19 @@ import ImageWithFallback from '@/components/ImageWithFallback';
  * Home/Landing page component with multiple sections
  */
 export default function Home() {
-    // Initialize activeService from URL parameter
+    // ========== TAB MANAGEMENT ==========
+    // Read URL parameter (?tab=visa) to set which form to display on page load
     const getInitialService = () => {
         if (typeof window !== 'undefined') {
             const params = new URLSearchParams(window.location.search);
             const tab = params.get('tab');
+            // Default to 'flight' if no tab specified
             return tab || 'flight';
         }
         return 'flight';
     };
 
+    // activeService state: controls which form is displayed (flight, hotel, visa, flight-hotel, airport-transfer)
     const [activeService, setActiveService] = useState(getInitialService());
     const [showDateRangePicker, setShowDateRangePicker] = useState(false);
     const [showTravellerModal, setShowTravellerModal] = useState(false);
@@ -50,13 +53,26 @@ export default function Home() {
     const heroAutoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const testimonialAutoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-    // Update URL when activeService changes
+    // Update URL when activeService changes (when user clicks a tab)
+    // Also syncs URL when user clicks browser back/forward buttons
     const handleTabChange = (service: string) => {
         setActiveService(service);
         const url = new URL(window.location.href);
         url.searchParams.set('tab', service);
         window.history.pushState({}, '', url);
     };
+
+    // Listen for browser back/forward button clicks
+    // This keeps the form in sync when user navigates history
+    useEffect(() => {
+        const handlePopState = () => {
+            const params = new URLSearchParams(window.location.search);
+            const tab = params.get('tab') || 'flight';
+            setActiveService(tab);
+        };
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
 
     useEffect(() => {
         loadSpecialOffers();
@@ -537,7 +553,14 @@ export default function Home() {
             <div className="booking-form-container" style={{ padding: '0 20px', position: 'relative', zIndex: 10, marginTop: '-180px', paddingBottom: '80px', overflow: 'visible' }}>
                 <div style={{ maxWidth: '1500px', margin: '0 auto', background: '#fff', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,.12)', overflow: 'visible' }}>
                     {/* Tab Navigation - Professional Style */}
+                    {/* ========== TAB BUTTONS ========== */}
+                    {/* Each tab button shows a service form when clicked */}
+                    {/* Tab styling changes based on activeService state: */}
+                    {/* - Active tab: blue underline (5px solid #0499ff) + blue text (#0499ff) + bold font (800) */}
+                    {/* - Inactive tab: no underline + black text (#000) + normal font (500-600) */}
+                    {/* When user clicks tab: handleTabChange() updates activeService + URL parameter */}
                     <div className="tabs-nav" style={{ display: 'flex', gap: 'clamp(0px, 1vw, 8px)', borderBottom: '2px solid #efefef', backgroundColor: '#fff', padding: 'clamp(2px, 1vw, 20px)', justifyContent: 'center', flexWrap: 'nowrap', overflowX: 'auto', boxShadow: '0 2px 8px rgba(0,0,0,.08)' }}>
+                        {/* FLIGHTS TAB - Shows flight search form */}
                         <button className="tab-button"
                             onClick={() => handleTabChange('flight')}
                             style={{
