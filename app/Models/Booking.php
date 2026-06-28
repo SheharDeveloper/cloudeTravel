@@ -52,6 +52,11 @@ class Booking extends Model
         return $this->hasMany(BookingNote::class);
     }
 
+    public function getRouteKeyName()
+    {
+        return 'uid';
+    }
+
     protected static function boot()
     {
         parent::boot();
