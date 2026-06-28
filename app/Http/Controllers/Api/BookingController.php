@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Booking;
 use App\Services\BookingService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -95,17 +96,8 @@ class BookingController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Booking $booking)
     {
-        $booking = $this->bookingService->getById((int)$id);
-
-        if (!$booking) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Booking not found',
-            ], 404);
-        }
-
         return response()->json([
             'success' => true,
             'booking' => $booking,
@@ -123,16 +115,8 @@ class BookingController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Booking $booking)
     {
-        $booking = $this->bookingService->getById((int)$id);
-
-        if (!$booking) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Booking not found',
-            ], 404);
-        }
 
         $validated = $request->validate([
             'notes' => 'nullable|string',

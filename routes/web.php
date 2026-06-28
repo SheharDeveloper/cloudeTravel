@@ -31,8 +31,8 @@ Route::inertia('/contact-us', 'contact-us')->name('contact-us');
 // Dashboard
 Route::inertia('dashboard', 'dashboard')->name('dashboard');
 
-// Admin Routes (frontend pages only - API calls handle auth)
-Route::prefix('admin')->group(function () {
+// Admin Routes (requires authentication - supports both session and token auth via custom middleware)
+Route::middleware([\App\Http\Middleware\AuthenticateApiToken::class])->prefix('admin')->group(function () {
     // Tours Management (React Components via Inertia)
     Route::inertia('tours', 'Admin/Tour/Index')->name('admin.tours.index');
     Route::inertia('tours/create', 'Admin/Tour/Create')->name('admin.tours.create');

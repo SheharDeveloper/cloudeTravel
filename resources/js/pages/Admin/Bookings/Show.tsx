@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ProtectedRoute } from '@/lib/ProtectedRoute';
 import { usePage } from '@inertiajs/react';
+import { apiFetch } from '@/lib/api';
 
 interface Booking {
     id: number;
@@ -153,6 +154,76 @@ export default function BookingShow() {
         });
     };
 
+    const generateWhatsAppMessage = () => {
+        if (!booking) return '';
+
+        const serviceEmoji = {
+            flight: '✈️',
+            hotel: '🏨',
+            visa: '🛂',
+            package: '📦',
+            'airport-transfer': '🚗',
+        }[booking.service] || '📅';
+
+        const serviceLabel = booking.service.charAt(0).toUpperCase() + booking.service.slice(1);
+
+        let details = `${serviceEmoji} *${serviceLabel} Booking Details*\n\n`;
+        details += `*Booking Reference:* ${booking.uid.substring(0, 8).toUpperCase()}\n`;
+        details += `*Customer Name:* ${booking.name}\n`;
+        details += `*Email:* ${booking.email}\n`;
+
+        if (booking.phone) {
+            details += `*Phone:* ${booking.phone}\n`;
+        }
+
+        details += `*Status:* ${booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}\n`;
+        details += `*Travelers:* ${booking.total_members}\n\n`;
+
+        // Service-specific details
+        if (booking.service === 'flight') {
+            details += `*From:* ${booking.from_city || 'N/A'}\n`;
+            details += `*To:* ${booking.to_city || 'N/A'}\n`;
+            details += `*Departure Date:* ${formatDate(booking.travel_date)}\n`;
+            if (booking.trip_type === 'roundtrip') {
+                details += `*Return Date:* ${formatDate(booking.return_date)}\n`;
+            }
+            details += `*Class:* ${booking.travel_class || 'N/A'}\n`;
+        } else if (booking.service === 'hotel') {
+            details += `*City:* ${booking.hotel_city || 'N/A'}\n`;
+            details += `*Check-in:* ${formatDate(booking.check_in_date)}\n`;
+            details += `*Check-out:* ${formatDate(booking.check_out_date)}\n`;
+            details += `*Rooms:* ${booking.rooms || 1}\n`;
+            details += `*Guests:* ${booking.guests || booking.total_members}\n`;
+        } else if (booking.service === 'visa') {
+            details += `*Destination:* ${booking.destination || 'N/A'}\n`;
+            details += `*Passport Country:* ${booking.passport_country || 'N/A'}\n`;
+            details += `*Visa Type:* ${booking.visa_type || 'N/A'}\n`;
+            details += `*Travel Date:* ${formatDate(booking.travel_date)}\n`;
+        }
+
+        details += '\n✨ *Thank you for choosing CloudTravel!*\n';
+        details += '📞 Our team will contact you shortly with more details.\n';
+        details += '🌍 Visit: https://cloudtravel.com';
+
+        return details;
+    };
+
+    const handleWhatsAppShare = () => {
+        if (!booking || !booking.phone) {
+            alert('Phone number not available for this booking');
+            return;
+        }
+
+        const message = generateWhatsAppMessage();
+        const encodedMessage = encodeURIComponent(message);
+
+        // WhatsApp Web link
+        const whatsappURL = `https://web.whatsapp.com/send?phone=91${booking.phone}&text=${encodedMessage}`;
+
+        // Open in new window
+        window.open(whatsappURL, 'whatsapp', 'width=800,height=600');
+    };
+
     const getServiceBadgeColor = (service: string) => {
         switch (service) {
             case 'flight':
@@ -272,6 +343,29 @@ export default function BookingShow() {
                                     <li className="me-3 d-inline-flex align-items-center">
                                         <i className="las la-phone me-1"></i>
                                         {booking.phone}
+                                        <button
+                                            onClick={handleWhatsAppShare}
+                                            title="Send WhatsApp Message"
+                                            style={{
+                                                background: '#25D366',
+                                                border: 'none',
+                                                color: '#fff',
+                                                borderRadius: '50%',
+                                                width: '36px',
+                                                height: '36px',
+                                                marginLeft: '8px',
+                                                cursor: 'pointer',
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                justifyContent: 'center',
+                                                transition: 'transform 0.2s',
+                                                fontSize: '18px',
+                                            }}
+                                            onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
+                                            onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
+                                        >
+                                            <i className="fab fa-whatsapp"></i>
+                                        </button>
                                     </li>
                                 )}
                                 <li className="me-3 d-inline-flex align-items-center">

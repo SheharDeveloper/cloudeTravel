@@ -42,16 +42,8 @@ Route::get('visas/{visa}', [VisaController::class, 'show'])->name('visas.show');
 Route::get('packages', [PackageController::class, 'index'])->name('packages.index');
 Route::get('packages/{package}', [PackageController::class, 'show'])->name('packages.show');
 
-// Public booking endpoints (no authentication required)
-Route::get('bookings', [BookingController::class, 'index'])->name('bookings.index');
-Route::get('bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+// Public booking submit endpoint (no authentication required - for booking modal)
 Route::post('bookings', [BookingController::class, 'store'])->name('bookings.store');
-Route::patch('bookings/{booking}', [BookingController::class, 'update'])->name('bookings.update');
-
-// Booking Notes endpoints
-Route::get('bookings/{booking}/notes', [BookingNoteController::class, 'index'])->name('booking-notes.index');
-Route::post('bookings/{booking}/notes', [BookingNoteController::class, 'store'])->name('booking-notes.store');
-Route::delete('bookings/{booking}/notes/{note}', [BookingNoteController::class, 'destroy'])->name('booking-notes.destroy');
 
 // Public tour endpoints (no authentication required)
 Route::get('tours', [TourController::class, 'index'])->name('tours.index');
@@ -123,4 +115,14 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('packages/{package}', [PackageController::class, 'update'])->name('packages.update');
     Route::patch('packages/{package}', [PackageController::class, 'update'])->name('packages.update');
     Route::delete('packages/{package}', [PackageController::class, 'destroy'])->name('packages.destroy');
+
+    // Protected booking endpoints (authentication required - for admin)
+    Route::get('bookings', [BookingController::class, 'index'])->name('bookings.index');
+    Route::get('bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+    Route::patch('bookings/{booking}', [BookingController::class, 'update'])->name('bookings.update');
+
+    // Booking Notes endpoints (authentication required - for admin)
+    Route::get('bookings/{booking}/notes', [BookingNoteController::class, 'index'])->name('booking-notes.index');
+    Route::post('bookings/{booking}/notes', [BookingNoteController::class, 'store'])->name('booking-notes.store');
+    Route::delete('bookings/{booking}/notes/{note}', [BookingNoteController::class, 'destroy'])->name('booking-notes.destroy');
 });
