@@ -194,7 +194,33 @@ export default function BookingShow() {
     if (!booking) {
         return (
             <ProtectedRoute>
-                <div className="alert alert-danger">Booking not found</div>
+                <div className="page-title">
+                    <nav aria-label="breadcrumb">
+                        <ol className="breadcrumb">
+                            <li><h1>Booking Details</h1></li>
+                            <li className="breadcrumb-item"><a href="/admin/bookings">Bookings</a></li>
+                            <li className="breadcrumb-item active">Not Found</li>
+                        </ol>
+                    </nav>
+                </div>
+                <div className="row">
+                    <div className="col-md-12">
+                        <div className="card">
+                            <div className="card-body text-center py-5">
+                                <div style={{ fontSize: '48px', marginBottom: '20px', color: '#ccc' }}>
+                                    <i className="fa fa-inbox"></i>
+                                </div>
+                                <h3 style={{ color: '#666', marginBottom: '10px' }}>Booking Not Found</h3>
+                                <p style={{ color: '#999', marginBottom: '20px' }}>
+                                    The booking you're looking for doesn't exist or has been deleted.
+                                </p>
+                                <a href="/admin/bookings" className="btn btn-primary">
+                                    <i className="fa fa-arrow-left me-2"></i> Back to Bookings
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </ProtectedRoute>
         );
     }
