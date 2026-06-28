@@ -144,14 +144,14 @@ export default function VisaDetail({ visa }: { visa: VisaData }) {
             {/* VISA SEARCH FORM */}
             <div
                 className="search-form-wrapper"
-                style={{ padding: '0 20px', position: 'relative', zIndex: 10, marginTop: '-80px', paddingBottom: '80px' }}
+                style={{ padding: '0 20px', position: 'relative', zIndex: 10, marginTop: '40px', paddingBottom: '80px' }}
             >
                 <div
                     style={{
-                        maxWidth: '900px',
+                        maxWidth: '1100px',
                         margin: '0 auto',
                         background: '#fff',
-                        padding: '30px',
+                        padding: '40px',
                         borderRadius: '8px',
                         boxShadow: '0 8px 30px rgba(0,0,0,.15)',
                     }}
