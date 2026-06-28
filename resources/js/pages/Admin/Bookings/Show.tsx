@@ -4,6 +4,7 @@ import { usePage } from '@inertiajs/react';
 
 interface Booking {
     id: number;
+    uid: string;
     service: string;
     name: string;
     email: string;
@@ -18,6 +19,7 @@ interface Booking {
     travel_class?: string;
     destination?: string;
     passport_country?: string;
+    visa_type?: string;
     hotel_city?: string;
     check_in_date?: string;
     check_out_date?: string;
@@ -40,7 +42,7 @@ interface BookingNote {
 
 export default function BookingShow() {
     const page = usePage();
-    const bookingId = (page.url.match(/\/admin\/bookings\/(\d+)/) || [])[1];
+    const bookingUid = (page.url.match(/\/admin\/bookings\/([a-f0-9-]+)/) || [])[1];
     const [booking, setBooking] = useState<Booking | null>(null);
     const [loading, setLoading] = useState(true);
     const [notes, setNotes] = useState<BookingNote[]>([]);
@@ -50,16 +52,16 @@ export default function BookingShow() {
     const [showNoteModal, setShowNoteModal] = useState(false);
 
     useEffect(() => {
-        if (bookingId) {
+        if (bookingUid) {
             fetchBooking();
             fetchNotes();
         }
-    }, [bookingId]);
+    }, [bookingUid]);
 
     const fetchBooking = async () => {
         setLoading(true);
         try {
-            const response = await fetch(`/api/bookings/${bookingId}`, {
+            const response = await fetch(`/api/bookings/${bookingUid}`, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -78,7 +80,7 @@ export default function BookingShow() {
 
     const fetchNotes = async () => {
         try {
-            const response = await fetch(`/api/bookings/${bookingId}/notes`, {
+            const response = await fetch(`/api/bookings/${bookingUid}/notes`, {
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -387,6 +389,14 @@ export default function BookingShow() {
                                                 <p className="fw-semibold">{booking.passport_country || 'N/A'}</p>
                                             </div>
                                             <div className="col-md-6 mb-3">
+                                                <label className="text-muted small">Visa Type</label>
+                                                <p className="fw-semibold">{booking.visa_type || 'N/A'}</p>
+                                            </div>
+                                            <div className="col-md-6 mb-3">
+                                                <label className="text-muted small">Number of Travelers</label>
+                                                <p className="fw-semibold">{booking.total_members}</p>
+                                            </div>
+                                            <div className="col-md-6 mb-3">
                                                 <label className="text-muted small">Travel Date</label>
                                                 <p className="fw-semibold">{formatDate(booking.travel_date)}</p>
                                             </div>
@@ -634,6 +644,14 @@ export default function BookingShow() {
                                                         <tr>
                                                             <td className="fw-semibold text-muted">Passport Country</td>
                                                             <td>{booking.passport_country || 'N/A'}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="fw-semibold text-muted">Visa Type</td>
+                                                            <td>{booking.visa_type || 'N/A'}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="fw-semibold text-muted">Number of Travelers</td>
+                                                            <td>{booking.total_members}</td>
                                                         </tr>
                                                         <tr>
                                                             <td className="fw-semibold text-muted">Travel Date</td>

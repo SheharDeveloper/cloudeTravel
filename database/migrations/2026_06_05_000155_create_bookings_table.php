@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uid')->unique();
             $table->string('service')->comment('flight, hotel, or visa');
             $table->string('name');
             $table->string('email');

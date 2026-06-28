@@ -5,12 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Booking extends Model
 {
     use SoftDeletes;
 
     protected $fillable = [
+        'uid',
         'service',
         'name',
         'email',
@@ -48,5 +50,16 @@ class Booking extends Model
     public function notes(): HasMany
     {
         return $this->hasMany(BookingNote::class);
+    }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($model) {
+            if (empty($model->uid)) {
+                $model->uid = Str::uuid();
+            }
+        });
     }
 }

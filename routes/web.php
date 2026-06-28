@@ -40,7 +40,7 @@ Route::prefix('admin')->group(function () {
 
     // Bookings Management (Inertia Pages)
     Route::inertia('bookings', 'Admin/Bookings/Index')->name('admin.bookings.index');
-    Route::inertia('bookings/{id}', 'Admin/Bookings/Show')->name('admin.bookings.show');
+    Route::inertia('bookings/{uid}', 'Admin/Bookings/Show')->name('admin.bookings.show');
 
     // Special Offer Management (Inertia Page)
     Route::inertia('special-offer', 'Admin/SpecialOffer/Index')->name('admin.special-offer.index');

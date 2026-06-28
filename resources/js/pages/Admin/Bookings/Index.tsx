@@ -5,6 +5,7 @@ import { router } from '@inertiajs/react';
 
 interface Booking {
     id: number;
+    uid: string;
     service: string;
     name: string;
     email: string;
@@ -249,7 +250,7 @@ export default function BookingsIndex() {
                                                                 <button
                                                                     className="btn btn-sm btn-primary"
                                                                     title="View Details"
-                                                                    onClick={() => router.visit(`/admin/bookings/${booking.id}`)}
+                                                                    onClick={() => router.visit(`/admin/bookings/${booking.uid}`)}
                                                                 >
                                                                     <i className="fa fa-eye"></i>
                                                                 </button>
