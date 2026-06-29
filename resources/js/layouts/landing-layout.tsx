@@ -211,7 +211,7 @@ export default function LandingLayout({ children }: Props) {
                     <li><Link href="/visa-services" style={{ color: isCurrentUrl('/visa-services') ? '#ff6b35' : '#333', fontSize: '14px', fontWeight: isCurrentUrl('/visa-services') ? 600 : 500, textDecoration: 'none', borderBottom: isCurrentUrl('/visa-services') ? '3px solid #ff6b35' : 'none', paddingBottom: '5px', transition: 'all 0.3s' }} onMouseEnter={(e) => !isCurrentUrl('/visa-services') && (e.currentTarget.style.color = '#ff6b35')} onMouseLeave={(e) => !isCurrentUrl('/visa-services') && (e.currentTarget.style.color = '#333')}>Visa Services</Link></li>
 
                     {/* Other Services Dropdown */}
-                    <li
+                    {/* <li
                         style={{ position: 'relative' }}
                         onMouseEnter={() => setOpenDropdown('other')}
                         onMouseLeave={() => setOpenDropdown(null)}
@@ -239,7 +239,7 @@ export default function LandingLayout({ children }: Props) {
                                 ))}
                             </div>
                         )}
-                    </li>
+                    </li> */}
 
                     {/* ABOUT US - Active state indicator: orange color + underline when on about-us page */}
                     <li><Link href="/about-us" style={{ color: isCurrentUrl('/about-us') ? '#ff6b35' : '#333', fontSize: '14px', fontWeight: isCurrentUrl('/about-us') ? 600 : 500, textDecoration: 'none', borderBottom: isCurrentUrl('/about-us') ? '3px solid #ff6b35' : 'none', paddingBottom: '5px', transition: 'all 0.3s' }} onMouseEnter={(e) => !isCurrentUrl('/about-us') && (e.currentTarget.style.color = '#ff6b35')} onMouseLeave={(e) => !isCurrentUrl('/about-us') && (e.currentTarget.style.color = '#333')}>About Us</Link></li>

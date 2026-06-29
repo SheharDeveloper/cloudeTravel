@@ -48,6 +48,7 @@ export default function Home() {
     const [heroImageLoading, setHeroImageLoading] = useState(true);
     const [featuredVisas, setFeaturedVisas] = useState<any[]>([]);
     const [featuredPackages, setFeaturedPackages] = useState<any[]>([]);
+    const [searchedCountry, setSearchedCountry] = useState<string>('');
     const isInitialLoadRef = useRef(true);
     const autoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const heroAutoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -139,6 +140,14 @@ export default function Home() {
     const loadFeaturedPackages = async () => {
         const packages = await fetchFeaturedPackages();
         setFeaturedPackages(packages);
+    };
+
+    const getFilteredPackages = () => {
+        if (!searchedCountry) return [];
+        return featuredPackages.filter((pkg) =>
+            pkg.destination_country?.toLowerCase().includes(searchedCountry.toLowerCase()) ||
+            pkg.name?.toLowerCase().includes(searchedCountry.toLowerCase())
+        );
     };
 
     const startAutoPlay = () => {
@@ -693,7 +702,102 @@ export default function Home() {
                     )}
 
                     {activeService === 'flight-hotel' && (
-                        <PackageSearchForm />
+                        <>
+                            <PackageSearchForm onCountrySelect={setSearchedCountry} />
+
+                            {/* PACKAGES BY SEARCHED COUNTRY - TABLE FORMAT BELOW SEARCH BUTTON */}
+                            {getFilteredPackages().length > 0 && (
+                                <div style={{ background: '#f9f9f9', borderTop: '1px solid #e0e0e0', padding: '16px 0', marginTop: '12px' }}>
+                                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#003d82', marginBottom: '12px', paddingLeft: '30px' }}>
+                                        📦 Available Packages in {searchedCountry}
+                                    </h3>
+                                    <div style={{ overflowX: 'auto', paddingLeft: '30px', paddingRight: '30px' }}>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                            <thead>
+                                                <tr style={{ borderBottom: '2px solid #0499ff', background: '#f0f7ff' }}>
+                                                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#003d82' }}>Package</th>
+                                                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#003d82' }}>Price</th>
+                                                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#003d82' }}>Duration</th>
+                                                    <th style={{ padding: '12px', textAlign: 'center', fontSize: '12px', fontWeight: 700, color: '#003d82' }}>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {getFilteredPackages().map((pkg) => (
+                                                    <tr
+                                                        key={pkg.id}
+                                                        style={{
+                                                            borderBottom: '1px solid #e0e0e0',
+                                                            transition: 'background 0.2s',
+                                                        }}
+                                                        onMouseEnter={(e) => {
+                                                            e.currentTarget.style.background = '#f0f7ff';
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            e.currentTarget.style.background = 'transparent';
+                                                        }}
+                                                    >
+                                                        <td style={{ padding: '12px', fontSize: '13px' }}>
+                                                            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                                                                {pkg.image && (
+                                                                    <img
+                                                                        src={pkg.image}
+                                                                        alt={pkg.name}
+                                                                        style={{
+                                                                            width: '50px',
+                                                                            height: '50px',
+                                                                            borderRadius: '4px',
+                                                                            objectFit: 'cover',
+                                                                        }}
+                                                                    />
+                                                                )}
+                                                                <div>
+                                                                    <div style={{ fontWeight: 700, color: '#003d82', marginBottom: '2px' }}>
+                                                                        {pkg.name}
+                                                                    </div>
+                                                                    <div style={{ fontSize: '11px', color: '#999' }}>
+                                                                        {pkg.description ? pkg.description.substring(0, 50) + '...' : 'Travel package'}
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td style={{ padding: '12px', fontSize: '13px', fontWeight: 700, color: '#0499ff' }}>
+                                                            £{pkg.price?.toLocaleString() || 'N/A'}
+                                                        </td>
+                                                        <td style={{ padding: '12px', fontSize: '13px', color: '#666' }}>
+                                                            {pkg.duration_days} days
+                                                        </td>
+                                                        <td style={{ padding: '12px', textAlign: 'center' }}>
+                                                            <a
+                                                                href={`/packages/${pkg.uid || pkg.id}`}
+                                                                style={{
+                                                                    background: '#0499ff',
+                                                                    color: '#fff',
+                                                                    padding: '6px 12px',
+                                                                    borderRadius: '4px',
+                                                                    fontSize: '11px',
+                                                                    fontWeight: 700,
+                                                                    textDecoration: 'none',
+                                                                    display: 'inline-block',
+                                                                    transition: 'background 0.2s',
+                                                                }}
+                                                                onMouseEnter={(e) => {
+                                                                    e.currentTarget.style.background = '#0284d0';
+                                                                }}
+                                                                onMouseLeave={(e) => {
+                                                                    e.currentTarget.style.background = '#0499ff';
+                                                                }}
+                                                            >
+                                                                View Details
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     )}
 
                     {activeService === 'airport-transfer' && (

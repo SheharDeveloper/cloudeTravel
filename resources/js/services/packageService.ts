@@ -3,6 +3,7 @@ import { apiFetch } from '@/lib/api';
 // Package data interface
 export interface Package {
     id: number;
+    uid?: string;
     name: string;
     title: string;
     image?: string;
@@ -16,7 +17,7 @@ export interface Package {
     duration_days: number;
     travel_export_included: boolean;
     visa_service_included: boolean;
-    status: number;
+    status: boolean;
     is_featured: boolean;
     created_at: string;
 }
@@ -36,7 +37,7 @@ export interface PackageFormData {
     duration_days: number;
     travel_export_included: boolean;
     visa_service_included: boolean;
-    status: number;
+    status: boolean;
     is_featured: boolean;
 }
 
@@ -66,7 +67,7 @@ export const fetchFeaturedPackages = async (): Promise<Package[]> => {
         if (response.ok) {
             const data = await response.json();
             const packages = data.data || data || [];
-            return packages.filter((pkg: Package) => pkg.is_featured === true && (pkg.status === 1 || pkg.status === true));
+            return packages.filter((pkg: Package) => pkg.is_featured === true && pkg.status === true);
         }
         throw new Error('Failed to fetch featured packages');
     } catch (error) {

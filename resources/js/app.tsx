@@ -39,6 +39,7 @@ createInertiaApp({
             case name === 'other-services':
             case name === 'about-us':
             case name === 'contact-us':
+            case name === 'PackageDetail':
                 return LandingLayout;
             case name.startsWith('auth/'):
                 return AuthLayout;

@@ -6,6 +6,7 @@ import { ProtectedRoute } from '@/lib/ProtectedRoute';
 export default function Dashboard() {
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [latestBookings, setLatestBookings] = useState<any[]>([]);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -34,6 +35,23 @@ export default function Dashboard() {
         };
 
         fetchUser();
+    }, []);
+
+    useEffect(() => {
+        const fetchLatestBookings = async () => {
+            try {
+                const response = await apiFetch('/api/bookings?per_page=5', {
+                    method: 'GET',
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    setLatestBookings(data.data || []);
+                }
+            } catch (err) {
+                console.error('Error fetching bookings:', err);
+            }
+        };
+        fetchLatestBookings();
     }, []);
 
     const userName = user?.name || user?.email || 'Admin';

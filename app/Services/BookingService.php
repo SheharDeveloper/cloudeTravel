@@ -146,13 +146,13 @@ class BookingService
             'name' => $formData['firstName'] ?? 'Guest',
             'email' => $formData['email'],
             'phone' => $formData['phone'] ?? null,
-            'country' => $searchParams['selectedCountry'] ?? null,
-            'hotel_city' => $searchParams['selectedCity'] ?? null,
+            'destination' => $searchParams['destinationCountry'] ?? $searchParams['selectedCountry'] ?? null,
+            'hotel_city' => $searchParams['hotelName'] ?? $searchParams['selectedCity'] ?? null,
             'check_in_date' => $searchParams['checkInDate'] ?? null,
             'check_out_date' => $searchParams['checkOutDate'] ?? null,
             'rooms' => $searchParams['rooms'] ?? 1,
-            'guests' => $searchParams['adults'] ?? 1,
-            'total_members' => $searchParams['adults'] ?? 1,
+            'guests' => $searchParams['guests'] ?? $searchParams['adults'] ?? 1,
+            'total_members' => $searchParams['total_members'] ?? $searchParams['adults'] ?? 1,
             'from_city' => $searchParams['selectedAirport'] ?? null,
             'notes' => $this->generatePackageNotes($searchParams),
             'status' => 'pending',
@@ -264,16 +264,23 @@ class BookingService
      */
     private function generatePackageNotes(array $searchParams): string
     {
-        return sprintf(
-            'Country: %s, City: %s, Airport: %s, Nights: %d, Adults: %d, Children: %d, Rooms: %d, Flexible Days: %d',
-            $searchParams['selectedCountry'] ?? 'N/A',
-            $searchParams['selectedCity'] ?? 'N/A',
+        $packageInfo = '';
+        if (!empty($searchParams['packageUid']) || !empty($searchParams['packageName'])) {
+            $packageInfo = sprintf(
+                'Package: %s (UID: %s) | ',
+                $searchParams['packageName'] ?? 'N/A',
+                $searchParams['packageUid'] ?? 'N/A'
+            );
+        }
+
+        return $packageInfo . sprintf(
+            'Destination: %s, Hotel: %s, Airport: %s, Duration: %d days, Guests: %d, Rooms: %d',
+            $searchParams['destinationCountry'] ?? $searchParams['selectedCountry'] ?? 'N/A',
+            $searchParams['hotelName'] ?? $searchParams['selectedCity'] ?? 'N/A',
             $searchParams['selectedAirport'] ?? 'N/A',
-            $searchParams['nights'] ?? 0,
-            $searchParams['adults'] ?? 1,
-            $searchParams['children'] ?? 0,
-            $searchParams['rooms'] ?? 1,
-            $searchParams['flexibleDays'] ?? 0
+            $searchParams['duration'] ?? $searchParams['nights'] ?? 0,
+            $searchParams['guests'] ?? $searchParams['adults'] ?? 1,
+            $searchParams['rooms'] ?? 1
         );
     }
 

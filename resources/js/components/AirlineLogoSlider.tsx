@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { airlineService } from '@/services/airlineService';
 
 interface Airline {
     id: string | number;
@@ -12,26 +11,10 @@ interface Airline {
 export default function AirlineLogoSlider() {
     const [airlines, setAirlines] = useState<Airline[]>([]);
     const [currentIndex, setCurrentIndex] = useState(0);
-    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        fetchAirlines();
+        setAirlines(getDefaultAirlines());
     }, []);
-
-    const fetchAirlines = async () => {
-        try {
-            setLoading(true);
-            const data = await airlineService.getAirlines(20, 0);
-            // Filter airlines with valid IATA code
-            const airlinesWithIata = data.filter((airline: any) => airline.iata);
-            setAirlines(airlinesWithIata.length > 0 ? airlinesWithIata : getDefaultAirlines());
-        } catch (error) {
-            console.error('Error fetching airlines:', error);
-            setAirlines(getDefaultAirlines());
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const getDefaultAirlines = () => [
         { id: 1, name: 'Air India', logo: '🇮🇳' },
@@ -67,17 +50,6 @@ export default function AirlineLogoSlider() {
         }
         return visible;
     };
-
-    if (loading) {
-        return (
-            <section style={{ padding: '50px 40px', background: '#fff', borderTop: '1px solid #f0f0f0' }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
-                    <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#003d82', marginBottom: '30px' }}>✈️ Partner Airlines</h3>
-                    <p style={{ color: '#999' }}>Loading airlines...</p>
-                </div>
-            </section>
-        );
-    }
 
     return (
         <section style={{ padding: '50px 40px', background: '#fff', borderTop: '1px solid #f0f0f0' }}>

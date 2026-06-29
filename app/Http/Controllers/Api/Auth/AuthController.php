@@ -119,7 +119,10 @@ class AuthController extends Controller
     public function logout(Request $request): JsonResponse
     {
         try {
-            $request->user()->currentAccessToken()->delete();
+            $user = $request->user();
+            if ($user && $user->currentAccessToken()) {
+                $user->tokens()->where('id', $user->currentAccessToken()->id)->delete();
+            }
 
             $response = response()->json([
                 'status' => 'success',
@@ -130,7 +133,7 @@ class AuthController extends Controller
             $response->cookie(
                 name: 'auth_token',
                 value: '',
-                minutes: -1, // Expire immediately
+                minutes: -1,
                 path: '/',
                 domain: null,
                 secure: app()->environment('production'),
@@ -140,7 +143,7 @@ class AuthController extends Controller
 
             return $response;
         } catch (Throwable $e) {
-            \Log::error('Auth error:', [
+            \Log::error('Logout error:', [
                 'message' => $e->getMessage(),
                 'file' => $e->getFile(),
                 'line' => $e->getLine(),

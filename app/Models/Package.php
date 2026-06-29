@@ -53,4 +53,10 @@ class Package extends Model
             }
         });
     }
+
+    // Use UUID for route model binding instead of numeric ID
+    public function getRouteKeyName()
+    {
+        return 'uid';
+    }
 }

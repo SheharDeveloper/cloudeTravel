@@ -12,17 +12,17 @@ const menuItems: MenuItem[] = [
 
     { type: 'link', icon: 'fa-solid fa-house', label: 'Dashboard', href: '/dashboard' },
 
-    { type: 'title', label: 'TOUR MANAGEMENT' },
+    // { type: 'title', label: 'TOUR MANAGEMENT' },
 
-    {
-        type: 'dropdown',
-        icon: 'fa-solid fa-plane',
-        label: 'Tours',
-        children: [
-            { label: 'All Tours', href: '/admin/tours' },
-            { label: 'Add New Tour', href: '/admin/tours/create' },
-        ],
-    },
+    // {
+    //     type: 'dropdown',
+    //     icon: 'fa-solid fa-plane',
+    //     label: 'Tours',
+    //     children: [
+    //         { label: 'All Tours', href: '/admin/tours' },
+    //         { label: 'Add New Tour', href: '/admin/tours/create' },
+    //     ],
+    // },
 
     { type: 'title', label: 'BOOKING MANAGEMENT' },
 

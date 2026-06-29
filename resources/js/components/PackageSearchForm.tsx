@@ -2,7 +2,11 @@ import { useState, useRef, useEffect } from 'react';
 import CalendarDateRangePicker from '@/components/CalendarDateRangePicker';
 import BookingModal from '@/components/BookingModal';
 
-export default function PackageSearchForm(): React.ReactElement {
+interface PackageSearchFormProps {
+    onCountrySelect?: (country: string) => void;
+}
+
+export default function PackageSearchForm({ onCountrySelect }: PackageSearchFormProps): React.ReactElement {
     const [selectedCountry, setSelectedCountry] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
     const [selectedAirport, setSelectedAirport] = useState('');
@@ -197,6 +201,7 @@ export default function PackageSearchForm(): React.ReactElement {
                                     key={country.code}
                                     onClick={() => {
                                         setSelectedCountry(country.code);
+                                        onCountrySelect?.(country.name);
                                         setCountrySearch('');
                                         setShowCountryDropdown(false);
                                         setSelectedCity('');
