@@ -195,7 +195,7 @@ export default function Home() {
                 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
             </Head>
 
-            {/* Loading overlay when hero image is loading */}
+            {/* Loading overlay with video when hero image is loading */}
             {heroImageLoading && (
                 <div style={{
                     position: 'fixed',
@@ -203,9 +203,26 @@ export default function Home() {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    background: 'rgba(255, 255, 255, 0.95)',
+                    background: '#000',
                     zIndex: 9998,
-                }} />
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                }}>
+                    <video
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'contain',
+                        }}
+                    >
+                        <source src="/images/loader.mp4" type="video/mp4" />
+                    </video>
+                </div>
             )}
 
             <style>{`
