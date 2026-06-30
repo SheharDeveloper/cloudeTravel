@@ -44,6 +44,10 @@ Route::middleware([\App\Http\Middleware\AuthenticateApiToken::class])->prefix('a
     Route::inertia('bookings', 'Admin/Bookings/Index')->name('admin.bookings.index');
     Route::inertia('bookings/{uid}', 'Admin/Bookings/Show')->name('admin.bookings.show');
 
+    // Contact Requests Management (Inertia Pages)
+    Route::inertia('contact-requests', 'Admin/ContactRequests/Index')->name('admin.contact-requests.index');
+    Route::inertia('contact-requests/{uid}', 'Admin/ContactRequests/Show')->name('admin.contact-requests.show');
+
     // Special Offer Management (Inertia Page)
     Route::inertia('special-offer', 'Admin/SpecialOffer/Index')->name('admin.special-offer.index');
 

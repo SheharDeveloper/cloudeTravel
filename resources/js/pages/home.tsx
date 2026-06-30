@@ -12,8 +12,8 @@ import HotelsSearchForm from '@/components/HotelsSearchForm';
 import VisasSearchForm from '@/components/VisasSearchForm';
 import PackageSearchForm from '@/components/PackageSearchForm';
 import AirportTransportForm from '@/components/AirportTransportForm';
-import AirlineLogoSlider from '@/components/AirlineLogoSlider';
 import ImageWithFallback from '@/components/ImageWithFallback';
+import ContactForm from '@/components/ContactForm';
 
 /**
  * Home/Landing page component with multiple sections
@@ -36,7 +36,6 @@ export default function Home() {
     const [showDateRangePicker, setShowDateRangePicker] = useState(false);
     const [showTravellerModal, setShowTravellerModal] = useState(false);
 
-    const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
     const [specialOffers, setSpecialOffers] = useState<any[]>([]);
     const [currentOfferIndex, setCurrentOfferIndex] = useState(0);
     const [heroImages, setHeroImages] = useState<any[]>([]);
@@ -1217,9 +1216,6 @@ export default function Home() {
                 </section>
             )}
 
-            {/* AIRLINE LOGO SLIDER SECTION */}
-            <AirlineLogoSlider />
-
             {/* CONTACT FORM SECTION */}
             <section className="contact-section" style={{ padding: '50px 40px', background: '#fff' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
@@ -1227,17 +1223,7 @@ export default function Home() {
                         {/* Form */}
                         <div>
                             <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#003d82', marginBottom: '20px' }}>Get in Touch</h3>
-                            <form style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                                <input type="text" placeholder="Name" style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px' }} value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
-                                <input type="email" placeholder="Email" style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px' }} value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
-                                <input type="text" placeholder="Subject" style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px' }} value={formData.subject} onChange={(e) => setFormData({ ...formData, subject: e.target.value })} />
-                                <textarea placeholder="Message" style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px', minHeight: '120px', fontFamily: "'Open Sans', sans-serif" }} value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })}></textarea>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px' }}>
-                                    <input type="checkbox" id="agree" />
-                                    <label htmlFor="agree">I Agree to the terms & conditions</label>
-                                </div>
-                                <button type="submit" style={{ background: '#003d82', color: '#fff', border: 'none', padding: '12px', borderRadius: '4px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Send</button>
-                            </form>
+                            <ContactForm />
                         </div>
 
                         {/* Gallery */}

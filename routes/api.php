@@ -17,6 +17,8 @@ use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\BookingNoteController;
 use App\Http\Controllers\Api\VisaController;
 use App\Http\Controllers\Api\PackageController;
+use App\Http\Controllers\Api\ContactController;
+use App\Http\Controllers\Api\ContactRequestController;
 
 // Public auth endpoints (no authentication required)
 Route::post('auth/login', [AuthController::class, 'login'])->name('auth.login');
@@ -33,6 +35,9 @@ Route::get('testimonials', [TestimonialController::class, 'index'])->name('testi
 
 // Public contact info endpoint
 Route::get('contact-info', [ContactInfoController::class, 'index'])->name('contact-info.index');
+
+// Public contact form endpoint
+Route::post('contact', [ContactController::class, 'store'])->name('contact.store');
 
 // Public visa endpoints (no authentication required)
 Route::get('visas', [VisaController::class, 'index'])->name('visas.index');
@@ -125,4 +130,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('bookings/{booking}/notes', [BookingNoteController::class, 'index'])->name('booking-notes.index');
     Route::post('bookings/{booking}/notes', [BookingNoteController::class, 'store'])->name('booking-notes.store');
     Route::delete('bookings/{booking}/notes/{note}', [BookingNoteController::class, 'destroy'])->name('booking-notes.destroy');
+
+    // Contact Requests endpoints (authentication required - for admin)
+    Route::get('contact-requests', [ContactRequestController::class, 'index'])->name('contact-requests.index');
+    Route::get('contact-requests/{contact}', [ContactRequestController::class, 'show'])->name('contact-requests.show');
+    Route::delete('contact-requests/{contact}', [ContactRequestController::class, 'destroy'])->name('contact-requests.destroy');
 });
