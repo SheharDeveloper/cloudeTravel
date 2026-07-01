@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+﻿import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
 import BookingModal from '@/components/BookingModal';
 
@@ -68,7 +68,7 @@ export default function PackageDetail({ package: pkg }: Props) {
                 <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px' }}>
                     {/* Header */}
                     <div style={{ marginBottom: '40px' }}>
-                        <h1 style={{ fontSize: '32px', fontWeight: 700, color: '#003d82', marginBottom: '8px' }}>
+                        <h1 style={{ fontSize: '32px', fontWeight: 700, color: '#0499ff', marginBottom: '8px' }}>
                             {pkg.name}
                         </h1>
                         <p style={{ fontSize: '16px', color: '#666', marginBottom: '20px' }}>
@@ -85,7 +85,7 @@ export default function PackageDetail({ package: pkg }: Props) {
                             fontSize: '20px',
                             fontWeight: 700,
                         }}>
-                            £{pkg.price.toLocaleString()}
+                            Â£{pkg.price.toLocaleString()}
                         </div>
                     </div>
 
@@ -104,7 +104,7 @@ export default function PackageDetail({ package: pkg }: Props) {
                             <div style={{ fontSize: '12px', color: '#999', fontWeight: 700, marginBottom: '4px' }}>
                                 DESTINATION
                             </div>
-                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#003d82' }}>
+                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#0499ff' }}>
                                 {pkg.destination_country}
                             </div>
                         </div>
@@ -113,7 +113,7 @@ export default function PackageDetail({ package: pkg }: Props) {
                             <div style={{ fontSize: '12px', color: '#999', fontWeight: 700, marginBottom: '4px' }}>
                                 DURATION
                             </div>
-                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#003d82' }}>
+                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#0499ff' }}>
                                 {pkg.duration_days} Days
                             </div>
                         </div>
@@ -122,8 +122,8 @@ export default function PackageDetail({ package: pkg }: Props) {
                             <div style={{ fontSize: '12px', color: '#999', fontWeight: 700, marginBottom: '4px' }}>
                                 HOTEL RATING
                             </div>
-                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#003d82' }}>
-                                ⭐ {pkg.hotel_stars} Stars
+                            <div style={{ fontSize: '16px', fontWeight: 700, color: '#0499ff' }}>
+                                â­ {pkg.hotel_stars} Stars
                             </div>
                         </div>
 
@@ -132,7 +132,7 @@ export default function PackageDetail({ package: pkg }: Props) {
                                 <div style={{ fontSize: '12px', color: '#999', fontWeight: 700, marginBottom: '4px' }}>
                                     HOTEL
                                 </div>
-                                <div style={{ fontSize: '16px', fontWeight: 700, color: '#003d82' }}>
+                                <div style={{ fontSize: '16px', fontWeight: 700, color: '#0499ff' }}>
                                     {pkg.hotel_name}
                                 </div>
                             </div>
@@ -148,7 +148,7 @@ export default function PackageDetail({ package: pkg }: Props) {
                             marginBottom: '40px',
                             boxShadow: '0 2px 8px rgba(0,0,0,.1)',
                         }}>
-                            <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#003d82', marginBottom: '12px' }}>
+                            <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#0499ff', marginBottom: '12px' }}>
                                 About This Package
                             </h2>
                             <p style={{ fontSize: '14px', lineHeight: 1.6, color: '#555' }}>
@@ -165,28 +165,28 @@ export default function PackageDetail({ package: pkg }: Props) {
                         marginBottom: '40px',
                         boxShadow: '0 2px 8px rgba(0,0,0,.1)',
                     }}>
-                        <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#003d82', marginBottom: '16px' }}>
+                        <h2 style={{ fontSize: '20px', fontWeight: 700, color: '#0499ff', marginBottom: '16px' }}>
                             What's Included
                         </h2>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
                             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                <span style={{ fontSize: '18px' }}>✓</span>
+                                <span style={{ fontSize: '18px' }}>âœ“</span>
                                 <span style={{ color: '#555' }}>Hotel Accommodation</span>
                             </div>
                             {pkg.visa_service_included && (
                                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                    <span style={{ fontSize: '18px', color: '#0499ff' }}>✓</span>
+                                    <span style={{ fontSize: '18px', color: '#0499ff' }}>âœ“</span>
                                     <span style={{ color: '#555' }}>Visa Service</span>
                                 </div>
                             )}
                             {pkg.travel_export_included && (
                                 <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                    <span style={{ fontSize: '18px', color: '#0499ff' }}>✓</span>
+                                    <span style={{ fontSize: '18px', color: '#0499ff' }}>âœ“</span>
                                     <span style={{ color: '#555' }}>Travel Insurance</span>
                                 </div>
                             )}
                             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                <span style={{ fontSize: '18px' }}>✓</span>
+                                <span style={{ fontSize: '18px' }}>âœ“</span>
                                 <span style={{ color: '#555' }}>24/7 Support</span>
                             </div>
                         </div>
@@ -270,7 +270,7 @@ export default function PackageDetail({ package: pkg }: Props) {
                                         >
                                             <div style={{ fontSize: '13px', color: '#333', fontWeight: 600 }}>
                                                 <i className="fa fa-users" style={{ marginRight: '8px', color: '#0066cc' }}></i>
-                                                {adults} Adult{adults !== 1 ? 's' : ''} • {children} Child{children !== 1 ? 'ren' : ''} • {rooms} Room{rooms !== 1 ? 's' : ''}
+                                                {adults} Adult{adults !== 1 ? 's' : ''} â€¢ {children} Child{children !== 1 ? 'ren' : ''} â€¢ {rooms} Room{rooms !== 1 ? 's' : ''}
                                             </div>
                                             <i className="fa fa-chevron-down" style={{ fontSize: '12px', color: '#999' }}></i>
                                         </div>
@@ -285,7 +285,7 @@ export default function PackageDetail({ package: pkg }: Props) {
                                                             <p style={{ fontSize: '14px', color: '#333', margin: 0, fontWeight: 600 }}>Rooms</p>
                                                         </div>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                            <button onClick={() => setRooms(Math.max(1, rooms - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                                                            <button onClick={() => setRooms(Math.max(1, rooms - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>âˆ’</button>
                                                             <span style={{ fontSize: '16px', fontWeight: 600, color: '#333', minWidth: '24px', textAlign: 'center' }}>{rooms}</span>
                                                             <button onClick={() => setRooms(Math.min(8, rooms + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                                                         </div>
@@ -300,7 +300,7 @@ export default function PackageDetail({ package: pkg }: Props) {
                                                             <p style={{ fontSize: '11px', color: '#999', margin: '4px 0 0 0' }}>18 yrs or above</p>
                                                         </div>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                            <button onClick={() => setAdults(Math.max(1, adults - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                                                            <button onClick={() => setAdults(Math.max(1, adults - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>âˆ’</button>
                                                             <span style={{ fontSize: '16px', fontWeight: 600, color: '#333', minWidth: '24px', textAlign: 'center' }}>{adults}</span>
                                                             <button onClick={() => setAdults(Math.min(8, adults + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                                                         </div>
@@ -315,7 +315,7 @@ export default function PackageDetail({ package: pkg }: Props) {
                                                             <p style={{ fontSize: '11px', color: '#999', margin: '4px 0 0 0' }}>0 - 17 yrs</p>
                                                         </div>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                            <button onClick={() => setChildren(Math.max(0, children - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                                                            <button onClick={() => setChildren(Math.max(0, children - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>âˆ’</button>
                                                             <span style={{ fontSize: '16px', fontWeight: 600, color: '#333', minWidth: '24px', textAlign: 'center' }}>{children}</span>
                                                             <button onClick={() => setChildren(Math.min(6, children + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                                                         </div>
@@ -382,7 +382,7 @@ export default function PackageDetail({ package: pkg }: Props) {
                             fontSize: '14px',
                             fontWeight: 700,
                         }}>
-                            ← Back to Packages
+                            â† Back to Packages
                         </Link>
                     </div>
                 </div>
@@ -391,3 +391,4 @@ export default function PackageDetail({ package: pkg }: Props) {
         </>
     );
 }
+

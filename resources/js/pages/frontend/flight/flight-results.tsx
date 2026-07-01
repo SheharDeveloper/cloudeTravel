@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+﻿import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 
 export default function FlightResults({ searchParams }: any) {
@@ -57,7 +57,7 @@ export default function FlightResults({ searchParams }: any) {
                 {submitted ? (
                     <div style={{ textAlign: 'center', padding: '60px 20px' }}>
                         <div style={{ background: '#f0f8ff', padding: '40px', borderRadius: '12px', maxWidth: '500px', margin: '0 auto' }}>
-                            <h1 style={{ fontSize: '32px', color: '#003d82', marginBottom: '15px' }}>✓ Thank You!</h1>
+                            <h1 style={{ fontSize: '32px', color: '#0499ff', marginBottom: '15px' }}>âœ“ Thank You!</h1>
                             <p style={{ fontSize: '16px', color: '#666', marginBottom: '20px', lineHeight: 1.6 }}>
                                 Your flight booking request has been submitted successfully.
                             </p>
@@ -86,18 +86,18 @@ export default function FlightResults({ searchParams }: any) {
                     </div>
                 ) : (
                     <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-                        <h1 style={{ fontSize: '28px', color: '#003d82', marginBottom: '10px', textAlign: 'center' }}>
-                            ✈️ Complete Your Flight Booking
+                        <h1 style={{ fontSize: '28px', color: '#0499ff', marginBottom: '10px', textAlign: 'center' }}>
+                            âœˆï¸ Complete Your Flight Booking
                         </h1>
                         <p style={{ color: '#666', marginBottom: '30px', textAlign: 'center' }}>
-                            {searchParams.fromCity} → {searchParams.toCity} | {searchParams.adults + searchParams.children + searchParams.infants} Traveller(s)
+                            {searchParams.fromCity} â†’ {searchParams.toCity} | {searchParams.adults + searchParams.children + searchParams.infants} Traveller(s)
                         </p>
 
                         {/* Two-Section Form Layout - Side by Side */}
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px', background: '#f8fafb', padding: '30px', borderRadius: '8px', border: '1px solid #ddd' }}>
                             {/* Section 1: Personal Information */}
                             <div>
-                                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#003d82', marginBottom: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0499ff', marginBottom: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#0066cc', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 700 }}>1</span>
                                     Personal Information
                                 </h3>
@@ -149,7 +149,7 @@ export default function FlightResults({ searchParams }: any) {
 
                             {/* Section 2: Contact Information */}
                             <div>
-                                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#003d82', marginBottom: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0499ff', marginBottom: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                     <span style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#0066cc', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: 700 }}>2</span>
                                     Contact Information
                                 </h3>
@@ -225,7 +225,7 @@ export default function FlightResults({ searchParams }: any) {
                                     e.currentTarget.style.boxShadow = '0 4px 16px rgba(255, 107, 53, 0.3)';
                                 }}
                             >
-                                ✓ Submit Booking
+                                âœ“ Submit Booking
                             </button>
                         </div>
                     </div>
@@ -234,3 +234,4 @@ export default function FlightResults({ searchParams }: any) {
         </>
     );
 }
+

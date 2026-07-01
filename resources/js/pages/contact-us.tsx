@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+﻿import { Head } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 import { contactInfoService } from '@/services/contactInfoService';
@@ -68,7 +68,7 @@ export default function ContactUs() {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '40px' }}>
                     {/* Contact Info */}
                     <div>
-                        <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#003d82', marginBottom: '20px' }}>Get in Touch</h3>
+                        <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0499ff', marginBottom: '20px' }}>Get in Touch</h3>
 
                         {contactInfo?.get_in_touch_image && (
                             <img
@@ -79,7 +79,7 @@ export default function ContactUs() {
                         )}
 
                         <div style={{ marginBottom: '25px' }}>
-                            <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#003d82', marginBottom: '8px' }}>Address</h4>
+                            <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#0499ff', marginBottom: '8px' }}>Address</h4>
                             <p style={{ fontSize: '13px', color: '#666', margin: 0, lineHeight: 1.6 }}>
                                 62 King Street<br />
                                 Southall<br />
@@ -89,21 +89,21 @@ export default function ContactUs() {
                         </div>
 
                         <div style={{ marginBottom: '25px' }}>
-                            <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#003d82', marginBottom: '8px' }}>Phone</h4>
+                            <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#0499ff', marginBottom: '8px' }}>Phone</h4>
                             <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>
                                 <a href="tel:07944495552" style={{ textDecoration: 'none', color: '#ff6b35', fontWeight: 600 }}>07944495552</a>
                             </p>
                         </div>
 
                         <div style={{ marginBottom: '25px' }}>
-                            <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#003d82', marginBottom: '8px' }}>Email</h4>
+                            <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#0499ff', marginBottom: '8px' }}>Email</h4>
                             <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>
                                 <a href="mailto:info@cloudtravels.co.uk" style={{ textDecoration: 'none', color: '#ff6b35', fontWeight: 600 }}>info@cloudtravels.co.uk</a>
                             </p>
                         </div>
 
                         <div style={{ marginBottom: '25px' }}>
-                            <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#003d82', marginBottom: '12px' }}>Business Hours</h4>
+                            <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#0499ff', marginBottom: '12px' }}>Business Hours</h4>
                             <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>
                                 Monday - Friday: 9:00 AM - 6:00 PM<br />
                                 Saturday: 10:00 AM - 4:00 PM<br />
@@ -112,7 +112,7 @@ export default function ContactUs() {
                         </div>
 
                         <div>
-                            <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#003d82', marginBottom: '12px' }}>Follow Us</h4>
+                            <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#0499ff', marginBottom: '12px' }}>Follow Us</h4>
                             <div style={{ display: 'flex', gap: '10px' }}>
                                 <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" style={{ width: 32, height: 32, borderRadius: '50%', background: '#4267B2', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
                                     <i className="fab fa-facebook-f"></i>
@@ -140,7 +140,7 @@ export default function ContactUs() {
             {/* Google Maps Section */}
             <div style={{ marginTop: '60px', backgroundColor: '#f5f5f5', padding: '40px 20px' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#003d82', marginBottom: '30px', textAlign: 'center' }}>Our Location</h3>
+                    <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#0499ff', marginBottom: '30px', textAlign: 'center' }}>Our Location</h3>
                     <div style={{ display: 'flex', justifyContent: 'center' }}>
                         <iframe
                             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d639319.9569119832!2d-1.829651917124168!3d51.24958301798195!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x48760d52956b5cb9%3A0xf7c975d392a773ce!2sCloud%20Travel%C2%AE%20Southall!5e0!3m2!1sen!2sin!4v1781950847097!5m2!1sen!2sin"
@@ -159,3 +159,4 @@ export default function ContactUs() {
         </>
     );
 }
+

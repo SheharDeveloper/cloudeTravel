@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+﻿import { Head } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { getTour } from '@/services/tourService';
 
@@ -8,7 +8,7 @@ export default function TourDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: '', email: '', phone: '', dates: '' });
-  const [currency, setCurrency] = useState({ symbol: '£', code: 'GBP' });
+  const [currency, setCurrency] = useState({ symbol: 'Â£', code: 'GBP' });
 
   useEffect(() => {
     loadTour();
@@ -49,9 +49,9 @@ export default function TourDetail() {
       <>
         <Head title="Tour Not Found" />
         <div style={{ textAlign: 'center', padding: '100px 20px', maxWidth: '1200px', margin: '0 auto' }}>
-          <h1 style={{ color: '#003d82', marginBottom: '20px' }}>Tour Not Found</h1>
+          <h1 style={{ color: '#0499ff', marginBottom: '20px' }}>Tour Not Found</h1>
           <p style={{ color: '#666', marginBottom: '20px' }}>{error || 'This tour does not exist.'}</p>
-          <a href="/tours" style={{ background: '#003d82', color: '#fff', padding: '10px 20px', borderRadius: '4px', textDecoration: 'none', display: 'inline-block' }}>
+          <a href="/tours" style={{ background: '#0499ff', color: '#fff', padding: '10px 20px', borderRadius: '4px', textDecoration: 'none', display: 'inline-block' }}>
             Back to Tours
           </a>
         </div>
@@ -92,14 +92,14 @@ export default function TourDetail() {
             {tour.short_description || 'Discover amazing experiences in this curated tour package.'}
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: '30px', fontSize: '16px', fontWeight: 500 }}>
-            <div>📍 {tour.country}</div>
-            <div>⏱️ {tour.duration_days} Days</div>
+            <div>ðŸ“ {tour.country}</div>
+            <div>â±ï¸ {tour.duration_days} Days</div>
           </div>
         </div>
 
         {/* RIGHT SIDE - BOOKING FORM */}
         <div style={{ position: 'relative', zIndex: 2, flex: '0 0 380px', padding: '35px', backgroundColor: '#ffffff', borderRadius: '8px', boxShadow: '0 10px 40px rgba(0,0,0,.2)', margin: '0 40px 0 0' }}>
-          <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#003d82', marginBottom: '25px' }}>Book Your Tour</h3>
+          <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0499ff', marginBottom: '25px' }}>Book Your Tour</h3>
 
           <input
             type="text"
@@ -156,7 +156,7 @@ export default function TourDetail() {
           </button>
 
           <p style={{ fontSize: '12px', color: '#999', margin: '12px 0 0 0', textAlign: 'center' }}>
-            💳 Create a quick enquiry
+            ðŸ’³ Create a quick enquiry
           </p>
         </div>
       </div>
@@ -184,9 +184,9 @@ export default function TourDetail() {
                   e.currentTarget.style.transform = 'translateY(0)';
                 }}>
                   <div style={{ fontSize: '40px', marginBottom: '12px', color: '#ff6b35' }}>
-                    ✓
+                    âœ“
                   </div>
-                  <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#003d82', margin: '0 0 8px 0' }}>
+                  <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#0499ff', margin: '0 0 8px 0' }}>
                     {highlight.title}
                   </h4>
                   <p style={{ fontSize: '12px', color: '#666', margin: 0, lineHeight: 1.6 }}>
@@ -201,7 +201,7 @@ export default function TourDetail() {
         {/* ABOUT SECTION */}
         {tour.full_description && (
           <div style={{ marginBottom: '80px', paddingBottom: '40px', borderBottom: '1px solid #f0f0f0' }}>
-            <h2 style={{ fontSize: '32px', fontWeight: 700, color: '#003d82', marginBottom: '25px' }}>About This Tour</h2>
+            <h2 style={{ fontSize: '32px', fontWeight: 700, color: '#0499ff', marginBottom: '25px' }}>About This Tour</h2>
             <p style={{ fontSize: '16px', lineHeight: 1.8, color: '#555', maxWidth: '900px' }}>
               {tour.full_description}
             </p>
@@ -211,7 +211,7 @@ export default function TourDetail() {
         {/* ITINERARY TIMELINE */}
         {tour.itineraries && tour.itineraries.length > 0 && (
           <div style={{ marginBottom: '80px' }}>
-            <h2 style={{ fontSize: '32px', fontWeight: 700, color: '#003d82', marginBottom: '50px' }}>Tour Itinerary</h2>
+            <h2 style={{ fontSize: '32px', fontWeight: 700, color: '#0499ff', marginBottom: '50px' }}>Tour Itinerary</h2>
             <div style={{ maxWidth: '900px' }}>
               {tour.itineraries.map((item: any, idx: number) => (
                 <div key={idx} style={{ display: 'flex', gap: '30px', marginBottom: '50px', position: 'relative' }}>
@@ -239,11 +239,11 @@ export default function TourDetail() {
 
                   {/* Content */}
                   <div style={{ flex: 1, paddingTop: '8px', paddingBottom: '10px' }}>
-                    <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#003d82', margin: '0 0 8px 0' }}>
+                    <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0499ff', margin: '0 0 8px 0' }}>
                       {item.title}
                     </h3>
                     <p style={{ fontSize: '13px', color: '#999', margin: '0 0 12px 0', fontWeight: 500 }}>
-                      📍 {item.location} • 📅 {item.date}
+                      ðŸ“ {item.location} â€¢ ðŸ“… {item.date}
                     </p>
                     <p style={{ fontSize: '14px', color: '#555', lineHeight: 1.7, margin: '0 0 15px 0' }}>
                       {item.description}
@@ -268,11 +268,11 @@ export default function TourDetail() {
         {/* HIGHLIGHTS SECTION (Detailed) */}
         {tour.highlights && tour.highlights.length > 0 && (
           <div style={{ marginBottom: '80px', paddingBottom: '40px', borderBottom: '1px solid #f0f0f0' }}>
-            <h2 style={{ fontSize: '32px', fontWeight: 700, color: '#003d82', marginBottom: '30px' }}>Tour Highlights</h2>
+            <h2 style={{ fontSize: '32px', fontWeight: 700, color: '#0499ff', marginBottom: '30px' }}>Tour Highlights</h2>
             <ul style={{ fontSize: '15px', color: '#555', lineHeight: 2, paddingLeft: '25px', maxWidth: '800px' }}>
               {tour.highlights.map((highlight: any, idx: number) => (
                 <li key={idx} style={{ marginBottom: '8px' }}>
-                  <span style={{ color: '#ff6b35', fontWeight: 700 }}>●</span> {highlight.title}
+                  <span style={{ color: '#ff6b35', fontWeight: 700 }}>â—</span> {highlight.title}
                 </li>
               ))}
             </ul>
@@ -282,7 +282,7 @@ export default function TourDetail() {
         {/* INCLUSIONS & EXCLUSIONS */}
         {tour.terms_conditions && tour.terms_conditions.length > 0 && (
           <div style={{ marginBottom: '80px', paddingBottom: '40px', borderBottom: '1px solid #f0f0f0' }}>
-            <h2 style={{ fontSize: '32px', fontWeight: 700, color: '#003d82', marginBottom: '35px' }}>Package Includes & Excludes</h2>
+            <h2 style={{ fontSize: '32px', fontWeight: 700, color: '#0499ff', marginBottom: '35px' }}>Package Includes & Excludes</h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', maxWidth: '1000px' }}>
               {tour.terms_conditions.map((term: any, idx: number) => (
                 <div key={idx}>
@@ -295,7 +295,7 @@ export default function TourDetail() {
                     alignItems: 'center',
                     gap: '8px'
                   }}>
-                    {term.type === 'package_includes' ? '✓' : '✗'} {term.type === 'package_includes' ? 'Includes' : 'Does Not Include'}
+                    {term.type === 'package_includes' ? 'âœ“' : 'âœ—'} {term.type === 'package_includes' ? 'Includes' : 'Does Not Include'}
                   </h3>
                   <ul style={{ fontSize: '14px', color: '#555', lineHeight: 1.9, paddingLeft: '20px', margin: 0 }}>
                     {term.policy.split('\n').map((item: string, i: number) => (
@@ -311,7 +311,7 @@ export default function TourDetail() {
         {/* DESTINATIONS */}
         {tour.key_destinations && tour.key_destinations.length > 0 && (
           <div style={{ marginBottom: '80px' }}>
-            <h2 style={{ fontSize: '32px', fontWeight: 700, color: '#003d82', marginBottom: '40px' }}>Key Destinations</h2>
+            <h2 style={{ fontSize: '32px', fontWeight: 700, color: '#0499ff', marginBottom: '40px' }}>Key Destinations</h2>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '25px' }}>
               {tour.key_destinations.map((dest: any, idx: number) => (
                 <div key={idx} style={{ textAlign: 'center' }}>
@@ -330,13 +330,13 @@ export default function TourDetail() {
                     fontSize: '50px',
                     color: '#fff'
                   }}>
-                    📍
+                    ðŸ“
                   </div>
-                  <h4 style={{ fontSize: '16px', fontWeight: 700, color: '#003d82', margin: '0 0 6px 0' }}>
+                  <h4 style={{ fontSize: '16px', fontWeight: 700, color: '#0499ff', margin: '0 0 6px 0' }}>
                     {dest.destination_name}
                   </h4>
                   <p style={{ fontSize: '12px', color: '#999', margin: 0 }}>
-                    📍 {dest.location}
+                    ðŸ“ {dest.location}
                   </p>
                 </div>
               ))}
@@ -347,7 +347,7 @@ export default function TourDetail() {
         {/* GALLERY */}
         {(tour.feature_image || (tour.itineraries && tour.itineraries.some((i: any) => i.images && (Array.isArray(i.images) ? i.images.length > 0 : JSON.parse(i.images || '[]').length > 0)))) && (
           <div style={{ marginTop: '80px' }}>
-            <h2 style={{ fontSize: '32px', fontWeight: 700, color: '#003d82', marginBottom: '40px' }}>Photo Gallery</h2>
+            <h2 style={{ fontSize: '32px', fontWeight: 700, color: '#0499ff', marginBottom: '40px' }}>Photo Gallery</h2>
             {tour.feature_image && (
               <img src={tour.feature_image} alt={tour.tour_title} style={{
                 width: '100%',
@@ -378,3 +378,4 @@ export default function TourDetail() {
     </>
   );
 }
+

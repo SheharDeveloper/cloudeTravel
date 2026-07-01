@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 
 export default function ContactForm() {
     const [formData, setFormData] = useState({ name: '', email: '', subject: '', message: '' });
@@ -105,7 +105,7 @@ export default function ContactForm() {
                 type="submit"
                 disabled={formSubmitting}
                 style={{
-                    background: formSubmitting ? '#ccc' : '#003d82',
+                    background: formSubmitting ? '#ccc' : '#0499ff',
                     color: '#fff',
                     border: 'none',
                     padding: '12px',
@@ -121,3 +121,4 @@ export default function ContactForm() {
         </form>
     );
 }
+

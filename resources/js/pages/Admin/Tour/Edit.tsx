@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import DatePicker from '@/components/DatePicker';
 import { ProtectedRoute } from '@/lib/ProtectedRoute';
 import { getTour, updateTour } from '@/services/tourService';
@@ -261,8 +261,8 @@ export default function EditTour() {
                   gap: '8px',
                   padding: '8px 16px',
                   borderRadius: '6px',
-                  border: currentStep === step.id ? '2px solid #003d82' : '2px solid #ddd',
-                  background: currentStep === step.id ? '#003d82' : '#f9f9f9',
+                  border: currentStep === step.id ? '2px solid #0499ff' : '2px solid #ddd',
+                  background: currentStep === step.id ? '#0499ff' : '#f9f9f9',
                   color: currentStep === step.id ? '#fff' : '#333',
                   cursor: 'pointer',
                   fontSize: '13px',
@@ -507,7 +507,7 @@ function BasicInformationStep({ formData, setFormData }: any) {
             <input
               type="text"
               className="form-control"
-              placeholder="e.g., From £1,999"
+              placeholder="e.g., From Â£1,999"
               value={formData.basic.bookingPrice}
               onChange={(e) =>
                 setFormData((prev: FormData) => ({
@@ -1022,3 +1022,4 @@ function TermsConditionsStep({ formData, setFormData }: any) {
     </div>
   );
 }
+

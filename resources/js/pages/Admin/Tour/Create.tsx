@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import DatePicker from '@/components/DatePicker';
 import { ProtectedRoute } from '@/lib/ProtectedRoute';
 import { createTour } from '@/services/tourService';
@@ -258,7 +258,7 @@ export default function CreateTour() {
                     padding: '8px 16px',
                     borderRadius: '6px',
                     border: '1px solid #ddd',
-                    background: currentStep === step.id ? '#003d82' : '#fff',
+                    background: currentStep === step.id ? '#0499ff' : '#fff',
                     color: currentStep === step.id ? '#fff' : '#666',
                     cursor: 'pointer',
                     fontSize: '12px',
@@ -749,7 +749,7 @@ function HighlightsStep({ formData, setFormData }: any) {
                             <option key={icon.value} value={icon.value}>{icon.label}</option>
                           ))}
                         </select>
-                        <i className={`fa ${highlight.icon}`} style={{ fontSize: '24px', color: '#003d82' }}></i>
+                        <i className={`fa ${highlight.icon}`} style={{ fontSize: '24px', color: '#0499ff' }}></i>
                       </div>
                     </td>
                     <td>
@@ -1206,3 +1206,4 @@ function TermsConditionsStep({ formData, setFormData }: any) {
     </div>
   );
 }
+

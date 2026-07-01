@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+﻿import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
 
 export default function Landing() {
@@ -11,7 +11,7 @@ export default function Landing() {
             </Head>
             <div style={{ fontFamily: "'Open Sans', sans-serif", background: '#fff', color: '#333', fontSize: '13px' }}>
             {/* TOP BAR */}
-            <div style={{ background: '#003d82', padding: '6px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ background: '#0499ff', padding: '6px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                     <div style={{ width: 34, height: 34, border: '1px solid rgba(255,255,255,.3)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '13px' }}>
                         <i className="fa fa-globe"></i>
@@ -34,12 +34,12 @@ export default function Landing() {
             </div>
 
             {/* NAVBAR */}
-            <nav style={{ background: '#003d82', padding: '0 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '70px', borderTop: '1px solid rgba(255,255,255,.1)' }}>
+            <nav style={{ background: '#0499ff', padding: '0 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '70px', borderTop: '1px solid rgba(255,255,255,.1)' }}>
                 <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', minWidth: '120px' }}>
                     <img src="/images/logo.png" alt="CloudTravel" style={{ width: 40, height: 40 }} />
                 </Link>
                 <ul style={{ display: 'flex', alignItems: 'center', gap: '28px', listStyle: 'none', margin: 0, padding: 0, flex: 1, justifyContent: 'center' }}>
-                    <li><a href="#" style={{ color: '#ff6b35', fontSize: '14px', fontWeight: 500, textDecoration: 'none', borderBottom: '3px solid #ff6b35', paddingBottom: '5px' }}>Home</a></li>
+                    <li><a href="#" style={{ color: '#0499ff', fontSize: '14px', fontWeight: 500, textDecoration: 'none', borderBottom: '3px solid #0499ff', paddingBottom: '5px' }}>Home</a></li>
                     <li><a href="#tours" style={{ color: '#fff', fontSize: '14px', fontWeight: 500, textDecoration: 'none' }}>Tours</a></li>
                     <li><a href="#tickets" style={{ color: '#fff', fontSize: '14px', fontWeight: 500, textDecoration: 'none' }}>Tickets</a></li>
                     <li style={{ position: 'relative', cursor: 'pointer' }}>
@@ -69,16 +69,16 @@ export default function Landing() {
                         Book flights, hotels, and visas seamlessly in one platform.<br />Your journey starts here.
                     </p>
                     <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                        <button onClick={() => setActiveHeroBtn('tour')} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: activeHeroBtn === 'tour' ? '#00d4ff' : 'rgba(255,255,255,.15)', border: '2px solid ' + (activeHeroBtn === 'tour' ? '#00d4ff' : 'rgba(255,255,255,.7)'), color: activeHeroBtn === 'tour' ? '#003d82' : '#fff', padding: '9px 20px', borderRadius: '4px', fontSize: '12px', fontWeight: 700, letterSpacing: '.5px', cursor: 'pointer', fontFamily: "'Open Sans', sans-serif", textTransform: 'uppercase' }}>
+                        <button onClick={() => setActiveHeroBtn('tour')} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: activeHeroBtn === 'tour' ? '#00d4ff' : 'rgba(255,255,255,.15)', border: '2px solid ' + (activeHeroBtn === 'tour' ? '#00d4ff' : 'rgba(255,255,255,.7)'), color: activeHeroBtn === 'tour' ? '#0499ff' : '#fff', padding: '9px 20px', borderRadius: '4px', fontSize: '12px', fontWeight: 700, letterSpacing: '.5px', cursor: 'pointer', fontFamily: "'Open Sans', sans-serif", textTransform: 'uppercase' }}>
                             <i className="fa fa-plane"></i> TOURS
                         </button>
-                        <button onClick={() => setActiveHeroBtn('flight')} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: activeHeroBtn === 'flight' ? '#00d4ff' : 'rgba(255,255,255,.15)', border: '2px solid ' + (activeHeroBtn === 'flight' ? '#00d4ff' : 'rgba(255,255,255,.7)'), color: activeHeroBtn === 'flight' ? '#003d82' : '#fff', padding: '9px 20px', borderRadius: '4px', fontSize: '12px', fontWeight: 700, letterSpacing: '.5px', cursor: 'pointer', fontFamily: "'Open Sans', sans-serif", textTransform: 'uppercase' }}>
+                        <button onClick={() => setActiveHeroBtn('flight')} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: activeHeroBtn === 'flight' ? '#00d4ff' : 'rgba(255,255,255,.15)', border: '2px solid ' + (activeHeroBtn === 'flight' ? '#00d4ff' : 'rgba(255,255,255,.7)'), color: activeHeroBtn === 'flight' ? '#0499ff' : '#fff', padding: '9px 20px', borderRadius: '4px', fontSize: '12px', fontWeight: 700, letterSpacing: '.5px', cursor: 'pointer', fontFamily: "'Open Sans', sans-serif", textTransform: 'uppercase' }}>
                             <i className="fa fa-plane"></i> FLIGHTS
                         </button>
-                        <button onClick={() => setActiveHeroBtn('hotel')} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: activeHeroBtn === 'hotel' ? '#00d4ff' : 'rgba(255,255,255,.15)', border: '2px solid ' + (activeHeroBtn === 'hotel' ? '#00d4ff' : 'rgba(255,255,255,.7)'), color: activeHeroBtn === 'hotel' ? '#003d82' : '#fff', padding: '9px 20px', borderRadius: '4px', fontSize: '12px', fontWeight: 700, letterSpacing: '.5px', cursor: 'pointer', fontFamily: "'Open Sans', sans-serif", textTransform: 'uppercase' }}>
+                        <button onClick={() => setActiveHeroBtn('hotel')} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: activeHeroBtn === 'hotel' ? '#00d4ff' : 'rgba(255,255,255,.15)', border: '2px solid ' + (activeHeroBtn === 'hotel' ? '#00d4ff' : 'rgba(255,255,255,.7)'), color: activeHeroBtn === 'hotel' ? '#0499ff' : '#fff', padding: '9px 20px', borderRadius: '4px', fontSize: '12px', fontWeight: 700, letterSpacing: '.5px', cursor: 'pointer', fontFamily: "'Open Sans', sans-serif", textTransform: 'uppercase' }}>
                             <i className="fa fa-hotel"></i> HOTELS
                         </button>
-                        <button onClick={() => setActiveHeroBtn('visa')} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: activeHeroBtn === 'visa' ? '#00d4ff' : 'rgba(255,255,255,.15)', border: '2px solid ' + (activeHeroBtn === 'visa' ? '#00d4ff' : 'rgba(255,255,255,.7)'), color: activeHeroBtn === 'visa' ? '#003d82' : '#fff', padding: '9px 20px', borderRadius: '4px', fontSize: '12px', fontWeight: 700, letterSpacing: '.5px', cursor: 'pointer', fontFamily: "'Open Sans', sans-serif", textTransform: 'uppercase' }}>
+                        <button onClick={() => setActiveHeroBtn('visa')} style={{ display: 'flex', alignItems: 'center', gap: '7px', background: activeHeroBtn === 'visa' ? '#00d4ff' : 'rgba(255,255,255,.15)', border: '2px solid ' + (activeHeroBtn === 'visa' ? '#00d4ff' : 'rgba(255,255,255,.7)'), color: activeHeroBtn === 'visa' ? '#0499ff' : '#fff', padding: '9px 20px', borderRadius: '4px', fontSize: '12px', fontWeight: 700, letterSpacing: '.5px', cursor: 'pointer', fontFamily: "'Open Sans', sans-serif", textTransform: 'uppercase' }}>
                             <i className="fa fa-passport"></i> VISA
                         </button>
                     </div>
@@ -94,14 +94,14 @@ export default function Landing() {
             <div style={{ background: '#fff', borderBottom: '1px solid #eee', padding: '10px 0', textAlign: 'center', fontSize: '11.5px', color: '#555' }}>
                 <div style={{ display: 'inline-block', color: '#00d4ff', fontWeight: 700, fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', borderBottom: '1px solid #00d4ff', marginBottom: '4px' }}>Special Offer</div>
                 <br />
-                ★ Special fares with <strong>ETIHAD AIRWAYS</strong> from LONDON to destinations worldwide from <span style={{ color: '#c0392b', fontWeight: 700 }}>£495.00</span> <span style={{ color: '#00d4ff', fontWeight: 700 }}>→</span>
+                â˜… Special fares with <strong>ETIHAD AIRWAYS</strong> from LONDON to destinations worldwide from <span style={{ color: '#c0392b', fontWeight: 700 }}>Â£495.00</span> <span style={{ color: '#00d4ff', fontWeight: 700 }}>â†’</span>
             </div>
 
             {/* TOURS SECTION */}
             <section id="tours" style={{ padding: '50px 0 40px', background: '#fff' }}>
                 <div style={{ maxWidth: '960px', margin: '0 auto', padding: '0 20px' }}>
                     <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-                        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '28px', color: '#003d82', marginBottom: '8px' }}>Popular Tours</h2>
+                        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '28px', color: '#0499ff', marginBottom: '8px' }}>Popular Tours</h2>
                         <div style={{ width: '40px', height: '2px', background: '#00d4ff', margin: '10px auto 14px' }}></div>
                         <p style={{ color: '#777', fontSize: '12.5px', lineHeight: 1.7 }}>Explore the world's most beautiful destinations with our curated tour packages.</p>
                     </div>
@@ -115,19 +115,19 @@ export default function Landing() {
                             <div key={i} style={{ border: '1px solid #e5e5e5', borderRadius: '4px', overflow: 'hidden', background: '#fff', transition: 'box-shadow .2s' }} onMouseEnter={(e) => (e.currentTarget as HTMLElement).style.boxShadow = '0 4px 18px rgba(0,0,0,.12)'} onMouseLeave={(e) => (e.currentTarget as HTMLElement).style.boxShadow = 'none'}>
                                 <div style={{ position: 'relative', height: '170px', overflow: 'hidden' }}>
                                     <img src={tour.img} alt={tour.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', transition: 'transform .3s' }} onMouseEnter={(e) => (e.target as HTMLElement).style.transform = 'scale(1.06)'} onMouseLeave={(e) => (e.target as HTMLElement).style.transform = 'scale(1)'} />
-                                    <span style={{ position: 'absolute', top: 0, left: 0, background: '#00d4ff', color: '#003d82', fontSize: '9px', fontWeight: 700, padding: '4px 10px', borderRadius: '0 0 4px 0', textTransform: 'uppercase', letterSpacing: '.5px' }}>FEATURED</span>
+                                    <span style={{ position: 'absolute', top: 0, left: 0, background: '#00d4ff', color: '#0499ff', fontSize: '9px', fontWeight: 700, padding: '4px 10px', borderRadius: '0 0 4px 0', textTransform: 'uppercase', letterSpacing: '.5px' }}>FEATURED</span>
                                 </div>
                                 <div style={{ padding: '12px 14px 14px' }}>
-                                    <h3 style={{ fontSize: '12.5px', fontWeight: 700, color: '#003d82', marginBottom: '2px', lineHeight: 1.4 }}>{tour.title}</h3>
+                                    <h3 style={{ fontSize: '12.5px', fontWeight: 700, color: '#0499ff', marginBottom: '2px', lineHeight: 1.4 }}>{tour.title}</h3>
                                     <div style={{ color: '#00d4ff', fontSize: '11px', fontWeight: 600, marginBottom: '10px' }}>7-14 Days</div>
-                                    <a href="#" style={{ display: 'inline-block', border: '1px solid #003d82', color: '#003d82', fontSize: '10px', fontWeight: 700, padding: '4px 12px', borderRadius: '2px', letterSpacing: '.5px', textTransform: 'uppercase', transition: 'all .2s', textDecoration: 'none' }} onMouseEnter={(e) => { (e.target as HTMLElement).style.background = '#003d82'; (e.target as HTMLElement).style.color = '#fff'; }} onMouseLeave={(e) => { (e.target as HTMLElement).style.background = 'transparent'; (e.target as HTMLElement).style.color = '#003d82'; }}>View Details</a>
+                                    <a href="#" style={{ display: 'inline-block', border: '1px solid #0499ff', color: '#0499ff', fontSize: '10px', fontWeight: 700, padding: '4px 12px', borderRadius: '2px', letterSpacing: '.5px', textTransform: 'uppercase', transition: 'all .2s', textDecoration: 'none' }} onMouseEnter={(e) => { (e.target as HTMLElement).style.background = '#0499ff'; (e.target as HTMLElement).style.color = '#fff'; }} onMouseLeave={(e) => { (e.target as HTMLElement).style.background = 'transparent'; (e.target as HTMLElement).style.color = '#0499ff'; }}>View Details</a>
                                 </div>
                             </div>
                         ))}
                     </div>
 
                     <div style={{ textAlign: 'center' }}>
-                        <a href="#" style={{ display: 'inline-block', background: '#003d82', color: '#fff', fontSize: '12px', fontWeight: 700, padding: '9px 26px', borderRadius: '3px', letterSpacing: '.5px', cursor: 'pointer', transition: 'background .2s', textDecoration: 'none' }} onMouseEnter={(e) => (e.target as HTMLElement).style.background = '#00d4ff'} onMouseLeave={(e) => (e.target as HTMLElement).style.background = '#003d82'}>More Tours</a>
+                        <a href="#" style={{ display: 'inline-block', background: '#0499ff', color: '#fff', fontSize: '12px', fontWeight: 700, padding: '9px 26px', borderRadius: '3px', letterSpacing: '.5px', cursor: 'pointer', transition: 'background .2s', textDecoration: 'none' }} onMouseEnter={(e) => (e.target as HTMLElement).style.background = '#00d4ff'} onMouseLeave={(e) => (e.target as HTMLElement).style.background = '#0499ff'}>More Tours</a>
                     </div>
                 </div>
             </section>
@@ -136,20 +136,20 @@ export default function Landing() {
             <section id="services" style={{ background: '#f9f9f9', padding: '50px 0' }}>
                 <div style={{ maxWidth: '960px', margin: '0 auto', padding: '0 20px' }}>
                     <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-                        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '28px', color: '#003d82', marginBottom: '8px' }}>Our Services</h2>
+                        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '28px', color: '#0499ff', marginBottom: '8px' }}>Our Services</h2>
                         <div style={{ width: '40px', height: '2px', background: '#00d4ff', margin: '10px auto 14px' }}></div>
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '20px' }}>
                         {[
-                            { icon: '✈️', title: 'Flight Booking', desc: 'Book flights worldwide' },
-                            { icon: '🏨', title: 'Hotel Stays', desc: 'Find perfect accommodations' },
-                            { icon: '🛂', title: 'Visa Services', desc: 'Hassle-free visa processing' },
-                            { icon: '🎫', title: 'Tour Packages', desc: 'Curated tour experiences' },
+                            { icon: 'âœˆï¸', title: 'Flight Booking', desc: 'Book flights worldwide' },
+                            { icon: 'ðŸ¨', title: 'Hotel Stays', desc: 'Find perfect accommodations' },
+                            { icon: 'ðŸ›‚', title: 'Visa Services', desc: 'Hassle-free visa processing' },
+                            { icon: 'ðŸŽ«', title: 'Tour Packages', desc: 'Curated tour experiences' },
                         ].map((service, i) => (
                             <div key={i} style={{ textAlign: 'center', padding: '20px', background: '#fff', borderRadius: '8px', border: '1px solid #e5e5e5' }}>
                                 <div style={{ fontSize: '2.5rem', marginBottom: '10px' }}>{service.icon}</div>
-                                <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#003d82', marginBottom: '5px' }}>{service.title}</h3>
+                                <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#0499ff', marginBottom: '5px' }}>{service.title}</h3>
                                 <p style={{ fontSize: '11px', color: '#777' }}>{service.desc}</p>
                             </div>
                         ))}
@@ -161,7 +161,7 @@ export default function Landing() {
             <section style={{ background: '#fff', padding: '50px 0' }}>
                 <div style={{ maxWidth: '960px', margin: '0 auto', padding: '0 20px' }}>
                     <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-                        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '28px', color: '#003d82', marginBottom: '8px' }}>Our Gallery</h2>
+                        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '28px', color: '#0499ff', marginBottom: '8px' }}>Our Gallery</h2>
                         <div style={{ width: '40px', height: '2px', background: '#00d4ff', margin: '10px auto 14px' }}></div>
                     </div>
 
@@ -178,13 +178,13 @@ export default function Landing() {
                     </div>
 
                     <div style={{ textAlign: 'center' }}>
-                        <a href="#" style={{ display: 'inline-block', background: '#003d82', color: '#fff', fontSize: '12px', fontWeight: 700, padding: '8px 24px', borderRadius: '3px', cursor: 'pointer', transition: 'background .2s', textDecoration: 'none' }} onMouseEnter={(e) => (e.target as HTMLElement).style.background = '#00d4ff'} onMouseLeave={(e) => (e.target as HTMLElement).style.background = '#003d82'}>Explore More</a>
+                        <a href="#" style={{ display: 'inline-block', background: '#0499ff', color: '#fff', fontSize: '12px', fontWeight: 700, padding: '8px 24px', borderRadius: '3px', cursor: 'pointer', transition: 'background .2s', textDecoration: 'none' }} onMouseEnter={(e) => (e.target as HTMLElement).style.background = '#00d4ff'} onMouseLeave={(e) => (e.target as HTMLElement).style.background = '#0499ff'}>Explore More</a>
                     </div>
                 </div>
             </section>
 
             {/* FOOTER */}
-            <footer style={{ background: '#003d82', color: '#9ab', padding: '40px 0 0' }}>
+            <footer style={{ background: '#0499ff', color: '#fff', padding: '40px 0 0' }}>
                 <div style={{ maxWidth: '960px', margin: '0 auto', padding: '0 20px', display: 'grid', gridTemplateColumns: '1.6fr 1fr 1fr 1fr', gap: '30px', marginBottom: '30px' }}>
                     <div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
@@ -222,9 +222,9 @@ export default function Landing() {
                         </div>
                     </div>
                 </div>
-                <div style={{ background: '#001f47', padding: '13px 0', textAlign: 'center' }}>
-                    <p style={{ fontSize: '11px', color: '#789', margin: 0 }}>
-                        © {new Date().getFullYear()} CloudTravel. All rights reserved.
+                <div style={{ background: '#0499ff', padding: '13px 0', textAlign: 'center' }}>
+                    <p style={{ fontSize: '11px', color: '#fff', margin: 0 }}>
+                        Â© {new Date().getFullYear()} CloudTravel. All rights reserved.
                     </p>
                 </div>
             </footer>
@@ -232,3 +232,4 @@ export default function Landing() {
         </>
     );
 }
+

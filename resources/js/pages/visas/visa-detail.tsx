@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+﻿import { Head } from '@inertiajs/react';
 import VisasSearchForm from '@/components/VisasSearchForm';
 
 interface VisaData {
@@ -101,7 +101,7 @@ export default function VisaDetail({ visa }: { visa: VisaData }) {
                             style={{
                                 fontFamily: "'Playfair Display', serif",
                                 fontSize: '28px',
-                                color: '#003d82',
+                                color: '#0499ff',
                                 marginBottom: '8px',
                             }}
                         >
@@ -119,21 +119,21 @@ export default function VisaDetail({ visa }: { visa: VisaData }) {
                                 <div style={{ fontSize: '28px', color: '#ff6b35', marginBottom: '10px' }}>
                                     <i className="fa fa-clock"></i>
                                 </div>
-                                <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#003d82', marginBottom: '5px' }}>Fast Processing</h4>
+                                <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#0499ff', marginBottom: '5px' }}>Fast Processing</h4>
                                 <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>Quick turnaround for your application</p>
                             </div>
                             <div style={{ padding: '15px', background: '#fff', borderRadius: '6px', textAlign: 'center' }}>
                                 <div style={{ fontSize: '28px', color: '#ff6b35', marginBottom: '10px' }}>
                                     <i className="fa fa-shield"></i>
                                 </div>
-                                <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#003d82', marginBottom: '5px' }}>Secure & Safe</h4>
+                                <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#0499ff', marginBottom: '5px' }}>Secure & Safe</h4>
                                 <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>Your data is protected</p>
                             </div>
                             <div style={{ padding: '15px', background: '#fff', borderRadius: '6px', textAlign: 'center' }}>
                                 <div style={{ fontSize: '28px', color: '#ff6b35', marginBottom: '10px' }}>
                                     <i className="fa fa-headset"></i>
                                 </div>
-                                <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#003d82', marginBottom: '5px' }}>Expert Support</h4>
+                                <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#0499ff', marginBottom: '5px' }}>Expert Support</h4>
                                 <p style={{ fontSize: '12px', color: '#666', margin: 0 }}>Dedicated support team</p>
                             </div>
                         </div>
@@ -156,7 +156,7 @@ export default function VisaDetail({ visa }: { visa: VisaData }) {
                         boxShadow: '0 8px 30px rgba(0,0,0,.15)',
                     }}
                 >
-                    <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#003d82', marginBottom: '20px', textAlign: 'center' }}>
+                    <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0499ff', marginBottom: '20px', textAlign: 'center' }}>
                         Search & Get Quote
                     </h3>
                     <VisasSearchForm prefilledVisaType={visa.name} disableVisaType={true} />
@@ -165,3 +165,4 @@ export default function VisaDetail({ visa }: { visa: VisaData }) {
         </>
     );
 }
+

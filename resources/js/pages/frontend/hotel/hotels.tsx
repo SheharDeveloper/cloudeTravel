@@ -1,4 +1,4 @@
-import { Head, Link, router } from '@inertiajs/react';
+﻿import { Head, Link, router } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';
 import { heroImageService } from '@/services/heroImageService';
 
@@ -119,7 +119,7 @@ export default function Hotels() {
             {/* HOTEL SEARCH FORM */}
             <div style={{ padding: '0 20px', position: 'relative', zIndex: 10, marginTop: '-80px', paddingBottom: '80px' }}>
                 <div style={{ maxWidth: '900px', margin: '0 auto', background: '#fff', padding: '30px', borderRadius: '8px', boxShadow: '0 8px 30px rgba(0,0,0,.15)' }}>
-                    <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#003d82', marginBottom: '20px', margin: '0 0 20px 0' }}>🏨 Hotel Search</h4>
+                    <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#0499ff', marginBottom: '20px', margin: '0 0 20px 0' }}>ðŸ¨ Hotel Search</h4>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '12px', alignItems: 'end' }}>
                         <div>
                             <label style={{ display: 'block', fontSize: '10px', color: '#999', marginBottom: '4px', fontWeight: 700, textTransform: 'uppercase' }}>City/Hotel</label>
@@ -170,3 +170,4 @@ export default function Hotels() {
         </>
     );
 }
+

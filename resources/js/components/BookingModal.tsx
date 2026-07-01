@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 
 interface BookingModalProps {
@@ -93,43 +93,43 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
 
     if (!isOpen) return null;
 
-    const emoji = serviceType === 'flight' ? '✈️' : serviceType === 'hotel' ? '🏨' : serviceType === 'visa' ? '🛂' : serviceType === 'package' ? '📦' : '🚗';
+    const emoji = serviceType === 'flight' ? 'âœˆï¸' : serviceType === 'hotel' ? 'ðŸ¨' : serviceType === 'visa' ? 'ðŸ›‚' : serviceType === 'package' ? 'ðŸ“¦' : 'ðŸš—';
     const title = serviceType === 'flight' ? 'Flight' : serviceType === 'hotel' ? 'Hotel' : serviceType === 'visa' ? 'Visa' : serviceType === 'package' ? 'Package' : 'Airport Transfer';
 
     const renderSearchDetails = () => {
         if (serviceType === 'visa') {
             return (
                 <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', marginBottom: '24px', border: '1px solid #e9ecef' }}>
-                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#003d82', marginBottom: '12px', margin: '0 0 12px 0' }}>Booking Details</h3>
+                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0499ff', marginBottom: '12px', margin: '0 0 12px 0' }}>Booking Details</h3>
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                         {searchDetails.destinationCountry && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Destination Country</p>
-                                <p style={{ fontSize: '13px', color: '#003d82', margin: 0, fontWeight: 500 }}>{searchDetails.destinationCountry}</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.destinationCountry}</p>
                             </div>
                         )}
                         {searchDetails.passportCountry && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Passport Country</p>
-                                <p style={{ fontSize: '13px', color: '#003d82', margin: 0, fontWeight: 500 }}>{searchDetails.passportCountry}</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.passportCountry}</p>
                             </div>
                         )}
                         {searchDetails.visaType && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Visa Type</p>
-                                <p style={{ fontSize: '13px', color: '#003d82', margin: 0, fontWeight: 500 }}>{searchDetails.visaType}</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.visaType}</p>
                             </div>
                         )}
                         {searchDetails.numberOfTravelers && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Number of Travelers</p>
-                                <p style={{ fontSize: '13px', color: '#003d82', margin: 0, fontWeight: 500 }}>{searchDetails.numberOfTravelers}</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.numberOfTravelers}</p>
                             </div>
                         )}
                         {searchDetails.travelDate && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Travel Date</p>
-                                <p style={{ fontSize: '13px', color: '#003d82', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.travelDate).toLocaleDateString()}</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.travelDate).toLocaleDateString()}</p>
                             </div>
                         )}
                     </div>
@@ -150,7 +150,7 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
                     // Thank You Popup
                     <div style={{ background: '#fff', borderRadius: '16px', padding: '40px', maxWidth: '500px', width: '90%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)', animation: 'slideUp 0.3s ease' }}>
                         <div style={{ fontSize: '48px', marginBottom: '16px' }}>{emoji}</div>
-                        <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#003d82', marginBottom: '12px' }}>Thank You!</h2>
+                        <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#0499ff', marginBottom: '12px' }}>Thank You!</h2>
                         <p style={{ fontSize: '16px', color: '#666', marginBottom: '8px', lineHeight: '1.6' }}>
                             Thank you for booking with us. We're fetching the best {title.toLowerCase()} offers for you!
                         </p>
@@ -169,10 +169,10 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
                     // Booking Form Popup
                     <div style={{ background: '#fff', borderRadius: '16px', padding: '40px', minWidth: '700px', maxWidth: '85vw', maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)', animation: 'slideUp 0.3s ease' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                            <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#003d82', margin: 0 }}>
+                            <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#0499ff', margin: 0 }}>
                                 {emoji} Complete Your {title} Booking
                             </h2>
-                            <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999' }}>×</button>
+                            <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999' }}>Ã—</button>
                         </div>
 
                         {/* Search Details Section */}
@@ -241,3 +241,4 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
 
     return createPortal(modalContent, document.body);
 }
+

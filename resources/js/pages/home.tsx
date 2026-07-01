@@ -202,7 +202,7 @@ export default function Home() {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    background: '#000',
+                    background: '#0499ff',
                     zIndex: 9998,
                     display: 'flex',
                     alignItems: 'center',
@@ -724,17 +724,17 @@ export default function Home() {
                             {/* PACKAGES BY SEARCHED COUNTRY - TABLE FORMAT BELOW SEARCH BUTTON */}
                             {getFilteredPackages().length > 0 && (
                                 <div style={{ background: '#f9f9f9', borderTop: '1px solid #e0e0e0', padding: '16px 0', marginTop: '12px' }}>
-                                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#003d82', marginBottom: '12px', paddingLeft: '30px' }}>
+                                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0499ff', marginBottom: '12px', paddingLeft: '30px' }}>
                                         📦 Available Packages in {searchedCountry}
                                     </h3>
                                     <div style={{ overflowX: 'auto', paddingLeft: '30px', paddingRight: '30px' }}>
                                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                             <thead>
                                                 <tr style={{ borderBottom: '2px solid #0499ff', background: '#f0f7ff' }}>
-                                                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#003d82' }}>Package</th>
-                                                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#003d82' }}>Price</th>
-                                                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#003d82' }}>Duration</th>
-                                                    <th style={{ padding: '12px', textAlign: 'center', fontSize: '12px', fontWeight: 700, color: '#003d82' }}>Action</th>
+                                                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#0499ff' }}>Package</th>
+                                                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#0499ff' }}>Price</th>
+                                                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#0499ff' }}>Duration</th>
+                                                    <th style={{ padding: '12px', textAlign: 'center', fontSize: '12px', fontWeight: 700, color: '#0499ff' }}>Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -767,7 +767,7 @@ export default function Home() {
                                                                     />
                                                                 )}
                                                                 <div>
-                                                                    <div style={{ fontWeight: 700, color: '#003d82', marginBottom: '2px' }}>
+                                                                    <div style={{ fontWeight: 700, color: '#0499ff', marginBottom: '2px' }}>
                                                                         {pkg.name}
                                                                     </div>
                                                                     <div style={{ fontSize: '11px', color: '#999' }}>
@@ -873,7 +873,7 @@ export default function Home() {
             {/* VISA SERVICES SECTION */}
             <section style={{ padding: '50px 40px', background: '#fff', borderTop: '1px solid #f0f0f0' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#003d82', marginBottom: '30px', textAlign: 'center' }}>🛂 Visa Services</h3>
+                    <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#0499ff', marginBottom: '30px', textAlign: 'center' }}>🛂 Visa Services</h3>
                     <div className="visa-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
                         {[
                             { name: 'Schengen Visa', img: 'schengen.jpg', icon: '📋' },
@@ -888,7 +888,7 @@ export default function Home() {
                                     fallbackSrc={imageService.getFallbackImage('visa')}
                                     style={{ width: '100%', height: '160px', objectFit: 'cover', borderRadius: '8px', marginBottom: '12px' }}
                                 />
-                                <p style={{ fontSize: '15px', fontWeight: 600, color: '#003d82', margin: 0, lineHeight: 1.4 }}>{visa.name}</p>
+                                <p style={{ fontSize: '15px', fontWeight: 600, color: '#0499ff', margin: 0, lineHeight: 1.4 }}>{visa.name}</p>
                             </div>
                         ))}
                     </div>
@@ -901,7 +901,7 @@ export default function Home() {
                 <section style={{ padding: '50px 20px', background: '#fff' }}>
                     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-                            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#003d82', marginBottom: '12px' }}>
+                            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#0499ff', marginBottom: '12px' }}>
                                 <i className="fa fa-star" style={{ color: '#0499ff', marginRight: '10px' }}></i>
                                 Featured Visa Services
                             </h2>
@@ -984,7 +984,7 @@ export default function Home() {
                                         <h3 style={{
                                             fontSize: '16px',
                                             fontWeight: 700,
-                                            color: '#003d82',
+                                            color: '#0499ff',
                                             marginBottom: '8px'
                                         }}>
                                             {visa.name}
@@ -1041,7 +1041,7 @@ export default function Home() {
                 <section style={{ padding: '50px 20px', background: '#f9f9f9' }}>
                     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-                            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#003d82', marginBottom: '12px' }}>
+                            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#0499ff', marginBottom: '12px' }}>
                                 <i className="fa fa-gift" style={{ color: '#0499ff', marginRight: '10px' }}></i>
                                 Featured Travel Package
                             </h2>
@@ -1121,7 +1121,7 @@ export default function Home() {
                                             position: 'absolute',
                                             bottom: '10px',
                                             left: '10px',
-                                            background: '#003d82',
+                                            background: '#0499ff',
                                             color: '#fff',
                                             padding: '4px 10px',
                                             borderRadius: '4px',
@@ -1137,7 +1137,7 @@ export default function Home() {
                                         <h3 style={{
                                             fontSize: '16px',
                                             fontWeight: 700,
-                                            color: '#003d82',
+                                            color: '#0499ff',
                                             marginBottom: '8px'
                                         }}>
                                             {pkg.name}
@@ -1164,7 +1164,7 @@ export default function Home() {
                                         <div style={{
                                             fontSize: '18px',
                                             fontWeight: 700,
-                                            color: '#003d82',
+                                            color: '#0499ff',
                                             marginBottom: '15px'
                                         }}>
                                             {pkg.currency} {parseFloat(String(pkg.price)).toFixed(0)}
@@ -1222,7 +1222,7 @@ export default function Home() {
                     <div className="contact-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
                         {/* Form */}
                         <div>
-                            <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#003d82', marginBottom: '20px' }}>Get in Touch</h3>
+                            <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0499ff', marginBottom: '20px' }}>Get in Touch</h3>
                             <ContactForm />
                         </div>
 
@@ -1261,7 +1261,7 @@ export default function Home() {
                     `}</style>
                     <div style={{ maxWidth: '1200px', margin: '0 auto' }} className="testimonials-section">
                         <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-                            <h2 className="testimonials-heading" style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#003d82', marginBottom: '12px' }}>What Our Clients Say</h2>
+                            <h2 className="testimonials-heading" style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#0499ff', marginBottom: '12px' }}>What Our Clients Say</h2>
                             <div style={{ width: '50px', height: '3px', background: '#0499ff', margin: '0 auto 15px' }}></div>
                             <p className="testimonials-paragraph" style={{ color: '#777', fontSize: '13px', maxWidth: '500px', margin: '0 auto' }}>Discover what travelers around the world think about our services</p>
                         </div>
@@ -1276,7 +1276,7 @@ export default function Home() {
                                         return newIndex < 0 ? Math.max(0, testimonials.length - cardsPerView) : newIndex;
                                     });
                                 }}
-                                style={{ background: '#003d82', color: '#fff', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}
+                                style={{ background: '#0499ff', color: '#fff', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}
                             >
                                 <i className="fa fa-chevron-left"></i>
                             </button>
@@ -1294,7 +1294,7 @@ export default function Home() {
                                                     style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #0499ff' }}
                                                 />
                                             </div>
-                                            <h4 style={{ fontSize: '16px', fontWeight: 700, color: '#003d82', marginBottom: '8px' }}>{testimonial.client_name}</h4>
+                                            <h4 style={{ fontSize: '16px', fontWeight: 700, color: '#0499ff', marginBottom: '8px' }}>{testimonial.client_name}</h4>
                                             <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '15px' }}>
                                                 {[...Array(testimonial.rating)].map((_, i) => (
                                                     <span key={i} style={{ color: '#0499ff', fontSize: '14px' }}>★</span>
@@ -1315,7 +1315,7 @@ export default function Home() {
                                         return newIndex >= testimonials.length ? 0 : newIndex;
                                     });
                                 }}
-                                style={{ background: '#003d82', color: '#fff', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}
+                                style={{ background: '#0499ff', color: '#fff', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}
                             >
                                 <i className="fa fa-chevron-right"></i>
                             </button>

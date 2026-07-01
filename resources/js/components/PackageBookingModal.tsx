@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 
 interface PackageBookingModalProps {
     isOpen: boolean;
@@ -106,8 +106,8 @@ export default function PackageBookingModal({ isOpen, onClose, packageData }: Pa
             <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
                 {submitted ? (
                     <div style={{ textAlign: 'center', padding: '40px' }}>
-                        <div style={{ fontSize: '64px', marginBottom: '16px' }}>✓</div>
-                        <h2 style={{ color: '#003d82', marginBottom: '8px', fontSize: '28px', fontWeight: 700 }}>
+                        <div style={{ fontSize: '64px', marginBottom: '16px' }}>âœ“</div>
+                        <h2 style={{ color: '#0499ff', marginBottom: '8px', fontSize: '28px', fontWeight: 700 }}>
                             Booking Confirmed!
                         </h2>
                         <p style={{ color: '#666', fontSize: '16px' }}>
@@ -116,7 +116,7 @@ export default function PackageBookingModal({ isOpen, onClose, packageData }: Pa
                     </div>
                 ) : (
                     <>
-                        <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#003d82', marginBottom: '24px' }}>
+                        <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#0499ff', marginBottom: '24px' }}>
                             Complete Your Booking for {packageData.name}
                         </h2>
 
@@ -124,7 +124,7 @@ export default function PackageBookingModal({ isOpen, onClose, packageData }: Pa
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '20px' }}>
                             {/* Name */}
                             <div>
-                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#003d82', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#0499ff', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
                                     Full Name
                                 </label>
                                 <input
@@ -146,7 +146,7 @@ export default function PackageBookingModal({ isOpen, onClose, packageData }: Pa
 
                             {/* Email */}
                             <div>
-                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#003d82', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#0499ff', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
                                     Email
                                 </label>
                                 <input
@@ -168,7 +168,7 @@ export default function PackageBookingModal({ isOpen, onClose, packageData }: Pa
 
                             {/* Phone */}
                             <div>
-                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#003d82', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#0499ff', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
                                     Phone
                                 </label>
                                 <input
@@ -190,7 +190,7 @@ export default function PackageBookingModal({ isOpen, onClose, packageData }: Pa
 
                             {/* Check-in Date */}
                             <div>
-                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#003d82', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#0499ff', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
                                     Check-in Date
                                 </label>
                                 <input
@@ -211,7 +211,7 @@ export default function PackageBookingModal({ isOpen, onClose, packageData }: Pa
 
                             {/* Check-out Date */}
                             <div>
-                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#003d82', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#0499ff', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
                                     Check-out Date
                                 </label>
                                 <input
@@ -232,7 +232,7 @@ export default function PackageBookingModal({ isOpen, onClose, packageData }: Pa
 
                             {/* Adults */}
                             <div>
-                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#003d82', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#0499ff', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
                                     Adults
                                 </label>
                                 <input
@@ -254,7 +254,7 @@ export default function PackageBookingModal({ isOpen, onClose, packageData }: Pa
 
                             {/* Children */}
                             <div>
-                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#003d82', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#0499ff', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
                                     Children
                                 </label>
                                 <input
@@ -276,7 +276,7 @@ export default function PackageBookingModal({ isOpen, onClose, packageData }: Pa
 
                             {/* Infants */}
                             <div>
-                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#003d82', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#0499ff', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
                                     Infants
                                 </label>
                                 <input
@@ -298,7 +298,7 @@ export default function PackageBookingModal({ isOpen, onClose, packageData }: Pa
 
                             {/* Rooms */}
                             <div>
-                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#003d82', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
+                                <label style={{ fontSize: '12px', fontWeight: 700, color: '#0499ff', display: 'block', marginBottom: '8px', textTransform: 'uppercase' }}>
                                     Rooms
                                 </label>
                                 <input
@@ -346,3 +346,4 @@ export default function PackageBookingModal({ isOpen, onClose, packageData }: Pa
         </div>
     );
 }
+

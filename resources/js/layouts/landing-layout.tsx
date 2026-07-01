@@ -205,10 +205,10 @@ export default function LandingLayout({ children }: Props) {
 
                 <ul className="navbar-menu" style={{ display: 'flex', alignItems: 'center', gap: '28px', listStyle: 'none', margin: 0, padding: 0, flex: 1, justifyContent: 'center' }}>
                     {/* HOME - Active state indicator: orange color + underline when on home page */}
-                    <li><Link href="/" style={{ color: isCurrentUrl('/') ? '#ff6b35' : '#333', fontSize: '14px', fontWeight: isCurrentUrl('/') ? 600 : 500, textDecoration: 'none', borderBottom: isCurrentUrl('/') ? '3px solid #ff6b35' : 'none', paddingBottom: '5px', transition: 'all 0.3s' }} onMouseEnter={(e) => !isCurrentUrl('/') && (e.currentTarget.style.color = '#ff6b35')} onMouseLeave={(e) => !isCurrentUrl('/') && (e.currentTarget.style.color = '#333')}>Home</Link></li>
+                    <li><Link href="/" style={{ color: isCurrentUrl('/') ? '#0499ff' : '#333', fontSize: '14px', fontWeight: isCurrentUrl('/') ? 600 : 500, textDecoration: 'none', borderBottom: isCurrentUrl('/') ? '3px solid #0499ff' : 'none', paddingBottom: '5px', transition: 'all 0.3s' }} onMouseEnter={(e) => !isCurrentUrl('/') && (e.currentTarget.style.color = '#0499ff')} onMouseLeave={(e) => !isCurrentUrl('/') && (e.currentTarget.style.color = '#333')}>Home</Link></li>
 
                     {/* Visa Services Link */}
-                    <li><Link href="/visa-services" style={{ color: isCurrentUrl('/visa-services') ? '#ff6b35' : '#333', fontSize: '14px', fontWeight: isCurrentUrl('/visa-services') ? 600 : 500, textDecoration: 'none', borderBottom: isCurrentUrl('/visa-services') ? '3px solid #ff6b35' : 'none', paddingBottom: '5px', transition: 'all 0.3s' }} onMouseEnter={(e) => !isCurrentUrl('/visa-services') && (e.currentTarget.style.color = '#ff6b35')} onMouseLeave={(e) => !isCurrentUrl('/visa-services') && (e.currentTarget.style.color = '#333')}>Visa Services</Link></li>
+                    <li><Link href="/visa-services" style={{ color: isCurrentUrl('/visa-services') ? '#0499ff' : '#333', fontSize: '14px', fontWeight: isCurrentUrl('/visa-services') ? 600 : 500, textDecoration: 'none', borderBottom: isCurrentUrl('/visa-services') ? '3px solid #0499ff' : 'none', paddingBottom: '5px', transition: 'all 0.3s' }} onMouseEnter={(e) => !isCurrentUrl('/visa-services') && (e.currentTarget.style.color = '#0499ff')} onMouseLeave={(e) => !isCurrentUrl('/visa-services') && (e.currentTarget.style.color = '#333')}>Visa Services</Link></li>
 
                     {/* Other Services Dropdown */}
                     {/* <li
@@ -219,7 +219,7 @@ export default function LandingLayout({ children }: Props) {
                         <button
                             onClick={() => setOpenDropdown(openDropdown === 'other' ? null : 'other')}
                             style={{ background: 'none', border: 'none', color: '#333', fontSize: '14px', fontWeight: 500, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px', cursor: 'pointer', padding: 0, transition: 'color 0.3s' }}
-                            onMouseEnter={(e) => e.currentTarget.style.color = '#ff6b35'}
+                            onMouseEnter={(e) => e.currentTarget.style.color = '#0499ff'}
                             onMouseLeave={(e) => e.currentTarget.style.color = '#333'}
                         >
                             Other Services <i className="fa fa-chevron-down" style={{ fontSize: '10px' }}></i>
@@ -242,10 +242,10 @@ export default function LandingLayout({ children }: Props) {
                     </li> */}
 
                     {/* ABOUT US - Active state indicator: orange color + underline when on about-us page */}
-                    <li><Link href="/about-us" style={{ color: isCurrentUrl('/about-us') ? '#ff6b35' : '#333', fontSize: '14px', fontWeight: isCurrentUrl('/about-us') ? 600 : 500, textDecoration: 'none', borderBottom: isCurrentUrl('/about-us') ? '3px solid #ff6b35' : 'none', paddingBottom: '5px', transition: 'all 0.3s' }} onMouseEnter={(e) => !isCurrentUrl('/about-us') && (e.currentTarget.style.color = '#ff6b35')} onMouseLeave={(e) => !isCurrentUrl('/about-us') && (e.currentTarget.style.color = '#333')}>About Us</Link></li>
+                    <li><Link href="/about-us" style={{ color: isCurrentUrl('/about-us') ? '#0499ff' : '#333', fontSize: '14px', fontWeight: isCurrentUrl('/about-us') ? 600 : 500, textDecoration: 'none', borderBottom: isCurrentUrl('/about-us') ? '3px solid #0499ff' : 'none', paddingBottom: '5px', transition: 'all 0.3s' }} onMouseEnter={(e) => !isCurrentUrl('/about-us') && (e.currentTarget.style.color = '#0499ff')} onMouseLeave={(e) => !isCurrentUrl('/about-us') && (e.currentTarget.style.color = '#333')}>About Us</Link></li>
 
                     {/* CONTACT US - Active state indicator: orange color + underline when on contact-us page */}
-                    <li><Link href="/contact-us" style={{ color: isCurrentUrl('/contact-us') ? '#ff6b35' : '#333', fontSize: '14px', fontWeight: isCurrentUrl('/contact-us') ? 600 : 500, textDecoration: 'none', borderBottom: isCurrentUrl('/contact-us') ? '3px solid #ff6b35' : 'none', paddingBottom: '5px', transition: 'all 0.3s' }} onMouseEnter={(e) => !isCurrentUrl('/contact-us') && (e.currentTarget.style.color = '#ff6b35')} onMouseLeave={(e) => !isCurrentUrl('/contact-us') && (e.currentTarget.style.color = '#333')}>Contact Us</Link></li>
+                    <li><Link href="/contact-us" style={{ color: isCurrentUrl('/contact-us') ? '#0499ff' : '#333', fontSize: '14px', fontWeight: isCurrentUrl('/contact-us') ? 600 : 500, textDecoration: 'none', borderBottom: isCurrentUrl('/contact-us') ? '3px solid #0499ff' : 'none', paddingBottom: '5px', transition: 'all 0.3s' }} onMouseEnter={(e) => !isCurrentUrl('/contact-us') && (e.currentTarget.style.color = '#ff6b35')} onMouseLeave={(e) => !isCurrentUrl('/contact-us') && (e.currentTarget.style.color = '#333')}>Contact Us</Link></li>
                 </ul>
                 <a className="navbar-cta" href="tel:+1234567890" style={{ background: '#0499ff', color: '#fff', padding: '10px 22px', borderRadius: '4px', fontWeight: 700, fontSize: '13px', textDecoration: 'none', cursor: 'pointer', transition: 'all 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.background = '#0277d8'} onMouseLeave={(e) => e.currentTarget.style.background = '#0499ff'}>CALL NOW</a>
             </nav>
@@ -277,19 +277,19 @@ export default function LandingLayout({ children }: Props) {
             </a>
 
             {/* FOOTER */}
-            <footer className="landing-footer" style={{ background: '#003d82', color: '#fff', padding: '30px', marginTop: '40px', borderTop: '1px solid rgba(255,255,255,.1)' }}>
+            <footer className="landing-footer" style={{ background: '#0499ff', color: '#fff', padding: '30px', marginTop: '40px', borderTop: '1px solid rgba(255,255,255,.1)' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     {/* Logo Section */}
                     <div style={{ marginBottom: '30px', paddingBottom: '20px', borderBottom: '1px solid rgba(255,255,255,.1)' }}>
-                        <img src={LOGO_PATH} alt={footerLogoConfig.alt} style={{ width: isMobile ? 40 : 75, height: isMobile ? 40 : 75, objectFit: 'contain' }} />
+                        <img src={LOGO_PATH} alt={footerLogoConfig.alt} style={{ width: isMobile ? 60 : 120, height: isMobile ? 60 : 120, objectFit: 'contain' }} />
                     </div>
 
                     <div className="footer-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '30px', marginBottom: '30px' }}>
                         {/* Contact Info - Detailed */}
                         <div>
-                            <h4 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '15px', color: '#ff6b35' }}>Contact Info</h4>
+                            <h4 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '15px', color: '#ff6b35' }}>Contact Info</h4>
                             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                                <li style={{ marginBottom: '10px', fontSize: '12px', color: 'rgba(255,255,255,.7)' }}>
+                                <li style={{ marginBottom: '10px', fontSize: '14px', color: 'rgba(255,255,255,.7)' }}>
                                     <i className="fa fa-map-pin" style={{ color: '#ff6b35', marginRight: '8px' }}></i>
                                     <strong>Address:</strong><br />
                                     <span style={{ marginLeft: '20px', display: 'block' }}>62 King Street<br />Southall, Middlesex<br />UB2 4DB, United Kingdom</span>

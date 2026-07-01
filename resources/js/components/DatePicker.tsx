@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 
 interface DatePickerProps {
   value: string; // ISO format: YYYY-MM-DD
@@ -137,7 +137,7 @@ export default function DatePicker({ value, onChange, minDate, maxDate, label }:
                 padding: '4px 8px',
               }}
             >
-              ← Prev
+              â† Prev
             </button>
             <div style={{ fontSize: '14px', fontWeight: 'bold' }}>{monthYear}</div>
             <button
@@ -151,7 +151,7 @@ export default function DatePicker({ value, onChange, minDate, maxDate, label }:
                 padding: '4px 8px',
               }}
             >
-              Next →
+              Next â†’
             </button>
           </div>
 
@@ -188,7 +188,7 @@ export default function DatePicker({ value, onChange, minDate, maxDate, label }:
                   cursor: day ? 'pointer' : 'default',
                   backgroundColor:
                     day && selectedDate === formatToISO(currentMonth.getFullYear(), currentMonth.getMonth(), day)
-                      ? '#003d82'
+                      ? '#0499ff'
                       : 'transparent',
                   color:
                     day && selectedDate === formatToISO(currentMonth.getFullYear(), currentMonth.getMonth(), day)
@@ -244,3 +244,4 @@ export default function DatePicker({ value, onChange, minDate, maxDate, label }:
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import toast, { Toaster } from 'react-hot-toast';
 
 interface TourFormProps {
@@ -171,63 +171,63 @@ export default function TourForm({ tour, isEdit = false }: TourFormProps) {
 
     return (
         <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '40px 20px' }}>
-            <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#003d82', marginBottom: '30px' }}>
+            <h1 style={{ fontSize: '28px', fontWeight: 700, color: '#0499ff', marginBottom: '30px' }}>
                 {isEdit ? 'Edit Tour' : 'Create New Tour'}
             </h1>
 
             <form onSubmit={handleSubmit} style={{ background: '#fff', padding: '30px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,.1)' }}>
                 {/* BASIC INFO */}
                 <div style={{ marginBottom: '30px' }}>
-                    <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#003d82', marginBottom: '15px' }}>Basic Information</h3>
+                    <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0499ff', marginBottom: '15px' }}>Basic Information</h3>
 
                     <div style={{ marginBottom: '15px' }}>
-                        <label style={{ display: 'block', fontWeight: 700, color: '#003d82', marginBottom: '5px', fontSize: '13px' }}>Tour Name *</label>
+                        <label style={{ display: 'block', fontWeight: 700, color: '#0499ff', marginBottom: '5px', fontSize: '13px' }}>Tour Name *</label>
                         <input type="text" value={formData.name} onChange={(e) => handleInputChange('name', e.target.value)} placeholder="e.g., Singapore & Thailand Sep 2026" style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px', boxSizing: 'border-box' }} required />
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
                         <div>
-                            <label style={{ display: 'block', fontWeight: 700, color: '#003d82', marginBottom: '5px', fontSize: '13px' }}>Duration *</label>
+                            <label style={{ display: 'block', fontWeight: 700, color: '#0499ff', marginBottom: '5px', fontSize: '13px' }}>Duration *</label>
                             <input type="text" value={formData.duration} onChange={(e) => handleInputChange('duration', e.target.value)} placeholder="e.g., 7 Days" style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px', boxSizing: 'border-box' }} required />
                         </div>
                         <div>
-                            <label style={{ display: 'block', fontWeight: 700, color: '#003d82', marginBottom: '5px', fontSize: '13px' }}>Price</label>
+                            <label style={{ display: 'block', fontWeight: 700, color: '#0499ff', marginBottom: '5px', fontSize: '13px' }}>Price</label>
                             <input type="number" value={formData.price} onChange={(e) => handleInputChange('price', e.target.value)} placeholder="e.g., 1299" style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px', boxSizing: 'border-box' }} />
                         </div>
                     </div>
 
                     <div style={{ marginBottom: '15px' }}>
-                        <label style={{ display: 'block', fontWeight: 700, color: '#003d82', marginBottom: '5px', fontSize: '13px' }}>Subtitle *</label>
+                        <label style={{ display: 'block', fontWeight: 700, color: '#0499ff', marginBottom: '5px', fontSize: '13px' }}>Subtitle *</label>
                         <input type="text" value={formData.subtitle} onChange={(e) => handleInputChange('subtitle', e.target.value)} placeholder="e.g., September 2026 (24th Sep - 01st Oct 2026)" style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px', boxSizing: 'border-box' }} required />
                     </div>
 
                     <div style={{ marginBottom: '15px' }}>
-                        <label style={{ display: 'block', fontWeight: 700, color: '#003d82', marginBottom: '5px', fontSize: '13px' }}>Location</label>
+                        <label style={{ display: 'block', fontWeight: 700, color: '#0499ff', marginBottom: '5px', fontSize: '13px' }}>Location</label>
                         <input type="text" value={formData.location} onChange={(e) => handleInputChange('location', e.target.value)} placeholder="e.g., Singapore, Thailand" style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px', boxSizing: 'border-box' }} />
                     </div>
 
                     <div style={{ marginBottom: '15px' }}>
-                        <label style={{ display: 'block', fontWeight: 700, color: '#003d82', marginBottom: '5px', fontSize: '13px' }}>Image URL</label>
+                        <label style={{ display: 'block', fontWeight: 700, color: '#0499ff', marginBottom: '5px', fontSize: '13px' }}>Image URL</label>
                         <input type="text" value={formData.image} onChange={(e) => handleInputChange('image', e.target.value)} placeholder="e.g., https://example.com/image.jpg" style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px', boxSizing: 'border-box' }} />
                     </div>
 
                     <div>
-                        <label style={{ display: 'block', fontWeight: 700, color: '#003d82', marginBottom: '5px', fontSize: '13px' }}>Description *</label>
+                        <label style={{ display: 'block', fontWeight: 700, color: '#0499ff', marginBottom: '5px', fontSize: '13px' }}>Description *</label>
                         <textarea value={formData.description} onChange={(e) => handleInputChange('description', e.target.value)} placeholder="Detailed tour description..." style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px', boxSizing: 'border-box', minHeight: '120px', fontFamily: "'Open Sans', sans-serif" }} required></textarea>
                     </div>
                 </div>
 
                 {/* HIGHLIGHTS */}
                 <div style={{ marginBottom: '30px', paddingBottom: '20px', borderBottom: '1px solid #eee' }}>
-                    <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#003d82', marginBottom: '15px' }}>Highlights</h3>
+                    <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0499ff', marginBottom: '15px' }}>Highlights</h3>
                     <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
                         <input type="text" value={newHighlight} onChange={(e) => setNewHighlight(e.target.value)} placeholder="Add a highlight..." style={{ flex: 1, padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px' }} />
-                        <button type="button" onClick={addHighlight} style={{ background: '#003d82', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '4px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Add</button>
+                        <button type="button" onClick={addHighlight} style={{ background: '#0499ff', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '4px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Add</button>
                     </div>
                     <div>
                         {(formData.highlights || []).map((highlight: string, idx: number) => (
                             <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: '#f9f9f9', borderRadius: '4px', marginBottom: '8px', fontSize: '13px' }}>
-                                <span>• {highlight}</span>
+                                <span>â€¢ {highlight}</span>
                                 <button type="button" onClick={() => removeHighlight(idx)} style={{ background: 'none', border: 'none', color: '#c0392b', cursor: 'pointer', fontWeight: 700 }}>Remove</button>
                             </div>
                         ))}
@@ -236,11 +236,11 @@ export default function TourForm({ tour, isEdit = false }: TourFormProps) {
 
                 {/* ITINERARY */}
                 <div style={{ marginBottom: '30px', paddingBottom: '20px', borderBottom: '1px solid #eee' }}>
-                    <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#003d82', marginBottom: '15px' }}>Itinerary</h3>
+                    <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0499ff', marginBottom: '15px' }}>Itinerary</h3>
                     <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr 80px', gap: '10px', marginBottom: '15px' }}>
                         <input type="text" value={newItinerary.day} onChange={(e) => setNewItinerary({ ...newItinerary, day: e.target.value })} placeholder="Day 1" style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px' }} />
                         <input type="text" value={newItinerary.description} onChange={(e) => setNewItinerary({ ...newItinerary, description: e.target.value })} placeholder="Itinerary details..." style={{ padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px' }} />
-                        <button type="button" onClick={addItinerary} style={{ background: '#003d82', color: '#fff', border: 'none', padding: '10px', borderRadius: '4px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Add</button>
+                        <button type="button" onClick={addItinerary} style={{ background: '#0499ff', color: '#fff', border: 'none', padding: '10px', borderRadius: '4px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Add</button>
                     </div>
                     <div>
                         {(formData.itinerary || []).map((item: any, idx: number) => (
@@ -254,15 +254,15 @@ export default function TourForm({ tour, isEdit = false }: TourFormProps) {
 
                 {/* PACKAGE INCLUDES */}
                 <div style={{ marginBottom: '30px', paddingBottom: '20px', borderBottom: '1px solid #eee' }}>
-                    <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#003d82', marginBottom: '15px' }}>Package Includes</h3>
+                    <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0499ff', marginBottom: '15px' }}>Package Includes</h3>
                     <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
                         <input type="text" value={newInclude} onChange={(e) => setNewInclude(e.target.value)} placeholder="Add what's included..." style={{ flex: 1, padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px' }} />
-                        <button type="button" onClick={addInclude} style={{ background: '#003d82', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '4px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Add</button>
+                        <button type="button" onClick={addInclude} style={{ background: '#0499ff', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '4px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Add</button>
                     </div>
                     <div>
                         {(formData.package_includes || []).map((include: string, idx: number) => (
                             <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: '#f9f9f9', borderRadius: '4px', marginBottom: '8px', fontSize: '13px' }}>
-                                <span>✓ {include}</span>
+                                <span>âœ“ {include}</span>
                                 <button type="button" onClick={() => removeInclude(idx)} style={{ background: 'none', border: 'none', color: '#c0392b', cursor: 'pointer', fontWeight: 700 }}>Remove</button>
                             </div>
                         ))}
@@ -271,15 +271,15 @@ export default function TourForm({ tour, isEdit = false }: TourFormProps) {
 
                 {/* PACKAGE EXCLUDES */}
                 <div style={{ marginBottom: '30px', paddingBottom: '20px', borderBottom: '1px solid #eee' }}>
-                    <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#003d82', marginBottom: '15px' }}>Package Excludes</h3>
+                    <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0499ff', marginBottom: '15px' }}>Package Excludes</h3>
                     <div style={{ display: 'flex', gap: '10px', marginBottom: '15px' }}>
                         <input type="text" value={newExclude} onChange={(e) => setNewExclude(e.target.value)} placeholder="Add what's not included..." style={{ flex: 1, padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px' }} />
-                        <button type="button" onClick={addExclude} style={{ background: '#003d82', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '4px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Add</button>
+                        <button type="button" onClick={addExclude} style={{ background: '#0499ff', color: '#fff', border: 'none', padding: '10px 20px', borderRadius: '4px', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Add</button>
                     </div>
                     <div>
                         {(formData.package_excludes || []).map((exclude: string, idx: number) => (
                             <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 10px', background: '#f9f9f9', borderRadius: '4px', marginBottom: '8px', fontSize: '13px' }}>
-                                <span>✗ {exclude}</span>
+                                <span>âœ— {exclude}</span>
                                 <button type="button" onClick={() => removeExclude(idx)} style={{ background: 'none', border: 'none', color: '#c0392b', cursor: 'pointer', fontWeight: 700 }}>Remove</button>
                             </div>
                         ))}
@@ -288,13 +288,13 @@ export default function TourForm({ tour, isEdit = false }: TourFormProps) {
 
                 {/* TERMS & CONDITIONS */}
                 <div style={{ marginBottom: '30px' }}>
-                    <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#003d82', marginBottom: '15px' }}>Terms & Conditions</h3>
+                    <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0499ff', marginBottom: '15px' }}>Terms & Conditions</h3>
                     <textarea value={formData.terms_conditions} onChange={(e) => handleInputChange('terms_conditions', e.target.value)} placeholder="Terms and conditions..." style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', fontSize: '13px', boxSizing: 'border-box', minHeight: '100px', fontFamily: "'Open Sans', sans-serif" }}></textarea>
                 </div>
 
                 {/* SUBMIT BUTTON */}
                 <div style={{ display: 'flex', gap: '10px' }}>
-                    <button type="submit" disabled={isLoading} style={{ background: '#003d82', color: '#fff', border: 'none', padding: '12px 30px', borderRadius: '4px', fontSize: '13px', fontWeight: 700, cursor: isLoading ? 'not-allowed' : 'pointer', opacity: isLoading ? 0.7 : 1 }}>
+                    <button type="submit" disabled={isLoading} style={{ background: '#0499ff', color: '#fff', border: 'none', padding: '12px 30px', borderRadius: '4px', fontSize: '13px', fontWeight: 700, cursor: isLoading ? 'not-allowed' : 'pointer', opacity: isLoading ? 0.7 : 1 }}>
                         {isLoading ? 'Saving...' : isEdit ? 'Update Tour' : 'Create Tour'}
                     </button>
                     <a href="/admin/tours" style={{ background: '#ddd', color: '#333', border: 'none', padding: '12px 30px', borderRadius: '4px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
@@ -307,3 +307,4 @@ export default function TourForm({ tour, isEdit = false }: TourFormProps) {
         </div>
     );
 }
+

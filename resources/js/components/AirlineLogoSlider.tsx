@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+﻿import { useState, useEffect } from 'react';
 
 interface Airline {
     id: string | number;
@@ -17,14 +17,14 @@ export default function AirlineLogoSlider() {
     }, []);
 
     const getDefaultAirlines = () => [
-        { id: 1, name: 'Air India', logo: '🇮🇳' },
-        { id: 2, name: 'Emirates', logo: '🇦🇪' },
-        { id: 3, name: 'Qatar Airways', logo: '🇶🇦' },
-        { id: 4, name: 'Lufthansa', logo: '🇩🇪' },
-        { id: 5, name: 'British Airways', logo: '🇬🇧' },
-        { id: 6, name: 'Turkish Airlines', logo: '🇹🇷' },
-        { id: 7, name: 'Singapore Airlines', logo: '🇸🇬' },
-        { id: 8, name: 'Thai Airways', logo: '🇹🇭' },
+        { id: 1, name: 'Air India', logo: 'ðŸ‡®ðŸ‡³' },
+        { id: 2, name: 'Emirates', logo: 'ðŸ‡¦ðŸ‡ª' },
+        { id: 3, name: 'Qatar Airways', logo: 'ðŸ‡¶ðŸ‡¦' },
+        { id: 4, name: 'Lufthansa', logo: 'ðŸ‡©ðŸ‡ª' },
+        { id: 5, name: 'British Airways', logo: 'ðŸ‡¬ðŸ‡§' },
+        { id: 6, name: 'Turkish Airlines', logo: 'ðŸ‡¹ðŸ‡·' },
+        { id: 7, name: 'Singapore Airlines', logo: 'ðŸ‡¸ðŸ‡¬' },
+        { id: 8, name: 'Thai Airways', logo: 'ðŸ‡¹ðŸ‡­' },
     ];
 
     useEffect(() => {
@@ -54,7 +54,7 @@ export default function AirlineLogoSlider() {
     return (
         <section style={{ padding: '50px 40px', background: '#fff', borderTop: '1px solid #f0f0f0' }}>
             <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#003d82', marginBottom: '30px', textAlign: 'center' }}>✈️ Partner Airlines</h3>
+                <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#0499ff', marginBottom: '30px', textAlign: 'center' }}>âœˆï¸ Partner Airlines</h3>
 
                 {airlines && airlines.length > 0 ? (
                 <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -86,7 +86,7 @@ export default function AirlineLogoSlider() {
                             e.currentTarget.style.transform = 'scale(1)';
                         }}
                     >
-                        ‹
+                        â€¹
                     </button>
 
                     {/* Airlines Grid (6 in a row) */}
@@ -171,7 +171,7 @@ export default function AirlineLogoSlider() {
                             e.currentTarget.style.transform = 'scale(1)';
                         }}
                     >
-                        ›
+                        â€º
                     </button>
                 </div>
                 ) : (
@@ -183,3 +183,4 @@ export default function AirlineLogoSlider() {
         </section>
     );
 }
+

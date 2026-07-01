@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+﻿import { Head } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 
 interface SearchParams {
@@ -260,7 +260,7 @@ export default function FlightResults({ searchParams }: { searchParams?: SearchP
             {/* Main Content */}
             {!isLoading && (
                 <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '60px 20px' }}>
-                    <h1 style={{ fontSize: '32px', fontWeight: 700, color: '#003d82', marginBottom: '30px' }}>
+                    <h1 style={{ fontSize: '32px', fontWeight: 700, color: '#0499ff', marginBottom: '30px' }}>
                         Flight Results
                     </h1>
 
@@ -274,8 +274,8 @@ export default function FlightResults({ searchParams }: { searchParams?: SearchP
                             borderLeft: '4px solid #0066cc'
                         }}>
                             <p style={{ margin: 0, color: '#666', fontSize: '14px' }}>
-                                <strong>Search Summary:</strong> {searchParams?.from || 'N/A'} → {searchParams?.to || 'N/A'} | {searchParams?.departureDate || 'N/A'} |
-                                {searchParams?.adults || 0} Adult{(searchParams?.adults ?? 0) !== 1 ? 's' : ''} •
+                                <strong>Search Summary:</strong> {searchParams?.from || 'N/A'} â†’ {searchParams?.to || 'N/A'} | {searchParams?.departureDate || 'N/A'} |
+                                {searchParams?.adults || 0} Adult{(searchParams?.adults ?? 0) !== 1 ? 's' : ''} â€¢
                                 {searchParams?.children || 0} Child{(searchParams?.children ?? 0) !== 1 ? 'ren' : ''} | {searchParams?.selectedClass || 'N/A'}
                             </p>
                         </div>
@@ -290,7 +290,7 @@ export default function FlightResults({ searchParams }: { searchParams?: SearchP
                         textAlign: 'center'
                     }}>
                         <p style={{ color: '#999', fontSize: '16px', margin: 0 }}>
-                            ✈️ Flight results will be displayed here
+                            âœˆï¸ Flight results will be displayed here
                         </p>
                         <p style={{ color: '#ccc', fontSize: '14px', margin: '10px 0 0 0' }}>
                             Coming soon: live flight search and booking
@@ -301,3 +301,4 @@ export default function FlightResults({ searchParams }: { searchParams?: SearchP
         </>
     );
 }
+

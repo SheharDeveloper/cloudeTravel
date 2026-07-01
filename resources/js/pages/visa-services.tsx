@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+﻿import { Head, Link } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { fetchAllVisas } from '@/services/visaService';
 
@@ -44,14 +44,14 @@ export default function VisaServices() {
             <div style={{ background: '#fff', borderBottom: '1px solid #eee', padding: '20px 0', textAlign: 'center', fontSize: '11.5px', color: '#555' }}>
                 <div style={{ display: 'inline-block', color: '#0499ff', fontWeight: 700, fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', borderBottom: '2px solid #0499ff', marginBottom: '4px', paddingBottom: '2px' }}>Visa Processing</div>
                 <br />
-                ★ Fast visa processing services for <strong>50+ Countries</strong> with <span style={{ color: '#0499ff', fontWeight: 700 }}>Expert Assistance</span>
+                â˜… Fast visa processing services for <strong>50+ Countries</strong> with <span style={{ color: '#0499ff', fontWeight: 700 }}>Expert Assistance</span>
             </div>
 
             {/* VISA TYPES SECTION */}
             <section style={{ padding: '50px 40px', background: '#fff' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-                        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '28px', color: '#003d82', marginBottom: '8px' }}>Popular Visa Types</h2>
+                        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '28px', color: '#0499ff', marginBottom: '8px' }}>Popular Visa Types</h2>
                         <div style={{ width: '40px', height: '2px', background: '#0499ff', margin: '10px auto 14px' }}></div>
                         <p style={{ color: '#777', fontSize: '12.5px', lineHeight: 1.7 }}>Fast processing for visas to your favorite destinations worldwide</p>
                     </div>
@@ -86,7 +86,7 @@ export default function VisaServices() {
                                         <div style={{ fontSize: '32px', color: '#0499ff', marginBottom: '12px' }}>
                                             <i className="fa fa-passport"></i>
                                         </div>
-                                        <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#003d82', marginBottom: '6px' }}>
+                                        <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0499ff', marginBottom: '6px' }}>
                                             {visa.name}
                                         </h3>
                                         <p style={{ fontSize: '12px', color: '#666', marginBottom: '10px' }}>{visa.title}</p>
@@ -114,7 +114,7 @@ export default function VisaServices() {
             <section style={{ padding: '50px 40px', background: '#f5f5f5' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-                        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '28px', color: '#003d82', marginBottom: '8px' }}>What You Need</h2>
+                        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '28px', color: '#0499ff', marginBottom: '8px' }}>What You Need</h2>
                         <div style={{ width: '40px', height: '2px', background: '#0499ff', margin: '10px auto 14px' }}></div>
                     </div>
 
@@ -131,7 +131,7 @@ export default function VisaServices() {
                                 <div style={{ fontSize: '28px', color: '#0499ff', marginBottom: '10px' }}>
                                     <i className={`fa-solid ${req.icon}`}></i>
                                 </div>
-                                <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#003d82', marginBottom: '6px' }}>{req.title}</h3>
+                                <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#0499ff', marginBottom: '6px' }}>{req.title}</h3>
                                 <p style={{ fontSize: '11px', color: '#666', margin: 0 }}>{req.desc}</p>
                             </div>
                         ))}
@@ -140,7 +140,7 @@ export default function VisaServices() {
             </section>
 
             {/* CTA SECTION */}
-            <section style={{ background: '#003d82', color: '#fff', padding: '50px 40px', textAlign: 'center' }}>
+            <section style={{ background: '#0499ff', color: '#fff', padding: '50px 40px', textAlign: 'center' }}>
                 <div style={{ maxWidth: '800px', margin: '0 auto' }}>
                     <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '28px', marginBottom: '15px' }}>Ready to Get Your Visa?</h2>
                     <p style={{ fontSize: '13px', marginBottom: '25px', lineHeight: 1.8 }}>Our expert team will guide you through the entire process. We handle all the paperwork so you can focus on your journey.</p>
@@ -150,3 +150,4 @@ export default function VisaServices() {
         </>
     );
 }
+

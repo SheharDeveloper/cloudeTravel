@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+﻿import { Head } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import { getTours } from '@/services/tourService';
 
@@ -12,7 +12,7 @@ export default function Tours() {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [error, setError] = useState<string | null>(null);
-    const [currency, setCurrency] = useState({ symbol: '£', code: 'GBP' });
+    const [currency, setCurrency] = useState({ symbol: 'Â£', code: 'GBP' });
     const itemsPerPage = 12;
 
     useEffect(() => {
@@ -52,7 +52,7 @@ export default function Tours() {
             <Head title="Tours - CloudTravel" />
             <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
                 <div style={{ marginBottom: '40px' }}>
-                    <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#003d82', marginBottom: '10px' }}>Tour Packages</h1>
+                    <h1 style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#0499ff', marginBottom: '10px' }}>Tour Packages</h1>
                     <p style={{ color: '#666', marginBottom: '20px' }}>Explore our exclusive collection of curated tour packages to the world's most beautiful destinations.</p>
 
                     {/* Search Bar */}
@@ -149,14 +149,14 @@ export default function Tours() {
                                                 textTransform: 'uppercase',
                                                 letterSpacing: '0.5px'
                                             }}>
-                                                ⭐ Featured
+                                                â­ Featured
                                             </span>
                                         )}
                                         <span style={{
                                             position: 'absolute',
                                             top: '12px',
                                             right: '12px',
-                                            background: '#003d82',
+                                            background: '#0499ff',
                                             color: '#fff',
                                             padding: '6px 12px',
                                             borderRadius: '4px',
@@ -180,7 +180,7 @@ export default function Tours() {
                                         </span>
                                     </div>
                                     <div style={{ padding: '25px' }}>
-                                        <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#003d82', marginBottom: '10px', minHeight: '40px', lineHeight: 1.3 }}>
+                                        <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0499ff', marginBottom: '10px', minHeight: '40px', lineHeight: 1.3 }}>
                                             {tour.tour_title}
                                         </h3>
                                         <p style={{ fontSize: '13px', color: '#666', marginBottom: '15px', lineHeight: 1.5 }}>
@@ -196,7 +196,7 @@ export default function Tours() {
                                             <a
                                                 href={`/tours/${tour.id}`}
                                                 style={{
-                                                    background: '#003d82',
+                                                    background: '#0499ff',
                                                     color: '#fff',
                                                     padding: '10px 16px',
                                                     borderRadius: '4px',
@@ -208,7 +208,7 @@ export default function Tours() {
                                                     transition: 'all 0.3s'
                                                 }}
                                                 onMouseEnter={(e) => e.currentTarget.style.background = '#002050'}
-                                                onMouseLeave={(e) => e.currentTarget.style.background = '#003d82'}
+                                                onMouseLeave={(e) => e.currentTarget.style.background = '#0499ff'}
                                             >
                                                 View Details
                                             </a>
@@ -244,7 +244,7 @@ export default function Tours() {
                                             padding: '8px 12px',
                                             border: '1px solid #ddd',
                                             borderRadius: '4px',
-                                            background: currentPage === idx + 1 ? '#003d82' : '#fff',
+                                            background: currentPage === idx + 1 ? '#0499ff' : '#fff',
                                             color: currentPage === idx + 1 ? '#fff' : '#333',
                                             cursor: 'pointer',
                                             fontSize: '12px',
@@ -277,3 +277,4 @@ export default function Tours() {
         </>
     );
 }
+

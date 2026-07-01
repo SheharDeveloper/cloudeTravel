@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+﻿import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 
 /**
@@ -17,7 +17,7 @@ export default function OtherServices() {
             <div style={{ background: '#fff', borderBottom: '1px solid #eee', padding: '10px 0', textAlign: 'center', fontSize: '11.5px', color: '#555' }}>
                 <div style={{ display: 'inline-block', color: '#ff6b35', fontWeight: 700, fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', borderBottom: '1px solid #ff6b35', marginBottom: '4px' }}>Complete Solutions</div>
                 <br />
-                ★ Complete travel solutions beyond flights and hotels - <strong>All in one place</strong> with <span style={{ color: '#ff6b35', fontWeight: 700 }}>Expert Support</span>
+                â˜… Complete travel solutions beyond flights and hotels - <strong>All in one place</strong> with <span style={{ color: '#ff6b35', fontWeight: 700 }}>Expert Support</span>
             </div>
 
             {/* HERO SECTION */}
@@ -51,7 +51,7 @@ export default function OtherServices() {
             <section style={{ padding: '50px 40px', background: '#fff' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-                        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '28px', color: '#003d82', marginBottom: '8px' }}>Our Services</h2>
+                        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '28px', color: '#0499ff', marginBottom: '8px' }}>Our Services</h2>
                         <div style={{ width: '40px', height: '2px', background: '#ff6b35', margin: '10px auto 14px' }}></div>
                         <p style={{ color: '#777', fontSize: '12.5px', lineHeight: 1.7 }}>Everything you need for a complete travel experience</p>
                     </div>
@@ -75,7 +75,7 @@ export default function OtherServices() {
                                 <div style={{ fontSize: '36px', color: '#ff6b35', marginBottom: '12px' }}>
                                     <i className={`fa-solid ${service.icon}`}></i>
                                 </div>
-                                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#003d82', marginBottom: '8px' }}>{service.title}</h3>
+                                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0499ff', marginBottom: '8px' }}>{service.title}</h3>
                                 <p style={{ fontSize: '12px', color: '#666', marginBottom: '15px', lineHeight: 1.5 }}>{service.desc}</p>
                                 <button style={{ background: '#ff6b35', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: '4px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', width: '100%' }}>Get Started</button>
                             </div>
@@ -88,7 +88,7 @@ export default function OtherServices() {
             <section style={{ background: '#f5f5f5', padding: '50px 40px' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-                        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '28px', color: '#003d82', marginBottom: '8px' }}>Why Choose CloudTravel</h2>
+                        <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '28px', color: '#0499ff', marginBottom: '8px' }}>Why Choose CloudTravel</h2>
                         <div style={{ width: '40px', height: '2px', background: '#ff6b35', margin: '10px auto 14px' }}></div>
                     </div>
 
@@ -105,7 +105,7 @@ export default function OtherServices() {
                                 <div style={{ fontSize: '28px', color: '#ff6b35', marginBottom: '10px' }}>
                                     <i className={`fa-solid ${reason.icon}`}></i>
                                 </div>
-                                <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#003d82', marginBottom: '6px' }}>{reason.title}</h3>
+                                <h3 style={{ fontSize: '13px', fontWeight: 700, color: '#0499ff', marginBottom: '6px' }}>{reason.title}</h3>
                                 <p style={{ fontSize: '11px', color: '#666', margin: 0 }}>{reason.desc}</p>
                             </div>
                         ))}
@@ -114,7 +114,7 @@ export default function OtherServices() {
             </section>
 
             {/* CTA SECTION */}
-            <section style={{ background: '#003d82', color: '#fff', padding: '50px 40px', textAlign: 'center' }}>
+            <section style={{ background: '#0499ff', color: '#fff', padding: '50px 40px', textAlign: 'center' }}>
                 <div style={{ maxWidth: '800px', margin: '0 auto' }}>
                     <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '28px', marginBottom: '15px' }}>Need Help with Anything?</h2>
                     <p style={{ fontSize: '13px', marginBottom: '25px', lineHeight: 1.8 }}>Our expert team is here to assist with all your travel service needs. Contact us today and let's make your travel plans perfect.</p>
@@ -124,3 +124,4 @@ export default function OtherServices() {
         </>
     );
 }
+
