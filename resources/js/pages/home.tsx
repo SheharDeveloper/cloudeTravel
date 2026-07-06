@@ -590,10 +590,11 @@ export default function Home() {
                             onClick={() => handleTabChange('flight')}
                             style={{
                                 padding: '15px 15px',
-                                background: 'transparent',
+                                background: activeService === 'flight' ? '#0499ff' : 'transparent',
                                 border: 'none',
-                                borderBottom: activeService === 'flight' ? '5px solid #0066cc' : 'none',
-                                color: activeService === 'flight' ? '#0066cc' : '#000',
+                                borderRadius: '8px',
+                                borderBottom: activeService === 'flight' ? '3px solid #0499ff' : 'none',
+                                color: activeService === 'flight' ? '#000000' : '#000',
                                 fontSize: '17px',
                                 fontWeight: activeService === 'flight' ? 800 : 600,
                                 cursor: 'pointer',
@@ -612,10 +613,11 @@ export default function Home() {
                             onClick={() => handleTabChange('hotel')}
                             style={{
                                 padding: '10px 10px',
-                                background: 'transparent',
+                                background: activeService === 'hotel' ? '#0499ff' : 'transparent',
                                 border: 'none',
-                                borderBottom: activeService === 'hotel' ? '5px solid #0066cc' : 'none',
-                                color: activeService === 'hotel' ? '#0066cc' : '#000',
+                                borderRadius: '8px',
+                                borderBottom: activeService === 'hotel' ? '3px solid #0499ff' : 'none',
+                                color: activeService === 'hotel' ? '#000000' : '#000',
                                 fontSize: '17px',
                                 fontWeight: activeService === 'hotel' ? 800 : 500,
                                 cursor: 'pointer',
@@ -634,10 +636,11 @@ export default function Home() {
                             onClick={() => handleTabChange('flight-hotel')}
                             style={{
                                 padding: '10px 10px',
-                                background: 'transparent',
+                                background: activeService === 'flight-hotel' ? '#0499ff' : 'transparent',
                                 border: 'none',
-                                borderBottom: activeService === 'flight-hotel' ? '5px solid #0066cc' : 'none',
-                                color: activeService === 'flight-hotel' ? '#0066cc' : '#000',
+                                borderRadius: '8px',
+                                borderBottom: activeService === 'flight-hotel' ? '3px solid #0499ff' : 'none',
+                                color: activeService === 'flight-hotel' ? '#000000' : '#000',
                                 fontSize: '17px',
                                 fontWeight: activeService === 'flight-hotel' ? 800 : 500,
                                 cursor: 'pointer',
@@ -656,10 +659,11 @@ export default function Home() {
                             onClick={() => handleTabChange('visa')}
                             style={{
                                 padding: '10px 10px',
-                                background: 'transparent',
+                                background: activeService === 'visa' ? '#0499ff' : 'transparent',
                                 border: 'none',
-                                borderBottom: activeService === 'visa' ? '5px solid #0066cc' : 'none',
-                                color: activeService === 'visa' ? '#0066cc' : '#000',
+                                borderRadius: '8px',
+                                borderBottom: activeService === 'visa' ? '3px solid #0499ff' : 'none',
+                                color: activeService === 'visa' ? '#000000' : '#000',
                                 fontSize: '17px',
                                 fontWeight: activeService === 'visa' ? 800 : 500,
                                 cursor: 'pointer',
@@ -678,10 +682,11 @@ export default function Home() {
                             onClick={() => handleTabChange('airport-transfer')}
                             style={{
                                 padding: '10px 10px',
-                                background: 'transparent',
+                                background: activeService === 'airport-transfer' ? '#0499ff' : 'transparent',
                                 border: 'none',
-                                borderBottom: activeService === 'airport-transfer' ? '5px solid #0066cc' : 'none',
-                                color: activeService === 'airport-transfer' ? '#0066cc' : '#000',
+                                borderRadius: '8px',
+                                borderBottom: activeService === 'airport-transfer' ? '3px solid #0499ff' : 'none',
+                                color: activeService === 'airport-transfer' ? '#000000' : '#000',
                                 fontSize: '17px',
                                 fontWeight: activeService === 'airport-transfer' ? 800 : 500,
                                 cursor: 'pointer',

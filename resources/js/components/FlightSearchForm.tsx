@@ -109,8 +109,8 @@ export default function FlightSearchForm({
                     onClick={() => setTripType('oneway')}
                     className="trip-type-btn"
                     style={{
-                        background: tripType === 'oneway' ? '#fff5e8' : '#fff',
-                        color: tripType === 'oneway' ? '#0499ff' : '#666',
+                        background: tripType === 'oneway' ? '#0499ff' : '#fff',
+                        color: tripType === 'oneway' ? '#000000' : '#000000',
                         border: `2px solid ${tripType === 'oneway' ? '#0499ff' : '#ddd'}`,
                         padding: '10px 20px',
                         borderRadius: '24px',
@@ -139,8 +139,8 @@ export default function FlightSearchForm({
                     onClick={() => setTripType('roundtrip')}
                     className="trip-type-btn"
                     style={{
-                        background: tripType === 'roundtrip' ? '#fff5e8' : '#fff',
-                        color: tripType === 'roundtrip' ? '#0499ff' : '#666',
+                        background: tripType === 'roundtrip' ? '#0499ff' : '#fff',
+                        color: tripType === 'roundtrip' ? '#000000' : '#000000',
                         border: `2px solid ${tripType === 'roundtrip' ? '#0499ff' : '#ddd'}`,
                         padding: '10px 20px',
                         borderRadius: '24px',
@@ -171,7 +171,7 @@ export default function FlightSearchForm({
             <div className="flight-search-row1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '50px', marginBottom: '20px', alignItems: 'flex-start', position: 'relative' }}>
                 {/* FROM CITY - Searchable Dropdown */}
                 <div ref={fromRef} style={{ position: 'relative', width: '100%', margin: 0, padding: 0 }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, margin: 0, padding: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>From</label>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, margin: 0, padding: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>From</label>
                     <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 16px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-plane"></i>
                     </div>
@@ -223,7 +223,7 @@ export default function FlightSearchForm({
 
                 {/* TO CITY - Searchable Dropdown */}
                 <div ref={toRef} style={{ position: 'relative', width: '100%', margin: 0, padding: 0 }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, margin: 0, padding: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>To</label>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, margin: 0, padding: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>To</label>
                     <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 16px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-map-marker"></i>
                     </div>
@@ -305,7 +305,7 @@ export default function FlightSearchForm({
             <div className="flight-search-row2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '50px', marginBottom: '16px', alignItems: 'flex-start', marginTop: '8px' }}>
                 {/* Combined Date Range Picker */}
                 <div ref={calendarRef} style={{ width: '100%', position: 'relative' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>When</label>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>When</label>
                     <div
                         onClick={() => {
                             setShowDateRangePicker(!showDateRangePicker);
@@ -370,7 +370,7 @@ export default function FlightSearchForm({
 
                 {/* Travellers & Class */}
                 <div ref={travellerRef} style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Who</label>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Who</label>
                     <div
                         onClick={() => {
                             setShowTravellerModal(!showTravellerModal);
