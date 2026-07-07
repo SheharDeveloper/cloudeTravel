@@ -202,7 +202,7 @@ export default function Home() {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    background: '#0499ff',
+                    background: '#ffffff',
                     zIndex: 9998,
                     display: 'flex',
                     alignItems: 'center',
@@ -557,16 +557,16 @@ export default function Home() {
                             boxShadow: '0 8px 25px rgba(0, 102, 204, 0.4)',
                             marginBottom: '20px'
                         }} />
-                        <p style={{ color: '#0066cc', fontSize: '16px', fontWeight: 600, margin: 0 }}>Loading...</p>
+                        <p style={{ color: '#ffffff', fontSize: '16px', fontWeight: 600, margin: 0 }}>Loading...</p>
                     </div>
                 )}
 
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,20,60,.6) 0%, rgba(0,20,60,.3) 60%, rgba(0,20,60,.7) 100%)' }}></div>
                 <div style={{ position: 'relative', zIndex: 2, padding: '0 20px' }}>
-                    <h3 className="hero-title" style={{ fontFamily: "'Playfair Display', serif", fontSize: '28px', fontWeight: 700, color: '#fff', marginBottom: '5px', textShadow: '0 2px 12px rgba(0,0,0,.5)', transition: 'opacity 0.5s ease-in-out' }}>
+                    <h3 className="hero-title" style={{ fontFamily: "'Playfair Display', serif", fontSize: '28px', fontWeight: 700, color: '#ffffff', marginBottom: '5px', textShadow: '0 2px 12px rgba(0,0,0,.5)', transition: 'opacity 0.5s ease-in-out' }}>
                         {heroImages[currentHeroIndex]?.title || 'Discover the World with CloudTravel'}
                     </h3>
-                    <p className="hero-subtitle" style={{ color: 'rgba(255,255,255,.88)', fontSize: '12px', marginBottom: '0px', lineHeight: 1.6, transition: 'opacity 0.5s ease-in-out' }}>
+                    <p className="hero-subtitle" style={{ color: '#ffffff', fontSize: '12px', marginBottom: '0px', lineHeight: 1.6, transition: 'opacity 0.5s ease-in-out' }}>
                         {heroImages[currentHeroIndex]?.subtitle || 'Book flights, hotels, and visas seamlessly in one platform.'}
                     </p>
                     {/* Removed inline buttons - using tabbed interface below */}
@@ -704,7 +704,7 @@ export default function Home() {
                     </div>
 
                     {/* Form Content */}
-                    <div className="form-content-animate" style={{ padding: '16px 32px 20px 32px', backgroundColor: '#f9f9f9', transition: 'all 0.3s ease-in-out', height: 'auto' }}>
+                    <div className="form-content-animate" style={{ padding: '16px 32px 20px 32px', backgroundColor: '#ffffff', transition: 'all 0.3s ease-in-out', height: 'auto' }}>
                         {activeService === 'flight' && (
                         <FlightSearchForm
                             showDateRangePicker={showDateRangePicker}
@@ -729,17 +729,17 @@ export default function Home() {
                             {/* PACKAGES BY SEARCHED COUNTRY - TABLE FORMAT BELOW SEARCH BUTTON */}
                             {getFilteredPackages().length > 0 && (
                                 <div style={{ background: '#f9f9f9', borderTop: '1px solid #e0e0e0', padding: '16px 0', marginTop: '12px' }}>
-                                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0499ff', marginBottom: '12px', paddingLeft: '30px' }}>
+                                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#000000', marginBottom: '12px', paddingLeft: '30px' }}>
                                         📦 Available Packages in {searchedCountry}
                                     </h3>
                                     <div style={{ overflowX: 'auto', paddingLeft: '30px', paddingRight: '30px' }}>
                                         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                             <thead>
                                                 <tr style={{ borderBottom: '2px solid #0499ff', background: '#f0f7ff' }}>
-                                                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#0499ff' }}>Package</th>
-                                                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#0499ff' }}>Price</th>
-                                                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#0499ff' }}>Duration</th>
-                                                    <th style={{ padding: '12px', textAlign: 'center', fontSize: '12px', fontWeight: 700, color: '#0499ff' }}>Action</th>
+                                                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#000000' }}>Package</th>
+                                                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#000000' }}>Price</th>
+                                                    <th style={{ padding: '12px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#000000' }}>Duration</th>
+                                                    <th style={{ padding: '12px', textAlign: 'center', fontSize: '12px', fontWeight: 700, color: '#000000' }}>Action</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -772,19 +772,19 @@ export default function Home() {
                                                                     />
                                                                 )}
                                                                 <div>
-                                                                    <div style={{ fontWeight: 700, color: '#0499ff', marginBottom: '2px' }}>
+                                                                    <div style={{ fontWeight: 700, color: '#000000', marginBottom: '2px' }}>
                                                                         {pkg.name}
                                                                     </div>
-                                                                    <div style={{ fontSize: '11px', color: '#999' }}>
+                                                                    <div style={{ fontSize: '11px', color: '#000000' }}>
                                                                         {pkg.description ? pkg.description.substring(0, 50) + '...' : 'Travel package'}
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </td>
-                                                        <td style={{ padding: '12px', fontSize: '13px', fontWeight: 700, color: '#0499ff' }}>
+                                                        <td style={{ padding: '12px', fontSize: '13px', fontWeight: 700, color: '#000000' }}>
                                                             £{pkg.price?.toLocaleString() || 'N/A'}
                                                         </td>
-                                                        <td style={{ padding: '12px', fontSize: '13px', color: '#666' }}>
+                                                        <td style={{ padding: '12px', fontSize: '13px', color: '#000000' }}>
                                                             {pkg.duration_days} days
                                                         </td>
                                                         <td style={{ padding: '12px', textAlign: 'center' }}>
@@ -792,7 +792,7 @@ export default function Home() {
                                                                 href={`/packages/${pkg.uid || pkg.id}`}
                                                                 style={{
                                                                     background: '#0499ff',
-                                                                    color: '#fff',
+                                                                    color: '#000000',
                                                                     padding: '6px 12px',
                                                                     borderRadius: '4px',
                                                                     fontSize: '11px',
@@ -830,7 +830,7 @@ export default function Home() {
 
             {/* SPECIAL OFFERS SLIDER - MARQUEE STYLE */}
             {specialOffers.length > 0 && (
-                <div style={{ background: '#fff', borderBottom: '1px solid #eee', padding: '12px 15px', textAlign: 'center', fontSize: '11.5px', color: '#555', overflow: 'hidden', width: '100%' }}>
+                <div style={{ background: '#fff', borderBottom: '1px solid #eee', padding: '12px 15px', textAlign: 'center', fontSize: '11.5px', color: '#000000', overflow: 'hidden', width: '100%' }}>
                     <style>{`
                         @keyframes marqueeOffer {
                             0% {
@@ -868,9 +868,9 @@ export default function Home() {
                         }
                     `}</style>
                     <div className="offer-marquee" key={currentOfferIndex}>
-                        <div style={{ display: 'inline-block', color: '#0499ff', fontWeight: 700, fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', borderBottom: '1px solid #0499ff', marginBottom: '4px' }}>Special Offer</div>
+                        <div style={{ display: 'inline-block', color: '#000000', fontWeight: 700, fontSize: '10px', letterSpacing: '1px', textTransform: 'uppercase', borderBottom: '1px solid #0499ff', marginBottom: '4px' }}>Special Offer</div>
                         <br />
-                        ★ Special fares with <strong>{specialOffers[currentOfferIndex].airline}</strong> from {specialOffers[currentOfferIndex].from} to {specialOffers[currentOfferIndex].destinations} from <span style={{ color: '#c0392b', fontWeight: 700 }}>{specialOffers[currentOfferIndex].price}</span> <span style={{ color: '#0499ff', fontWeight: 700 }}>→</span>
+                        ★ Special fares with <strong>{specialOffers[currentOfferIndex].airline}</strong> from {specialOffers[currentOfferIndex].from} to {specialOffers[currentOfferIndex].destinations} from <span style={{ color: '#000000', fontWeight: 700 }}>{specialOffers[currentOfferIndex].price}</span> <span style={{ color: '#000000', fontWeight: 700 }}>→</span>
                     </div>
                 </div>
             )}
@@ -878,7 +878,7 @@ export default function Home() {
             {/* VISA SERVICES SECTION */}
             <section style={{ padding: '50px 40px', background: '#fff', borderTop: '1px solid #f0f0f0' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#0499ff', marginBottom: '30px', textAlign: 'center' }}>🛂 Visa Services</h3>
+                    <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#000000', marginBottom: '30px', textAlign: 'center' }}>🛂 Visa Services</h3>
                     <div className="visa-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
                         {[
                             { name: 'Schengen Visa', img: 'schengen.jpg', icon: '📋' },
@@ -893,7 +893,7 @@ export default function Home() {
                                     fallbackSrc={imageService.getFallbackImage('visa')}
                                     style={{ width: '100%', height: '160px', objectFit: 'cover', borderRadius: '8px', marginBottom: '12px' }}
                                 />
-                                <p style={{ fontSize: '15px', fontWeight: 600, color: '#0499ff', margin: 0, lineHeight: 1.4 }}>{visa.name}</p>
+                                <p style={{ fontSize: '15px', fontWeight: 600, color: '#000000', margin: 0, lineHeight: 1.4 }}>{visa.name}</p>
                             </div>
                         ))}
                     </div>
@@ -906,12 +906,12 @@ export default function Home() {
                 <section style={{ padding: '50px 20px', background: '#fff' }}>
                     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-                            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#0499ff', marginBottom: '12px' }}>
-                                <i className="fa fa-star" style={{ color: '#0499ff', marginRight: '10px' }}></i>
+                            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#000000', marginBottom: '12px' }}>
+                                <i className="fa fa-star" style={{ color: '#000000', marginRight: '10px' }}></i>
                                 Featured Visa Services
                             </h2>
-                            <div style={{ width: '50px', height: '3px', background: '#0499ff', margin: '0 auto 15px' }}></div>
-                            <p style={{ color: '#777', fontSize: '13px', maxWidth: '500px', margin: '0 auto' }}>
+                            <div style={{ width: '50px', height: '3px', background: '#ffffff', margin: '0 auto 15px' }}></div>
+                            <p style={{ color: '#000000', fontSize: '13px', maxWidth: '500px', margin: '0 auto' }}>
                                 Explore our most popular visa services for your travel needs
                             </p>
                         </div>
@@ -960,7 +960,7 @@ export default function Home() {
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
                                                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                                color: '#fff',
+                                                color: '#000000',
                                                 fontSize: '48px'
                                             }}>
                                                 <i className="fa fa-passport"></i>
@@ -971,7 +971,7 @@ export default function Home() {
                                             top: '10px',
                                             right: '10px',
                                             background: '#0499ff',
-                                            color: '#fff',
+                                            color: '#000000',
                                             padding: '6px 12px',
                                             borderRadius: '20px',
                                             fontSize: '11px',
@@ -989,14 +989,14 @@ export default function Home() {
                                         <h3 style={{
                                             fontSize: '16px',
                                             fontWeight: 700,
-                                            color: '#0499ff',
+                                            color: '#000000',
                                             marginBottom: '8px'
                                         }}>
                                             {visa.name}
                                         </h3>
                                         <p style={{
                                             fontSize: '12px',
-                                            color: '#0499ff',
+                                            color: '#000000',
                                             fontWeight: 600,
                                             marginBottom: '10px'
                                         }}>
@@ -1004,7 +1004,7 @@ export default function Home() {
                                         </p>
                                         <p style={{
                                             fontSize: '12px',
-                                            color: '#666',
+                                            color: '#000000',
                                             lineHeight: '1.5',
                                             marginBottom: '15px'
                                         }}>
@@ -1012,8 +1012,8 @@ export default function Home() {
                                         </p>
                                         <button style={{
                                             width: '100%',
-                                            background: '#0499ff',
-                                            color: '#fff',
+                                            background: '#ffffff',
+                                            color: '#000000',
                                             border: 'none',
                                             padding: '10px',
                                             borderRadius: '6px',
@@ -1043,15 +1043,15 @@ export default function Home() {
 
             {/* FEATURED PACKAGES SECTION */}
             {featuredPackages.length > 0 && (
-                <section style={{ padding: '50px 20px', background: '#f9f9f9' }}>
+                <section style={{ padding: '50px 20px', background: '#ffffff' }}>
                     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-                            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#0499ff', marginBottom: '12px' }}>
-                                <i className="fa fa-gift" style={{ color: '#0499ff', marginRight: '10px' }}></i>
+                            <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#000000', marginBottom: '12px' }}>
+                                <i className="fa fa-gift" style={{ color: '#000000', marginRight: '10px' }}></i>
                                 Featured Travel Package
                             </h2>
-                            <div style={{ width: '50px', height: '3px', background: '#0499ff', margin: '0 auto 15px' }}></div>
-                            <p style={{ color: '#777', fontSize: '13px', maxWidth: '500px', margin: '0 auto' }}>
+                            <div style={{ width: '50px', height: '3px', background: '#ffffff', margin: '0 auto 15px' }}></div>
+                            <p style={{ color: '#000000', fontSize: '13px', maxWidth: '500px', margin: '0 auto' }}>
                                 Explore our most popular travel packages for unforgettable adventures
                             </p>
                         </div>
@@ -1100,7 +1100,7 @@ export default function Home() {
                                                 alignItems: 'center',
                                                 justifyContent: 'center',
                                                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                                color: '#fff',
+                                                color: '#000000',
                                                 fontSize: '48px'
                                             }}>
                                                 <i className="fa fa-gift"></i>
@@ -1111,7 +1111,7 @@ export default function Home() {
                                             top: '10px',
                                             right: '10px',
                                             background: '#0499ff',
-                                            color: '#fff',
+                                            color: '#000000',
                                             padding: '6px 12px',
                                             borderRadius: '20px',
                                             fontSize: '11px',
@@ -1126,8 +1126,8 @@ export default function Home() {
                                             position: 'absolute',
                                             bottom: '10px',
                                             left: '10px',
-                                            background: '#0499ff',
-                                            color: '#fff',
+                                            background: '#ffffff',
+                                            color: '#000000',
                                             padding: '4px 10px',
                                             borderRadius: '4px',
                                             fontSize: '10px',
@@ -1142,14 +1142,14 @@ export default function Home() {
                                         <h3 style={{
                                             fontSize: '16px',
                                             fontWeight: 700,
-                                            color: '#0499ff',
+                                            color: '#000000',
                                             marginBottom: '8px'
                                         }}>
                                             {pkg.name}
                                         </h3>
                                         <p style={{
                                             fontSize: '12px',
-                                            color: '#0499ff',
+                                            color: '#000000',
                                             fontWeight: 600,
                                             marginBottom: '10px'
                                         }}>
@@ -1161,7 +1161,7 @@ export default function Home() {
                                             alignItems: 'center',
                                             marginBottom: '15px',
                                             fontSize: '12px',
-                                            color: '#666'
+                                            color: '#000000'
                                         }}>
                                             <span><i className="fa fa-calendar me-1"></i>{pkg.duration_days} Days</span>
                                             <span><i className="fa fa-star me-1"></i>{pkg.hotel_stars} Stars</span>
@@ -1169,7 +1169,7 @@ export default function Home() {
                                         <div style={{
                                             fontSize: '18px',
                                             fontWeight: 700,
-                                            color: '#0499ff',
+                                            color: '#000000',
                                             marginBottom: '15px'
                                         }}>
                                             {pkg.currency} {parseFloat(String(pkg.price)).toFixed(0)}
@@ -1192,8 +1192,8 @@ export default function Home() {
                                         )}
                                         <button style={{
                                             width: '100%',
-                                            background: '#0499ff',
-                                            color: '#fff',
+                                            background: '#ffffff',
+                                            color: '#000000',
                                             border: 'none',
                                             padding: '10px',
                                             borderRadius: '6px',
@@ -1227,7 +1227,7 @@ export default function Home() {
                     <div className="contact-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
                         {/* Form */}
                         <div>
-                            <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#0499ff', marginBottom: '20px' }}>Get in Touch</h3>
+                            <h3 style={{ fontSize: '18px', fontWeight: 700, color: '#000000', marginBottom: '20px' }}>Get in Touch</h3>
                             <ContactForm />
                         </div>
 
@@ -1239,7 +1239,7 @@ export default function Home() {
 
             {/* TESTIMONIALS SECTION */}
             {testimonials.length > 0 && (
-                <section style={{ padding: '40px 20px', background: '#f5f5f5' }}>
+                <section style={{ padding: '40px 20px', background: '#ffffff' }}>
                     <style>{`
                         @media (max-width: 768px) {
                             .testimonials-section { padding: 30px 15px; }
@@ -1266,9 +1266,9 @@ export default function Home() {
                     `}</style>
                     <div style={{ maxWidth: '1200px', margin: '0 auto' }} className="testimonials-section">
                         <div style={{ textAlign: 'center', marginBottom: '50px' }}>
-                            <h2 className="testimonials-heading" style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#0499ff', marginBottom: '12px' }}>What Our Clients Say</h2>
-                            <div style={{ width: '50px', height: '3px', background: '#0499ff', margin: '0 auto 15px' }}></div>
-                            <p className="testimonials-paragraph" style={{ color: '#777', fontSize: '13px', maxWidth: '500px', margin: '0 auto' }}>Discover what travelers around the world think about our services</p>
+                            <h2 className="testimonials-heading" style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#000000', marginBottom: '12px' }}>What Our Clients Say</h2>
+                            <div style={{ width: '50px', height: '3px', background: '#ffffff', margin: '0 auto 15px' }}></div>
+                            <p className="testimonials-paragraph" style={{ color: '#000000', fontSize: '13px', maxWidth: '500px', margin: '0 auto' }}>Discover what travelers around the world think about our services</p>
                         </div>
 
                         <div className="testimonials-nav" style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '20px', justifyContent: 'center' }}>
@@ -1281,7 +1281,7 @@ export default function Home() {
                                         return newIndex < 0 ? Math.max(0, testimonials.length - cardsPerView) : newIndex;
                                     });
                                 }}
-                                style={{ background: '#0499ff', color: '#fff', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}
+                                style={{ background: '#0499ff', color: '#000000', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}
                             >
                                 <i className="fa fa-chevron-left"></i>
                             </button>
@@ -1299,13 +1299,13 @@ export default function Home() {
                                                     style={{ width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover', border: '3px solid #0499ff' }}
                                                 />
                                             </div>
-                                            <h4 style={{ fontSize: '16px', fontWeight: 700, color: '#0499ff', marginBottom: '8px' }}>{testimonial.client_name}</h4>
+                                            <h4 style={{ fontSize: '16px', fontWeight: 700, color: '#000000', marginBottom: '8px' }}>{testimonial.client_name}</h4>
                                             <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', marginBottom: '15px' }}>
                                                 {[...Array(testimonial.rating)].map((_, i) => (
-                                                    <span key={i} style={{ color: '#0499ff', fontSize: '14px' }}>★</span>
+                                                    <span key={i} style={{ color: '#000000', fontSize: '14px' }}>★</span>
                                                 ))}
                                             </div>
-                                            <p style={{ color: '#666', fontSize: '13px', lineHeight: 1.6, fontStyle: 'italic' }}>"{testimonial.message}"</p>
+                                            <p style={{ color: '#000000', fontSize: '13px', lineHeight: 1.6, fontStyle: 'italic' }}>"{testimonial.message}"</p>
                                         </div>
                                     ))}
                                 </div>
@@ -1320,7 +1320,7 @@ export default function Home() {
                                         return newIndex >= testimonials.length ? 0 : newIndex;
                                     });
                                 }}
-                                style={{ background: '#0499ff', color: '#fff', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}
+                                style={{ background: '#0499ff', color: '#000000', border: 'none', width: '40px', height: '40px', borderRadius: '50%', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}
                             >
                                 <i className="fa fa-chevron-right"></i>
                             </button>

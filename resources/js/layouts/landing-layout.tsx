@@ -277,10 +277,10 @@ export default function LandingLayout({ children }: Props) {
             </a>
 
             {/* FOOTER */}
-            <footer className="landing-footer" style={{ background: '#0499ff', color: '#fff', padding: '30px', marginTop: '40px', borderTop: '1px solid rgba(255,255,255,.1)' }}>
+            <footer className="landing-footer" style={{ background: '#f0f0f0', color: '#000', padding: '30px', marginTop: '40px', borderTop: '1px solid #e0e0e0' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     {/* Logo Section */}
-                    <div style={{ marginBottom: '30px', paddingBottom: '20px', borderBottom: '1px solid rgba(255,255,255,.1)' }}>
+                    <div style={{ marginBottom: '30px', paddingBottom: '20px', borderBottom: '1px solid #e0e0e0' }}>
                         <img src={LOGO_PATH} alt={footerLogoConfig.alt} style={{ width: isMobile ? 60 : 120, height: isMobile ? 60 : 120, objectFit: 'contain' }} />
                     </div>
 
@@ -289,20 +289,20 @@ export default function LandingLayout({ children }: Props) {
                         <div>
                             <h4 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '15px', color: '#ff6b35' }}>Contact Info</h4>
                             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                                <li style={{ marginBottom: '10px', fontSize: '14px', color: 'rgba(255,255,255,.7)' }}>
+                                <li style={{ marginBottom: '10px', fontSize: '14px', color: '#333333' }}>
                                     <i className="fa fa-map-pin" style={{ color: '#ff6b35', marginRight: '8px' }}></i>
                                     <strong>Address:</strong><br />
                                     <span style={{ marginLeft: '20px', display: 'block' }}>62 King Street<br />Southall, Middlesex<br />UB2 4DB, United Kingdom</span>
                                 </li>
-                                <li style={{ marginBottom: '10px', fontSize: '12px', color: 'rgba(255,255,255,.7)' }}>
+                                <li style={{ marginBottom: '10px', fontSize: '12px', color: '#333333' }}>
                                     <i className="fa fa-phone" style={{ color: '#ff6b35', marginRight: '8px' }}></i>
                                     <strong>Telephone:</strong><br />
-                                    <a href="tel:02035000000" style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none', marginLeft: '20px', display: 'block' }}>0203500 0000</a>
+                                    <a href="tel:02035000000" style={{ color: '#333333', textDecoration: 'none', marginLeft: '20px', display: 'block' }}>0203500 0000</a>
                                 </li>
-                                <li style={{ fontSize: '12px', color: 'rgba(255,255,255,.7)' }}>
+                                <li style={{ fontSize: '12px', color: '#333333' }}>
                                     <i className="fa fa-mobile" style={{ color: '#ff6b35', marginRight: '8px' }}></i>
                                     <strong>Mobile:</strong><br />
-                                    <a href="tel:07944495552" style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none', marginLeft: '20px', display: 'block' }}>07944495552</a>
+                                    <a href="tel:07944495552" style={{ color: '#333333', textDecoration: 'none', marginLeft: '20px', display: 'block' }}>07944495552</a>
                                 </li>
                             </ul>
                         </div>
@@ -311,9 +311,9 @@ export default function LandingLayout({ children }: Props) {
                         <div>
                             <h4 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '15px', color: '#ff6b35' }}>Quick Links</h4>
                             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                                <li style={{ marginBottom: '8px' }}><a href="/visa-services" style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none', fontSize: '12px' }}>Visa Services</a></li>
-                                <li style={{ marginBottom: '8px' }}><a href="/contact-us" style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none', fontSize: '12px' }}>Contact Us</a></li>
-                                <li><a href="/about-us" style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none', fontSize: '12px' }}>About Us</a></li>
+                                <li style={{ marginBottom: '8px' }}><a href="/visa-services" style={{ color: '#333333', textDecoration: 'none', fontSize: '12px' }}>Visa Services</a></li>
+                                <li style={{ marginBottom: '8px' }}><a href="/contact-us" style={{ color: '#333333', textDecoration: 'none', fontSize: '12px' }}>Contact Us</a></li>
+                                <li><a href="/about-us" style={{ color: '#333333', textDecoration: 'none', fontSize: '12px' }}>About Us</a></li>
                             </ul>
                         </div>
 
@@ -322,17 +322,17 @@ export default function LandingLayout({ children }: Props) {
                             <h4 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '15px', color: '#ff6b35' }}>Documents</h4>
                             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                                 <li style={{ marginBottom: '8px', fontSize: '11px' }}>
-                                    <a href="/conditions/Safari.pdf" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none' }}>
+                                    <a href="/conditions/Safari.pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#333333', textDecoration: 'none' }}>
                                         <i className="fa fa-file-pdf" style={{ marginRight: '6px' }}></i>Terms & Conditions 1
                                     </a>
                                 </li>
                                 <li style={{ marginBottom: '8px', fontSize: '11px' }}>
-                                    <a href="/conditions/Safari (1).pdf" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none' }}>
+                                    <a href="/conditions/Safari (1).pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#333333', textDecoration: 'none' }}>
                                         <i className="fa fa-file-pdf" style={{ marginRight: '6px' }}></i>Terms & Conditions 2
                                     </a>
                                 </li>
                                 <li style={{ fontSize: '11px' }}>
-                                    <a href="/conditions/Safari (2).pdf" target="_blank" rel="noopener noreferrer" style={{ color: 'rgba(255,255,255,.7)', textDecoration: 'none' }}>
+                                    <a href="/conditions/Safari (2).pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#333333', textDecoration: 'none' }}>
                                         <i className="fa fa-file-pdf" style={{ marginRight: '6px' }}></i>Terms & Conditions 3
                                     </a>
                                 </li>
@@ -341,11 +341,11 @@ export default function LandingLayout({ children }: Props) {
                     </div>
 
                     {/* Footer Bottom */}
-                    <div className="footer-bottom" style={{ borderTop: '1px solid rgba(255,255,255,.1)', paddingTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <p style={{ fontSize: '11px', color: 'rgba(255,255,255,.6)', margin: 0 }}>© 2026 CloudTravel. All rights reserved.</p>
+                    <div className="footer-bottom" style={{ borderTop: '1px solid #e0e0e0', paddingTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <p style={{ fontSize: '11px', color: '#333333', margin: 0 }}>© 2026 CloudTravel. All rights reserved.</p>
                         <div style={{ display: 'flex', gap: '15px' }}>
-                            <a href="#" style={{ fontSize: '11px', color: 'rgba(255,255,255,.6)', textDecoration: 'none' }}>Privacy Policy</a>
-                            <a href="#" style={{ fontSize: '11px', color: 'rgba(255,255,255,.6)', textDecoration: 'none' }}>Terms & Conditions</a>
+                            <a href="#" style={{ fontSize: '11px', color: '#333333', textDecoration: 'none' }}>Privacy Policy</a>
+                            <a href="#" style={{ fontSize: '11px', color: '#333333', textDecoration: 'none' }}>Terms & Conditions</a>
                         </div>
                     </div>
                 </div>
