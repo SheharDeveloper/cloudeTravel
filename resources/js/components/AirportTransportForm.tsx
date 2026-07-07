@@ -156,10 +156,10 @@ export default function AirportTransportForm(): React.ReactElement {
             <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
                 {/* Pickup Airport */}
                 <div ref={pickupRef} style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                         FROM
                     </label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-plane"></i>
                     </div>
                     <input
@@ -193,7 +193,7 @@ export default function AirportTransportForm(): React.ReactElement {
                                             setPickupSearch('');
                                             setShowPickupDropdown(false);
                                         }}
-                                        style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#333', transition: 'background 0.2s' }}
+                                        style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#000000', transition: 'background 0.2s' }}
                                         onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
                                         onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
                                     >
@@ -201,7 +201,7 @@ export default function AirportTransportForm(): React.ReactElement {
                                     </div>
                                 ))
                             ) : (
-                                <div style={{ padding: '12px', color: '#999', fontSize: '13px', textAlign: 'center' }}>No airports found</div>
+                                <div style={{ padding: '12px', color: '#000000', fontSize: '13px', textAlign: 'center' }}>No airports found</div>
                             )}
                         </div>
                     )}
@@ -209,10 +209,10 @@ export default function AirportTransportForm(): React.ReactElement {
 
                 {/* Drop-off Location */}
                 <div ref={destinationRef} style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                         TO
                     </label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-map-marker"></i>
                     </div>
                     <input
@@ -266,7 +266,7 @@ export default function AirportTransportForm(): React.ReactElement {
                                             setDestinationSearch('');
                                             setShowDestinationDropdown(false);
                                         }}
-                                        style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#333', transition: 'background 0.2s' }}
+                                        style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#000000', transition: 'background 0.2s' }}
                                         onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
                                         onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
                                     >
@@ -274,7 +274,7 @@ export default function AirportTransportForm(): React.ReactElement {
                                     </div>
                                 ))
                             ) : (
-                                <div style={{ padding: '12px', color: '#999', fontSize: '13px', textAlign: 'center' }}>No locations found</div>
+                                <div style={{ padding: '12px', color: '#000000', fontSize: '13px', textAlign: 'center' }}>No locations found</div>
                             )}
                         </div>
                     )}
@@ -285,8 +285,8 @@ export default function AirportTransportForm(): React.ReactElement {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
                 {/* Pickup Date */}
                 <div style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>WHEN</label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>WHEN</label>
+                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-calendar"></i>
                     </div>
                     <input
@@ -307,8 +307,8 @@ export default function AirportTransportForm(): React.ReactElement {
 
                 {/* Pickup Time */}
                 <div style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>TIME</label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>TIME</label>
+                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-clock-o"></i>
                     </div>
                     <input
@@ -329,8 +329,8 @@ export default function AirportTransportForm(): React.ReactElement {
 
                 {/* Passengers */}
                 <div style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>WHO</label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>WHO</label>
+                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-users"></i>
                     </div>
                     <select
@@ -356,14 +356,14 @@ export default function AirportTransportForm(): React.ReactElement {
             {/* Return Trip Section - Only show for Return trips */}
             {tripType === 'return' && (
                 <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '2px solid #f0f0f0' }}>
-                    <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#0499ff', marginBottom: '16px' }}>Return Trip</h4>
+                    <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#000000', marginBottom: '16px' }}>Return Trip</h4>
 
                     {/* Return Row 1: Return Locations */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
                         {/* Return Pickup Location - Auto-filled from outbound drop-off */}
                         <div style={{ position: 'relative', width: '100%' }}>
-                            <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>RETURN FROM</label>
-                            <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                            <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>RETURN FROM</label>
+                            <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
                                 <i className="fa fa-map-marker"></i>
                             </div>
                             <input
@@ -374,13 +374,13 @@ export default function AirportTransportForm(): React.ReactElement {
                                 disabled={!destinationLocation}
                                 style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '14px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s', backgroundColor: !destinationLocation ? '#f9f9f9' : '#fff', cursor: !destinationLocation ? 'not-allowed' : 'text' }}
                             />
-                            {!destinationLocation && <span style={{ fontSize: '11px', color: '#999' }}>Select drop-off location first</span>}
+                            {!destinationLocation && <span style={{ fontSize: '11px', color: '#000000' }}>Select drop-off location first</span>}
                         </div>
 
                         {/* Return Drop-off Location - Auto-filled from outbound pickup */}
                         <div style={{ position: 'relative', width: '100%' }}>
-                            <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>RETURN TO</label>
-                            <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                            <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>RETURN TO</label>
+                            <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
                                 <i className="fa fa-map-marker"></i>
                             </div>
                             <input
@@ -391,7 +391,7 @@ export default function AirportTransportForm(): React.ReactElement {
                                 disabled={!pickupAirport}
                                 style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '14px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s', backgroundColor: !pickupAirport ? '#f9f9f9' : '#fff', cursor: !pickupAirport ? 'not-allowed' : 'text' }}
                             />
-                            {!pickupAirport && <span style={{ fontSize: '11px', color: '#999' }}>Select pick-up location first</span>}
+                            {!pickupAirport && <span style={{ fontSize: '11px', color: '#000000' }}>Select pick-up location first</span>}
                         </div>
                     </div>
 
@@ -399,8 +399,8 @@ export default function AirportTransportForm(): React.ReactElement {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
                         {/* Return Date */}
                         <div style={{ position: 'relative', width: '100%' }}>
-                            <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>RETURN WHEN</label>
-                            <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                            <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>RETURN WHEN</label>
+                            <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
                                 <i className="fa fa-calendar"></i>
                             </div>
                             <input
@@ -421,8 +421,8 @@ export default function AirportTransportForm(): React.ReactElement {
 
                         {/* Return Time */}
                         <div style={{ position: 'relative', width: '100%' }}>
-                            <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>RETURN TIME</label>
-                            <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                            <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>RETURN TIME</label>
+                            <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
                                 <i className="fa fa-clock-o"></i>
                             </div>
                             <input

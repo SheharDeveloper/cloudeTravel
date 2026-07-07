@@ -214,8 +214,8 @@ export default function Home() {
                         muted
                         playsInline
                         style={{
-                            width: '100%',
-                            height: '100%',
+                            width: '50%',
+                            height: '50%',
                             objectFit: 'contain',
                         }}
                     >
@@ -532,33 +532,68 @@ export default function Home() {
                     />
                 )}
 
-                {/* Loading Spinner */}
+                {/* Small Loading Popup - Inside Website with Blurred Background */}
                 {heroImageLoading && (
-                    <div style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        background: 'transparent',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexDirection: 'column',
-                        zIndex: 100
-                    }}>
+                    <>
+                        {/* Blurred Background Overlay */}
                         <div style={{
-                            width: '100px',
-                            height: '100px',
-                            border: '10px solid #d0d0d0',
-                            borderTop: '10px solid #0066cc',
-                            borderRadius: '50%',
-                            animation: 'heroSpin 1s linear infinite',
-                            boxShadow: '0 8px 25px rgba(0, 102, 204, 0.4)',
-                            marginBottom: '20px'
-                        }} />
-                        <p style={{ color: '#ffffff', fontSize: '16px', fontWeight: 600, margin: 0 }}>Loading...</p>
-                    </div>
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            background: 'rgba(0, 0, 0, 0.3)',
+                            backdropFilter: 'blur(6px)',
+                            WebkitBackdropFilter: 'blur(6px)',
+                            zIndex: 49,
+                            borderRadius: '12px'
+                        }}></div>
+
+                        {/* Loader Popup */}
+                        <div style={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '50%',
+                            transform: 'translate(-50%, -50%)',
+                            background: '#ffffff',
+                            borderRadius: '12px',
+                            padding: '24px',
+                            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
+                            zIndex: 50,
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '12px',
+                            maxWidth: '200px'
+                        }}>
+                            {/* Video Loader - Replace with your video */}
+                            <video
+                                autoPlay
+                                loop
+                                muted
+                                playsInline
+                                style={{
+                                    width: '80px',
+                                    height: '80px',
+                                    objectFit: 'contain',
+                                    borderRadius: '8px'
+                                }}
+                            >
+                                <source src="/images/loader.mp4" type="video/mp4" />
+                                {/* Fallback spinner if video not available */}
+                                <div style={{
+                                    width: '30px',
+                                    height: '30px',
+                                    border: '3px solid #e0e0e0',
+                                    borderTop: '3px solid #0499ff',
+                                    borderRadius: '50%',
+                                    animation: 'heroSpin 1s linear infinite'
+                                }} />
+                            </video>
+                            <span style={{ color: '#000000', fontSize: '12px', fontWeight: 600 }}>Loading...</span>
+                        </div>
+                    </>
                 )}
 
                 <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,20,60,.6) 0%, rgba(0,20,60,.3) 60%, rgba(0,20,60,.7) 100%)' }}></div>

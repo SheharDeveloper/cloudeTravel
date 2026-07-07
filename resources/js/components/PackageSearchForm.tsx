@@ -169,8 +169,8 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px', alignItems: 'flex-start' }}>
                 {/* Country Selector - Searchable */}
                 <div ref={countryRef} style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Where</label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '16px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Where</label>
+                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '16px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-globe"></i>
                     </div>
                     <input
@@ -206,7 +206,7 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
                                         setShowCountryDropdown(false);
                                         setSelectedCity('');
                                     }}
-                                    style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#333', transition: 'background 0.2s' }}
+                                    style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#000000', transition: 'background 0.2s' }}
                                     onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
                                     onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
                                 >
@@ -219,8 +219,8 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
 
                 {/* City Selector - Searchable */}
                 <div ref={cityRef} style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>City</label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '16px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>City</label>
+                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '16px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-building"></i>
                     </div>
                     <input
@@ -256,7 +256,7 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
                                         setCitySearch('');
                                         setShowCityDropdown(false);
                                     }}
-                                    style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#333', transition: 'background 0.2s' }}
+                                    style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#000000', transition: 'background 0.2s' }}
                                     onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
                                     onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
                                 >
@@ -269,8 +269,8 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
 
                 {/* Airport Selector */}
                 <div ref={airportRef} style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Airport</label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '16px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Airport</label>
+                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '16px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-plane"></i>
                     </div>
                     <input
@@ -303,7 +303,7 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
                                         setAirportSearch('');
                                         setShowAirportDropdown(false);
                                     }}
-                                    style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#333', transition: 'background 0.2s' }}
+                                    style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#000000', transition: 'background 0.2s' }}
                                     onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
                                     onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
                                 >
@@ -329,15 +329,15 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
                         onMouseEnter={(e) => e.currentTarget.style.borderColor = '#ccc'}
                         onMouseLeave={(e) => e.currentTarget.style.borderColor = '#ddd'}
                     >
-                        <div style={{ fontSize: '16px', color: '#999', marginRight: '12px', display: 'flex', alignItems: 'center' }}>
+                        <div style={{ fontSize: '16px', color: '#000000', marginRight: '12px', display: 'flex', alignItems: 'center' }}>
                             <i className="fa fa-calendar"></i>
                         </div>
                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                            <div style={{ fontSize: '13px', color: '#333', fontWeight: 600 }}>
+                            <div style={{ fontSize: '13px', color: '#000000', fontWeight: 600 }}>
                                 {checkInDate ? new Date(checkInDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Check-in'}
                             </div>
                         </div>
-                        <div style={{ fontSize: '12px', color: '#999', marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                        <div style={{ fontSize: '12px', color: '#000000', marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
                             <i className="fa fa-chevron-down"></i>
                         </div>
                     </div>
@@ -366,10 +366,10 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
                         onMouseLeave={(e) => e.currentTarget.style.borderColor = '#ddd'}
                     >
                         <div style={{ display: 'flex', alignItems: 'center' }}>
-                            <i className="fa fa-moon" style={{ marginRight: '8px', color: '#999' }}></i>
-                            <span style={{ fontSize: '13px', color: '#333', fontWeight: 600 }}>{nights} night{nights !== 1 ? 's' : ''}</span>
+                            <i className="fa fa-moon" style={{ marginRight: '8px', color: '#000000' }}></i>
+                            <span style={{ fontSize: '13px', color: '#000000', fontWeight: 600 }}>{nights} night{nights !== 1 ? 's' : ''}</span>
                         </div>
-                        <i className="fa fa-chevron-down" style={{ fontSize: '12px', color: '#999' }}></i>
+                        <i className="fa fa-chevron-down" style={{ fontSize: '12px', color: '#000000' }}></i>
                     </div>
                     {showNightsDropdown && (
                         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '300px', overflowY: 'auto' }}>
@@ -441,11 +441,11 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
                         onMouseEnter={(e) => e.currentTarget.style.borderColor = '#ccc'}
                         onMouseLeave={(e) => e.currentTarget.style.borderColor = '#ddd'}
                     >
-                        <div style={{ fontSize: '13px', color: '#333', fontWeight: 600 }}>
+                        <div style={{ fontSize: '13px', color: '#000000', fontWeight: 600 }}>
                             <i className="fa fa-users" style={{ marginRight: '8px', color: '#0066cc' }}></i>
                             {adults} Adult{adults !== 1 ? 's' : ''} • {children} Child{children !== 1 ? 'ren' : ''} • {rooms} Room{rooms !== 1 ? 's' : ''}
                         </div>
-                        <i className="fa fa-chevron-down" style={{ fontSize: '12px', color: '#999' }}></i>
+                        <i className="fa fa-chevron-down" style={{ fontSize: '12px', color: '#000000' }}></i>
                     </div>
 
                     {/* Guest & Room Selector Modal */}
@@ -455,11 +455,11 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
                             <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #f0f0f0' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                     <div>
-                                        <p style={{ fontSize: '14px', color: '#333', margin: 0, fontWeight: 600 }}>Rooms</p>
+                                        <p style={{ fontSize: '14px', color: '#000000', margin: 0, fontWeight: 600 }}>Rooms</p>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                         <button onClick={() => setRooms(Math.max(1, rooms - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-                                        <span style={{ fontSize: '16px', fontWeight: 600, color: '#333', minWidth: '24px', textAlign: 'center' }}>{rooms}</span>
+                                        <span style={{ fontSize: '16px', fontWeight: 600, color: '#000000', minWidth: '24px', textAlign: 'center' }}>{rooms}</span>
                                         <button onClick={() => setRooms(Math.min(8, rooms + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                                     </div>
                                 </div>
@@ -469,12 +469,12 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
                             <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #f0f0f0' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                     <div>
-                                        <p style={{ fontSize: '14px', color: '#333', margin: 0, fontWeight: 600 }}>Adults</p>
-                                        <p style={{ fontSize: '11px', color: '#999', margin: '4px 0 0 0' }}>18 yrs or above</p>
+                                        <p style={{ fontSize: '14px', color: '#000000', margin: 0, fontWeight: 600 }}>Adults</p>
+                                        <p style={{ fontSize: '11px', color: '#000000', margin: '4px 0 0 0' }}>18 yrs or above</p>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                         <button onClick={() => setAdults(Math.max(1, adults - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-                                        <span style={{ fontSize: '16px', fontWeight: 600, color: '#333', minWidth: '24px', textAlign: 'center' }}>{adults}</span>
+                                        <span style={{ fontSize: '16px', fontWeight: 600, color: '#000000', minWidth: '24px', textAlign: 'center' }}>{adults}</span>
                                         <button onClick={() => setAdults(Math.min(8, adults + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                                     </div>
                                 </div>
@@ -484,12 +484,12 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
                             <div style={{ marginBottom: '20px', paddingBottom: '20px', borderBottom: '1px solid #f0f0f0' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                     <div>
-                                        <p style={{ fontSize: '14px', color: '#333', margin: 0, fontWeight: 600 }}>Children</p>
-                                        <p style={{ fontSize: '11px', color: '#999', margin: '4px 0 0 0' }}>0 - 17 yrs</p>
+                                        <p style={{ fontSize: '14px', color: '#000000', margin: 0, fontWeight: 600 }}>Children</p>
+                                        <p style={{ fontSize: '11px', color: '#000000', margin: '4px 0 0 0' }}>0 - 17 yrs</p>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                         <button onClick={() => setChildren(Math.max(0, children - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-                                        <span style={{ fontSize: '16px', fontWeight: 600, color: '#333', minWidth: '24px', textAlign: 'center' }}>{children}</span>
+                                        <span style={{ fontSize: '16px', fontWeight: 600, color: '#000000', minWidth: '24px', textAlign: 'center' }}>{children}</span>
                                         <button onClick={() => setChildren(Math.min(6, children + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                                     </div>
                                 </div>
@@ -499,12 +499,12 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
                             <div style={{ marginBottom: '20px', paddingBottom: '0' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                     <div>
-                                        <p style={{ fontSize: '14px', color: '#333', margin: 0, fontWeight: 600 }}>Infants</p>
-                                        <p style={{ fontSize: '11px', color: '#999', margin: '4px 0 0 0' }}>Under 2 yrs</p>
+                                        <p style={{ fontSize: '14px', color: '#000000', margin: 0, fontWeight: 600 }}>Infants</p>
+                                        <p style={{ fontSize: '11px', color: '#000000', margin: '4px 0 0 0' }}>Under 2 yrs</p>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                                         <button onClick={() => setInfants(Math.max(0, infants - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-                                        <span style={{ fontSize: '16px', fontWeight: 600, color: '#333', minWidth: '24px', textAlign: 'center' }}>{infants}</span>
+                                        <span style={{ fontSize: '16px', fontWeight: 600, color: '#000000', minWidth: '24px', textAlign: 'center' }}>{infants}</span>
                                         <button onClick={() => setInfants(Math.min(6, infants + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                                     </div>
                                 </div>
@@ -524,7 +524,7 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
 
             {/* Row 3: Flexible Days Checkbox */}
             <div style={{ marginBottom: '20px', padding: '16px', background: '#f9f9f9', borderRadius: '10px' }}>
-                <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', fontSize: '13px', color: '#333' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer', fontSize: '13px', color: '#000000' }}>
                     <input
                         type="checkbox"
                         checked={flexibleDays === 3}

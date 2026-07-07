@@ -119,8 +119,8 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start', position: 'relative' }}>
                 {/* Destination Country */}
                 <div ref={destinationRef} style={{ position: 'relative', width: '100%', margin: 0, padding: 0 }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>DESTINATION</label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>DESTINATION</label>
+                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-globe"></i>
                     </div>
                     <input
@@ -154,7 +154,7 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
                                             setDestinationSearch('');
                                             setShowDestinationDropdown(false);
                                         }}
-                                        style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#333', transition: 'background 0.2s' }}
+                                        style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#000000', transition: 'background 0.2s' }}
                                         onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
                                         onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
                                     >
@@ -162,7 +162,7 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
                                     </div>
                                 ))
                             ) : (
-                                <div style={{ padding: '12px', color: '#999', fontSize: '13px', textAlign: 'center' }}>No countries found</div>
+                                <div style={{ padding: '12px', color: '#000000', fontSize: '13px', textAlign: 'center' }}>No countries found</div>
                             )}
                         </div>
                     )}
@@ -170,8 +170,8 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
 
                 {/* Passport Country */}
                 <div ref={passportRef} style={{ position: 'relative', width: '100%', margin: 0, padding: 0 }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>PASSPORT</label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>PASSPORT</label>
+                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-passport"></i>
                     </div>
                     <input
@@ -205,7 +205,7 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
                                             setPassportSearch('');
                                             setShowPassportDropdown(false);
                                         }}
-                                        style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#333', transition: 'background 0.2s' }}
+                                        style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#000000', transition: 'background 0.2s' }}
                                         onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
                                         onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
                                     >
@@ -213,7 +213,7 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
                                     </div>
                                 ))
                             ) : (
-                                <div style={{ padding: '12px', color: '#999', fontSize: '13px', textAlign: 'center' }}>No countries found</div>
+                                <div style={{ padding: '12px', color: '#000000', fontSize: '13px', textAlign: 'center' }}>No countries found</div>
                             )}
                         </div>
                     )}
@@ -221,8 +221,8 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
 
                 {/* Visa Type - Searchable Dropdown */}
                 <div ref={visaRef} style={{ width: '100%', position: 'relative' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>VISA TYPE</label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '16px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>VISA TYPE</label>
+                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '16px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-passport"></i>
                     </div>
                     <input
@@ -267,16 +267,16 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
                                             setVisaSearch('');
                                             setShowVisaDropdown(false);
                                         }}
-                                        style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#333', transition: 'background 0.2s' }}
+                                        style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#000000', transition: 'background 0.2s' }}
                                         onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
                                         onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
                                     >
                                         <strong>{visa.name}</strong>
-                                        <div style={{ fontSize: '11px', color: '#999', marginTop: '2px' }}>{visa.title}</div>
+                                        <div style={{ fontSize: '11px', color: '#000000', marginTop: '2px' }}>{visa.title}</div>
                                     </div>
                                 ))
                             ) : (
-                                <div style={{ padding: '12px', color: '#999', fontSize: '13px', textAlign: 'center' }}>No visas found</div>
+                                <div style={{ padding: '12px', color: '#000000', fontSize: '13px', textAlign: 'center' }}>No visas found</div>
                             )}
                         </div>
                     )}
@@ -284,9 +284,9 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
 
                 {/* Travel Date */}
                 <div style={{ width: '100%', position: 'relative' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>WHEN</label>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>WHEN</label>
                     <div style={{ position: 'relative' }}>
-                        <div style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', fontSize: '16px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                        <div style={{ position: 'absolute', left: '16px', top: '50%', transform: 'translateY(-50%)', fontSize: '16px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
                             <i className="fa fa-calendar"></i>
                         </div>
                         <input
@@ -310,7 +310,7 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
             {/* Row 2: Number of Travelers */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px', marginBottom: '16px', alignItems: 'flex-start' }}>
                 <div style={{ width: '100%', position: 'relative' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#0499ff', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>TRAVELERS</label>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>TRAVELERS</label>
                     <select
                         value={numberOfTravelers}
                         onChange={(e) => setNumberOfTravelers(parseInt(e.target.value))}
