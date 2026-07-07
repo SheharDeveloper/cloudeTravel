@@ -287,20 +287,20 @@ export default function LandingLayout({ children }: Props) {
                     <div className="footer-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '30px', marginBottom: '30px' }}>
                         {/* Contact Info - Detailed */}
                         <div>
-                            <h4 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '15px', color: '#ff6b35' }}>Contact Info</h4>
+                            <h4 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '15px', color: '#000000' }}>Contact Info</h4>
                             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                                 <li style={{ marginBottom: '10px', fontSize: '14px', color: '#333333' }}>
-                                    <i className="fa fa-map-pin" style={{ color: '#ff6b35', marginRight: '8px' }}></i>
+                                    <i className="fa fa-map-pin" style={{ color: '#000000', marginRight: '8px' }}></i>
                                     <strong>Address:</strong><br />
                                     <span style={{ marginLeft: '20px', display: 'block' }}>62 King Street<br />Southall, Middlesex<br />UB2 4DB, United Kingdom</span>
                                 </li>
                                 <li style={{ marginBottom: '10px', fontSize: '12px', color: '#333333' }}>
-                                    <i className="fa fa-phone" style={{ color: '#ff6b35', marginRight: '8px' }}></i>
+                                    <i className="fa fa-phone" style={{ color: '#000000', marginRight: '8px' }}></i>
                                     <strong>Telephone:</strong><br />
                                     <a href="tel:02035000000" style={{ color: '#333333', textDecoration: 'none', marginLeft: '20px', display: 'block' }}>0203500 0000</a>
                                 </li>
                                 <li style={{ fontSize: '12px', color: '#333333' }}>
-                                    <i className="fa fa-mobile" style={{ color: '#ff6b35', marginRight: '8px' }}></i>
+                                    <i className="fa fa-mobile" style={{ color: '#000000', marginRight: '8px' }}></i>
                                     <strong>Mobile:</strong><br />
                                     <a href="tel:07944495552" style={{ color: '#333333', textDecoration: 'none', marginLeft: '20px', display: 'block' }}>07944495552</a>
                                 </li>
@@ -309,7 +309,7 @@ export default function LandingLayout({ children }: Props) {
 
                         {/* Quick Links */}
                         <div>
-                            <h4 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '15px', color: '#ff6b35' }}>Quick Links</h4>
+                            <h4 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '15px', color: '#000000' }}>Quick Links</h4>
                             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                                 <li style={{ marginBottom: '8px' }}><a href="/visa-services" style={{ color: '#333333', textDecoration: 'none', fontSize: '12px' }}>Visa Services</a></li>
                                 <li style={{ marginBottom: '8px' }}><a href="/contact-us" style={{ color: '#333333', textDecoration: 'none', fontSize: '12px' }}>Contact Us</a></li>
@@ -319,7 +319,7 @@ export default function LandingLayout({ children }: Props) {
 
                         {/* Documents */}
                         <div>
-                            <h4 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '15px', color: '#ff6b35' }}>Documents</h4>
+                            <h4 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '15px', color: '#000000' }}>Documents</h4>
                             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                                 <li style={{ marginBottom: '8px', fontSize: '11px' }}>
                                     <a href="/conditions/Safari.pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#333333', textDecoration: 'none' }}>
