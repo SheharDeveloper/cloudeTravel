@@ -1,3 +1,5 @@
+import { router } from '@inertiajs/react';
+
 interface SpecialOffer {
     id: number;
     uid: string;
@@ -159,6 +161,34 @@ export default function SpecialOffers({
                 )}
                     </>
                 )}
+
+                {/* SEE MORE BUTTON */}
+                <div style={{ textAlign: 'center', marginTop: '40px' }}>
+                    <button
+                        onClick={() => router.visit('/all-offers')}
+                        style={{
+                            background: '#0499ff',
+                            color: '#ffffff',
+                            border: 'none',
+                            padding: '12px 30px',
+                            borderRadius: '6px',
+                            fontSize: '14px',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = '#0284d0';
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = '#0499ff';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                        }}
+                    >
+                        See More
+                    </button>
+                </div>
             </div>
 
             <style>{`
@@ -266,6 +296,7 @@ function OfferCard({ offer, currency }: { offer: SpecialOffer; currency: Currenc
                     {currency.symbol}{offer.total_price?.toLocaleString()}
                 </div>
                 <button
+                    onClick={() => router.visit(`/offers/${offer.uid}`)}
                     style={{
                         width: '100%',
                         background: '#0499ff',

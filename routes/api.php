@@ -30,6 +30,7 @@ Route::delete('users/{userId}/services/{serviceId}', [AgencyServiceController::c
 
 // Public endpoints (no authentication required, but will use auth if token provided)
 Route::get('special-offers', [SpecialOfferController::class, 'index'])->name('special-offers.index');
+Route::get('special-offers-detail/{uid}', [SpecialOfferController::class, 'showByUid'])->name('special-offers.show-by-uid');
 Route::get('hero-images', [HeroImageController::class, 'index'])->name('hero-images.index');
 Route::get('testimonials', [TestimonialController::class, 'index'])->name('testimonials.index');
 

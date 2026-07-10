@@ -10,6 +10,8 @@ use App\Http\Controllers\SearchController;
 
 // Landing/Public routes
 Route::inertia('/', 'home')->name('home');
+Route::inertia('/all-offers', 'AllOffers', ['currency' => config('currency')])->name('all-offers');
+Route::get('/offers/{uid}', [\App\Http\Controllers\Web\OfferController::class, 'show'])->name('offers.detail');
 Route::inertia('/flights', 'frontend/flight/flight')->name('flights');
 Route::inertia('/flights/results', 'FlightResults')->name('flights.results');
 Route::inertia('/hotels', 'frontend/hotel/hotels')->name('hotels');

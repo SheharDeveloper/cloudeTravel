@@ -21,6 +21,8 @@ createInertiaApp({
             case name === 'welcome':
                 return null;
             case name === 'home':
+            case name === 'AllOffers':
+            case name === 'OfferDetail':
             case name === 'Flights':
             case name === 'Hotels':
             case name === 'Visas':

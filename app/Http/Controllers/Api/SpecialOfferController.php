@@ -32,11 +32,23 @@ class SpecialOfferController extends Controller
     }
 
     /**
-     * Get a specific special offer
+     * Get a specific special offer by ID
      */
     public function show($id): JsonResponse
     {
         $offer = $this->specialOfferService->getById($id);
+        if (!$offer) {
+            return response()->json(['error' => 'Not found'], 404);
+        }
+        return response()->json($offer);
+    }
+
+    /**
+     * Get a specific special offer by UID
+     */
+    public function showByUid($uid): JsonResponse
+    {
+        $offer = $this->specialOfferService->getByUid($uid);
         if (!$offer) {
             return response()->json(['error' => 'Not found'], 404);
         }
