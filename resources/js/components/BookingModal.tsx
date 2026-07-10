@@ -95,8 +95,216 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
 
     const emoji = serviceType === 'flight' ? 'âœˆï¸' : serviceType === 'hotel' ? 'ðŸ¨' : serviceType === 'visa' ? 'ðŸ›‚' : serviceType === 'package' ? 'ðŸ“¦' : 'ðŸš—';
     const title = serviceType === 'flight' ? 'Flight' : serviceType === 'hotel' ? 'Hotel' : serviceType === 'visa' ? 'Visa' : serviceType === 'package' ? 'Package' : 'Airport Transfer';
+    // emoji variable removed as it's not used
 
     const renderSearchDetails = () => {
+        if (serviceType === 'flight') {
+            return (
+                <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', marginBottom: '24px', border: '1px solid #e9ecef' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0499ff', marginBottom: '12px', margin: '0 0 12px 0' }}>Flight Details</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        {searchDetails.from && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>From</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.from}</p>
+                            </div>
+                        )}
+                        {searchDetails.to && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>To</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.to}</p>
+                            </div>
+                        )}
+                        {searchDetails.departure && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Departure Date</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.departure).toLocaleDateString()}</p>
+                            </div>
+                        )}
+                        {searchDetails.tripType === 'roundtrip' && searchDetails.return && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Return Date</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.return).toLocaleDateString()}</p>
+                            </div>
+                        )}
+                        {searchDetails.adults && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Passengers</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>
+                                    {searchDetails.adults} Adult{searchDetails.adults !== 1 ? 's' : ''}
+                                    {(searchDetails.children ?? 0) > 0 && `, ${searchDetails.children} Child${searchDetails.children !== 1 ? 'ren' : ''}`}
+                                </p>
+                            </div>
+                        )}
+                        {searchDetails.class && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Class</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.class}</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+        if (serviceType === 'hotel') {
+            return (
+                <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', marginBottom: '24px', border: '1px solid #e9ecef' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0499ff', marginBottom: '12px', margin: '0 0 12px 0' }}>Hotel Details</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        {searchDetails.hotelCity && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>City</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.hotelCity}</p>
+                            </div>
+                        )}
+                        {searchDetails.stayType && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Stay Type</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.stayType === 'overnight' ? 'Overnight Stay' : 'Day Use Stay'}</p>
+                            </div>
+                        )}
+                        {searchDetails.checkInDate && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Check-in Date</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.checkInDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                            </div>
+                        )}
+                        {searchDetails.checkOutDate && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Check-out Date</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.checkOutDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                            </div>
+                        )}
+                        {searchDetails.rooms && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Rooms</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.rooms} Room{searchDetails.rooms !== 1 ? 's' : ''}</p>
+                            </div>
+                        )}
+                        {searchDetails.adults && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Guests</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>
+                                    {searchDetails.adults} Adult{searchDetails.adults !== 1 ? 's' : ''}
+                                    {(searchDetails.children ?? 0) > 0 && `, ${searchDetails.children} Child${searchDetails.children !== 1 ? 'ren' : ''}`}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+        if (serviceType === 'package') {
+            return (
+                <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', marginBottom: '24px', border: '1px solid #e9ecef' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0499ff', marginBottom: '12px', margin: '0 0 12px 0' }}>Package Details</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        {searchDetails.selectedCountry && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Country</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.selectedCountry}</p>
+                            </div>
+                        )}
+                        {searchDetails.selectedCity && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>City</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.selectedCity}</p>
+                            </div>
+                        )}
+                        {searchDetails.selectedAirport && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Airport</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.selectedAirport}</p>
+                            </div>
+                        )}
+                        {searchDetails.checkInDate && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Check-in Date</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.checkInDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                            </div>
+                        )}
+                        {searchDetails.nights && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Nights</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.nights} Night{searchDetails.nights !== 1 ? 's' : ''}</p>
+                            </div>
+                        )}
+                        {searchDetails.rooms && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Rooms</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.rooms} Room{searchDetails.rooms !== 1 ? 's' : ''}</p>
+                            </div>
+                        )}
+                        {searchDetails.adults && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Guests</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>
+                                    {searchDetails.adults} Adult{searchDetails.adults !== 1 ? 's' : ''}
+                                    {(searchDetails.children ?? 0) > 0 && `, ${searchDetails.children} Child${searchDetails.children !== 1 ? 'ren' : ''}`}
+                                </p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+        if (serviceType === 'airport-transfer') {
+            return (
+                <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', marginBottom: '24px', border: '1px solid #e9ecef' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0499ff', marginBottom: '12px', margin: '0 0 12px 0' }}>Transfer Details</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        {searchDetails.tripType && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Trip Type</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.tripType === 'oneway' ? 'One Way' : 'Round Trip'}</p>
+                            </div>
+                        )}
+                        {searchDetails.pickupAirport && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Pickup Airport</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.pickupAirport}</p>
+                            </div>
+                        )}
+                        {searchDetails.destinationLocation && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Destination</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.destinationLocation}</p>
+                            </div>
+                        )}
+                        {searchDetails.pickupDate && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Pickup Date</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.pickupDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                            </div>
+                        )}
+                        {searchDetails.pickupTime && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Pickup Time</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.pickupTime}</p>
+                            </div>
+                        )}
+                        {searchDetails.passengers && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Passengers</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.passengers} Passenger{searchDetails.passengers !== 1 ? 's' : ''}</p>
+                            </div>
+                        )}
+                        {searchDetails.tripType === 'return' && searchDetails.returnDate && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Return Date</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.returnDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                            </div>
+                        )}
+                        {searchDetails.tripType === 'return' && searchDetails.returnTime && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Return Time</p>
+                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.returnTime}</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
         if (serviceType === 'visa') {
             return (
                 <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', marginBottom: '24px', border: '1px solid #e9ecef' }}>
@@ -149,7 +357,9 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
                 {submitted ? (
                     // Thank You Popup
                     <div style={{ background: '#fff', borderRadius: '16px', padding: '40px', maxWidth: '500px', width: '90%', textAlign: 'center', boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)', animation: 'slideUp 0.3s ease' }}>
-                        <div style={{ fontSize: '48px', marginBottom: '16px' }}>{emoji}</div>
+                        <div style={{ fontSize: '48px', marginBottom: '16px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                            <i className={`fa fa-${serviceType === 'flight' ? 'plane' : serviceType === 'hotel' ? 'building' : serviceType === 'visa' ? 'passport' : serviceType === 'package' ? 'cube' : 'car'}`} style={{ color: '#0499ff', fontSize: '48px' }}></i>
+                        </div>
                         <h2 style={{ fontSize: '24px', fontWeight: 700, color: '#0499ff', marginBottom: '12px' }}>Thank You!</h2>
                         <p style={{ fontSize: '16px', color: '#666', marginBottom: '8px', lineHeight: '1.6' }}>
                             Thank you for booking with us. We're fetching the best {title.toLowerCase()} offers for you!
@@ -169,10 +379,11 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
                     // Booking Form Popup
                     <div style={{ background: '#fff', borderRadius: '16px', padding: '40px', minWidth: '700px', maxWidth: '85vw', maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)', animation: 'slideUp 0.3s ease' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                            <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#0499ff', margin: 0 }}>
-                                {emoji} Complete Your {title} Booking
+                            <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#0499ff', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <i className={`fa fa-${serviceType === 'flight' ? 'plane' : serviceType === 'hotel' ? 'building' : serviceType === 'visa' ? 'passport' : serviceType === 'package' ? 'cube' : 'car'}`} style={{ color: '#0499ff', fontSize: '20px' }}></i>
+                                Complete Your {title} Booking
                             </h2>
-                            <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999' }}>Ã—</button>
+                            <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999' }}>×</button>
                         </div>
 
                         {/* Search Details Section */}

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import BookingModal from '@/components/BookingModal';
+import { countryService } from '@/services/countryService';
 
 interface VisasSearchFormProps {
     prefilledVisaType?: string;
@@ -20,11 +21,24 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
     const [visaSearch, setVisaSearch] = useState('');
     const [showVisaDropdown, setShowVisaDropdown] = useState(false);
     const [showBookingModal, setShowBookingModal] = useState(false);
+    const [countries, setCountries] = useState<any[]>([]);
+    const [loadingCountries, setLoadingCountries] = useState(true);
 
     // Refs for click-outside detection
     const destinationRef = useRef<HTMLDivElement>(null);
     const passportRef = useRef<HTMLDivElement>(null);
     const visaRef = useRef<HTMLDivElement>(null);
+
+    // Fetch countries on component mount
+    useEffect(() => {
+        const fetchCountries = async () => {
+            setLoadingCountries(true);
+            const data = await countryService.getAllCountries();
+            setCountries(data);
+            setLoadingCountries(false);
+        };
+        fetchCountries();
+    }, []);
 
     // Handle click outside to close dropdowns
     useEffect(() => {
@@ -69,24 +83,9 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
         fetchVisaTypes();
     }, []);
 
-    const countryList = [
-        { code: 'GB', name: 'United Kingdom' },
-        { code: 'US', name: 'United States' },
-        { code: 'CA', name: 'Canada' },
-        { code: 'AU', name: 'Australia' },
-        { code: 'NZ', name: 'New Zealand' },
-        { code: 'IN', name: 'India' },
-        { code: 'DE', name: 'Germany' },
-        { code: 'FR', name: 'France' },
-        { code: 'JP', name: 'Japan' },
-        { code: 'SG', name: 'Singapore' },
-        { code: 'AE', name: 'United Arab Emirates' },
-        { code: 'SG', name: 'Singapore' },
-    ];
-
     const filterCountries = (search: string) => {
-        if (!search) return countryList;
-        return countryList.filter(country =>
+        if (!search || !countries.length) return countries;
+        return countries.filter((country: any) =>
             country.code.toLowerCase().includes(search.toLowerCase()) ||
             country.name.toLowerCase().includes(search.toLowerCase())
         );
@@ -126,7 +125,7 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
                     <input
                         type="text"
                         placeholder="Search destination..."
-                        value={destinationCountry ? `${countryList.find(c => c.code === destinationCountry)?.code} - ${countryList.find(c => c.code === destinationCountry)?.name}` : destinationSearch}
+                        value={destinationCountry ? `${countries.find((c: any) => c.code === destinationCountry)?.code} - ${countries.find((c: any) => c.code === destinationCountry)?.name}` : destinationSearch}
                         onChange={(e) => {
                             setDestinationSearch(e.target.value);
                             setDestinationCountry('');
@@ -177,7 +176,7 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
                     <input
                         type="text"
                         placeholder="Search passport country..."
-                        value={passportCountry ? `${countryList.find(c => c.code === passportCountry)?.code} - ${countryList.find(c => c.code === passportCountry)?.name}` : passportSearch}
+                        value={passportCountry ? `${countries.find((c: any) => c.code === passportCountry)?.code} - ${countries.find((c: any) => c.code === passportCountry)?.name}` : passportSearch}
                         onChange={(e) => {
                             setPassportSearch(e.target.value);
                             setPassportCountry('');

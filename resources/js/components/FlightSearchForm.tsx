@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { router } from '@inertiajs/react';
 import CalendarDateRangePicker from '@/components/CalendarDateRangePicker';
 import BookingModal from '@/components/BookingModal';
+import { countryService } from '@/services/countryService';
 
 interface FlightSearchFormProps {
     showDateRangePicker: boolean;
@@ -25,17 +26,32 @@ export default function FlightSearchForm({
     const [toCity, setToCity] = useState('');
     const [fromSearch, setFromSearch] = useState('');
     const [toSearch, setToSearch] = useState('');
+    const [fromCityManual, setFromCityManual] = useState('');
+    const [toCityManual, setToCityManual] = useState('');
     const [showFromDropdown, setShowFromDropdown] = useState(false);
     const [showToDropdown, setShowToDropdown] = useState(false);
     const [departureDate, setDepartureDate] = useState('');
     const [returnDate, setReturnDate] = useState('');
     const [showBookingModal, setShowBookingModal] = useState(false);
     const [isFlexibleDates, setIsFlexibleDates] = useState(false);
+    const [countries, setCountries] = useState<any[]>([]);
+    const [loadingCountries, setLoadingCountries] = useState(true);
 
     const fromRef = useRef<HTMLDivElement>(null);
     const toRef = useRef<HTMLDivElement>(null);
     const calendarRef = useRef<HTMLDivElement>(null);
     const travellerRef = useRef<HTMLDivElement>(null);
+
+    // Fetch countries on component mount
+    useEffect(() => {
+        const fetchCountries = async () => {
+            setLoadingCountries(true);
+            const data = await countryService.getAllCountries();
+            setCountries(data);
+            setLoadingCountries(false);
+        };
+        fetchCountries();
+    }, []);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -57,25 +73,11 @@ export default function FlightSearchForm({
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const cityList = [
-        { code: 'LON', name: 'London' },
-        { code: 'DEL', name: 'Delhi' },
-        { code: 'BOM', name: 'Mumbai' },
-        { code: 'NYC', name: 'New York' },
-        { code: 'LAX', name: 'Los Angeles' },
-        { code: 'CDG', name: 'Paris' },
-        { code: 'LHR', name: 'London Heathrow' },
-        { code: 'DXB', name: 'Dubai' },
-        { code: 'SIN', name: 'Singapore' },
-        { code: 'HND', name: 'Tokyo' },
-        { code: 'IXC', name: 'Chandigarh' },
-    ];
-
     const filterCities = (search: string) => {
-        if (!search) return cityList;
-        return cityList.filter(city =>
-            city.code.toLowerCase().includes(search.toLowerCase()) ||
-            city.name.toLowerCase().includes(search.toLowerCase())
+        if (!search || !countries.length) return countries;
+        return countries.filter(country =>
+            country.code.toLowerCase().includes(search.toLowerCase()) ||
+            country.name.toLowerCase().includes(search.toLowerCase())
         );
     };
 
@@ -94,6 +96,8 @@ export default function FlightSearchForm({
         setToCity('');
         setFromSearch('');
         setToSearch('');
+        setFromCityManual('');
+        setToCityManual('');
         setDepartureDate('');
         setReturnDate('');
         setTripType('roundtrip');
@@ -178,7 +182,7 @@ export default function FlightSearchForm({
                     <input
                         type="text"
                         placeholder="Flying from"
-                        value={fromCity ? `${cityList.find(c => c.code === fromCity)?.code} - ${cityList.find(c => c.code === fromCity)?.name}` : fromSearch}
+                        value={fromCity ? `${countries.find((c: any) => c.code === fromCity)?.code} - ${countries.find((c: any) => c.code === fromCity)?.name}` : fromSearch}
                         onChange={(e) => {
                             setFromSearch(e.target.value);
                             setFromCity('');
@@ -230,7 +234,7 @@ export default function FlightSearchForm({
                     <input
                         type="text"
                         placeholder="Flying to"
-                        value={toCity ? `${cityList.find(c => c.code === toCity)?.code} - ${cityList.find(c => c.code === toCity)?.name}` : toSearch}
+                        value={toCity ? `${countries.find((c: any) => c.code === toCity)?.code} - ${countries.find((c: any) => c.code === toCity)?.name}` : toSearch}
                         onChange={(e) => {
                             setToSearch(e.target.value);
                             setToCity('');
@@ -583,6 +587,12 @@ export default function FlightSearchForm({
                     children,
                     infants,
                     selectedClass,
+                    from: countries.find((c: any) => c.code === fromCity)?.name,
+                    to: countries.find((c: any) => c.code === toCity)?.name,
+                    departure: departureDate,
+                    return: returnDate,
+                    class: selectedClass,
+                    tripType
                 }}
                 serviceType="flight"
             />

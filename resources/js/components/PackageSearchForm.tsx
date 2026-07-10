@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import CalendarDateRangePicker from '@/components/CalendarDateRangePicker';
 import BookingModal from '@/components/BookingModal';
+import { countryService } from '@/services/countryService';
 
 interface PackageSearchFormProps {
     onCountrySelect?: (country: string) => void;
@@ -27,6 +28,8 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
     const [showCountryDropdown, setShowCountryDropdown] = useState(false);
     const [showCityDropdown, setShowCityDropdown] = useState(false);
     const [showAirportDropdown, setShowAirportDropdown] = useState(false);
+    const [apiCountries, setApiCountries] = useState<any[]>([]);
+    const [loadingCountries, setLoadingCountries] = useState(true);
 
     const countryRef = useRef<HTMLDivElement>(null);
     const cityRef = useRef<HTMLDivElement>(null);
@@ -55,6 +58,17 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
 
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    // Fetch countries on component mount
+    useEffect(() => {
+        const fetchCountries = async () => {
+            setLoadingCountries(true);
+            const data = await countryService.getAllCountries();
+            setApiCountries(data);
+            setLoadingCountries(false);
+        };
+        fetchCountries();
     }, []);
 
     const weeklyOptions = [7, 14, 21, 28];
@@ -196,7 +210,7 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
                     />
                     {showCountryDropdown && (
                         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '250px', overflowY: 'auto' }}>
-                            {countryData.filter(c => c.name.toLowerCase().includes(countrySearch.toLowerCase())).map(country => (
+                            {(apiCountries.length > 0 ? apiCountries : countryData).filter((c: any) => c.name.toLowerCase().includes(countrySearch.toLowerCase())).map((country: any) => (
                                 <div
                                     key={country.code}
                                     onClick={() => {

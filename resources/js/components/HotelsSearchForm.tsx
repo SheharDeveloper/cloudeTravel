@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import CalendarDateRangePicker from '@/components/CalendarDateRangePicker';
 import BookingModal from '@/components/BookingModal';
+import { countryService } from '@/services/countryService';
 
 export default function HotelsSearchForm(): React.ReactElement {
     const [stayType, setStayType] = useState('overnight');
@@ -8,6 +9,7 @@ export default function HotelsSearchForm(): React.ReactElement {
     const [checkOutDate, setCheckOutDate] = useState('');
     const [hotelCity, setHotelCity] = useState('');
     const [hotelSearch, setHotelSearch] = useState('');
+    const [hotelCityManual, setHotelCityManual] = useState('');
     const [showHotelDropdown, setShowHotelDropdown] = useState(false);
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showGuestModal, setShowGuestModal] = useState(false);
@@ -16,10 +18,19 @@ export default function HotelsSearchForm(): React.ReactElement {
     const [children, setChildren] = useState(0);
     const [infants, setInfants] = useState(0);
     const [showBookingModal, setShowBookingModal] = useState(false);
+    const [countries, setCountries] = useState<any[]>([]);
 
     const hotelRef = useRef<HTMLDivElement>(null);
     const datePickerRef = useRef<HTMLDivElement>(null);
     const guestModalRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const fetchCountries = async () => {
+            const data = await countryService.getAllCountries();
+            setCountries(data);
+        };
+        fetchCountries();
+    }, []);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -38,24 +49,11 @@ export default function HotelsSearchForm(): React.ReactElement {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const cityList = [
-        { code: 'LON', name: 'London' },
-        { code: 'DEL', name: 'Delhi' },
-        { code: 'BOM', name: 'Mumbai' },
-        { code: 'NYC', name: 'New York' },
-        { code: 'LAX', name: 'Los Angeles' },
-        { code: 'CDG', name: 'Paris' },
-        { code: 'LHR', name: 'London Heathrow' },
-        { code: 'DXB', name: 'Dubai' },
-        { code: 'SIN', name: 'Singapore' },
-        { code: 'HND', name: 'Tokyo' },
-    ];
-
     const filterCities = (search: string) => {
-        if (!search) return cityList;
-        return cityList.filter(city =>
-            city.code.toLowerCase().includes(search.toLowerCase()) ||
-            city.name.toLowerCase().includes(search.toLowerCase())
+        if (!search || !countries.length) return countries;
+        return countries.filter((country: any) =>
+            country.code.toLowerCase().includes(search.toLowerCase()) ||
+            country.name.toLowerCase().includes(search.toLowerCase())
         );
     };
 
@@ -72,6 +70,7 @@ export default function HotelsSearchForm(): React.ReactElement {
         setShowBookingModal(false);
         setHotelCity('');
         setHotelSearch('');
+        setHotelCityManual('');
         setCheckInDate('');
         setCheckOutDate('');
         setStayType('overnight');
@@ -143,9 +142,9 @@ export default function HotelsSearchForm(): React.ReactElement {
                 </button>
             </div>
 
-            {/* Row 1: Hotel City, Dates & Guests */}
-            <div className="hotel-search-row1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px', alignItems: 'flex-start' }}>
-                {/* Hotel City */}
+            {/* Row 1: All fields on one line - WHERE, CITY, WHEN, WHO */}
+            <div className="hotel-search-row1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px', marginBottom: '16px', alignItems: 'flex-start' }}>
+                {/* WHERE - Country Selection */}
                 <div ref={hotelRef} style={{ position: 'relative', width: '100%' }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Where</label>
                     <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
@@ -154,7 +153,7 @@ export default function HotelsSearchForm(): React.ReactElement {
                     <input
                         type="text"
                         placeholder="Staying in"
-                        value={hotelCity ? `${cityList.find(c => c.code === hotelCity)?.code} - ${cityList.find(c => c.code === hotelCity)?.name}` : hotelSearch}
+                        value={hotelCity ? `${countries.find((c: any) => c.code === hotelCity)?.code} - ${countries.find((c: any) => c.code === hotelCity)?.name}` : hotelSearch}
                         onChange={(e) => {
                             setHotelSearch(e.target.value);
                             setHotelCity('');
@@ -194,9 +193,33 @@ export default function HotelsSearchForm(): React.ReactElement {
                             )}
                         </div>
                     )}
+
                 </div>
 
-                {/* Dates */}
+                {/* CITY - Manual City Entry */}
+                <div style={{ position: 'relative', width: '100%' }}>
+                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>City</label>
+                    <input
+                        type="text"
+                        placeholder="Enter city name..."
+                        value={hotelCityManual}
+                        onChange={(e) => setHotelCityManual(e.target.value)}
+                        disabled={!hotelCity}
+                        style={{ width: '100%', padding: '16px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '14px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500, opacity: hotelCity ? 1 : 0.6, cursor: hotelCity ? 'text' : 'not-allowed' }}
+                        onFocus={(e) => {
+                            if (hotelCity) {
+                                e.currentTarget.style.borderColor = '#0499ff';
+                                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
+                            }
+                        }}
+                        onBlur={(e) => {
+                            e.currentTarget.style.borderColor = '#ddd';
+                            e.currentTarget.style.boxShadow = 'none';
+                        }}
+                    />
+                </div>
+
+                {/* Dates (WHEN) */}
                 <div ref={datePickerRef} style={{ position: 'relative' }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                         When
@@ -268,7 +291,7 @@ export default function HotelsSearchForm(): React.ReactElement {
                     )}
                 </div>
 
-                {/* Room & Guest Selection Card - In the same row */}
+                {/* WHO - Guests and Rooms */}
                 <div ref={guestModalRef} style={{ position: 'relative' }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Who</label>
                     <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '58px', border: '1.5px solid #ddd', borderRadius: '10px', background: '#fff', padding: '16px', cursor: 'pointer', transition: 'all 0.3s' }}
@@ -368,6 +391,7 @@ export default function HotelsSearchForm(): React.ReactElement {
                         </div>
                     )}
                 </div>
+
             </div>
 
             {/* Search Button */}
