@@ -19,7 +19,6 @@ class DatabaseSeeder extends Seeder
         $this->call(HeroImageSeeder::class);
         $this->call(SpecialOfferSeeder::class);
         $this->call(TestimonialSeeder::class);
-        $this->call(TourSeeder::class);
         $this->call(VisaSeeder::class);
         $this->call(PackageSeeder::class);
     }

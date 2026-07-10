@@ -22,24 +22,11 @@ class SpecialOfferController extends Controller
      */
     public function index(): JsonResponse
     {
-        $status = request()->query('status');
-        $isAuthenticated = auth()->check();
+        $perPage = request()->query('per_page', 100);
+        $page = request()->query('page', 1);
 
-        Log::info('Special Offers Request:', [
-            'status_param'   => $status,
-            'auth_check'     => $isAuthenticated,
-            'user'           => auth()->user(),
-            'sanctum_token'  => request()->bearerToken(),
-        ]);
-
-        // For SpecialOffer, showAll is true if authenticated
-        $showAll = $isAuthenticated;
-        $offers = $this->specialOfferService->getAll($showAll, $status);
-
-        Log::info('Special Offers Response:', [
-            'offers_count'   => count($offers),
-            'note'           => 'SpecialOffer has no status field, showing all offers',
-        ]);
+        // Get active special offers with images
+        $offers = $this->specialOfferService->getAll($perPage, $page);
 
         return response()->json($offers);
     }

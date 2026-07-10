@@ -1,5 +1,5 @@
 import { useEffect, ReactNode } from 'react';
-import { getAuthToken } from './api';
+import { usePage, router } from '@inertiajs/react';
 
 interface ProtectedRouteProps {
     children: ReactNode;
@@ -7,17 +7,16 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, redirectTo = '/login' }: ProtectedRouteProps) {
-    useEffect(() => {
-        const token = getAuthToken();
-        
-        if (!token) {
-            window.location.href = redirectTo;
-        }
-    }, [redirectTo]);
+    const page = usePage();
+    const auth = page.props.auth as any;
 
-    const token = getAuthToken();
-    
-    if (!token) {
+    useEffect(() => {
+        if (!auth?.user) {
+            router.visit(redirectTo);
+        }
+    }, [redirectTo, auth?.user]);
+
+    if (!auth?.user) {
         return null;
     }
 
@@ -25,17 +24,16 @@ export function ProtectedRoute({ children, redirectTo = '/login' }: ProtectedRou
 }
 
 export function PublicRoute({ children }: { children: ReactNode }) {
-    useEffect(() => {
-        const token = getAuthToken();
-        
-        if (token) {
-            window.location.href = '/dashboard';
-        }
-    }, []);
+    const page = usePage();
+    const auth = page.props.auth as any;
 
-    const token = getAuthToken();
-    
-    if (token) {
+    useEffect(() => {
+        if (auth?.user) {
+            router.visit('/dashboard');
+        }
+    }, [auth?.user]);
+
+    if (auth?.user) {
         return null;
     }
 

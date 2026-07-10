@@ -48,6 +48,7 @@ export default function Home() {
     const [featuredVisas, setFeaturedVisas] = useState<any[]>([]);
     const [featuredPackages, setFeaturedPackages] = useState<any[]>([]);
     const [searchedCountry, setSearchedCountry] = useState<string>('');
+    const [activeOfferTab, setActiveOfferTabState] = useState<string>(getInitialService());
     const isInitialLoadRef = useRef(true);
     const autoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
     const heroAutoPlayTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -59,6 +60,14 @@ export default function Home() {
         setActiveService(service);
         const url = new URL(window.location.href);
         url.searchParams.set('tab', service);
+        window.history.pushState({}, '', url);
+    };
+
+    // Update URL when activeOfferTab changes (for special offers and unified tabs)
+    const handleOfferTabChange = (tab: string) => {
+        setActiveOfferTabState(tab);
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', tab);
         window.history.pushState({}, '', url);
     };
 
@@ -613,25 +622,20 @@ export default function Home() {
             <div className="booking-form-container" style={{ padding: '0 20px', position: 'relative', zIndex: 10, marginTop: '-180px', paddingBottom: '80px', overflow: 'visible' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto', background: '#fff', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,.12)', overflow: 'visible' }}>
                     {/* Tab Navigation - Professional Style */}
-                    {/* ========== TAB BUTTONS ========== */}
-                    {/* Each tab button shows a service form when clicked */}
-                    {/* Tab styling changes based on activeService state: */}
-                    {/* - Active tab: blue underline (5px solid #0499ff) + blue text (#0499ff) + bold font (800) */}
-                    {/* - Inactive tab: no underline + black text (#000) + normal font (500-600) */}
-                    {/* When user clicks tab: handleTabChange() updates activeService + URL parameter */}
+                    {/* Tabs controlled by activeOfferTab from special offers section */}
                     <div className="tabs-nav" style={{ display: 'flex', gap: 'clamp(0px, 1vw, 8px)', borderBottom: '2px solid #efefef', backgroundColor: '#fff', padding: 'clamp(2px, 1vw, 20px)', justifyContent: 'center', flexWrap: 'nowrap', overflowX: 'auto', boxShadow: '0 2px 8px rgba(0,0,0,.08)' }}>
                         {/* FLIGHTS TAB - Shows flight search form */}
                         <button className="tab-button"
-                            onClick={() => handleTabChange('flight')}
+                            onClick={() => handleOfferTabChange('flight')}
                             style={{
                                 padding: '15px 15px',
-                                background: activeService === 'flight' ? '#0499ff' : 'transparent',
+                                background: activeOfferTab === 'flight' ? '#0499ff' : 'transparent',
                                 border: 'none',
                                 borderRadius: '8px',
-                                borderBottom: activeService === 'flight' ? '3px solid #0499ff' : 'none',
-                                color: activeService === 'flight' ? '#000000' : '#000',
+                                borderBottom: activeOfferTab === 'flight' ? '3px solid #0499ff' : 'none',
+                                color: activeOfferTab === 'flight' ? '#000000' : '#000',
                                 fontSize: '17px',
-                                fontWeight: activeService === 'flight' ? 800 : 600,
+                                fontWeight: activeOfferTab === 'flight' ? 800 : 600,
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
@@ -645,16 +649,16 @@ export default function Home() {
                             <i className="fa fa-plane" style={{ fontSize: '19px' }}></i> Flights
                         </button>
                         <button className="tab-button"
-                            onClick={() => handleTabChange('hotel')}
+                            onClick={() => handleOfferTabChange('hotel')}
                             style={{
                                 padding: '10px 10px',
-                                background: activeService === 'hotel' ? '#0499ff' : 'transparent',
+                                background: activeOfferTab === 'hotel' ? '#0499ff' : 'transparent',
                                 border: 'none',
                                 borderRadius: '8px',
-                                borderBottom: activeService === 'hotel' ? '3px solid #0499ff' : 'none',
-                                color: activeService === 'hotel' ? '#000000' : '#000',
+                                borderBottom: activeOfferTab === 'hotel' ? '3px solid #0499ff' : 'none',
+                                color: activeOfferTab === 'hotel' ? '#000000' : '#000',
                                 fontSize: '17px',
-                                fontWeight: activeService === 'hotel' ? 800 : 500,
+                                fontWeight: activeOfferTab === 'hotel' ? 800 : 500,
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
@@ -668,16 +672,16 @@ export default function Home() {
                             <i className="fa fa-bed" style={{ fontSize: '19px' }}></i> Hotels
                         </button>
                         <button className="tab-button"
-                            onClick={() => handleTabChange('flight-hotel')}
+                            onClick={() => handleOfferTabChange('package')}
                             style={{
                                 padding: '10px 10px',
-                                background: activeService === 'flight-hotel' ? '#0499ff' : 'transparent',
+                                background: activeOfferTab === 'package' ? '#0499ff' : 'transparent',
                                 border: 'none',
                                 borderRadius: '8px',
-                                borderBottom: activeService === 'flight-hotel' ? '3px solid #0499ff' : 'none',
-                                color: activeService === 'flight-hotel' ? '#000000' : '#000',
+                                borderBottom: activeOfferTab === 'package' ? '3px solid #0499ff' : 'none',
+                                color: activeOfferTab === 'package' ? '#000000' : '#000',
                                 fontSize: '17px',
-                                fontWeight: activeService === 'flight-hotel' ? 800 : 500,
+                                fontWeight: activeOfferTab === 'package' ? 800 : 500,
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
@@ -691,16 +695,16 @@ export default function Home() {
                             <i className="fa fa-cube" style={{ fontSize: '19px' }}></i> Package
                         </button>
                         <button className="tab-button"
-                            onClick={() => handleTabChange('visa')}
+                            onClick={() => handleOfferTabChange('visa')}
                             style={{
                                 padding: '10px 10px',
-                                background: activeService === 'visa' ? '#0499ff' : 'transparent',
+                                background: activeOfferTab === 'visa' ? '#0499ff' : 'transparent',
                                 border: 'none',
                                 borderRadius: '8px',
-                                borderBottom: activeService === 'visa' ? '3px solid #0499ff' : 'none',
-                                color: activeService === 'visa' ? '#000000' : '#000',
+                                borderBottom: activeOfferTab === 'visa' ? '3px solid #0499ff' : 'none',
+                                color: activeOfferTab === 'visa' ? '#000000' : '#000',
                                 fontSize: '17px',
-                                fontWeight: activeService === 'visa' ? 800 : 500,
+                                fontWeight: activeOfferTab === 'visa' ? 800 : 500,
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
@@ -714,16 +718,16 @@ export default function Home() {
                             <i className="fa fa-passport" style={{ fontSize: '19px' }}></i> Visa
                         </button>
                         <button className="tab-button"
-                            onClick={() => handleTabChange('airport-transfer')}
+                            onClick={() => handleOfferTabChange('airport-transfer')}
                             style={{
                                 padding: '10px 10px',
-                                background: activeService === 'airport-transfer' ? '#0499ff' : 'transparent',
+                                background: activeOfferTab === 'airport-transfer' ? '#0499ff' : 'transparent',
                                 border: 'none',
                                 borderRadius: '8px',
-                                borderBottom: activeService === 'airport-transfer' ? '3px solid #0499ff' : 'none',
-                                color: activeService === 'airport-transfer' ? '#000000' : '#000',
+                                borderBottom: activeOfferTab === 'airport-transfer' ? '3px solid #0499ff' : 'none',
+                                color: activeOfferTab === 'airport-transfer' ? '#000000' : '#000',
                                 fontSize: '17px',
-                                fontWeight: activeService === 'airport-transfer' ? 800 : 500,
+                                fontWeight: activeOfferTab === 'airport-transfer' ? 800 : 500,
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
@@ -738,9 +742,9 @@ export default function Home() {
                         </button>
                     </div>
 
-                    {/* Form Content */}
+                    {/* Form Content - Controlled by activeOfferTab */}
                     <div className="form-content-animate" style={{ padding: '16px 32px 20px 32px', backgroundColor: '#ffffff', transition: 'all 0.3s ease-in-out', height: 'auto' }}>
-                        {activeService === 'flight' && (
+                        {activeOfferTab === 'flight' && (
                         <FlightSearchForm
                             showDateRangePicker={showDateRangePicker}
                             setShowDateRangePicker={setShowDateRangePicker}
@@ -749,15 +753,15 @@ export default function Home() {
                         />
                     )}
 
-                    {activeService === 'hotel' && (
+                    {activeOfferTab === 'hotel' && (
                         <HotelsSearchForm />
                     )}
 
-                    {activeService === 'visa' && (
+                    {activeOfferTab === 'visa' && (
                         <VisasSearchForm />
                     )}
 
-                    {activeService === 'flight-hotel' && (
+                    {activeOfferTab === 'package' && (
                         <>
                             <PackageSearchForm onCountrySelect={setSearchedCountry} />
 
@@ -856,7 +860,7 @@ export default function Home() {
                         </>
                     )}
 
-                    {activeService === 'airport-transfer' && (
+                    {activeOfferTab === 'airport-transfer' && (
                         <AirportTransportForm />
                     )}
                     </div>
@@ -1076,182 +1080,311 @@ export default function Home() {
                 </section>
             )}
 
-            {/* FEATURED PACKAGES SECTION */}
-            {featuredPackages.length > 0 && (
+
+            {/* SPECIAL OFFERS BY TYPE SECTION WITH TABS */}
+            {specialOffers.length > 0 && (
                 <section style={{ padding: '50px 20px', background: '#ffffff' }}>
                     <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                        <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+                        <div style={{ textAlign: 'center', marginBottom: '50px' }}>
                             <h2 style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#000000', marginBottom: '12px' }}>
-                                <i className="fa fa-gift" style={{ color: '#000000', marginRight: '10px' }}></i>
-                                Featured Travel Package
+                                <i className="fa fa-tag" style={{ color: '#000000', marginRight: '10px' }}></i>
+                                Prices are down, summer is on
                             </h2>
-                            <div style={{ width: '50px', height: '3px', background: '#ffffff', margin: '0 auto 15px' }}></div>
-                            <p style={{ color: '#000000', fontSize: '13px', maxWidth: '500px', margin: '0 auto' }}>
-                                Explore our most popular travel packages for unforgettable adventures
+                            <div style={{ width: '50px', height: '3px', background: '#0499ff', margin: '0 auto 15px' }}></div>
+                            <p style={{ color: '#000000', fontSize: '13px', maxWidth: '600px', margin: '0 auto' }}>
+                                Discover our exclusive featured packages for unforgettable getaways
                             </p>
                         </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '25px' }}>
-                            {featuredPackages.map((pkg) => (
-                                <div key={pkg.id} style={{
-                                    background: '#fff',
-                                    borderRadius: '12px',
-                                    overflow: 'hidden',
-                                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                                    transition: 'transform 0.3s ease, box-shadow 0.3s ease',
-                                    cursor: 'pointer',
-                                    border: '2px solid #0499ff'
-                                }}
-                                onMouseEnter={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(-8px)';
-                                    e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
-                                }}
-                                onMouseLeave={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
-                                }}>
-                                    {/* Image */}
-                                    <div style={{
-                                        height: '200px',
-                                        background: '#f0f0f0',
-                                        overflow: 'hidden',
-                                        position: 'relative'
-                                    }}>
-                                        {pkg.image ? (
-                                            <ImageWithFallback
-                                                src={pkg.image}
-                                                alt={pkg.name}
-                                                style={{
-                                                    width: '100%',
-                                                    height: '100%',
-                                                    objectFit: 'cover'
-                                                }}
-                                            />
-                                        ) : (
-                                            <div style={{
-                                                width: '100%',
-                                                height: '100%',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                                color: '#000000',
-                                                fontSize: '48px'
-                                            }}>
-                                                <i className="fa fa-gift"></i>
-                                            </div>
-                                        )}
-                                        <div style={{
-                                            position: 'absolute',
-                                            top: '10px',
-                                            right: '10px',
-                                            background: '#0499ff',
-                                            color: '#000000',
-                                            padding: '6px 12px',
-                                            borderRadius: '20px',
-                                            fontSize: '11px',
-                                            fontWeight: 700,
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '5px'
-                                        }}>
-                                            <i className="fa fa-star"></i> Featured
-                                        </div>
-                                        <div style={{
-                                            position: 'absolute',
-                                            bottom: '10px',
-                                            left: '10px',
-                                            background: '#ffffff',
-                                            color: '#000000',
-                                            padding: '4px 10px',
-                                            borderRadius: '4px',
-                                            fontSize: '10px',
-                                            fontWeight: 700
-                                        }}>
-                                            {pkg.origin_country || 'India'} → {pkg.destination_country}
-                                        </div>
-                                    </div>
+                        {/* TAB NAVIGATION */}
+                        {/* <div style={{ display: 'flex', gap: '15px', marginBottom: '40px', borderBottom: '2px solid #efefef', justifyContent: 'center', flexWrap: 'wrap' }}>
+                            {specialOffers.filter(o => o.is_featured && o.type === 'Flight').length > 0 && (
+                                <button
+                                    onClick={() => handleOfferTabChange('flight')}
+                                    style={{
+                                        padding: '12px 20px',
+                                        background: activeOfferTab === 'flight' ? '#0499ff' : 'transparent',
+                                        border: 'none',
+                                        borderBottom: activeOfferTab === 'flight' ? '3px solid #0499ff' : 'none',
+                                        color: activeOfferTab === 'flight' ? '#000000' : '#000000',
+                                        fontSize: '15px',
+                                        fontWeight: activeOfferTab === 'flight' ? 700 : 600,
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                >
+                                    <i className="fa fa-plane" style={{ marginRight: '8px' }}></i>Flights
+                                </button>
+                            )}
+                            {specialOffers.filter(o => o.is_featured && o.type === 'Hotel').length > 0 && (
+                                <button
+                                    onClick={() => handleOfferTabChange('hotel')}
+                                    style={{
+                                        padding: '12px 20px',
+                                        background: activeOfferTab === 'hotel' ? '#0499ff' : 'transparent',
+                                        border: 'none',
+                                        borderBottom: activeOfferTab === 'hotel' ? '3px solid #0499ff' : 'none',
+                                        color: activeOfferTab === 'hotel' ? '#000000' : '#000000',
+                                        fontSize: '15px',
+                                        fontWeight: activeOfferTab === 'hotel' ? 700 : 600,
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                >
+                                    <i className="fa fa-hotel" style={{ marginRight: '8px' }}></i>Hotels
+                                </button>
+                            )}
+                            {specialOffers.filter(o => o.is_featured && o.type === 'Package').length > 0 && (
+                                <button
+                                    onClick={() => handleOfferTabChange('package')}
+                                    style={{
+                                        padding: '12px 20px',
+                                        background: activeOfferTab === 'package' ? '#0499ff' : 'transparent',
+                                        border: 'none',
+                                        borderBottom: activeOfferTab === 'package' ? '3px solid #0499ff' : 'none',
+                                        color: activeOfferTab === 'package' ? '#000000' : '#000000',
+                                        fontSize: '15px',
+                                        fontWeight: activeOfferTab === 'package' ? 700 : 600,
+                                        cursor: 'pointer',
+                                        transition: 'all 0.3s ease'
+                                    }}
+                                >
+                                    <i className="fa fa-cube" style={{ marginRight: '8px' }}></i>Packages
+                                </button>
+                            )}
+                        </div> */}
 
-                                    {/* Content */}
-                                    <div style={{ padding: '20px' }}>
-                                        <h3 style={{
-                                            fontSize: '16px',
-                                            fontWeight: 700,
-                                            color: '#000000',
-                                            marginBottom: '8px'
-                                        }}>
-                                            {pkg.name}
-                                        </h3>
-                                        <p style={{
-                                            fontSize: '12px',
-                                            color: '#000000',
-                                            fontWeight: 600,
-                                            marginBottom: '10px'
-                                        }}>
-                                            {pkg.title}
-                                        </p>
-                                        <div style={{
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            marginBottom: '15px',
-                                            fontSize: '12px',
-                                            color: '#000000'
-                                        }}>
-                                            <span><i className="fa fa-calendar me-1"></i>{pkg.duration_days} Days</span>
-                                            <span><i className="fa fa-star me-1"></i>{pkg.hotel_stars} Stars</span>
-                                        </div>
-                                        <div style={{
-                                            fontSize: '18px',
-                                            fontWeight: 700,
-                                            color: '#000000',
-                                            marginBottom: '15px'
-                                        }}>
-                                            {pkg.currency} {parseFloat(String(pkg.price)).toFixed(0)}
-                                        </div>
-                                        {(pkg.travel_export_included || pkg.visa_service_included) && (
-                                            <div style={{
-                                                display: 'flex',
-                                                gap: '5px',
-                                                marginBottom: '15px',
-                                                flexWrap: 'wrap',
-                                                fontSize: '10px'
-                                            }}>
-                                                {pkg.travel_export_included && (
-                                                    <span className="badge bg-success"><i className="fa fa-check me-1"></i>Travel Export</span>
-                                                )}
-                                                {pkg.visa_service_included && (
-                                                    <span className="badge bg-primary"><i className="fa fa-check me-1"></i>Visa Service</span>
-                                                )}
-                                            </div>
-                                        )}
-                                        <button style={{
-                                            width: '100%',
-                                            background: '#ffffff',
-                                            color: '#000000',
-                                            border: 'none',
-                                            padding: '10px',
-                                            borderRadius: '6px',
-                                            fontSize: '12px',
-                                            fontWeight: 700,
+                        {/* FLIGHTS SECTION */}
+                        {activeOfferTab === 'flight' && specialOffers.filter(o => o.is_featured && o.type === 'Flight').length > 0 && (
+                            <div style={{ marginBottom: '60px', animation: 'fadeInUp 0.4s ease' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
+                                    {specialOffers.filter(o => o.is_featured && o.type === 'Flight').map((offer) => (
+                                        <div key={offer.id} style={{
+                                            background: '#fff',
+                                            borderRadius: '12px',
+                                            overflow: 'hidden',
+                                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                            transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                                             cursor: 'pointer',
-                                            transition: 'all 0.3s ease'
+                                            border: '1px solid #e0e0e0'
                                         }}
                                         onMouseEnter={(e) => {
-                                            e.currentTarget.style.background = '#0277d8';
-                                            e.currentTarget.style.transform = 'translateY(-2px)';
+                                            e.currentTarget.style.transform = 'translateY(-8px)';
+                                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
                                         }}
                                         onMouseLeave={(e) => {
-                                            e.currentTarget.style.background = '#0499ff';
                                             e.currentTarget.style.transform = 'translateY(0)';
-                                        }}
-                                        >
-                                            Book Now
-                                        </button>
-                                    </div>
+                                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                                        }}>
+                                            {/* Image with badges */}
+                                            <div style={{ height: '200px', background: '#f0f0f0', overflow: 'hidden', position: 'relative' }}>
+                                                {offer.images && offer.images.length > 0 ? (
+                                                    <img src={`/storage/${offer.images[0].image_path}`} alt={offer.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                ) : (
+                                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: '#ffffff', fontSize: '48px' }}>
+                                                        <i className="fa fa-plane"></i>
+                                                    </div>
+                                                )}
+                                                <span style={{ position: 'absolute', top: '12px', left: '12px', background: '#e74c3c', color: '#ffffff', padding: '6px 14px', borderRadius: '20px', fontSize: '11px', fontWeight: 700 }}>Price drop</span>
+                                                {offer.is_featured && (
+                                                    <span style={{ position: 'absolute', top: '12px', right: '12px', background: '#f39c12', color: '#ffffff', padding: '6px 14px', borderRadius: '20px', fontSize: '11px', fontWeight: 700 }}>Most loved</span>
+                                                )}
+                                            </div>
+
+                                            {/* Content */}
+                                            <div style={{ padding: '18px' }}>
+                                                <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#000000', marginBottom: '8px' }}>{offer.name}</h4>
+                                                <p style={{ fontSize: '12px', color: '#666666', marginBottom: '12px', lineHeight: 1.4 }}>{offer.flight_name || offer.description?.substring(0, 50)}</p>
+                                                <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', alignItems: 'center' }}>
+                                                    {offer.rating && (
+                                                        <>
+                                                            <div style={{ display: 'flex', gap: '2px' }}>
+                                                                {[...Array(Math.floor(offer.rating))].map((_, i) => (
+                                                                    <span key={i} style={{ color: '#000000', fontSize: '12px' }}>★</span>
+                                                                ))}
+                                                                {offer.rating % 1 !== 0 && <span style={{ color: '#ddd', fontSize: '12px' }}>★</span>}
+                                                            </div>
+                                                            <span style={{ fontSize: '11px', color: '#666666' }}>{offer.rating} (24 reviews)</span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <div style={{ fontSize: '18px', fontWeight: 700, color: '#000000', marginBottom: '12px' }}>
+                                                    {currency.symbol}{offer.total_price?.toLocaleString()}
+                                                </div>
+                                                <button style={{
+                                                    width: '100%',
+                                                    background: '#0499ff',
+                                                    color: '#ffffff',
+                                                    border: 'none',
+                                                    padding: '10px',
+                                                    borderRadius: '6px',
+                                                    fontSize: '12px',
+                                                    fontWeight: 700,
+                                                    cursor: 'pointer',
+                                                    transition: 'all 0.3s ease'
+                                                }}
+                                                onMouseEnter={(e) => { e.currentTarget.style.background = '#0284d0'; e.currentTarget.style.transform = 'scale(1.02)'; }}
+                                                onMouseLeave={(e) => { e.currentTarget.style.background = '#0499ff'; e.currentTarget.style.transform = 'scale(1)'; }}>
+                                                    View Details
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-                            ))}
-                        </div>
+                            </div>
+                        )}
+
+                        {/* HOTELS SECTION */}
+                        {activeOfferTab === 'hotel' && specialOffers.filter(o => o.is_featured && o.type === 'Hotel').length > 0 && (
+                            <div style={{ marginBottom: '60px', animation: 'fadeInUp 0.4s ease' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
+                                    {specialOffers.filter(o => o.is_featured && o.type === 'Hotel').map((offer) => (
+                                        <div key={offer.id} style={{
+                                            background: '#fff',
+                                            borderRadius: '12px',
+                                            overflow: 'hidden',
+                                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                            transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                                            cursor: 'pointer',
+                                            border: '1px solid #e0e0e0'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.transform = 'translateY(-8px)';
+                                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                                        }}>
+                                            <div style={{ height: '200px', background: '#f0f0f0', overflow: 'hidden', position: 'relative' }}>
+                                                {offer.images && offer.images.length > 0 ? (
+                                                    <img src={`/storage/${offer.images[0].image_path}`} alt={offer.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                ) : (
+                                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: '#ffffff', fontSize: '48px' }}>
+                                                        <i className="fa fa-hotel"></i>
+                                                    </div>
+                                                )}
+                                                <span style={{ position: 'absolute', top: '12px', left: '12px', background: '#e74c3c', color: '#ffffff', padding: '6px 14px', borderRadius: '20px', fontSize: '11px', fontWeight: 700 }}>Price drop</span>
+                                                {offer.is_featured && (
+                                                    <span style={{ position: 'absolute', top: '12px', right: '12px', background: '#f39c12', color: '#ffffff', padding: '6px 14px', borderRadius: '20px', fontSize: '11px', fontWeight: 700 }}>Most loved</span>
+                                                )}
+                                            </div>
+                                            <div style={{ padding: '18px' }}>
+                                                <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#000000', marginBottom: '8px' }}>{offer.name}</h4>
+                                                <p style={{ fontSize: '12px', color: '#666666', marginBottom: '12px', lineHeight: 1.4 }}>{offer.hotel_name || offer.description?.substring(0, 50)}</p>
+                                                <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', alignItems: 'center' }}>
+                                                    {offer.hotel_star_rating && (
+                                                        <>
+                                                            <div style={{ display: 'flex', gap: '2px' }}>
+                                                                {[...Array(offer.hotel_star_rating)].map((_, i) => (
+                                                                    <span key={i} style={{ color: '#000000', fontSize: '12px' }}>★</span>
+                                                                ))}
+                                                            </div>
+                                                            <span style={{ fontSize: '11px', color: '#666666' }}>{offer.hotel_star_rating} stars</span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <div style={{ fontSize: '18px', fontWeight: 700, color: '#000000', marginBottom: '12px' }}>
+                                                    {currency.symbol}{offer.total_price?.toLocaleString()}
+                                                </div>
+                                                <button style={{
+                                                    width: '100%',
+                                                    background: '#3498db',
+                                                    color: '#ffffff',
+                                                    border: 'none',
+                                                    padding: '10px',
+                                                    borderRadius: '6px',
+                                                    fontSize: '12px',
+                                                    fontWeight: 700,
+                                                    cursor: 'pointer',
+                                                    transition: 'all 0.3s ease'
+                                                }}
+                                                onMouseEnter={(e) => { e.currentTarget.style.background = '#2980b9'; e.currentTarget.style.transform = 'scale(1.02)'; }}
+                                                onMouseLeave={(e) => { e.currentTarget.style.background = '#3498db'; e.currentTarget.style.transform = 'scale(1)'; }}>
+                                                    View Details
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* PACKAGES SECTION */}
+                        {activeOfferTab === 'package' && specialOffers.filter(o => o.is_featured && o.type === 'Package').length > 0 && (
+                            <div style={{ animation: 'fadeInUp 0.4s ease' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '24px' }}>
+                                    {specialOffers.filter(o => o.is_featured && o.type === 'Package').map((offer) => (
+                                        <div key={offer.id} style={{
+                                            background: '#fff',
+                                            borderRadius: '12px',
+                                            overflow: 'hidden',
+                                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                                            transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                                            cursor: 'pointer',
+                                            border: '1px solid #e0e0e0'
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.transform = 'translateY(-8px)';
+                                            e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.15)';
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.transform = 'translateY(0)';
+                                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                                        }}>
+                                            <div style={{ height: '200px', background: '#f0f0f0', overflow: 'hidden', position: 'relative' }}>
+                                                {offer.images && offer.images.length > 0 ? (
+                                                    <img src={`/storage/${offer.images[0].image_path}`} alt={offer.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                                ) : (
+                                                    <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: '#ffffff', fontSize: '48px' }}>
+                                                        <i className="fa fa-cube"></i>
+                                                    </div>
+                                                )}
+                                                <span style={{ position: 'absolute', top: '12px', left: '12px', background: '#e74c3c', color: '#ffffff', padding: '6px 14px', borderRadius: '20px', fontSize: '11px', fontWeight: 700 }}>Price drop</span>
+                                                {offer.is_featured && (
+                                                    <span style={{ position: 'absolute', top: '12px', right: '12px', background: '#f39c12', color: '#ffffff', padding: '6px 14px', borderRadius: '20px', fontSize: '11px', fontWeight: 700 }}>Most loved</span>
+                                                )}
+                                            </div>
+                                            <div style={{ padding: '18px' }}>
+                                                <h4 style={{ fontSize: '15px', fontWeight: 700, color: '#000000', marginBottom: '8px' }}>{offer.name}</h4>
+                                                <p style={{ fontSize: '12px', color: '#666666', marginBottom: '12px', lineHeight: 1.4 }}>{offer.description?.substring(0, 50)}</p>
+                                                <div style={{ display: 'flex', gap: '8px', marginBottom: '12px', alignItems: 'center' }}>
+                                                    {offer.rating && (
+                                                        <>
+                                                            <div style={{ display: 'flex', gap: '2px' }}>
+                                                                {[...Array(Math.floor(offer.rating))].map((_, i) => (
+                                                                    <span key={i} style={{ color: '#000000', fontSize: '12px' }}>★</span>
+                                                                ))}
+                                                            </div>
+                                                            <span style={{ fontSize: '11px', color: '#666666' }}>{offer.rating} (48 reviews)</span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                                <div style={{ fontSize: '18px', fontWeight: 700, color: '#000000', marginBottom: '12px' }}>
+                                                    {currency.symbol}{offer.total_price?.toLocaleString()}
+                                                </div>
+                                                <button style={{
+                                                    width: '100%',
+                                                    background: '#0499ff',
+                                                    color: '#ffffff',
+                                                    border: 'none',
+                                                    padding: '10px',
+                                                    borderRadius: '6px',
+                                                    fontSize: '12px',
+                                                    fontWeight: 700,
+                                                    cursor: 'pointer',
+                                                    transition: 'all 0.3s ease'
+                                                }}
+                                                onMouseEnter={(e) => { e.currentTarget.style.background = '#0284d0'; e.currentTarget.style.transform = 'scale(1.02)'; }}
+                                                onMouseLeave={(e) => { e.currentTarget.style.background = '#0499ff'; e.currentTarget.style.transform = 'scale(1)'; }}>
+                                                    View Details
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </section>
             )}
@@ -1259,6 +1392,12 @@ export default function Home() {
             {/* CONTACT FORM SECTION */}
             <section className="contact-section" style={{ padding: '50px 40px', background: '#fff' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+
+                    <div style={{ textAlign: 'center', marginBottom: '50px' }}>
+                            <h2 className="testimonials-heading" style={{ fontFamily: "'Playfair Display', serif", fontSize: '32px', color: '#000000', marginBottom: '12px' }}>Get in Touch</h2>
+                            <div style={{ width: '50px', height: '3px', background: '#ffffff', margin: '0 auto 15px' }}></div>
+                            <p className="testimonials-paragraph" style={{ color: '#000000', fontSize: '13px', maxWidth: '500px', margin: '0 auto' }}>Have questions or want to learn more? Fill out the form and we'll get back to you soon!</p>
+                        </div>
                     <div className="contact-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
                         {/* Form */}
                         <div>

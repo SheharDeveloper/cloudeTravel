@@ -33,23 +33,25 @@ Route::inertia('/contact-us', 'contact-us')->name('contact-us');
 // Dashboard
 Route::inertia('dashboard', 'dashboard')->name('dashboard');
 
-// Admin Routes (requires authentication - supports both session and token auth via custom middleware)
-Route::middleware([\App\Http\Middleware\AuthenticateApiToken::class])->prefix('admin')->group(function () {
+// Admin Routes (requires authentication via session - Breeze/Inertia)
+Route::middleware('auth')->prefix('admin')->group(function () {
     // Tours Management (React Components via Inertia)
     Route::inertia('tours', 'Admin/Tour/Index')->name('admin.tours.index');
     Route::inertia('tours/create', 'Admin/Tour/Create')->name('admin.tours.create');
     Route::inertia('tours/{tour}/edit', 'Admin/Tour/Edit')->name('admin.tours.edit');
 
-    // Bookings Management (Inertia Pages)
-    Route::inertia('bookings', 'Admin/Bookings/Index')->name('admin.bookings.index');
+    // Bookings Management
+    Route::get('bookings', [\App\Http\Controllers\Admin\BookingController::class, 'index'])->name('admin.bookings.index');
     Route::inertia('bookings/{uid}', 'Admin/Bookings/Show')->name('admin.bookings.show');
 
     // Contact Requests Management (Inertia Pages)
     Route::inertia('contact-requests', 'Admin/ContactRequests/Index')->name('admin.contact-requests.index');
     Route::inertia('contact-requests/{uid}', 'Admin/ContactRequests/Show')->name('admin.contact-requests.show');
 
-    // Special Offer Management (Inertia Page)
-    Route::inertia('special-offer', 'Admin/SpecialOffer/Index')->name('admin.special-offer.index');
+    // Special Offer Management
+    Route::resource('special-offer', \App\Http\Controllers\Admin\SpecialOfferController::class)->except(['show'])->names('admin.special-offer');
+    Route::get('special-offer/{uid}', [\App\Http\Controllers\Admin\SpecialOfferController::class, 'show'])->name('admin.special-offer.show');
+    Route::delete('special-offer/{uid}/images/{imageId}', [\App\Http\Controllers\Admin\SpecialOfferController::class, 'deleteImage'])->name('admin.special-offer.delete-image');
 
     // Hero Image Management (Inertia Page)
     Route::inertia('hero-image', 'Admin/HeroImage/Index')->name('admin.hero-image.index');

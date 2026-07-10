@@ -1,12 +1,17 @@
+const isBrowser = typeof window !== 'undefined' && typeof localStorage !== 'undefined';
+
 export const getAuthToken = (): string | null => {
+    if (!isBrowser) return null;
     return localStorage.getItem('auth_token');
 };
 
 export const setAuthToken = (token: string): void => {
+    if (!isBrowser) return;
     localStorage.setItem('auth_token', token);
 };
 
 export const clearAuthToken = (): void => {
+    if (!isBrowser) return;
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user');
 };
@@ -15,7 +20,7 @@ export const apiFetch = async (url: string, options: RequestInit = {}) => {
     const token = getAuthToken();
     const headers: Record<string, string> = {
         'Accept': 'application/json',
-        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+        'X-CSRF-TOKEN': isBrowser ? document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '' : '',
         ...options.headers as Record<string, string>,
     };
 
@@ -38,15 +43,16 @@ export const apiFetch = async (url: string, options: RequestInit = {}) => {
     const response = await fetch(url, {
         ...options,
         headers,
-        credentials: 'include',  // Include cookies in request and store cookies from response
+        credentials: 'include',
     });
 
     console.log('API Response Status:', response.status, 'Content-Type:', response.headers.get('content-type'));
 
-    // Handle 401 Unauthenticated responses by redirecting to login
     if (response.status === 401) {
         clearAuthToken();
-        window.location.href = '/login';
+        if (isBrowser) {
+            window.location.href = '/login';
+        }
         return response;
     }
 

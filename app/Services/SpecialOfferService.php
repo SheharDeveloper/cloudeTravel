@@ -3,58 +3,89 @@
 namespace App\Services;
 
 use App\Models\SpecialOffer;
+use App\Models\SpecialOfferImage;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class SpecialOfferService
 {
-    /**
-     * Get all special offers
-     * Note: SpecialOffer doesn't have a status field, so all offers are shown regardless of status parameter
-     */
-    public function getAll(bool $showAll = false, $status = null): array
+    public function getAll(int $perPage = 15, int $page = 1): LengthAwarePaginator
     {
-        return SpecialOffer::all()->toArray();
+        return SpecialOffer::with('images')
+            ->where('is_active', true)
+            ->latest()
+            ->paginate($perPage, ['*'], 'page', $page);
     }
 
-    /**
-     * Get a single special offer by ID
-     */
+    public function getAllForAdmin(int $perPage = 15, int $page = 1): LengthAwarePaginator
+    {
+        return SpecialOffer::with('images')
+            ->latest()
+            ->paginate($perPage, ['*'], 'page', $page);
+    }
+
     public function getById(int $id): ?SpecialOffer
     {
-        return SpecialOffer::find($id);
+        return SpecialOffer::with('images')->find($id);
     }
 
-    /**
-     * Create a new special offer
-     */
+    public function getByUid(string $uid): ?SpecialOffer
+    {
+        return SpecialOffer::with('images')->where('uid', $uid)->first();
+    }
+
     public function create(array $data): SpecialOffer
     {
         return SpecialOffer::create($data);
     }
 
-    /**
-     * Update a special offer
-     */
-    public function update(int $id, array $data): ?SpecialOffer
+    public function update(SpecialOffer $offer, array $data): SpecialOffer
     {
-        $offer = SpecialOffer::find($id);
-        if (!$offer) {
-            return null;
-        }
-
         $offer->update($data);
         return $offer;
     }
 
-    /**
-     * Delete a special offer
-     */
-    public function delete(int $id): bool
+    public function delete(SpecialOffer $offer): bool
     {
-        $offer = SpecialOffer::find($id);
-        if (!$offer) {
-            return false;
-        }
+        return $offer->delete();
+    }
 
-        return $offer->forceDelete() ? true : false;
+    public function addFlight(SpecialOffer $offer, array $data)
+    {
+        return $offer->flights()->create($data);
+    }
+
+    public function addHotel(SpecialOffer $offer, array $data)
+    {
+        return $offer->hotels()->create($data);
+    }
+
+    public function addVisa(SpecialOffer $offer, array $data)
+    {
+        return $offer->visas()->create($data);
+    }
+
+    public function addTransport(SpecialOffer $offer, array $data)
+    {
+        return $offer->transports()->create($data);
+    }
+
+    public function addImage(SpecialOffer $offer, array $data)
+    {
+        return $offer->images()->create($data);
+    }
+
+    public function removeImage(int $imageId): bool
+    {
+        $image = SpecialOfferImage::find($imageId);
+        return $image ? $image->delete() : false;
+    }
+
+    public function updateImage(int $imageId, array $data): ?SpecialOfferImage
+    {
+        $image = SpecialOfferImage::find($imageId);
+        if ($image) {
+            $image->update($data);
+        }
+        return $image;
     }
 }

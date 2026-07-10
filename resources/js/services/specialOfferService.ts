@@ -6,12 +6,26 @@ import { apiFetch } from '@/lib/api';
 // Special offer interface matching the database schema
 export interface SpecialOffer {
     id: number;
-    airline: string; // Airline name (e.g., "Emirates", "Qatar Airways")
-    from: string; // Departure location
-    destinations: string; // Destination location(s)
-    price: string; // Discounted price for the offer
-    description?: string; // Additional offer details
-    image?: string; // Airline/offer image URL
+    uid: string;
+    name: string;
+    type: string;
+    description?: string;
+    sub_description?: string;
+    duration_days?: number;
+    duration_nights?: number;
+    total_price: number;
+    is_active: boolean;
+    is_featured: boolean;
+    flight_name?: string;
+    hotel_name?: string;
+    hotel_star_rating?: number;
+    visa_name?: string;
+    is_visa?: boolean;
+    transport_name?: string;
+    transport_type?: string;
+    is_transport?: boolean;
+    rating?: number;
+    images?: Array<{ id: number; image_path: string; }>;
     created_at?: string;
     updated_at?: string;
 }
@@ -24,19 +38,17 @@ class SpecialOfferService {
     /**
      * Fetch all special offers from the API
      * - Used by public homepage to display current deals
-     * - Admin endpoint to get all offers for management
-     * @returns Promise<SpecialOffer[]> - Array of special offers with default images applied
+     * - Returns both active and inactive offers
+     * @returns Promise<SpecialOffer[]> - Array of special offers
      */
     async getAll(): Promise<SpecialOffer[]> {
         try {
             const response = await fetch('/api/special-offers');
             if (response.ok) {
                 const data = await response.json();
-                const offers = Array.isArray(data) ? data : data.data || [];
-                return offers.map((offer: any) => ({
-                    ...offer,
-                    image: offer.image || DEFAULT_IMAGE,
-                }));
+                // Handle paginated response (Laravel paginator returns { data: [], ... })
+                const offers = Array.isArray(data) ? data : (data.data || []);
+                return offers as SpecialOffer[];
             }
             return [];
         } catch (err) {

@@ -149,7 +149,10 @@ class VisaSeeder extends Seeder
         ];
 
         foreach ($visas as $visa) {
-            Visa::create($visa);
+            Visa::firstOrCreate(
+                ['name' => $visa['name']],
+                $visa
+            );
         }
     }
 }

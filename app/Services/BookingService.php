@@ -193,6 +193,31 @@ class BookingService
     }
 
     /**
+     * Get bookings for admin with filters and search
+     */
+    public function getForAdmin(int $perPage = 15, int $page = 1, ?string $service = null, ?string $status = null, ?string $search = null): LengthAwarePaginator
+    {
+        $query = $this->model->query();
+
+        if ($service) {
+            $query->where('service', $service);
+        }
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->latest()->paginate($perPage, ['*'], 'page', $page);
+    }
+
+    /**
      * Get booking by id
      */
     public function getById(int $id): ?Booking

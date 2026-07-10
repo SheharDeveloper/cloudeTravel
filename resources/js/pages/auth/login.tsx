@@ -1,6 +1,5 @@
 import { useState } from 'react';
-import { Head } from '@inertiajs/react';
-import { apiFetch, setAuthToken } from '@/lib/api';
+import { Head, router } from '@inertiajs/react';
 import { PublicRoute } from '@/lib/ProtectedRoute';
 
 export default function Login() {
@@ -9,37 +8,35 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const handleLogin = async (e: React.FormEvent) => {
+    const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
-        try {
-            const response = await apiFetch('/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
+        // Use Inertia's router.post() to handle login with Breeze
+        router.post('/login',
+            {
+                email,
+                password,
+            },
+            {
+                onSuccess: () => {
+                    // Inertia will automatically redirect after successful login
+                    setLoading(false);
                 },
-                body: JSON.stringify({
-                    email,
-                    password,
-                }),
-            });
-
-            const data = await response.json();
-
-            if (data.status === 'success') {
-                setAuthToken(data.data.token);
-                localStorage.setItem('user', JSON.stringify(data.data.user));
-                window.location.href = '/dashboard';
-            } else {
-                setError(data.message || 'Login failed');
-                setLoading(false);
+                onError: (errors: any) => {
+                    // Handle validation errors or login failure
+                    if (errors.email) {
+                        setError(errors.email);
+                    } else if (errors.password) {
+                        setError(errors.password);
+                    } else {
+                        setError('Login failed. Please check your credentials.');
+                    }
+                    setLoading(false);
+                },
             }
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'An error occurred');
-            setLoading(false);
-        }
+        );
     };
 
     return (

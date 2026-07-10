@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { Head } from '@inertiajs/react';
+import LoadingOverlay from '@/components/LoadingOverlay';
 
 interface BackendLayoutProps {
     children: React.ReactNode;
@@ -39,6 +40,7 @@ export default function BackendLayout({ children, title }: BackendLayoutProps) {
 
     return (
         <>
+            <LoadingOverlay />
             <Head title={title} />
 
             {/* YashAdmin CSS */}

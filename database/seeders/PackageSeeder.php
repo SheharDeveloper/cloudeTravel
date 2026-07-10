@@ -194,7 +194,10 @@ class PackageSeeder extends Seeder
         ];
 
         foreach ($packages as $package) {
-            Package::create($package);
+            Package::firstOrCreate(
+                ['name' => $package['name']],
+                $package
+            );
         }
     }
 }
