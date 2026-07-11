@@ -25,31 +25,157 @@ interface BookingModalProps {
 
 export default function BookingModal({ isOpen, onClose, searchDetails, serviceType }: BookingModalProps) {
     const [submitted, setSubmitted] = useState(false);
-    const [formData, setFormData] = useState({ firstName: '', email: '', phone: '' });
+    const [formData, setFormData] = useState({ firstName: '', email: '', countryCode: '1', phone: '' });
+    const [errors, setErrors] = useState<any>({});
 
     const handleInputChange = (e: any) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        setFormData((prev: any) => ({ ...prev, [name]: value }));
+        // Clear error for this field when user starts typing
+        if (errors[name]) {
+            setErrors((prev: any) => ({ ...prev, [name]: '' }));
+        }
+    };
+
+    const validateForm = () => {
+        const newErrors: any = {};
+
+        // First Name validation
+        if (!formData.firstName || formData.firstName.trim() === '') {
+            newErrors.firstName = 'First name is required';
+        } else if (formData.firstName.length < 2) {
+            newErrors.firstName = 'First name must be at least 2 characters';
+        }
+
+        // Email validation
+        if (!formData.email || formData.email.trim() === '') {
+            newErrors.email = 'Email is required';
+        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+            newErrors.email = 'Please enter a valid email address';
+        }
+
+        // Country Code validation
+        if (!formData.countryCode || formData.countryCode.trim() === '') {
+            newErrors.countryCode = 'Country code is required';
+        } else if (!/^(\+)?\d{1,3}$/.test(formData.countryCode)) {
+            newErrors.countryCode = 'Country code should be 1-3 digits (e.g., 1, 91, 44)';
+        }
+
+        // Phone validation
+        if (!formData.phone || formData.phone.trim() === '') {
+            newErrors.phone = 'Phone number is required';
+        } else if (!/^\d{7,15}$/.test(formData.phone.replace(/[\s\-()]/g, ''))) {
+            newErrors.phone = 'Phone number should be 7-15 digits';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async () => {
-        if (!formData.firstName || !formData.email || !formData.phone) {
-            alert('Please fill in all fields');
+        if (!validateForm()) {
             return;
         }
 
         try {
+            // Organize data by service type
+            const getServiceData = () => {
+                switch(serviceType) {
+                    case 'flight':
+                        return {
+                            flight_data: {
+                                from: searchDetails.from,
+                                to: searchDetails.to,
+                                fromCity: searchDetails.fromCity,
+                                toCity: searchDetails.toCity,
+                                departureDate: searchDetails.departureDate,
+                                returnDate: searchDetails.returnDate,
+                                tripType: searchDetails.tripType,
+                                adults: searchDetails.adults,
+                                children: searchDetails.children,
+                                infants: searchDetails.infants,
+                                selectedClass: searchDetails.selectedClass,
+                            }
+                        };
+                    case 'hotel':
+                        return {
+                            hotel_data: {
+                                hotelCountry: searchDetails.hotelCountry,
+                                hotelCity: searchDetails.hotelCity,
+                                stayType: searchDetails.stayType,
+                                checkInDate: searchDetails.checkInDate,
+                                checkOutDate: searchDetails.checkOutDate,
+                                rooms: searchDetails.rooms,
+                                adults: searchDetails.adults,
+                                children: searchDetails.children,
+                            }
+                        };
+                    case 'visa':
+                        return {
+                            visa_data: {
+                                destinationCountry: searchDetails.destinationCountry,
+                                passportCountry: searchDetails.passportCountry,
+                                visaType: searchDetails.visaType,
+                                numberOfTravelers: searchDetails.numberOfTravelers,
+                                travelDate: searchDetails.travelDate,
+                            },
+                            visa_type_id: searchDetails.visaTypeId
+                        };
+                    case 'package':
+                        return {
+                            package_data: {
+                                selectedCountry: searchDetails.selectedCountry,
+                                selectedCity: searchDetails.selectedCity,
+                                selectedAirport: searchDetails.selectedAirport,
+                                checkInDate: searchDetails.checkInDate,
+                                checkOutDate: searchDetails.checkOutDate,
+                                nights: searchDetails.nights,
+                                adults: searchDetails.adults,
+                                children: searchDetails.children,
+                                rooms: searchDetails.rooms,
+                                flexibleDays: searchDetails.flexibleDays,
+                            }
+                        };
+                    case 'airport-transfer':
+                        return {
+                            airport_transport_data: {
+                                tripType: searchDetails.tripType,
+                                pickupAirport: searchDetails.pickupAirport,
+                                destinationLocation: searchDetails.destinationLocation,
+                                pickupDate: searchDetails.pickupDate,
+                                pickupTime: searchDetails.pickupTime,
+                                returnPickupLocation: searchDetails.returnPickupLocation,
+                                returnDestinationLocation: searchDetails.returnDestinationLocation,
+                                returnDate: searchDetails.returnDate,
+                                returnTime: searchDetails.returnTime,
+                                passengers: searchDetails.passengers,
+                            }
+                        };
+                    default:
+                        return {};
+                }
+            };
+
+            // Prepare complete booking data (normalize airport-transfer to transport for database)
+            const bookingData = {
+                type: serviceType === 'airport-transfer' ? 'transport' : serviceType,
+                first_name: formData.firstName.trim(),
+                email: formData.email.trim(),
+                country_code: formData.countryCode.trim(),
+                phone: formData.phone.trim(),
+                status: 'pending',
+                ...getServiceData(),
+            };
+
+            console.log('Submitting booking:', bookingData);
+
             const response = await fetch('/api/bookings', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                 },
-                body: JSON.stringify({
-                    service: serviceType,
-                    formData,
-                    searchParams: searchDetails,
-                }),
+                body: JSON.stringify(bookingData),
             });
 
             if (response.ok) {
@@ -57,7 +183,7 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
                 setTimeout(() => {
                     onClose();
                     setSubmitted(false);
-                    setFormData({ firstName: '', email: '', phone: '' });
+                    setFormData({ firstName: '', email: '', countryCode: '1', phone: '' });
                 }, 3000);
             } else {
                 alert('Error submitting booking');
@@ -93,44 +219,42 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
 
     if (!isOpen) return null;
 
-    const emoji = serviceType === 'flight' ? 'âœˆï¸' : serviceType === 'hotel' ? 'ðŸ¨' : serviceType === 'visa' ? 'ðŸ›‚' : serviceType === 'package' ? 'ðŸ“¦' : 'ðŸš—';
     const title = serviceType === 'flight' ? 'Flight' : serviceType === 'hotel' ? 'Hotel' : serviceType === 'visa' ? 'Visa' : serviceType === 'package' ? 'Package' : 'Airport Transfer';
-    // emoji variable removed as it's not used
 
     const renderSearchDetails = () => {
         if (serviceType === 'flight') {
             return (
                 <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', marginBottom: '24px', border: '1px solid #e9ecef' }}>
-                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0499ff', marginBottom: '12px', margin: '0 0 12px 0' }}>Flight Details</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#000000', marginBottom: '12px', margin: '0 0 12px 0' }}>Flight Details</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
                         {searchDetails.from && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>From</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.from}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.from}</p>
                             </div>
                         )}
                         {searchDetails.to && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>To</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.to}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.to}</p>
                             </div>
                         )}
                         {searchDetails.departure && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Departure Date</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.departure).toLocaleDateString()}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.departure).toLocaleDateString()}</p>
                             </div>
                         )}
                         {searchDetails.tripType === 'roundtrip' && searchDetails.return && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Return Date</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.return).toLocaleDateString()}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.return).toLocaleDateString()}</p>
                             </div>
                         )}
                         {searchDetails.adults && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Passengers</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>
                                     {searchDetails.adults} Adult{searchDetails.adults !== 1 ? 's' : ''}
                                     {(searchDetails.children ?? 0) > 0 && `, ${searchDetails.children} Child${searchDetails.children !== 1 ? 'ren' : ''}`}
                                 </p>
@@ -139,7 +263,7 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
                         {searchDetails.class && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Class</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.class}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.class}</p>
                             </div>
                         )}
                     </div>
@@ -149,42 +273,48 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
         if (serviceType === 'hotel') {
             return (
                 <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', marginBottom: '24px', border: '1px solid #e9ecef' }}>
-                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0499ff', marginBottom: '12px', margin: '0 0 12px 0' }}>Hotel Details</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#000000', marginBottom: '12px', margin: '0 0 12px 0' }}>Hotel Details</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                        {searchDetails.hotelCountry && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Country</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.hotelCountry}</p>
+                            </div>
+                        )}
                         {searchDetails.hotelCity && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>City</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.hotelCity}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.hotelCity}</p>
                             </div>
                         )}
                         {searchDetails.stayType && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Stay Type</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.stayType === 'overnight' ? 'Overnight Stay' : 'Day Use Stay'}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.stayType === 'overnight' ? 'Overnight Stay' : 'Day Use Stay'}</p>
                             </div>
                         )}
                         {searchDetails.checkInDate && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Check-in Date</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.checkInDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.checkInDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                             </div>
                         )}
                         {searchDetails.checkOutDate && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Check-out Date</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.checkOutDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.checkOutDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                             </div>
                         )}
                         {searchDetails.rooms && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Rooms</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.rooms} Room{searchDetails.rooms !== 1 ? 's' : ''}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.rooms} Room{searchDetails.rooms !== 1 ? 's' : ''}</p>
                             </div>
                         )}
                         {searchDetails.adults && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Guests</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>
                                     {searchDetails.adults} Adult{searchDetails.adults !== 1 ? 's' : ''}
                                     {(searchDetails.children ?? 0) > 0 && `, ${searchDetails.children} Child${searchDetails.children !== 1 ? 'ren' : ''}`}
                                 </p>
@@ -197,48 +327,54 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
         if (serviceType === 'package') {
             return (
                 <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', marginBottom: '24px', border: '1px solid #e9ecef' }}>
-                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0499ff', marginBottom: '12px', margin: '0 0 12px 0' }}>Package Details</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#000000', marginBottom: '12px', margin: '0 0 12px 0' }}>Package Details</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
                         {searchDetails.selectedCountry && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Country</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.selectedCountry}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.selectedCountry}</p>
                             </div>
                         )}
                         {searchDetails.selectedCity && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>City</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.selectedCity}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.selectedCity}</p>
                             </div>
                         )}
                         {searchDetails.selectedAirport && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Airport</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.selectedAirport}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.selectedAirport}</p>
                             </div>
                         )}
                         {searchDetails.checkInDate && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Check-in Date</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.checkInDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.checkInDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                            </div>
+                        )}
+                        {searchDetails.checkOutDate && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Check-out Date</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.checkOutDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                             </div>
                         )}
                         {searchDetails.nights && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Nights</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.nights} Night{searchDetails.nights !== 1 ? 's' : ''}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.nights} Night{searchDetails.nights !== 1 ? 's' : ''}</p>
                             </div>
                         )}
                         {searchDetails.rooms && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Rooms</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.rooms} Room{searchDetails.rooms !== 1 ? 's' : ''}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.rooms} Room{searchDetails.rooms !== 1 ? 's' : ''}</p>
                             </div>
                         )}
                         {searchDetails.adults && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Guests</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>
                                     {searchDetails.adults} Adult{searchDetails.adults !== 1 ? 's' : ''}
                                     {(searchDetails.children ?? 0) > 0 && `, ${searchDetails.children} Child${searchDetails.children !== 1 ? 'ren' : ''}`}
                                 </p>
@@ -251,54 +387,66 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
         if (serviceType === 'airport-transfer') {
             return (
                 <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', marginBottom: '24px', border: '1px solid #e9ecef' }}>
-                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0499ff', marginBottom: '12px', margin: '0 0 12px 0' }}>Transfer Details</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#000000', marginBottom: '12px', margin: '0 0 12px 0' }}>Transfer Details</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
                         {searchDetails.tripType && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Trip Type</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.tripType === 'oneway' ? 'One Way' : 'Round Trip'}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.tripType === 'oneway' ? 'One Way' : 'Round Trip'}</p>
                             </div>
                         )}
                         {searchDetails.pickupAirport && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Pickup Airport</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.pickupAirport}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.pickupAirport}</p>
                             </div>
                         )}
                         {searchDetails.destinationLocation && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Destination</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.destinationLocation}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.destinationLocation}</p>
                             </div>
                         )}
                         {searchDetails.pickupDate && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Pickup Date</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.pickupDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.pickupDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                             </div>
                         )}
                         {searchDetails.pickupTime && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Pickup Time</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.pickupTime}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.pickupTime}</p>
                             </div>
                         )}
                         {searchDetails.passengers && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Passengers</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.passengers} Passenger{searchDetails.passengers !== 1 ? 's' : ''}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.passengers} Passenger{searchDetails.passengers !== 1 ? 's' : ''}</p>
                             </div>
                         )}
                         {searchDetails.tripType === 'return' && searchDetails.returnDate && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Return Date</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.returnDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.returnDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                             </div>
                         )}
                         {searchDetails.tripType === 'return' && searchDetails.returnTime && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Return Time</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.returnTime}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.returnTime}</p>
+                            </div>
+                        )}
+                        {searchDetails.tripType === 'return' && searchDetails.returnPickupLocation && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Return Pickup</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.returnPickupLocation}</p>
+                            </div>
+                        )}
+                        {searchDetails.tripType === 'return' && searchDetails.returnDestinationLocation && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Return Drop-off</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.returnDestinationLocation}</p>
                             </div>
                         )}
                     </div>
@@ -308,36 +456,36 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
         if (serviceType === 'visa') {
             return (
                 <div style={{ background: '#f8f9fa', padding: '20px', borderRadius: '8px', marginBottom: '24px', border: '1px solid #e9ecef' }}>
-                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#0499ff', marginBottom: '12px', margin: '0 0 12px 0' }}>Booking Details</h3>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <h3 style={{ fontSize: '14px', fontWeight: 700, color: '#000000', marginBottom: '12px', margin: '0 0 12px 0' }}>Booking Details</h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
                         {searchDetails.destinationCountry && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Destination Country</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.destinationCountry}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.destinationCountry}</p>
                             </div>
                         )}
                         {searchDetails.passportCountry && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Passport Country</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.passportCountry}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.passportCountry}</p>
                             </div>
                         )}
                         {searchDetails.visaType && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Visa Type</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.visaType}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.visaType}</p>
                             </div>
                         )}
                         {searchDetails.numberOfTravelers && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Number of Travelers</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{searchDetails.numberOfTravelers}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.numberOfTravelers}</p>
                             </div>
                         )}
                         {searchDetails.travelDate && (
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Travel Date</p>
-                                <p style={{ fontSize: '13px', color: '#0499ff', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.travelDate).toLocaleDateString()}</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{new Date(searchDetails.travelDate).toLocaleDateString()}</p>
                             </div>
                         )}
                     </div>
@@ -379,8 +527,8 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
                     // Booking Form Popup
                     <div style={{ background: '#fff', borderRadius: '16px', padding: '40px', minWidth: '700px', maxWidth: '85vw', maxHeight: '85vh', overflowY: 'auto', boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)', animation: 'slideUp 0.3s ease' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-                            <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#0499ff', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                                <i className={`fa fa-${serviceType === 'flight' ? 'plane' : serviceType === 'hotel' ? 'building' : serviceType === 'visa' ? 'passport' : serviceType === 'package' ? 'cube' : 'car'}`} style={{ color: '#0499ff', fontSize: '20px' }}></i>
+                            <h2 style={{ fontSize: '22px', fontWeight: 700, color: '#000000', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <i className={`fa fa-${serviceType === 'flight' ? 'plane' : serviceType === 'hotel' ? 'building' : serviceType === 'visa' ? 'passport' : serviceType === 'package' ? 'cube' : 'car'}`} style={{ color: '#000000', fontSize: '20px' }}></i>
                                 Complete Your {title} Booking
                             </h2>
                             <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: '#999' }}>×</button>
@@ -391,24 +539,37 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
 
                         {/* Form Fields */}
                         <div style={{ display: 'grid', gap: '14px', marginBottom: '24px' }}>
-                            {/* Row 1: First Name (Full Width) */}
-                            <div>
-                                <label style={{ display: 'block', fontSize: '11px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>First Name</label>
-                                <input type="text" name="firstName" placeholder="First name" value={formData.firstName} onChange={handleInputChange} style={{ width: '100%', padding: '10px', border: '1.5px solid #ddd', borderRadius: '6px', fontSize: '12px', boxSizing: 'border-box', transition: 'border-color 0.3s' }} onFocus={(e) => e.currentTarget.style.borderColor = '#0066cc'} onBlur={(e) => e.currentTarget.style.borderColor = '#ddd'} />
-                            </div>
-
-                            {/* Row 2: Email and Phone (Side by Side) */}
+                            {/* Row 1: First Name and Email (One Row, Two Columns) */}
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+                                {/* First Name */}
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '11px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>First Name</label>
+                                    <input type="text" name="firstName" placeholder="First name" value={formData.firstName} onChange={handleInputChange} style={{ width: '100%', padding: '10px', border: `1.5px solid ${errors.firstName ? '#dc3545' : '#ddd'}`, borderRadius: '6px', fontSize: '12px', boxSizing: 'border-box', transition: 'border-color 0.3s' }} onFocus={(e) => e.currentTarget.style.borderColor = errors.firstName ? '#dc3545' : '#0066cc'} onBlur={(e) => e.currentTarget.style.borderColor = errors.firstName ? '#dc3545' : '#ddd'} />
+                                    {errors.firstName && <p style={{ fontSize: '11px', color: '#dc3545', margin: '4px 0 0 0' }}>{errors.firstName}</p>}
+                                </div>
+
                                 {/* Email */}
                                 <div>
                                     <label style={{ display: 'block', fontSize: '11px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Email</label>
-                                    <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleInputChange} style={{ width: '100%', padding: '10px', border: '1.5px solid #ddd', borderRadius: '6px', fontSize: '12px', boxSizing: 'border-box', transition: 'border-color 0.3s' }} onFocus={(e) => e.currentTarget.style.borderColor = '#0066cc'} onBlur={(e) => e.currentTarget.style.borderColor = '#ddd'} />
+                                    <input type="email" name="email" placeholder="Email" value={formData.email} onChange={handleInputChange} style={{ width: '100%', padding: '10px', border: `1.5px solid ${errors.email ? '#dc3545' : '#ddd'}`, borderRadius: '6px', fontSize: '12px', boxSizing: 'border-box', transition: 'border-color 0.3s' }} onFocus={(e) => e.currentTarget.style.borderColor = errors.email ? '#dc3545' : '#0066cc'} onBlur={(e) => e.currentTarget.style.borderColor = errors.email ? '#dc3545' : '#ddd'} />
+                                    {errors.email && <p style={{ fontSize: '11px', color: '#dc3545', margin: '4px 0 0 0' }}>{errors.email}</p>}
+                                </div>
+                            </div>
+
+                            {/* Row 2: Country Code and Phone (One Row, Two Columns) */}
+                            <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', gap: '14px' }}>
+                                {/* Country Code - Fillable Text Input */}
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '11px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Code</label>
+                                    <input type="text" name="countryCode" placeholder="1" value={formData.countryCode} onChange={handleInputChange} style={{ width: '100%', padding: '10px', border: `1.5px solid ${errors.countryCode ? '#dc3545' : '#ddd'}`, borderRadius: '6px', fontSize: '12px', boxSizing: 'border-box', transition: 'border-color 0.3s' }} onFocus={(e) => e.currentTarget.style.borderColor = errors.countryCode ? '#dc3545' : '#0066cc'} onBlur={(e) => e.currentTarget.style.borderColor = errors.countryCode ? '#dc3545' : '#ddd'} />
+                                    {errors.countryCode && <p style={{ fontSize: '10px', color: '#dc3545', margin: '3px 0 0 0' }}>{errors.countryCode}</p>}
                                 </div>
 
                                 {/* Phone */}
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '11px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Phone</label>
-                                    <input type="tel" name="phone" placeholder="Phone" value={formData.phone} onChange={handleInputChange} style={{ width: '100%', padding: '10px', border: '1.5px solid #ddd', borderRadius: '6px', fontSize: '12px', boxSizing: 'border-box', transition: 'border-color 0.3s' }} onFocus={(e) => e.currentTarget.style.borderColor = '#0066cc'} onBlur={(e) => e.currentTarget.style.borderColor = '#ddd'} />
+                                    <label style={{ display: 'block', fontSize: '11px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Phone Number</label>
+                                    <input type="tel" name="phone" placeholder="Phone Number" value={formData.phone} onChange={handleInputChange} style={{ width: '100%', padding: '10px', border: `1.5px solid ${errors.phone ? '#dc3545' : '#ddd'}`, borderRadius: '6px', fontSize: '12px', boxSizing: 'border-box', transition: 'border-color 0.3s' }} onFocus={(e) => e.currentTarget.style.borderColor = errors.phone ? '#dc3545' : '#0066cc'} onBlur={(e) => e.currentTarget.style.borderColor = errors.phone ? '#dc3545' : '#ddd'} />
+                                    {errors.phone && <p style={{ fontSize: '11px', color: '#dc3545', margin: '4px 0 0 0' }}>{errors.phone}</p>}
                                 </div>
                             </div>
                         </div>

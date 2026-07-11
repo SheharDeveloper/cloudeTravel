@@ -28,7 +28,7 @@ class BookingService
     public function getByService(string $service, int $perPage = 15): LengthAwarePaginator
     {
         return $this->model
-            ->where('service', $service)
+            ->where('type', $service)
             ->latest()
             ->paginate($perPage);
     }
@@ -50,7 +50,7 @@ class BookingService
     public function getByServiceAndStatus(string $service, string $status, int $perPage = 15): LengthAwarePaginator
     {
         return $this->model
-            ->where('service', $service)
+            ->where('type', $service)
             ->where('status', $status)
             ->latest()
             ->paginate($perPage);
@@ -200,7 +200,7 @@ class BookingService
         $query = $this->model->query();
 
         if ($service) {
-            $query->where('service', $service);
+            $query->where('type', $service);
         }
 
         if ($status) {
@@ -209,7 +209,8 @@ class BookingService
 
         if ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
+                $q->where('first_name', 'like', "%{$search}%")
+                  ->orWhere('name', 'like', "%{$search}%")
                   ->orWhere('email', 'like', "%{$search}%");
             });
         }

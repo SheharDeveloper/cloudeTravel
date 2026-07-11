@@ -5,14 +5,18 @@ import { useBookings } from '@/hooks/useBookings';
 export default function BookingsIndex() {
     const { bookings, currentPage, lastPage, filters, loading, handleFilterChange, handlePageChange, handleReset } = useBookings();
 
-    const getServiceBadgeColor = (service: string) => {
-        switch (service) {
+    const getServiceBadgeColor = (type: string | undefined) => {
+        switch (type) {
             case 'flight':
                 return 'bg-primary';
             case 'hotel':
                 return 'bg-success';
             case 'visa':
                 return 'bg-warning';
+            case 'package':
+                return 'bg-info';
+            case 'transport':
+                return 'bg-danger';
             default:
                 return 'bg-secondary';
         }
@@ -40,14 +44,43 @@ export default function BookingsIndex() {
     };
 
     const getServiceDetails = (booking: any) => {
-        if (booking.service === 'flight') {
-            return `${booking.from_city} → ${booking.to_city}`;
-        } else if (booking.service === 'hotel') {
-            return booking.country || 'N/A';
-        } else if (booking.service === 'visa') {
-            return booking.destination || 'N/A';
+        if (booking.type === 'flight') {
+            const flightData = booking.flight_data || {};
+            return `${flightData.from || flightData.fromCity || 'N/A'} → ${flightData.to || flightData.toCity || 'N/A'}`;
+        } else if (booking.type === 'hotel') {
+            const hotelData = booking.hotel_data || {};
+            return `${hotelData.hotelCountry || 'N/A'} - ${hotelData.hotelCity || 'N/A'}`;
+        } else if (booking.type === 'visa') {
+            const visaData = booking.visa_data || {};
+            return visaData.destinationCountry || 'N/A';
+        } else if (booking.type === 'package') {
+            const packageData = booking.package_data || {};
+            return packageData.selectedCountry || 'N/A';
+        } else if (booking.type === 'transport') {
+            const transportData = booking.airport_transport_data || {};
+            return `${transportData.pickupAirport || 'N/A'} → ${transportData.destinationLocation || 'N/A'}`;
         }
         return 'N/A';
+    };
+
+    const getTravelDate = (booking: any) => {
+        if (booking.type === 'flight') {
+            const flightData = booking.flight_data || {};
+            return flightData.departureDate || booking.travel_date;
+        } else if (booking.type === 'hotel') {
+            const hotelData = booking.hotel_data || {};
+            return hotelData.checkInDate || booking.check_in_date;
+        } else if (booking.type === 'visa') {
+            const visaData = booking.visa_data || {};
+            return visaData.travelDate || booking.travel_date;
+        } else if (booking.type === 'package') {
+            const packageData = booking.package_data || {};
+            return packageData.checkInDate || booking.check_in_date;
+        } else if (booking.type === 'transport') {
+            const transportData = booking.airport_transport_data || {};
+            return transportData.pickupDate || booking.travel_date;
+        }
+        return booking.travel_date;
     };
 
     return (
@@ -86,6 +119,8 @@ export default function BookingsIndex() {
                                         <option value="flight">Flight</option>
                                         <option value="hotel">Hotel</option>
                                         <option value="visa">Visa</option>
+                                        <option value="package">Package</option>
+                                        <option value="transport">Airport Transfer</option>
                                     </select>
                                 </div>
                                 <div className="col-md-3">
@@ -142,12 +177,12 @@ export default function BookingsIndex() {
                                                             <strong>#{booking.id}</strong>
                                                         </td>
                                                         <td>
-                                                            <span className={`badge ${getServiceBadgeColor(booking.service)}`}>
-                                                                {booking.service.charAt(0).toUpperCase() + booking.service.slice(1)}
+                                                            <span className={`badge ${getServiceBadgeColor(booking.type || booking.service || 'unknown')}`}>
+                                                                {(booking.type || booking.service || 'unknown').charAt(0).toUpperCase() + (booking.type || booking.service || 'unknown').slice(1)}
                                                             </span>
                                                         </td>
                                                         <td>
-                                                            <strong>{booking.name}</strong>
+                                                            <strong>{booking.first_name || booking.name || 'N/A'}</strong>
                                                         </td>
                                                         <td>
                                                             <small>{booking.email}</small>
@@ -165,7 +200,7 @@ export default function BookingsIndex() {
                                                         </td>
                                                         <td>
                                                             <small>
-                                                                {booking.travel_date ? formatDate(booking.travel_date) : 'N/A'}
+                                                                {getTravelDate(booking) ? formatDate(getTravelDate(booking)) : 'N/A'}
                                                             </small>
                                                         </td>
                                                         <td>

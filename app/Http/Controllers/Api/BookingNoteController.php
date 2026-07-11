@@ -13,17 +13,8 @@ class BookingNoteController extends Controller
     /**
      * Get all notes for a booking
      */
-    public function index(string $bookingId): JsonResponse
+    public function index(Booking $booking): JsonResponse
     {
-        $booking = Booking::find($bookingId);
-
-        if (!$booking) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Booking not found',
-            ], 404);
-        }
-
         $notes = $booking->notes()->latest()->get();
 
         return response()->json([
@@ -35,17 +26,8 @@ class BookingNoteController extends Controller
     /**
      * Store a new note for a booking
      */
-    public function store(Request $request, string $bookingId): JsonResponse
+    public function store(Request $request, Booking $booking): JsonResponse
     {
-        $booking = Booking::find($bookingId);
-
-        if (!$booking) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Booking not found',
-            ], 404);
-        }
-
         $validated = $request->validate([
             'note' => 'required|string',
             'user_name' => 'nullable|string',
@@ -71,24 +53,13 @@ class BookingNoteController extends Controller
     /**
      * Delete a note
      */
-    public function destroy(string $bookingId, string $noteId): JsonResponse
+    public function destroy(Booking $booking, BookingNote $note): JsonResponse
     {
-        $booking = Booking::find($bookingId);
-
-        if (!$booking) {
+        if ($note->booking_id !== $booking->id) {
             return response()->json([
                 'success' => false,
-                'message' => 'Booking not found',
-            ], 404);
-        }
-
-        $note = $booking->notes()->find($noteId);
-
-        if (!$note) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Note not found',
-            ], 404);
+                'message' => 'Note does not belong to this booking',
+            ], 403);
         }
 
         try {

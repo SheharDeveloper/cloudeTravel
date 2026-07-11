@@ -122,8 +122,8 @@ export default function Home() {
     }, [testimonials]);
 
     const loadSpecialOffers = async () => {
-        const offers = await specialOfferService.getAll();
-        setSpecialOffers(offers);
+        const result = await specialOfferService.getAllOffers();
+        setSpecialOffers(result.offers);
     };
 
     const loadHeroImages = async () => {

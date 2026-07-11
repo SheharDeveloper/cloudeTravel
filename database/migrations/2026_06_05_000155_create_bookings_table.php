@@ -14,30 +14,42 @@ return new class extends Migration
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
             $table->uuid('uid')->unique();
-            $table->string('service')->comment('flight, hotel, or visa');
-            $table->string('name');
+
+            // User Information
+            $table->string('first_name');
             $table->string('email');
-            $table->string('phone')->nullable();
-            $table->string('country')->nullable();
-            $table->integer('total_members')->default(1);
-            $table->date('travel_date')->nullable();
-            $table->string('from_city')->nullable()->comment('For flights');
-            $table->string('to_city')->nullable()->comment('For flights');
-            $table->string('trip_type')->nullable()->comment('oneway or roundtrip');
-            $table->date('return_date')->nullable()->comment('For round trip flights');
-            $table->string('travel_class')->nullable()->comment('Economy, Business, etc');
-            $table->string('destination')->nullable()->comment('For visas');
-            $table->string('passport_country')->nullable()->comment('For visas');
-            $table->string('visa_type')->nullable()->comment('Visa type for visa bookings');
-            $table->string('hotel_city')->nullable()->comment('For hotels');
-            $table->date('check_in_date')->nullable()->comment('For hotels');
-            $table->date('check_out_date')->nullable()->comment('For hotels');
-            $table->integer('rooms')->nullable()->comment('For hotels');
-            $table->integer('guests')->nullable()->comment('For hotels');
+            $table->string('country_code');
+            $table->string('phone');
+
+            // Booking Type
+            $table->enum('type', ['flight', 'hotel', 'visa', 'package', 'transport'])->comment('Service type');
+
+            // Service-specific JSON data
+            $table->json('flight_data')->nullable()->comment('Flight details');
+            $table->json('hotel_data')->nullable()->comment('Hotel details');
+            $table->json('visa_data')->nullable()->comment('Visa details');
+            $table->json('package_data')->nullable()->comment('Package details');
+            $table->json('airport_transport_data')->nullable()->comment('Airport transport details');
+
+            // Optional foreign keys
+            $table->unsignedBigInteger('visa_type_id')->nullable()->comment('Link to visa type if visa booking');
+            $table->unsignedBigInteger('special_offer_id')->nullable()->comment('Link to special offer if chosen');
+
+            // Status
+            $table->enum('status', ['pending', 'confirmed', 'cancelled', 'completed'])->default('pending');
+
+            // Legacy columns (keeping for compatibility)
+            $table->string('service')->nullable()->comment('flight, hotel, visa, package, or transport');
             $table->text('notes')->nullable();
-            $table->string('status')->default('pending')->comment('pending, confirmed, cancelled');
+
+            // Timestamps
             $table->timestamps();
             $table->softDeletes();
+
+            // Indexes
+            $table->index('type');
+            $table->index('status');
+            $table->index('email');
         });
     }
 

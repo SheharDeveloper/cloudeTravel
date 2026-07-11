@@ -27,12 +27,22 @@ export default function CreateSpecialOffer({ currency }: CreateProps) {
         is_active: true,
         is_featured: false,
         flight_name: "",
+        flight_origin: "",
+        flight_destination: "",
         hotel_name: "",
         hotel_star_rating: "",
+        hotel_country: "",
+        hotel_city: "",
         visa_name: "",
+        visa_destination_country: "",
+        visa_passport_country: "",
         is_visa: false,
+        package_country: "",
+        package_city: "",
         transport_name: "",
         transport_type: "",
+        transport_origin: "",
+        transport_destination: "",
         is_transport: false,
         rating: "",
     });
@@ -216,16 +226,48 @@ export default function CreateSpecialOffer({ currency }: CreateProps) {
                                     <h5 className="mb-0">✈️ Flight</h5>
                                 </div>
                                 <div className="card-body">
-                                    <div className="mb-3">
-                                        <label className="form-label">Flight Name</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="flight_name"
-                                            value={formData.flight_name}
-                                            onChange={handleChange}
-                                            placeholder="e.g., Air India AI101"
-                                        />
+                                    <div className="row">
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label className="form-label">Flight Name</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="flight_name"
+                                                    value={formData.flight_name}
+                                                    onChange={handleChange}
+                                                    placeholder="e.g., Air India AI101"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="row">
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label className="form-label">Origin</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="flight_origin"
+                                                    value={formData.flight_origin}
+                                                    onChange={handleChange}
+                                                    placeholder="e.g., DEL - Delhi"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label className="form-label">Destination</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="flight_destination"
+                                                    value={formData.flight_destination}
+                                                    onChange={handleChange}
+                                                    placeholder="e.g., LHR - London"
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -267,6 +309,34 @@ export default function CreateSpecialOffer({ currency }: CreateProps) {
                                             </div>
                                         </div>
                                     </div>
+                                    <div className="row">
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label className="form-label">Country</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="hotel_country"
+                                                    value={formData.hotel_country}
+                                                    onChange={handleChange}
+                                                    placeholder="e.g., India"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label className="form-label">City</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="hotel_city"
+                                                    value={formData.hotel_city}
+                                                    onChange={handleChange}
+                                                    placeholder="e.g., Delhi"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -289,6 +359,34 @@ export default function CreateSpecialOffer({ currency }: CreateProps) {
                                             placeholder="e.g., Schengen Visa"
                                         />
                                     </div>
+                                    <div className="row">
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label className="form-label">Destination Country</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="visa_destination_country"
+                                                    value={formData.visa_destination_country}
+                                                    onChange={handleChange}
+                                                    placeholder="e.g., France"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label className="form-label">Passport Country</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="visa_passport_country"
+                                                    value={formData.visa_passport_country}
+                                                    onChange={handleChange}
+                                                    placeholder="e.g., India"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
                                     {formData.type === "Package" && (
                                         <div className="form-check">
                                             <input
@@ -304,6 +402,45 @@ export default function CreateSpecialOffer({ currency }: CreateProps) {
                                             </label>
                                         </div>
                                     )}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Package Details Card */}
+                        {(formData.type === "Package") && (
+                            <div className="card">
+                                <div className="card-header">
+                                    <h5 className="mb-0">📦 Package</h5>
+                                </div>
+                                <div className="card-body">
+                                    <div className="row">
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label className="form-label">Country</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="package_country"
+                                                    value={formData.package_country}
+                                                    onChange={handleChange}
+                                                    placeholder="e.g., France"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label className="form-label">City</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="package_city"
+                                                    value={formData.package_city}
+                                                    onChange={handleChange}
+                                                    placeholder="e.g., Paris"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         )}
@@ -339,6 +476,34 @@ export default function CreateSpecialOffer({ currency }: CreateProps) {
                                                 <option key={type} value={type}>{type}</option>
                                             ))}
                                         </select>
+                                    </div>
+                                    <div className="row">
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label className="form-label">Origin</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="transport_origin"
+                                                    value={formData.transport_origin}
+                                                    onChange={handleChange}
+                                                    placeholder="e.g., Airport"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-md-6">
+                                            <div className="mb-3">
+                                                <label className="form-label">Destination</label>
+                                                <input
+                                                    type="text"
+                                                    className="form-control"
+                                                    name="transport_destination"
+                                                    value={formData.transport_destination}
+                                                    onChange={handleChange}
+                                                    placeholder="e.g., City Center"
+                                                />
+                                            </div>
+                                        </div>
                                     </div>
                                     {formData.type === "Package" && (
                                         <div className="form-check">

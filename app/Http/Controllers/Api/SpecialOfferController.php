@@ -24,11 +24,43 @@ class SpecialOfferController extends Controller
     {
         $perPage = request()->query('per_page', 100);
         $page = request()->query('page', 1);
+        $type = request()->query('type', null);
+        $featured = request()->query('featured', null);
+        $search = request()->query('search', null);
 
-        // Get active special offers with images
-        $offers = $this->specialOfferService->getAll($perPage, $page);
+        $query = \App\Models\SpecialOffer::with('images')->where('is_active', true);
 
-        return response()->json($offers);
+        // Filter by type
+        if ($type) {
+            $query->where('type', $type);
+        }
+
+        // Filter featured
+        if ($featured === 'true' || $featured === '1') {
+            $query->where('is_featured', true);
+        }
+
+        // Search by name or description
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        $offers = $query->latest()->paginate($perPage, ['*'], 'page', $page);
+
+        return response()->json([
+            'offers' => $offers->items(),
+            'pagination' => [
+                'total' => $offers->total(),
+                'per_page' => $offers->perPage(),
+                'current_page' => $offers->currentPage(),
+                'last_page' => $offers->lastPage(),
+                'from' => $offers->firstItem(),
+                'to' => $offers->lastItem(),
+            ]
+        ]);
     }
 
     /**

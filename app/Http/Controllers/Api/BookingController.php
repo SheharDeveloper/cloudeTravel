@@ -51,34 +51,23 @@ class BookingController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'service' => 'required|string|in:flight,hotel,visa,package,airport-transfer',
-            'formData' => 'array',
-            'formData.firstName' => 'required_if:service,flight,hotel,visa,package,airport-transfer|string',
-            'formData.email' => 'required_if:service,flight,hotel,visa,package,airport-transfer|email',
-            'formData.phone' => 'nullable|string',
-            'searchParams' => 'array',
+            'type' => 'required|string|in:flight,hotel,visa,package,transport',
+            'first_name' => 'required|string|min:2',
+            'email' => 'required|email',
+            'country_code' => 'required|string',
+            'phone' => 'required|string',
+            'status' => 'required|string|in:pending,confirmed,cancelled,completed',
+            'flight_data' => 'nullable|array',
+            'hotel_data' => 'nullable|array',
+            'visa_data' => 'nullable|array',
+            'package_data' => 'nullable|array',
+            'airport_transport_data' => 'nullable|array',
+            'visa_type_id' => 'nullable|integer',
+            'special_offer_id' => 'nullable|integer',
         ]);
 
         try {
-            $service = $validated['service'];
-            $formData = $validated['formData'] ?? [];
-            $searchParams = $validated['searchParams'] ?? [];
-
-            $booking = match ($service) {
-                'flight' => $this->bookingService->createFlightBooking($formData, $searchParams),
-                'hotel' => $this->bookingService->createHotelBooking($formData, $searchParams),
-                'visa' => $this->bookingService->createVisaBooking($formData, $searchParams),
-                'package' => $this->bookingService->createPackageBooking($formData, $searchParams),
-                'airport-transfer' => $this->bookingService->createAirportTransferBooking($formData, $searchParams),
-                default => null,
-            };
-
-            if (!$booking) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Invalid service type',
-                ], 400);
-            }
+            $booking = Booking::create($validated);
 
             return response()->json([
                 'success' => true,

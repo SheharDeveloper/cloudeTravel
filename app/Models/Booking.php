@@ -13,10 +13,23 @@ class Booking extends Model
 
     protected $fillable = [
         'uid',
+        'type',
         'service',
-        'name',
+        'first_name',
         'email',
+        'country_code',
         'phone',
+        'flight_data',
+        'hotel_data',
+        'visa_data',
+        'package_data',
+        'airport_transport_data',
+        'visa_type_id',
+        'special_offer_id',
+        'status',
+        'notes',
+        // Legacy columns
+        'name',
         'country',
         'total_members',
         'travel_date',
@@ -33,18 +46,26 @@ class Booking extends Model
         'check_out_date',
         'rooms',
         'guests',
-        'notes',
-        'status',
     ];
 
     protected $casts = [
+        // JSON columns
+        'flight_data' => 'array',
+        'hotel_data' => 'array',
+        'visa_data' => 'array',
+        'package_data' => 'array',
+        'airport_transport_data' => 'array',
+        // Date columns
         'travel_date' => 'date',
         'return_date' => 'date',
         'check_in_date' => 'date',
         'check_out_date' => 'date',
+        // Integer columns
         'total_members' => 'integer',
         'rooms' => 'integer',
         'guests' => 'integer',
+        'visa_type_id' => 'integer',
+        'special_offer_id' => 'integer',
     ];
 
     public function notes(): HasMany

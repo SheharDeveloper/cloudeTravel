@@ -491,14 +491,14 @@ export default function AirportTransportForm(): React.ReactElement {
                 onClose={handleCloseBookingModal}
                 searchDetails={{
                     tripType,
-                    pickupAirport,
+                    pickupAirport: pickupAirport ? `${pickupAirport} - ${airportList.find(a => a.code === pickupAirport)?.name}` : '',
                     destinationLocation,
                     pickupDate,
                     pickupTime,
                     returnDate: tripType === 'return' ? returnDate : undefined,
                     returnTime: tripType === 'return' ? returnTime : undefined,
-                    returnPickupLocation: tripType === 'return' ? returnPickupLocation : undefined,
-                    returnDestinationLocation: tripType === 'return' ? returnDestinationLocation : undefined,
+                    returnPickupLocation: tripType === 'return' ? (returnPickupLocation || destinationLocation) : undefined,
+                    returnDestinationLocation: tripType === 'return' ? (returnDestinationLocation || (pickupAirport ? `${pickupAirport} - ${airportList.find(a => a.code === pickupAirport)?.name}` : '')) : undefined,
                     passengers,
                 }}
                 serviceType="airport-transfer"

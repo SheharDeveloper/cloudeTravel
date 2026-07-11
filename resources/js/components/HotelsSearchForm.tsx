@@ -440,7 +440,8 @@ export default function HotelsSearchForm(): React.ReactElement {
                 isOpen={showBookingModal}
                 onClose={handleCloseBookingModal}
                 searchDetails={{
-                    hotelCity,
+                    hotelCity: hotelCityManual || hotelCity,
+                    hotelCountry: countries.find((c: any) => c.code === hotelCity)?.name,
                     stayType,
                     checkInDate,
                     checkOutDate: stayType === 'overnight' ? checkOutDate : checkInDate,

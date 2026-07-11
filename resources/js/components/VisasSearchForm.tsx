@@ -375,9 +375,10 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
                 isOpen={showBookingModal}
                 onClose={handleCloseBookingModal}
                 searchDetails={{
-                    destinationCountry,
-                    passportCountry,
+                    destinationCountry: countries.find((c: any) => c.code === destinationCountry)?.name || destinationCountry,
+                    passportCountry: countries.find((c: any) => c.code === passportCountry)?.name || passportCountry,
                     visaType,
+                    visaTypeId: visaTypesList.find((v: any) => v.name === visaType)?.id,
                     numberOfTravelers,
                     travelDate,
                 }}

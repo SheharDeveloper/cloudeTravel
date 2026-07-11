@@ -1,167 +1,112 @@
-// Service for managing special travel offers
-// All API calls are handled here with proper authentication and error handling
+// Special Offer API Service
+const API_BASE_URL = '/api/special-offers';
 
-import { apiFetch } from '@/lib/api';
-
-// Special offer interface matching the database schema
-export interface SpecialOffer {
+interface SpecialOfferData {
     id: number;
     uid: string;
     name: string;
     type: string;
-    description?: string;
-    sub_description?: string;
-    duration_days?: number;
-    duration_nights?: number;
+    description: string;
+    sub_description: string;
     total_price: number;
+    rating: number;
     is_active: boolean;
     is_featured: boolean;
+    images?: any[];
+    flight_origin?: string;
+    flight_destination?: string;
     flight_name?: string;
+    hotel_country?: string;
+    hotel_city?: string;
     hotel_name?: string;
     hotel_star_rating?: number;
+    visa_destination_country?: string;
+    visa_passport_country?: string;
     visa_name?: string;
-    is_visa?: boolean;
+    transport_origin?: string;
+    transport_destination?: string;
     transport_name?: string;
     transport_type?: string;
-    is_transport?: boolean;
-    rating?: number;
-    images?: Array<{ id: number; image_path: string; }>;
-    created_at?: string;
-    updated_at?: string;
+    duration_days?: number;
+    duration_nights?: number;
 }
 
-// Default fallback image if offer image is not available
-const DEFAULT_IMAGE = 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=600&q=80';
-
-// Service class for all special offer operations
-class SpecialOfferService {
-    /**
-     * Fetch all special offers from the API
-     * - Used by public homepage to display current deals
-     * - Returns both active and inactive offers
-     * @returns Promise<SpecialOffer[]> - Array of special offers
-     */
-    async getAll(): Promise<SpecialOffer[]> {
+export const specialOfferService = {
+    // Fetch all special offers
+    async getAllOffers(page: number = 1): Promise<{ offers: SpecialOfferData[], pagination: any }> {
         try {
-            const response = await fetch('/api/special-offers');
-            if (response.ok) {
-                const data = await response.json();
-                // Handle paginated response (Laravel paginator returns { data: [], ... })
-                const offers = Array.isArray(data) ? data : (data.data || []);
-                return offers as SpecialOffer[];
-            }
+            const response = await fetch(`${API_BASE_URL}?page=${page}&per_page=50`);
+            if (!response.ok) throw new Error('Failed to fetch special offers');
+
+            const data = await response.json();
+            return {
+                offers: data.offers || [],
+                pagination: data.pagination || {}
+            };
+        } catch (error) {
+            console.error('Error fetching special offers:', error);
+            return { offers: [], pagination: {} };
+        }
+    },
+
+    // Get featured special offers
+    async getFeaturedOffers(page: number = 1): Promise<SpecialOfferData[]> {
+        try {
+            const response = await fetch(`${API_BASE_URL}?featured=true&page=${page}&per_page=50`);
+            if (!response.ok) throw new Error('Failed to fetch featured offers');
+
+            const data = await response.json();
+            return data.offers || [];
+        } catch (error) {
+            console.error('Error fetching featured offers:', error);
             return [];
-        } catch (err) {
-            console.error('Failed to fetch special offers:', err);
+        }
+    },
+
+    // Get offers by type
+    async getOffersByType(type: string, page: number = 1): Promise<SpecialOfferData[]> {
+        try {
+            const response = await fetch(`${API_BASE_URL}?type=${encodeURIComponent(type)}&page=${page}&per_page=50`);
+            if (!response.ok) throw new Error('Failed to fetch offers by type');
+
+            const data = await response.json();
+            return data.offers || [];
+        } catch (error) {
+            console.error('Error fetching offers by type:', error);
             return [];
         }
-    }
+    },
 
-    /**
-     * Fetch a single special offer by ID
-     * - Can be used by public endpoints to display detailed offer information
-     * @param id - Special offer ID to fetch
-     * @returns Promise<SpecialOffer | null> - Offer details or null on failure
-     */
-    async getById(id: number): Promise<SpecialOffer | null> {
+    // Search offers by name
+    async searchOffers(query: string, page: number = 1): Promise<SpecialOfferData[]> {
+        if (!query.trim()) {
+            const result = await this.getAllOffers(page);
+            return result.offers;
+        }
+
         try {
-            const response = await fetch(`/api/special-offers/${id}`);
-            if (response.ok) {
-                const offer = await response.json();
-                return {
-                    ...offer,
-                    image: offer.image || DEFAULT_IMAGE,
-                };
-            }
-            return null;
-        } catch (err) {
-            console.error('Failed to fetch special offer:', err);
+            const response = await fetch(`${API_BASE_URL}?search=${encodeURIComponent(query)}&page=${page}&per_page=50`);
+            if (!response.ok) return [];
+
+            const data = await response.json();
+            return data.offers || [];
+        } catch (error) {
+            console.error('Error searching offers:', error);
+            return [];
+        }
+    },
+
+    // Get single offer by UID
+    async getOfferByUid(uid: string): Promise<SpecialOfferData | null> {
+        try {
+            const response = await fetch(`${API_BASE_URL}-detail/${uid}`);
+            if (!response.ok) return null;
+
+            const data = await response.json();
+            return data || null;
+        } catch (error) {
+            console.error('Error fetching offer:', error);
             return null;
         }
     }
-
-    /**
-     * Create a new special offer via API
-     * - Requires authentication (admin only)
-     * - Uses POST method
-     * @param data - Offer data to create (airline, from, destinations, price, description, image)
-     * @returns Promise<SpecialOffer | null> - Created offer or null on failure
-     */
-    async create(data: Omit<SpecialOffer, 'id' | 'created_at' | 'updated_at'>): Promise<SpecialOffer | null> {
-        try {
-            const response = await apiFetch('/api/special-offers', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
-            });
-
-            if (response.ok) {
-                const offer = await response.json();
-                return {
-                    ...offer,
-                    image: offer.image || DEFAULT_IMAGE,
-                };
-            }
-            return null;
-        } catch (err) {
-            console.error('Failed to create special offer:', err);
-            return null;
-        }
-    }
-
-    /**
-     * Update an existing special offer via API
-     * - Requires authentication (admin only)
-     * - Uses PUT method
-     * @param id - Special offer ID to update
-     * @param data - Updated offer data (any fields can be updated)
-     * @returns Promise<SpecialOffer | null> - Updated offer or null on failure
-     */
-    async update(id: number, data: Partial<SpecialOffer>): Promise<SpecialOffer | null> {
-        try {
-            const response = await apiFetch(`/api/special-offers/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
-            });
-
-            if (response.ok) {
-                const offer = await response.json();
-                return {
-                    ...offer,
-                    image: offer.image || DEFAULT_IMAGE,
-                };
-            }
-            return null;
-        } catch (err) {
-            console.error('Failed to update special offer:', err);
-            return null;
-        }
-    }
-
-    /**
-     * Delete a special offer via API
-     * - Requires authentication (admin only)
-     * - Uses DELETE method
-     * @param id - Special offer ID to delete
-     * @returns Promise<boolean> - True if deletion successful, false otherwise
-     */
-    async delete(id: number): Promise<boolean> {
-        try {
-            const response = await apiFetch(`/api/special-offers/${id}`, {
-                method: 'DELETE',
-            });
-
-            if (!response.ok) {
-                const error = await response.json().catch(() => ({}));
-                console.error('Delete failed with status:', response.status, error);
-            }
-            return response.ok;
-        } catch (err) {
-            console.error('Failed to delete special offer:', err);
-            return false;
-        }
-    }
-}
-
-export const specialOfferService = new SpecialOfferService();
+};

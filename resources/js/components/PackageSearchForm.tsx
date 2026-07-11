@@ -9,6 +9,7 @@ interface PackageSearchFormProps {
 
 export default function PackageSearchForm({ onCountrySelect }: PackageSearchFormProps): React.ReactElement {
     const [selectedCountry, setSelectedCountry] = useState('');
+    const [selectedCountryName, setSelectedCountryName] = useState('');
     const [selectedCity, setSelectedCity] = useState('');
     const [selectedAirport, setSelectedAirport] = useState('');
     const [checkInDate, setCheckInDate] = useState('');
@@ -23,16 +24,12 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
     const [showBookingModal, setShowBookingModal] = useState(false);
     const [flexibleDays, setFlexibleDays] = useState(0);
     const [countrySearch, setCountrySearch] = useState('');
-    const [citySearch, setCitySearch] = useState('');
     const [airportSearch, setAirportSearch] = useState('');
     const [showCountryDropdown, setShowCountryDropdown] = useState(false);
-    const [showCityDropdown, setShowCityDropdown] = useState(false);
     const [showAirportDropdown, setShowAirportDropdown] = useState(false);
     const [apiCountries, setApiCountries] = useState<any[]>([]);
-    const [loadingCountries, setLoadingCountries] = useState(true);
 
     const countryRef = useRef<HTMLDivElement>(null);
-    const cityRef = useRef<HTMLDivElement>(null);
     const airportRef = useRef<HTMLDivElement>(null);
     const calendarRef = useRef<HTMLDivElement>(null);
     const guestModalRef = useRef<HTMLDivElement>(null);
@@ -41,9 +38,6 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
         const handleClickOutside = (event: MouseEvent) => {
             if (countryRef.current && !countryRef.current.contains(event.target as Node)) {
                 setShowCountryDropdown(false);
-            }
-            if (cityRef.current && !cityRef.current.contains(event.target as Node)) {
-                setShowCityDropdown(false);
             }
             if (airportRef.current && !airportRef.current.contains(event.target as Node)) {
                 setShowAirportDropdown(false);
@@ -63,10 +57,8 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
     // Fetch countries on component mount
     useEffect(() => {
         const fetchCountries = async () => {
-            setLoadingCountries(true);
             const data = await countryService.getAllCountries();
             setApiCountries(data);
-            setLoadingCountries(false);
         };
         fetchCountries();
     }, []);
@@ -84,70 +76,24 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
 
     const checkOutDate = calculateCheckoutDate();
 
-    const countryData = [
-        {
-            code: 'UK',
-            name: 'United Kingdom',
-            cities: [
-                { code: 'LON', name: 'London', airports: [{ code: 'LHR', name: 'London Heathrow' }, { code: 'LGW', name: 'London Gatwick' }] },
-                { code: 'MAN', name: 'Manchester', airports: [{ code: 'MAN', name: 'Manchester Airport' }] },
-            ]
-        },
-        {
-            code: 'IN',
-            name: 'India',
-            cities: [
-                { code: 'DEL', name: 'Delhi', airports: [{ code: 'DEL', name: 'Indira Gandhi International' }] },
-                { code: 'BOM', name: 'Mumbai', airports: [{ code: 'BOM', name: 'Bombay International' }] },
-            ]
-        },
-        {
-            code: 'US',
-            name: 'United States',
-            cities: [
-                { code: 'NYC', name: 'New York', airports: [{ code: 'JFK', name: 'John F. Kennedy' }, { code: 'LGA', name: 'LaGuardia' }] },
-                { code: 'LAX', name: 'Los Angeles', airports: [{ code: 'LAX', name: 'Los Angeles International' }] },
-            ]
-        },
-        {
-            code: 'FR',
-            name: 'France',
-            cities: [
-                { code: 'PAR', name: 'Paris', airports: [{ code: 'CDG', name: 'Charles de Gaulle' }, { code: 'ORY', name: 'Orly' }] },
-            ]
-        },
-        {
-            code: 'AE',
-            name: 'United Arab Emirates',
-            cities: [
-                { code: 'DXB', name: 'Dubai', airports: [{ code: 'DXB', name: 'Dubai International' }] },
-            ]
-        },
-        {
-            code: 'SG',
-            name: 'Singapore',
-            cities: [
-                { code: 'SIN', name: 'Singapore', airports: [{ code: 'SIN', name: 'Changi Airport' }] },
-            ]
-        },
+    const filterCountries = (search: string) => {
+        if (!search || !apiCountries.length) return apiCountries;
+        return apiCountries.filter((country: any) =>
+            country.code.toLowerCase().includes(search.toLowerCase()) ||
+            country.name.toLowerCase().includes(search.toLowerCase())
+        );
+    };
+
+    const airportList = [
+        { code: 'LHR', name: 'London Heathrow' },
+        { code: 'CDG', name: 'Paris Charles de Gaulle' },
+        { code: 'JFK', name: 'New York JFK' },
+        { code: 'NRT', name: 'Tokyo Narita' },
+        { code: 'DXB', name: 'Dubai International' },
+        { code: 'SIN', name: 'Singapore Changi' },
+        { code: 'BOM', name: 'Mumbai International' },
+        { code: 'SYD', name: 'Sydney Kingsford Smith' },
     ];
-
-    const getCitiesForCountry = (countryCode: string) => {
-        const country = countryData.find(c => c.code === countryCode);
-        return country ? country.cities : [];
-    };
-
-    const getAllAirports = () => {
-        const airports: any[] = [];
-        countryData.forEach(country => {
-            country.cities.forEach(city => {
-                city.airports.forEach(airport => {
-                    airports.push(airport);
-                });
-            });
-        });
-        return airports;
-    };
 
     const handleSearch = () => {
         if (!selectedCountry || !selectedCity || !selectedAirport || !checkInDate || !checkOutDate) {
@@ -161,6 +107,7 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
     const handleCloseBookingModal = () => {
         setShowBookingModal(false);
         setSelectedCountry('');
+        setSelectedCountryName('');
         setSelectedCity('');
         setSelectedAirport('');
         setCheckInDate('');
@@ -170,16 +117,14 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
         setNights(7);
         setFlexibleDays(0);
         setCountrySearch('');
-        setCitySearch('');
         setAirportSearch('');
         setShowCountryDropdown(false);
-        setShowCityDropdown(false);
         setShowAirportDropdown(false);
     };
 
     return (
         <div>
-            {/* Row 1: Country, City, Airport - 3 columns */}
+            {/* Row 1: Country, City, and Airport - 3 columns */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px', alignItems: 'flex-start' }}>
                 {/* Country Selector - Searchable */}
                 <div ref={countryRef} style={{ position: 'relative', width: '100%' }}>
@@ -190,11 +135,11 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
                     <input
                         type="text"
                         placeholder="Search country..."
-                        value={countrySearch || (selectedCountry ? countryData.find(c => c.code === selectedCountry)?.name || '' : '')}
+                        value={countrySearch || selectedCountryName}
                         onChange={(e) => {
                             setCountrySearch(e.target.value);
                             setSelectedCountry('');
-                            setSelectedCity('');
+                            setSelectedCountryName('');
                             setShowCountryDropdown(true);
                         }}
                         onFocus={(e) => {
@@ -210,75 +155,52 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
                     />
                     {showCountryDropdown && (
                         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '250px', overflowY: 'auto' }}>
-                            {(apiCountries.length > 0 ? apiCountries : countryData).filter((c: any) => c.name.toLowerCase().includes(countrySearch.toLowerCase())).map((country: any) => (
-                                <div
-                                    key={country.code}
-                                    onClick={() => {
-                                        setSelectedCountry(country.code);
-                                        onCountrySelect?.(country.name);
-                                        setCountrySearch('');
-                                        setShowCountryDropdown(false);
-                                        setSelectedCity('');
-                                    }}
-                                    style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#000000', transition: 'background 0.2s' }}
-                                    onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
-                                    onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
-                                >
-                                    {country.name}
-                                </div>
-                            ))}
+                            {filterCountries(countrySearch).length > 0 ? (
+                                filterCountries(countrySearch).map((country: any) => (
+                                    <div
+                                        key={country.code}
+                                        onClick={() => {
+                                            setSelectedCountry(country.code);
+                                            setSelectedCountryName(country.name);
+                                            onCountrySelect?.(country.name);
+                                            setCountrySearch('');
+                                            setShowCountryDropdown(false);
+                                        }}
+                                        style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#000000', transition: 'background 0.2s' }}
+                                        onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
+                                        onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
+                                    >
+                                        <strong>{country.code}</strong> - {country.name}
+                                    </div>
+                                ))
+                            ) : (
+                                <div style={{ padding: '12px', color: '#000000', fontSize: '13px', textAlign: 'center' }}>No countries found</div>
+                            )}
                         </div>
                     )}
                 </div>
 
-                {/* City Selector - Searchable */}
-                <div ref={cityRef} style={{ position: 'relative', width: '100%' }}>
+                {/* City Input - Fillable Text Field */}
+                <div style={{ position: 'relative', width: '100%' }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>City</label>
                     <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '16px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-building"></i>
                     </div>
                     <input
                         type="text"
-                        placeholder={selectedCountry ? "Search city..." : "Select country first"}
-                        value={citySearch || (selectedCity ? getCitiesForCountry(selectedCountry).find(c => c.code === selectedCity)?.name || '' : '')}
-                        onChange={(e) => {
-                            setCitySearch(e.target.value);
-                            setSelectedCity('');
-                            setShowCityDropdown(true);
-                        }}
+                        placeholder="Enter city name..."
+                        value={selectedCity}
+                        onChange={(e) => setSelectedCity(e.target.value)}
                         onFocus={(e) => {
-                            if (selectedCountry) {
-                                setShowCityDropdown(true);
-                                e.currentTarget.style.borderColor = '#0499ff';
-                                e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
-                            }
+                            e.currentTarget.style.borderColor = '#0499ff';
+                            e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
                         }}
                         onBlur={(e) => {
                             e.currentTarget.style.borderColor = '#ddd';
                             e.currentTarget.style.boxShadow = 'none';
                         }}
-                        disabled={!selectedCountry}
-                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500, opacity: selectedCountry ? 1 : 0.6, cursor: selectedCountry ? 'text' : 'not-allowed' }}
+                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
                     />
-                    {showCityDropdown && selectedCountry && (
-                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '250px', overflowY: 'auto' }}>
-                            {getCitiesForCountry(selectedCountry).filter(c => c.name.toLowerCase().includes(citySearch.toLowerCase())).map(city => (
-                                <div
-                                    key={city.code}
-                                    onClick={() => {
-                                        setSelectedCity(city.code);
-                                        setCitySearch('');
-                                        setShowCityDropdown(false);
-                                    }}
-                                    style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#000000', transition: 'background 0.2s' }}
-                                    onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
-                                    onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
-                                >
-                                    {city.name}
-                                </div>
-                            ))}
-                        </div>
-                    )}
                 </div>
 
                 {/* Airport Selector */}
@@ -290,7 +212,7 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
                     <input
                         type="text"
                         placeholder="Search airport..."
-                        value={airportSearch || (selectedAirport ? getAllAirports().find(a => a.code === selectedAirport)?.code + ' - ' + getAllAirports().find(a => a.code === selectedAirport)?.name || '' : '')}
+                        value={airportSearch || (selectedAirport ? airportList.find((a: any) => a.code === selectedAirport)?.code + ' - ' + airportList.find((a: any) => a.code === selectedAirport)?.name || '' : '')}
                         onChange={(e) => {
                             setAirportSearch(e.target.value);
                             setSelectedAirport('');
@@ -309,7 +231,7 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
                     />
                     {showAirportDropdown && (
                         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '250px', overflowY: 'auto' }}>
-                            {getAllAirports().filter(a => a.code.toLowerCase().includes(airportSearch.toLowerCase()) || a.name.toLowerCase().includes(airportSearch.toLowerCase())).map(airport => (
+                            {airportList.filter((a: any) => a.code.toLowerCase().includes(airportSearch.toLowerCase()) || a.name.toLowerCase().includes(airportSearch.toLowerCase())).map((airport: any) => (
                                 <div
                                     key={airport.code}
                                     onClick={() => {
@@ -595,9 +517,9 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
                 isOpen={showBookingModal}
                 onClose={handleCloseBookingModal}
                 searchDetails={{
-                    selectedCountry,
+                    selectedCountry: selectedCountryName,
                     selectedCity,
-                    selectedAirport,
+                    selectedAirport: selectedAirport ? `${selectedAirport} - ${airportList.find((a: any) => a.code === selectedAirport)?.name}` : '',
                     checkInDate,
                     checkOutDate,
                     nights,

@@ -6,12 +6,15 @@ import { apiFetch } from '@/lib/api';
 interface Booking {
     id: number;
     uid: string;
-    service: string;
-    name: string;
+    type?: string;
+    service?: string;
+    first_name?: string;
+    name?: string;
     email: string;
+    country_code?: string;
     phone?: string;
     country?: string;
-    total_members: number;
+    total_members?: number;
     travel_date?: string;
     from_city?: string;
     to_city?: string;
@@ -28,6 +31,11 @@ interface Booking {
     guests?: number;
     notes?: string;
     status: string;
+    flight_data?: any;
+    hotel_data?: any;
+    visa_data?: any;
+    package_data?: any;
+    airport_transport_data?: any;
     created_at: string;
 }
 
@@ -157,15 +165,16 @@ export default function BookingShow() {
     const generateWhatsAppMessage = () => {
         if (!booking) return '';
 
+        const serviceType = booking.type || booking.service || 'unknown';
         const serviceEmoji = {
             flight: '✈️',
             hotel: '🏨',
             visa: '🛂',
             package: '📦',
-            'airport-transfer': '🚗',
-        }[booking.service] || '📅';
+            transport: '🚗',
+        }[serviceType] || '📅';
 
-        const serviceLabel = booking.service.charAt(0).toUpperCase() + booking.service.slice(1);
+        const serviceLabel = serviceType.charAt(0).toUpperCase() + serviceType.slice(1);
 
         let details = `${serviceEmoji} *${serviceLabel} Booking Details*\n\n`;
         details += `*Booking Reference:* ${booking.uid.substring(0, 8).toUpperCase()}\n`;
@@ -224,7 +233,7 @@ export default function BookingShow() {
         window.open(whatsappURL, 'whatsapp', 'width=800,height=600');
     };
 
-    const getServiceBadgeColor = (service: string) => {
+    const getServiceBadgeColor = (service: string | undefined) => {
         switch (service) {
             case 'flight':
                 return 'bg-primary';
@@ -232,6 +241,10 @@ export default function BookingShow() {
                 return 'bg-success';
             case 'visa':
                 return 'bg-warning';
+            case 'package':
+                return 'bg-info';
+            case 'transport':
+                return 'bg-danger';
             default:
                 return 'bg-secondary';
         }
@@ -333,7 +346,7 @@ export default function BookingShow() {
                 <div className="card-body py-4">
                     <div className="d-flex justify-content-between align-items-start">
                         <div>
-                            <h3 className="fw-semibold mb-1">{booking.name}</h3>
+                            <h3 className="fw-semibold mb-1">{booking.first_name || booking.name || 'N/A'}</h3>
                             <ul className="d-flex flex-wrap align-items-center">
                                 <li className="me-3 d-inline-flex align-items-center">
                                     <i className="las la-envelope me-1"></i>
@@ -369,11 +382,11 @@ export default function BookingShow() {
                                     </li>
                                 )}
                                 <li className="me-3 d-inline-flex align-items-center">
-                                    <span className={`badge ${getServiceBadgeColor(booking.service)} me-2`}>
-                                        {booking.service.charAt(0).toUpperCase() + booking.service.slice(1)}
+                                    <span className={`badge ${getServiceBadgeColor(booking.type || booking.service)} me-2`}>
+                                        {(booking.type || booking.service || 'unknown').charAt(0).toUpperCase() + (booking.type || booking.service || 'unknown').slice(1)}
                                     </span>
                                     <span className={`badge ${getStatusBadgeColor(booking.status)}`}>
-                                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                                        {(booking.status || 'pending').charAt(0).toUpperCase() + (booking.status || 'pending').slice(1)}
                                     </span>
                                 </li>
                             </ul>
@@ -428,98 +441,202 @@ export default function BookingShow() {
                             <div className="card">
                                 <div className="card-header">
                                     <h5 className="card-title mb-0">
-                                        {booking.service === 'flight' && '✈️ Flight Details'}
-                                        {booking.service === 'hotel' && '🏨 Hotel Details'}
-                                        {booking.service === 'visa' && '🛂 Visa Details'}
+                                        {(booking.type === 'flight' || booking.service === 'flight') && '✈️ Flight Details'}
+                                        {(booking.type === 'hotel' || booking.service === 'hotel') && '🏨 Hotel Details'}
+                                        {(booking.type === 'visa' || booking.service === 'visa') && '🛂 Visa Details'}
+                                        {booking.type === 'package' && '📦 Package Details'}
+                                        {booking.type === 'transport' && '🚗 Transport Details'}
                                     </h5>
                                 </div>
                                 <div className="card-body">
-                                    {booking.service === 'flight' && (
+                                    {(booking.type === 'flight' || booking.service === 'flight') && (
                                         <div className="row">
                                             <div className="col-md-6 mb-3">
                                                 <label className="text-muted small">From</label>
-                                                <p className="fw-semibold">{booking.from_city || 'N/A'}</p>
+                                                <p className="fw-semibold">{(booking.flight_data?.from || booking.flight_data?.fromCity || booking.from_city) || 'N/A'}</p>
                                             </div>
                                             <div className="col-md-6 mb-3">
                                                 <label className="text-muted small">To</label>
-                                                <p className="fw-semibold">{booking.to_city || 'N/A'}</p>
+                                                <p className="fw-semibold">{(booking.flight_data?.to || booking.flight_data?.toCity || booking.to_city) || 'N/A'}</p>
                                             </div>
                                             <div className="col-md-6 mb-3">
                                                 <label className="text-muted small">Departure Date</label>
-                                                <p className="fw-semibold">{formatDate(booking.travel_date)}</p>
+                                                <p className="fw-semibold">{formatDate(booking.flight_data?.departureDate || booking.travel_date)}</p>
                                             </div>
-                                            {booking.trip_type === 'roundtrip' && (
+                                            {(booking.flight_data?.tripType || booking.trip_type) === 'roundtrip' && (
                                                 <div className="col-md-6 mb-3">
                                                     <label className="text-muted small">Return Date</label>
-                                                    <p className="fw-semibold">{formatDate(booking.return_date)}</p>
+                                                    <p className="fw-semibold">{formatDate(booking.flight_data?.returnDate || booking.return_date)}</p>
                                                 </div>
                                             )}
                                             <div className="col-md-6 mb-3">
                                                 <label className="text-muted small">Trip Type</label>
-                                                <p className="fw-semibold">{booking.trip_type ? booking.trip_type.charAt(0).toUpperCase() + booking.trip_type.slice(1) : 'N/A'}</p>
+                                                <p className="fw-semibold">{(booking.flight_data?.tripType || booking.trip_type) ? (booking.flight_data?.tripType || booking.trip_type).charAt(0).toUpperCase() + (booking.flight_data?.tripType || booking.trip_type).slice(1) : 'N/A'}</p>
                                             </div>
                                             <div className="col-md-6 mb-3">
                                                 <label className="text-muted small">Travel Class</label>
-                                                <p className="fw-semibold">{booking.travel_class || 'N/A'}</p>
+                                                <p className="fw-semibold">{booking.flight_data?.selectedClass || booking.flight_data?.class || booking.travel_class || 'N/A'}</p>
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="text-muted small">Travelers</label>
-                                                <p className="fw-semibold">{booking.total_members}</p>
+                                                <label className="text-muted small">Adults</label>
+                                                <p className="fw-semibold">{booking.flight_data?.adults || 'N/A'}</p>
+                                            </div>
+                                            <div className="col-md-6 mb-3">
+                                                <label className="text-muted small">Children</label>
+                                                <p className="fw-semibold">{booking.flight_data?.children || 0}</p>
+                                            </div>
+                                            <div className="col-md-6 mb-3">
+                                                <label className="text-muted small">Infants</label>
+                                                <p className="fw-semibold">{booking.flight_data?.infants || 0}</p>
                                             </div>
                                         </div>
                                     )}
 
-                                    {booking.service === 'hotel' && (
+                                    {(booking.type === 'hotel' || booking.service === 'hotel') && (
                                         <div className="row">
                                             <div className="col-md-6 mb-3">
+                                                <label className="text-muted small">Country</label>
+                                                <p className="fw-semibold">{booking.hotel_data?.hotelCountry || booking.country || 'N/A'}</p>
+                                            </div>
+                                            <div className="col-md-6 mb-3">
                                                 <label className="text-muted small">City</label>
-                                                <p className="fw-semibold">{booking.hotel_city || 'N/A'}</p>
+                                                <p className="fw-semibold">{booking.hotel_data?.hotelCity || booking.hotel_city || 'N/A'}</p>
                                             </div>
                                             <div className="col-md-6 mb-3">
                                                 <label className="text-muted small">Check-in Date</label>
-                                                <p className="fw-semibold">{formatDate(booking.check_in_date)}</p>
+                                                <p className="fw-semibold">{formatDate(booking.hotel_data?.checkInDate || booking.check_in_date)}</p>
                                             </div>
                                             <div className="col-md-6 mb-3">
                                                 <label className="text-muted small">Check-out Date</label>
-                                                <p className="fw-semibold">{formatDate(booking.check_out_date)}</p>
-                                            </div>
-                                            <div className="col-md-6 mb-3">
-                                                <label className="text-muted small">Country</label>
-                                                <p className="fw-semibold">{booking.country || 'N/A'}</p>
+                                                <p className="fw-semibold">{formatDate(booking.hotel_data?.checkOutDate || booking.check_out_date)}</p>
                                             </div>
                                             <div className="col-md-6 mb-3">
                                                 <label className="text-muted small">Rooms</label>
-                                                <p className="fw-semibold">{booking.rooms || 1}</p>
+                                                <p className="fw-semibold">{booking.hotel_data?.rooms || booking.rooms || 1}</p>
                                             </div>
                                             <div className="col-md-6 mb-3">
-                                                <label className="text-muted small">Guests</label>
-                                                <p className="fw-semibold">{booking.guests || booking.total_members}</p>
+                                                <label className="text-muted small">Adults</label>
+                                                <p className="fw-semibold">{booking.hotel_data?.adults || booking.guests || booking.total_members || 'N/A'}</p>
+                                            </div>
+                                            <div className="col-md-6 mb-3">
+                                                <label className="text-muted small">Children</label>
+                                                <p className="fw-semibold">{booking.hotel_data?.children || 0}</p>
                                             </div>
                                         </div>
                                     )}
 
-                                    {booking.service === 'visa' && (
+                                    {(booking.type === 'visa' || booking.service === 'visa') && (
                                         <div className="row">
                                             <div className="col-md-6 mb-3">
                                                 <label className="text-muted small">Destination</label>
-                                                <p className="fw-semibold">{booking.destination || 'N/A'}</p>
+                                                <p className="fw-semibold">{booking.visa_data?.destinationCountry || booking.destination || 'N/A'}</p>
                                             </div>
                                             <div className="col-md-6 mb-3">
                                                 <label className="text-muted small">Passport Country</label>
-                                                <p className="fw-semibold">{booking.passport_country || 'N/A'}</p>
+                                                <p className="fw-semibold">{booking.visa_data?.passportCountry || booking.passport_country || 'N/A'}</p>
                                             </div>
                                             <div className="col-md-6 mb-3">
                                                 <label className="text-muted small">Visa Type</label>
-                                                <p className="fw-semibold">{booking.visa_type || 'N/A'}</p>
+                                                <p className="fw-semibold">{booking.visa_data?.visaType || booking.visa_type || 'N/A'}</p>
                                             </div>
                                             <div className="col-md-6 mb-3">
                                                 <label className="text-muted small">Number of Travelers</label>
-                                                <p className="fw-semibold">{booking.total_members}</p>
+                                                <p className="fw-semibold">{booking.visa_data?.numberOfTravelers || booking.total_members || 'N/A'}</p>
                                             </div>
                                             <div className="col-md-6 mb-3">
                                                 <label className="text-muted small">Travel Date</label>
-                                                <p className="fw-semibold">{formatDate(booking.travel_date)}</p>
+                                                <p className="fw-semibold">{formatDate(booking.visa_data?.travelDate || booking.travel_date)}</p>
                                             </div>
+                                        </div>
+                                    )}
+
+                                    {(booking.type === 'package') && (
+                                        <div className="row">
+                                            <div className="col-md-6 mb-3">
+                                                <label className="text-muted small">Country</label>
+                                                <p className="fw-semibold">{booking.package_data?.selectedCountry || 'N/A'}</p>
+                                            </div>
+                                            <div className="col-md-6 mb-3">
+                                                <label className="text-muted small">City</label>
+                                                <p className="fw-semibold">{booking.package_data?.selectedCity || 'N/A'}</p>
+                                            </div>
+                                            <div className="col-md-6 mb-3">
+                                                <label className="text-muted small">Airport</label>
+                                                <p className="fw-semibold">{booking.package_data?.selectedAirport || 'N/A'}</p>
+                                            </div>
+                                            <div className="col-md-6 mb-3">
+                                                <label className="text-muted small">Check-in Date</label>
+                                                <p className="fw-semibold">{formatDate(booking.package_data?.checkInDate)}</p>
+                                            </div>
+                                            <div className="col-md-6 mb-3">
+                                                <label className="text-muted small">Check-out Date</label>
+                                                <p className="fw-semibold">{formatDate(booking.package_data?.checkOutDate)}</p>
+                                            </div>
+                                            <div className="col-md-6 mb-3">
+                                                <label className="text-muted small">Duration</label>
+                                                <p className="fw-semibold">{booking.package_data?.nights || 'N/A'} nights</p>
+                                            </div>
+                                            <div className="col-md-6 mb-3">
+                                                <label className="text-muted small">Rooms</label>
+                                                <p className="fw-semibold">{booking.package_data?.rooms || 'N/A'}</p>
+                                            </div>
+                                            <div className="col-md-6 mb-3">
+                                                <label className="text-muted small">Adults</label>
+                                                <p className="fw-semibold">{booking.package_data?.adults || 'N/A'}</p>
+                                            </div>
+                                            <div className="col-md-6 mb-3">
+                                                <label className="text-muted small">Children</label>
+                                                <p className="fw-semibold">{booking.package_data?.children || 0}</p>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {(booking.type === 'transport') && (
+                                        <div className="row">
+                                            <div className="col-md-6 mb-3">
+                                                <label className="text-muted small">Pickup Airport</label>
+                                                <p className="fw-semibold">{booking.airport_transport_data?.pickupAirport || 'N/A'}</p>
+                                            </div>
+                                            <div className="col-md-6 mb-3">
+                                                <label className="text-muted small">Destination</label>
+                                                <p className="fw-semibold">{booking.airport_transport_data?.destinationLocation || 'N/A'}</p>
+                                            </div>
+                                            <div className="col-md-6 mb-3">
+                                                <label className="text-muted small">Pickup Date</label>
+                                                <p className="fw-semibold">{formatDate(booking.airport_transport_data?.pickupDate)}</p>
+                                            </div>
+                                            <div className="col-md-6 mb-3">
+                                                <label className="text-muted small">Pickup Time</label>
+                                                <p className="fw-semibold">{booking.airport_transport_data?.pickupTime || 'N/A'}</p>
+                                            </div>
+                                            <div className="col-md-6 mb-3">
+                                                <label className="text-muted small">Trip Type</label>
+                                                <p className="fw-semibold">{booking.airport_transport_data?.tripType ? booking.airport_transport_data.tripType.charAt(0).toUpperCase() + booking.airport_transport_data.tripType.slice(1) : 'N/A'}</p>
+                                            </div>
+                                            <div className="col-md-6 mb-3">
+                                                <label className="text-muted small">Passengers</label>
+                                                <p className="fw-semibold">{booking.airport_transport_data?.passengers || booking.total_members || 'N/A'}</p>
+                                            </div>
+                                            {booking.airport_transport_data?.tripType === 'return' && (
+                                                <>
+                                                    <div className="col-md-6 mb-3">
+                                                        <label className="text-muted small">Return Pickup</label>
+                                                        <p className="fw-semibold">{booking.airport_transport_data?.returnPickupLocation || 'N/A'}</p>
+                                                    </div>
+                                                    <div className="col-md-6 mb-3">
+                                                        <label className="text-muted small">Return Drop-off</label>
+                                                        <p className="fw-semibold">{booking.airport_transport_data?.returnDestinationLocation || 'N/A'}</p>
+                                                    </div>
+                                                    <div className="col-md-6 mb-3">
+                                                        <label className="text-muted small">Return Date</label>
+                                                        <p className="fw-semibold">{formatDate(booking.airport_transport_data?.returnDate)}</p>
+                                                    </div>
+                                                    <div className="col-md-6 mb-3">
+                                                        <label className="text-muted small">Return Time</label>
+                                                        <p className="fw-semibold">{booking.airport_transport_data?.returnTime || 'N/A'}</p>
+                                                    </div>
+                                                </>
+                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -673,12 +790,18 @@ export default function BookingShow() {
                                             <tbody>
                                                 <tr>
                                                     <td style={{ width: '35%' }} className="fw-semibold text-muted">Name</td>
-                                                    <td>{booking.name}</td>
+                                                    <td>{booking.first_name || booking.name || 'N/A'}</td>
                                                 </tr>
                                                 <tr>
                                                     <td className="fw-semibold text-muted">Email</td>
                                                     <td>{booking.email}</td>
                                                 </tr>
+                                                {booking.country_code && (
+                                                    <tr>
+                                                        <td className="fw-semibold text-muted">Country Code</td>
+                                                        <td>{booking.country_code}</td>
+                                                    </tr>
+                                                )}
                                                 {booking.phone && (
                                                     <tr>
                                                         <td className="fw-semibold text-muted">Phone</td>
@@ -687,96 +810,202 @@ export default function BookingShow() {
                                                 )}
                                                 <tr>
                                                     <td className="fw-semibold text-muted">Service</td>
-                                                    <td><span className={`badge ${getServiceBadgeColor(booking.service)}`}>{booking.service}</span></td>
+                                                    <td><span className={`badge ${getServiceBadgeColor(booking.type || booking.service)}`}>{(booking.type || booking.service || 'unknown').charAt(0).toUpperCase() + (booking.type || booking.service || 'unknown').slice(1)}</span></td>
                                                 </tr>
                                                 <tr>
                                                     <td className="fw-semibold text-muted">Status</td>
                                                     <td><span className={`badge ${getStatusBadgeColor(booking.status)}`}>{booking.status}</span></td>
                                                 </tr>
-                                                <tr>
-                                                    <td className="fw-semibold text-muted">Total Members</td>
-                                                    <td>{booking.total_members}</td>
-                                                </tr>
-                                                {booking.service === 'flight' && (
+                                                {!(booking.type === 'flight' || booking.service === 'flight') && (
+                                                    <tr>
+                                                        <td className="fw-semibold text-muted">Total Members</td>
+                                                        <td>{booking.total_members || booking.hotel_data?.adults || booking.visa_data?.numberOfTravelers || booking.package_data?.adults || booking.airport_transport_data?.passengers || 'N/A'}</td>
+                                                    </tr>
+                                                )}
+                                                {(booking.type === 'flight' || booking.service === 'flight') && (
                                                     <>
                                                         <tr>
                                                             <td className="fw-semibold text-muted">From City</td>
-                                                            <td>{booking.from_city || 'N/A'}</td>
+                                                            <td>{booking.flight_data?.from || booking.flight_data?.fromCity || booking.from_city || 'N/A'}</td>
                                                         </tr>
                                                         <tr>
                                                             <td className="fw-semibold text-muted">To City</td>
-                                                            <td>{booking.to_city || 'N/A'}</td>
+                                                            <td>{booking.flight_data?.to || booking.flight_data?.toCity || booking.to_city || 'N/A'}</td>
                                                         </tr>
                                                         <tr>
                                                             <td className="fw-semibold text-muted">Departure Date</td>
-                                                            <td>{formatDate(booking.travel_date)}</td>
+                                                            <td>{formatDate(booking.flight_data?.departureDate || booking.travel_date)}</td>
                                                         </tr>
-                                                        {booking.trip_type === 'roundtrip' && (
+                                                        {(booking.flight_data?.tripType || booking.trip_type) === 'roundtrip' && (
                                                             <tr>
                                                                 <td className="fw-semibold text-muted">Return Date</td>
-                                                                <td>{formatDate(booking.return_date)}</td>
+                                                                <td>{formatDate(booking.flight_data?.returnDate || booking.return_date)}</td>
                                                             </tr>
                                                         )}
                                                         <tr>
                                                             <td className="fw-semibold text-muted">Trip Type</td>
-                                                            <td>{booking.trip_type || 'N/A'}</td>
+                                                            <td>{booking.flight_data?.tripType || booking.trip_type || 'N/A'}</td>
                                                         </tr>
                                                         <tr>
                                                             <td className="fw-semibold text-muted">Travel Class</td>
-                                                            <td>{booking.travel_class || 'N/A'}</td>
+                                                            <td>{booking.flight_data?.selectedClass || booking.flight_data?.class || booking.travel_class || 'N/A'}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="fw-semibold text-muted">Adults</td>
+                                                            <td>{booking.flight_data?.adults || 'N/A'}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="fw-semibold text-muted">Children</td>
+                                                            <td>{booking.flight_data?.children || 0}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="fw-semibold text-muted">Infants</td>
+                                                            <td>{booking.flight_data?.infants || 0}</td>
                                                         </tr>
                                                     </>
                                                 )}
-                                                {booking.service === 'hotel' && (
+                                                {(booking.type === 'hotel' || booking.service === 'hotel') && (
                                                     <>
                                                         <tr>
+                                                            <td className="fw-semibold text-muted">Country</td>
+                                                            <td>{booking.hotel_data?.hotelCountry || booking.country || 'N/A'}</td>
+                                                        </tr>
+                                                        <tr>
                                                             <td className="fw-semibold text-muted">Hotel City</td>
-                                                            <td>{booking.hotel_city || 'N/A'}</td>
+                                                            <td>{booking.hotel_data?.hotelCity || booking.hotel_city || 'N/A'}</td>
                                                         </tr>
                                                         <tr>
                                                             <td className="fw-semibold text-muted">Check-in Date</td>
-                                                            <td>{formatDate(booking.check_in_date)}</td>
+                                                            <td>{formatDate(booking.hotel_data?.checkInDate || booking.check_in_date)}</td>
                                                         </tr>
                                                         <tr>
                                                             <td className="fw-semibold text-muted">Check-out Date</td>
-                                                            <td>{formatDate(booking.check_out_date)}</td>
-                                                        </tr>
-                                                        <tr>
-                                                            <td className="fw-semibold text-muted">Country</td>
-                                                            <td>{booking.country || 'N/A'}</td>
+                                                            <td>{formatDate(booking.hotel_data?.checkOutDate || booking.check_out_date)}</td>
                                                         </tr>
                                                         <tr>
                                                             <td className="fw-semibold text-muted">Rooms</td>
-                                                            <td>{booking.rooms || 1}</td>
+                                                            <td>{booking.hotel_data?.rooms || booking.rooms || 1}</td>
                                                         </tr>
                                                         <tr>
-                                                            <td className="fw-semibold text-muted">Guests</td>
-                                                            <td>{booking.guests || booking.total_members}</td>
+                                                            <td className="fw-semibold text-muted">Adults</td>
+                                                            <td>{booking.hotel_data?.adults || booking.guests || booking.total_members || 'N/A'}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="fw-semibold text-muted">Children</td>
+                                                            <td>{booking.hotel_data?.children || 0}</td>
                                                         </tr>
                                                     </>
                                                 )}
-                                                {booking.service === 'visa' && (
+                                                {(booking.type === 'visa' || booking.service === 'visa') && (
                                                     <>
                                                         <tr>
                                                             <td className="fw-semibold text-muted">Destination</td>
-                                                            <td>{booking.destination || 'N/A'}</td>
+                                                            <td>{booking.visa_data?.destinationCountry || booking.destination || 'N/A'}</td>
                                                         </tr>
                                                         <tr>
                                                             <td className="fw-semibold text-muted">Passport Country</td>
-                                                            <td>{booking.passport_country || 'N/A'}</td>
+                                                            <td>{booking.visa_data?.passportCountry || booking.passport_country || 'N/A'}</td>
                                                         </tr>
                                                         <tr>
                                                             <td className="fw-semibold text-muted">Visa Type</td>
-                                                            <td>{booking.visa_type || 'N/A'}</td>
+                                                            <td>{booking.visa_data?.visaType || booking.visa_type || 'N/A'}</td>
                                                         </tr>
                                                         <tr>
                                                             <td className="fw-semibold text-muted">Number of Travelers</td>
-                                                            <td>{booking.total_members}</td>
+                                                            <td>{booking.visa_data?.numberOfTravelers || booking.total_members || 'N/A'}</td>
                                                         </tr>
                                                         <tr>
                                                             <td className="fw-semibold text-muted">Travel Date</td>
-                                                            <td>{formatDate(booking.travel_date)}</td>
+                                                            <td>{formatDate(booking.visa_data?.travelDate || booking.travel_date)}</td>
                                                         </tr>
+                                                    </>
+                                                )}
+                                                {(booking.type === 'package') && (
+                                                    <>
+                                                        <tr>
+                                                            <td className="fw-semibold text-muted">Country</td>
+                                                            <td>{booking.package_data?.selectedCountry || 'N/A'}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="fw-semibold text-muted">City</td>
+                                                            <td>{booking.package_data?.selectedCity || 'N/A'}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="fw-semibold text-muted">Airport</td>
+                                                            <td>{booking.package_data?.selectedAirport || 'N/A'}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="fw-semibold text-muted">Check-in Date</td>
+                                                            <td>{formatDate(booking.package_data?.checkInDate)}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="fw-semibold text-muted">Check-out Date</td>
+                                                            <td>{formatDate(booking.package_data?.checkOutDate)}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="fw-semibold text-muted">Duration</td>
+                                                            <td>{booking.package_data?.nights || 'N/A'} nights</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="fw-semibold text-muted">Rooms</td>
+                                                            <td>{booking.package_data?.rooms || 'N/A'}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="fw-semibold text-muted">Adults</td>
+                                                            <td>{booking.package_data?.adults || 'N/A'}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="fw-semibold text-muted">Children</td>
+                                                            <td>{booking.package_data?.children || 0}</td>
+                                                        </tr>
+                                                    </>
+                                                )}
+                                                {(booking.type === 'transport') && (
+                                                    <>
+                                                        <tr>
+                                                            <td className="fw-semibold text-muted">Pickup Airport</td>
+                                                            <td>{booking.airport_transport_data?.pickupAirport || 'N/A'}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="fw-semibold text-muted">Destination</td>
+                                                            <td>{booking.airport_transport_data?.destinationLocation || 'N/A'}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="fw-semibold text-muted">Pickup Date</td>
+                                                            <td>{formatDate(booking.airport_transport_data?.pickupDate)}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="fw-semibold text-muted">Pickup Time</td>
+                                                            <td>{booking.airport_transport_data?.pickupTime || 'N/A'}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="fw-semibold text-muted">Trip Type</td>
+                                                            <td>{booking.airport_transport_data?.tripType ? booking.airport_transport_data.tripType.charAt(0).toUpperCase() + booking.airport_transport_data.tripType.slice(1) : 'N/A'}</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td className="fw-semibold text-muted">Passengers</td>
+                                                            <td>{booking.airport_transport_data?.passengers || booking.total_members || 'N/A'}</td>
+                                                        </tr>
+                                                        {booking.airport_transport_data?.tripType === 'return' && (
+                                                            <>
+                                                                <tr>
+                                                                    <td className="fw-semibold text-muted">Return Pickup</td>
+                                                                    <td>{booking.airport_transport_data?.returnPickupLocation || 'N/A'}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td className="fw-semibold text-muted">Return Drop-off</td>
+                                                                    <td>{booking.airport_transport_data?.returnDestinationLocation || 'N/A'}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td className="fw-semibold text-muted">Return Date</td>
+                                                                    <td>{formatDate(booking.airport_transport_data?.returnDate)}</td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <td className="fw-semibold text-muted">Return Time</td>
+                                                                    <td>{booking.airport_transport_data?.returnTime || 'N/A'}</td>
+                                                                </tr>
+                                                            </>
+                                                        )}
                                                     </>
                                                 )}
                                                 <tr>
