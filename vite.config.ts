@@ -23,4 +23,9 @@ export default defineConfig({
             exclude: ['api/*'],
         }),
     ],
+    server: {
+        host: 'localhost',
+        port: 5173,
+        strictPort: false,
+    },
 });

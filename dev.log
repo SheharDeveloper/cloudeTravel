@@ -714,3 +714,513 @@ https://react.dev/link/hydration-mismatch
 [2m12:22:49 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/Admin/Bookings/Show.tsx[22m
 [2m12:23:14 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/resources/js/pages/Admin/Bookings/Show.tsx[22m
 [2m12:23:14 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/Admin/Bookings/Show.tsx[22m
+[32m2026-07-12 06:55:06[0m SSR Admin/Bookings/Index [90m243.22ms[0m
+[2m12:25:08 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[32m2026-07-12 06:56:37[0m SSR visa-services [90m46.81ms[0m
+[2m12:26:38 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[32m2026-07-12 06:57:29[0m SSR Admin/Visa/Index [90m41.91ms[0m
+[2m12:27:29 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[2m12:27:29 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[2m12:27:57 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[2m12:28:07 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[2m12:28:16 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[2m12:28:25 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[2m12:28:29 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[32m2026-07-12 06:58:38[0m SSR visa-services [90m54.92ms[0m
+[2m12:28:39 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[2m12:29:01 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[2m12:30:19 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/resources/js/pages/visa-services.tsx[22m
+[2m12:30:19 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/visa-services.tsx[22m
+[2m12:30:42 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/resources/js/pages/visa-services.tsx[22m
+[2m12:30:42 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/visa-services.tsx[22m
+[2m12:30:57 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/resources/js/pages/visa-services.tsx[22m
+[2m12:30:57 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/visa-services.tsx[22m
+[2m12:34:00 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/resources/js/pages/visa-services.tsx[22m
+[2m12:34:00 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/visa-services.tsx[22m
+[2m12:34:12 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/resources/js/pages/visa-services.tsx[22m
+[2m12:34:12 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/visa-services.tsx[22m
+[2m12:34:34 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/resources/js/pages/visa-services.tsx[22m
+[2m12:34:34 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/visa-services.tsx[22m
+[2m12:34:49 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/resources/js/pages/visa-services.tsx[22m
+[2m12:34:49 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/visa-services.tsx[22m
+[2m12:35:00 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/resources/js/pages/visa-services.tsx[22m
+[2m12:35:00 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/visa-services.tsx[22m
+[2m12:36:39 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/resources/js/pages/visa-services.tsx[22m
+[2m12:36:39 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/visa-services.tsx[22m
+[2m12:36:48 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/resources/js/pages/visa-services.tsx[22m
+[2m12:36:48 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/visa-services.tsx[22m
+[2m12:36:58 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/resources/js/pages/visa-services.tsx[22m
+[2m12:36:58 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/visa-services.tsx[22m
+[2m12:37:10 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/resources/js/pages/visa-services.tsx[22m
+[2m12:37:10 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/visa-services.tsx[22m
+[32m2026-07-12 07:08:07[0m SSR visa-services [90m204.54ms[0m
+[2m12:38:09 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[2m12:39:08 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/resources/js/pages/visa-services.tsx[22m
+[2m12:39:08 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/visa-services.tsx[22m
+[2m12:39:25 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/resources/js/pages/visa-services.tsx[22m
+[2m12:39:25 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/visa-services.tsx[22m
+[2m12:39:37 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/resources/js/pages/visa-services.tsx[22m
+[2m12:39:37 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/visa-services.tsx[22m
+[2m12:39:48 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/resources/js/pages/visa-services.tsx[22m
+[2m12:39:48 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/visa-services.tsx[22m
+[32m2026-07-12 07:11:02[0m SSR visas/visa-detail [90m323.45ms[0m
+[2m12:41:03 pm[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mError fetching countries: TypeError: Failed to fetch
+    at window.fetch (http://[::1]:5176/resources/js/bootstrap.ts:14:25)
+    at Object.getAllCountries (http://[::1]:5176/resources/js/services/countryService.ts:7:27)
+    at fetchCountries (http://[::1]:5176/resources/js/components/VisasSearchForm.tsx?t=1783838961127:66:39)
+    at t6 (http://[::1]:5176/resources/js/components/VisasSearchForm.tsx?t=1783838961127:70:4)
+    at Object.react_stack_bottom_frame (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:18474:13)
+    at runWithFiberInDEV (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:6421:66)
+    at commitHookEffectListMount (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:12187:153)
+    at commitHookPassiveMountEffects (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:12222:55)
+    at commitPassiveMountOnFiber (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:13188:22)
+    at recursivelyTraversePassiveMountEffects (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:13176:5)
+[2m12:41:07 pm[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mA tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  <TooltipProvider delayDuration={0}>
+    <TooltipProvider data-slot="tooltip-pr..." delayDuration={0}>
+      <TooltipProviderProvider scope={undefined} isOpenDelayedRef={{current:true}} delayDuration={0} onOpen={function} ...>
+        <Inertia initialPage={{...}} initialComponent={function VisaServices} ...>
+          <LandingLayout errors={{}} name="Laravel" auth={{...}} sidebarOpen={true}>
+            <Head>
+            <style>
+            <div style={{...}}>
+              <nav>
+              <div>
+              <main style={{flex:1}}>
+                <VisaServices errors={{}} name="Laravel" auth={{...}} sidebarOpen={true}>
+                  <Head>
+                  <div>
+                  <div>
+                  <section style={{padding:"6...", ...}}>
+                    <div style={{maxWidth:"...", ...}}>
+                      <div style={{...}}>
+                        <h2
+                          style={{
++                           fontFamily: "'Playfair Display', serif"
++                           fontSize: "36px"
++                           color: "#000000"
+-                           color: "rgb(4, 153, 255)"
++                           marginBottom: "12px"
++                           fontWeight: 700
+-                           font-family: "\"Playfair Display\", serif"
+-                           font-size: "36px"
+-                           margin-bottom: "12px"
+-                           font-weight: "700"
+                          }}
+                        >
++                         Popular Visa Types
+                        <div>
+                        <p
+                          style={{
++                           color: "#333333"
+-                           color: "rgb(6, 214, 214)"
++                           fontSize: "14px"
++                           lineHeight: 1.8
++                           maxWidth: "600px"
++                           margin: "0 auto"
++                           fontWeight: 500
+-                           font-size: "14px"
+-                           line-height: "1.8"
+-                           max-width: "600px"
+-                           margin-top: "0px"
+-                           margin-right: "auto"
+-                           margin-bottom: "0px"
+-                           margin-left: "auto"
+-                           font-weight: "500"
+                          }}
+                        >
++                         Fast processing for visas to your favorite destinations worldwide. Expert assistance at every...
+                      ...
+                  <section style={{padding:"7...", ...}}>
+                    <div style={{maxWidth:"...", ...}}>
+                      <div style={{...}}>
+                        <h2
+                          style={{
++                           fontFamily: "'Playfair Display', serif"
++                           fontSize: "36px"
++                           color: "#000000"
+-                           color: "rgb(4, 153, 255)"
++                           marginBottom: "12px"
++                           fontWeight: 700
+-                           font-family: "\"Playfair Display\", serif"
+-                           font-size: "36px"
+-                           margin-bottom: "12px"
+-                           font-weight: "700"
+                          }}
+                        >
++                         What You Need
+                        <div>
+                        <p
+                          style={{
++                           color: "#333333"
+-                           color: "rgb(6, 214, 214)"
++                           fontSize: "14px"
++                           lineHeight: 1.8
+-                           font-size: "14px"
+-                           line-height: "1.8"
+                          }}
+                        >
++                         {"All the documents you'll need for a smooth visa application process"}
+                      <div style={{display:"grid", ...}}>
+                        <div style={{...}} onMouseEnter={function onMouseEnter} onMouseLeave={function onMouseLeave}>
+                          <div>
+                          <h3
+                            style={{
++                             fontSize: "14px"
++                             fontWeight: 700
++                             color: "#000000"
+-                             color: "rgb(4, 153, 255)"
++                             marginBottom: "6px"
+-                             font-size: "14px"
+-                             font-weight: "700"
+-                             margin-bottom: "6px"
+                            }}
+                          >
++                           Valid Passport
+                          <p
+                            style={{
++                             fontSize: "12px"
++                             color: "#333333"
+-                             color: "rgb(6, 214, 214)"
++                             margin: 0
++                             lineHeight: 1.5
++                             fontWeight: 500
+-                             font-size: "12px"
+-                             margin-top: "0px"
+-                             margin-right: "0px"
+-                             margin-bottom: "0px"
+-                             margin-left: "0px"
+-                             line-height: "1.5"
+-                             font-weight: "500"
+                            }}
+                          >
++                           Minimum 6 months validity
+                        <div style={{...}} onMouseEnter={function onMouseEnter} onMouseLeave={function onMouseLeave}>
+                          <div>
+                          <h3
+                            style={{
++                             fontSize: "14px"
++                             fontWeight: 700
++                             color: "#000000"
+-                             color: "rgb(4, 153, 255)"
++                             marginBottom: "6px"
+-                             font-size: "14px"
+-                             font-weight: "700"
+-                             margin-bottom: "6px"
+                            }}
+                          >
++                           Photo
+                          <p
+                            style={{
++                             fontSize: "12px"
++                             color: "#333333"
+-                             color: "rgb(6, 214, 214)"
++                             margin: 0
++                             lineHeight: 1.5
++                             fontWeight: 500
+-                             font-size: "12px"
+-                             margin-top: "0px"
+-                             margin-right: "0px"
+-                             margin-bottom: "0px"
+-                             margin-left: "0px"
+-                             line-height: "1.5"
+-                             font-weight: "500"
+                            }}
+                          >
++                           Recent passport-sized photo
+                        <div style={{...}} onMouseEnter={function onMouseEnter} onMouseLeave={function onMouseLeave}>
+                          <div>
+                          <h3
+                            style={{
++                             fontSize: "14px"
++                             fontWeight: 700
++                             color: "#000000"
+-                             color: "rgb(4, 153, 255)"
++                             marginBottom: "6px"
+-                             font-size: "14px"
+-                             font-weight: "700"
+-                             margin-bottom: "6px"
+                            }}
+                          >
++                           Documents
+                          <p
+                            style={{
++                             fontSize: "12px"
++                             color: "#333333"
+-                             color: "rgb(6, 214, 214)"
++                             margin: 0
++                             lineHeight: 1.5
++                             fontWeight: 500
+-                             font-size: "12px"
+-                             margin-top: "0px"
+-                             margin-right: "0px"
+-                             margin-bottom: "0px"
+-                             margin-left: "0px"
+-                             line-height: "1.5"
+-                             font-weight: "500"
+                            }}
+                          >
++                           Travel purpose documents
+                        <div style={{...}} onMouseEnter={function onMouseEnter} onMouseLeave={function onMouseLeave}>
+                          <div>
+                          <h3
+                            style={{
++                             fontSize: "14px"
++                             fontWeight: 700
++                             color: "#000000"
+-                             color: "rgb(4, 153, 255)"
++                             marginBottom: "6px"
+-                             font-size: "14px"
+-                             font-weight: "700"
+-                             margin-bottom: "6px"
+                            }}
+                          >
++                           Financial Proof
+                          <p
+                            style={{
++                             fontSize: "12px"
++                             color: "#333333"
+-                             color: "rgb(6, 214, 214)"
++                             margin: 0
++                             lineHeight: 1.5
++                             fontWeight: 500
+-                             font-size: "12px"
+-                             margin-top: "0px"
+-                             margin-right: "0px"
+-                             margin-bottom: "0px"
+-                             margin-left: "0px"
+-                             line-height: "1.5"
+-                             font-weight: "500"
+                            }}
+                          >
++                           {"Bank statements & funds"}
+                        <div style={{...}} onMouseEnter={function onMouseEnter} onMouseLeave={function onMouseLeave}>
+                          <div>
+                          <h3
+                            style={{
++                             fontSize: "14px"
++                             fontWeight: 700
++                             color: "#000000"
+-                             color: "rgb(4, 153, 255)"
++                             marginBottom: "6px"
+-                             font-size: "14px"
+-                             font-weight: "700"
+-                             margin-bottom: "6px"
+                            }}
+                          >
++                           Accommodation
+                          <p
+                            style={{
++                             fontSize: "12px"
++                             color: "#333333"
+-                             color: "rgb(6, 214, 214)"
++                             margin: 0
++                             lineHeight: 1.5
++                             fontWeight: 500
+-                             font-size: "12px"
+-                             margin-top: "0px"
+-                             margin-right: "0px"
+-                             margin-bottom: "0px"
+-                             margin-left: "0px"
+-                             line-height: "1.5"
+-                             font-weight: "500"
+                            }}
+                          >
++                           Hotel booking confirmation
+                        <div style={{...}} onMouseEnter={function onMouseEnter} onMouseLeave={function onMouseLeave}>
+                          <div>
+                          <h3
+                            style={{
++                             fontSize: "14px"
++                             fontWeight: 700
++                             color: "#000000"
+-                             color: "rgb(4, 153, 255)"
++                             marginBottom: "6px"
+-                             font-size: "14px"
+-                             font-weight: "700"
+-                             margin-bottom: "6px"
+                            }}
+                          >
++                           Flight Booking
+                          <p
+                            style={{
++                             fontSize: "12px"
++                             color: "#333333"
+-                             color: "rgb(6, 214, 214)"
++                             margin: 0
++                             lineHeight: 1.5
++                             fontWeight: 500
+-                             font-size: "12px"
+-                             margin-top: "0px"
+-                             margin-right: "0px"
+-                             margin-bottom: "0px"
+-                             margin-left: "0px"
+-                             line-height: "1.5"
+-                             font-weight: "500"
+                            }}
+                          >
++                           Return flight tickets
+                  ...
+              ...
+
+[2m12:41:07 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[2m12:42:00 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/resources/js/pages/visa-services.tsx[22m
+[2m12:42:00 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/visa-services.tsx[22m
+[2m12:43:53 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/resources/js/pages/visa-services.tsx[22m
+[2m12:43:53 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/visa-services.tsx[22m
+[32m2026-07-12 07:15:04[0m SSR visa-services [90m156.69ms[0m
+[2m12:45:06 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[2m12:49:28 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/resources/js/pages/visa-services.tsx[22m
+[2m12:49:28 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/visa-services.tsx[22m
+[32m2026-07-12 07:20:32[0m SSR visas/visa-detail [90m409.47ms[0m
+[2m12:50:34 pm[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mError fetching countries: TypeError: Failed to fetch
+    at window.fetch (http://[::1]:5176/resources/js/bootstrap.ts:14:25)
+    at Object.getAllCountries (http://[::1]:5176/resources/js/services/countryService.ts:7:27)
+    at fetchCountries (http://[::1]:5176/resources/js/components/VisasSearchForm.tsx?t=1783838961127:66:39)
+    at t6 (http://[::1]:5176/resources/js/components/VisasSearchForm.tsx?t=1783838961127:70:4)
+    at Object.react_stack_bottom_frame (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:18474:13)
+    at runWithFiberInDEV (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:6421:66)
+    at commitHookEffectListMount (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:12187:153)
+    at commitHookPassiveMountEffects (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:12222:55)
+    at commitPassiveMountOnFiber (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:13188:22)
+    at recursivelyTraversePassiveMountEffects (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:13176:5)
+[32m2026-07-12 07:21:03[0m SSR Admin/SpecialOffer/Index [90m73.41ms[0m
+[2m12:51:04 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[32m2026-07-12 07:21:28[0m SSR home [90m134.00ms[0m
+[2m12:51:29 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[2m12:51:29 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[2m12:51:29 pm[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mError fetching countries: TypeError: Failed to fetch
+    at window.fetch (http://[::1]:5176/resources/js/bootstrap.ts:14:25)
+    at Object.getAllCountries (http://[::1]:5176/resources/js/services/countryService.ts:7:27)
+    at fetchCountries (http://[::1]:5176/resources/js/components/FlightSearchForm.tsx?t=1783838961127:55:39)
+    at t2 (http://[::1]:5176/resources/js/components/FlightSearchForm.tsx?t=1783838961127:59:4)
+    at Object.react_stack_bottom_frame (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:18474:13)
+    at runWithFiberInDEV (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:6421:66)
+    at commitHookEffectListMount (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:12187:153)
+    at commitHookPassiveMountEffects (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:12222:55)
+    at commitPassiveMountOnFiber (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:13188:22)
+    at recursivelyTraversePassiveMountEffects (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:13176:5)
+[2m12:51:41 pm[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled rejection] [1mTypeError[22m: specialOfferService.getAll is not a function
+[39m > getAll resources/js/pages/AllOffers.tsx:41:47
+    39 |  
+    40 |      const loadOffers = async () => {
+    41 |          const data = await specialOfferService.getAll();
+       |                                                 ^
+    42 |          setOffers(data);
+    43 |          if (data.length > 0) {
+ > loadOffers resources/js/pages/AllOffers.tsx:33:8
+ > Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25989:19
+ > runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:871:29
+ > commitHookEffectListMount node_modules/react-dom/cjs/react-dom-client.development.js:13249:28
+ > commitHookPassiveMountEffects node_modules/react-dom/cjs/react-dom-client.development.js:13336:10
+ > commitPassiveMountOnFiber node_modules/react-dom/cjs/react-dom-client.development.js:15484:12
+ > recursivelyTraversePassiveMountEffects node_modules/react-dom/cjs/react-dom-client.development.js:15439:10
+ > commitPassiveMountOnFiber node_modules/react-dom/cjs/react-dom-client.development.js:15718:10
+ > recursivelyTraversePassiveMountEffects node_modules/react-dom/cjs/react-dom-client.development.js:15439:10
+
+[2m12:51:41 pm[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled rejection] [1mTypeError[22m: specialOfferService.getAll is not a function
+[39m > getAll resources/js/pages/AllOffers.tsx:41:47
+    39 |  
+    40 |      const loadOffers = async () => {
+    41 |          const data = await specialOfferService.getAll();
+       |                                                 ^
+    42 |          setOffers(data);
+    43 |          if (data.length > 0) {
+ > loadOffers resources/js/pages/AllOffers.tsx:33:8
+ > Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25989:19
+ > runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:871:29
+ > commitHookEffectListMount node_modules/react-dom/cjs/react-dom-client.development.js:13249:28
+ > commitHookPassiveMountEffects node_modules/react-dom/cjs/react-dom-client.development.js:13336:10
+ > reconnectPassiveEffects node_modules/react-dom/cjs/react-dom-client.development.js:15832:10
+ > doubleInvokeEffectsOnFiber node_modules/react-dom/cjs/react-dom-client.development.js:18703:10
+ > runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:871:29
+ > recursivelyTraverseAndDoubleInvokeEffectsInDEV node_modules/react-dom/cjs/react-dom-client.development.js:18667:16
+
+[32m2026-07-12 07:22:29[0m SSR AllOffers [90m164.68ms[0m
+[2m12:52:31 pm[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [31m[Unhandled rejection] [1mTypeError[22m: specialOfferService.getAll is not a function
+[39m > getAll resources/js/pages/AllOffers.tsx:41:47
+    39 |  
+    40 |      const loadOffers = async () => {
+    41 |          const data = await specialOfferService.getAll();
+       |                                                 ^
+    42 |          setOffers(data);
+    43 |          if (data.length > 0) {
+ > loadOffers resources/js/pages/AllOffers.tsx:33:8
+ > Object.react_stack_bottom_frame node_modules/react-dom/cjs/react-dom-client.development.js:25989:19
+ > runWithFiberInDEV node_modules/react-dom/cjs/react-dom-client.development.js:871:29
+ > commitHookEffectListMount node_modules/react-dom/cjs/react-dom-client.development.js:13249:28
+ > commitHookPassiveMountEffects node_modules/react-dom/cjs/react-dom-client.development.js:13336:10
+ > commitPassiveMountOnFiber node_modules/react-dom/cjs/react-dom-client.development.js:15484:12
+ > recursivelyTraversePassiveMountEffects node_modules/react-dom/cjs/react-dom-client.development.js:15439:10
+ > commitPassiveMountOnFiber node_modules/react-dom/cjs/react-dom-client.development.js:15718:10
+ > recursivelyTraversePassiveMountEffects node_modules/react-dom/cjs/react-dom-client.development.js:15439:10
+
+[32m2026-07-12 07:22:52[0m SSR Admin/SpecialOffer/Index [90m25.07ms[0m
+[2m12:52:53 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[2m12:53:03 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[2m12:53:04 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[2m12:53:04 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[2m12:53:04 pm[22m [33m[1m[vite][22m[39m [33m[2m(client)[22m[39m [2m[console.warn] [22m✗ No token found in localStorage
+[2m12:53:04 pm[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mError fetching countries: TypeError: Failed to fetch
+    at window.fetch (http://[::1]:5176/resources/js/bootstrap.ts:14:25)
+    at Object.getAllCountries (http://[::1]:5176/resources/js/services/countryService.ts:7:27)
+    at fetchCountries (http://[::1]:5176/resources/js/components/FlightSearchForm.tsx?t=1783838961127:55:39)
+    at t2 (http://[::1]:5176/resources/js/components/FlightSearchForm.tsx?t=1783838961127:59:4)
+    at Object.react_stack_bottom_frame (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:18474:13)
+    at runWithFiberInDEV (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:6421:66)
+    at commitHookEffectListMount (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:12187:153)
+    at commitHookPassiveMountEffects (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:12222:55)
+    at commitPassiveMountOnFiber (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:13188:22)
+    at recursivelyTraversePassiveMountEffects (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:13176:5)
+[2m12:53:04 pm[22m [31m[1m[vite][22m[39m [31m[2m(client)[22m[39m [2m[console.error] [22mError fetching countries: TypeError: Failed to fetch
+    at window.fetch (http://[::1]:5176/resources/js/bootstrap.ts:14:25)
+    at Object.getAllCountries (http://[::1]:5176/resources/js/services/countryService.ts:7:27)
+    at fetchCountries (http://[::1]:5176/resources/js/components/FlightSearchForm.tsx?t=1783838961127:55:39)
+    at t2 (http://[::1]:5176/resources/js/components/FlightSearchForm.tsx?t=1783838961127:59:4)
+    at Object.react_stack_bottom_frame (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:18474:13)
+    at runWithFiberInDEV (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:6421:66)
+    at commitHookEffectListMount (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:12187:153)
+    at commitHookPassiveMountEffects (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:12222:55)
+    at reconnectPassiveEffects (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:13271:6)
+    at recursivelyTraverseReconnectPassiveEffects (http://[::1]:5176/node_modules/.vite/deps/@inertiajs_react.js?v=30dfcd07:13258:5)
+[2m1:06:45 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [32mhmr update [39m[2m/resources/js/pages/PackageDetail.tsx[22m
+[2m1:06:45 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/PackageDetail.tsx[22m
+[2m1:14:23 pm[22m [36m[1m[vite][22m[39m [32mvite.config.ts changed, restarting server...[39m
+Inertia SSR dev endpoint: /__inertia_ssr
+[2m1:14:54 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m info: Types generated for actions, routes, form variants
+  Plugin: [35m@laravel/vite-plugin-wayfinder[39m
+Warming up Inertia SSR module graph...
+[2m1:15:01 pm[22m [36m[1m[vite][22m[39m server restarted.
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5176[22m/[39m
+
+  [31m[1mLARAVEL[22m v13.3.0[39m  [2mplugin[22m [1mv3.1.0[22m
+
+  [32m➜[39m  [1mAPP_URL[22m: [36mhttp://localhost:[1m8000[22m[39m
+[2m1:15:02 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [optimizer] scanning dependencies...
+[2m1:15:10 pm[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m [optimizer] bundling dependencies...
+Inertia SSR module graph warmed up
+[2m1:19:57 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/OfferDetail.tsx[22m
+[2m1:31:02 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/OfferDetail.tsx[22m
+[2m1:31:35 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/OfferDetail.tsx[22m
+[2m1:31:53 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/OfferDetail.tsx[22m
+[2m1:32:03 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/OfferDetail.tsx[22m
+[2m1:40:06 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/OfferDetail.tsx[22m
+[2m1:40:19 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/OfferDetail.tsx[22m
+[2m1:44:39 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/OfferDetail.tsx[22m
+[2m1:45:06 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/OfferDetail.tsx[22m
+[2m1:45:16 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/OfferDetail.tsx[22m
+[2m1:48:09 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/OfferDetail.tsx[22m
+[2m1:49:45 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/OfferDetail.tsx[22m
+[2m1:55:45 pm[22m [36m[1m[vite][22m[39m [34m[2m(ssr)[22m[39m [32mpage reload [39m[2mresources/js/pages/OfferDetail.tsx[22m
