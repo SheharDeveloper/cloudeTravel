@@ -38,10 +38,10 @@ export default function AllOffers({ currency }: { currency: Currency }) {
     }, [offers, selectedTypes, priceRange]);
 
     const loadOffers = async () => {
-        const data = await specialOfferService.getAll();
-        setOffers(data);
-        if (data.length > 0) {
-            const max = Math.max(...data.map(o => o.total_price || 0));
+        const result = await specialOfferService.getAllOffers();
+        setOffers(result.offers);
+        if (result.offers.length > 0) {
+            const max = Math.max(...result.offers.map((o: SpecialOffer) => o.total_price || 0));
             setMaxPrice(max);
             setPriceRange([0, max]);
         }
