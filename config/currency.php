@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'default' => 'EUR',
-    'symbol' => '€',
-    'name' => 'Euro',
-    'code' => 'EUR',
+    'default' => 'GBP',
+    'symbol' => '£',
+    'name' => 'British Pound',
+    'code' => 'GBP',
 ];
