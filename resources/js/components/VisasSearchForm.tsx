@@ -102,6 +102,9 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
 
     const handleCloseBookingModal = () => {
         setShowBookingModal(false);
+    };
+
+    const handleBookingSuccess = () => {
         setDestinationCountry('');
         setPassportCountry('');
         setVisaType('');
@@ -131,7 +134,7 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
                             setDestinationCountry('');
                             setShowDestinationDropdown(true);
                         }}
-                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
+                        style={{ width: '100%', padding: '8px 12px 8px 40px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', height: '40px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
                         onFocus={(e) => {
                             setShowDestinationDropdown(true);
                             e.currentTarget.style.borderColor = '#0499ff';
@@ -182,7 +185,7 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
                             setPassportCountry('');
                             setShowPassportDropdown(true);
                         }}
-                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
+                        style={{ width: '100%', padding: '8px 12px 8px 40px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', height: '40px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
                         onFocus={(e) => {
                             setShowPassportDropdown(true);
                             e.currentTarget.style.borderColor = '#0499ff';
@@ -236,7 +239,7 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
                             }
                         }}
                         disabled={disableVisaType}
-                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500, backgroundColor: disableVisaType ? '#f5f5f5' : '#fff', cursor: disableVisaType ? 'not-allowed' : 'text', opacity: disableVisaType ? 0.7 : 1 }}
+                        style={{ width: '100%', padding: '8px 12px 8px 40px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', height: '40px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500, backgroundColor: disableVisaType ? '#f5f5f5' : '#fff', cursor: disableVisaType ? 'not-allowed' : 'text', opacity: disableVisaType ? 0.7 : 1 }}
                         onFocus={(e: any) => {
                             if (!disableVisaType) {
                                 setShowVisaDropdown(true);
@@ -292,7 +295,7 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
                             type="date"
                             value={travelDate}
                             onChange={(e) => setTravelDate(e.target.value)}
-                            style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
+                            style={{ width: '100%', padding: '8px 12px 8px 40px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', height: '40px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
                             onFocus={(e: any) => {
                                 e.currentTarget.style.borderColor = '#0499ff';
                                 e.currentTarget.style.boxShadow = '0 0 0 3px rgba(4, 153, 255, 0.1)';
@@ -313,7 +316,7 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
                     <select
                         value={numberOfTravelers}
                         onChange={(e) => setNumberOfTravelers(parseInt(e.target.value))}
-                        style={{ width: '100%', padding: '16px 16px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', cursor: 'pointer', fontWeight: 500, transition: 'all 0.3s' }}
+                        style={{ width: '100%', padding: '8px 12px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', height: '40px', boxSizing: 'border-box', cursor: 'pointer', fontWeight: 500, transition: 'all 0.3s' }}
                         onFocus={(e) => {
                             e.currentTarget.style.borderColor = '#0499ff';
                             e.currentTarget.style.boxShadow = '0 0 0 3px rgba(4, 153, 255, 0.1)';
@@ -374,6 +377,7 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
             <BookingModal
                 isOpen={showBookingModal}
                 onClose={handleCloseBookingModal}
+                onSuccess={handleBookingSuccess}
                 searchDetails={{
                     destinationCountry: countries.find((c: any) => c.code === destinationCountry)?.name || destinationCountry,
                     passportCountry: countries.find((c: any) => c.code === passportCountry)?.name || passportCountry,

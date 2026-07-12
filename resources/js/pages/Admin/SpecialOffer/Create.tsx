@@ -1,6 +1,8 @@
 import { ProtectedRoute } from "@/lib/ProtectedRoute";
 import { router } from "@inertiajs/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { countryService } from "@/services/countryService";
+import SearchableSelect from "@/components/SearchableSelect";
 
 const PACKAGE_TYPES = ["Flight", "Hotel", "Package", "Visa", "Transportation"];
 const TRANSPORT_TYPES = ["Bus", "Train", "Car", "Flight", "Cruise", "Boat"];
@@ -48,6 +50,25 @@ export default function CreateSpecialOffer({ currency }: CreateProps) {
     });
 
     const [images, setImages] = useState<File[]>([]);
+    const [countries, setCountries] = useState<any[]>([]);
+    const [loadingCountries, setLoadingCountries] = useState(true);
+
+    useEffect(() => {
+        const fetchCountries = async () => {
+            setLoadingCountries(true);
+            try {
+                const data = await countryService.getAllCountries();
+                setCountries(data || []);
+                console.log('Countries loaded:', data?.length);
+            } catch (error) {
+                console.error('Error loading countries:', error);
+                setCountries([]);
+            } finally {
+                setLoadingCountries(false);
+            }
+        };
+        fetchCountries();
+    }, []);
 
     const handleChange = (e: any) => {
         const { name, value, type, checked } = e.target;
@@ -243,30 +264,26 @@ export default function CreateSpecialOffer({ currency }: CreateProps) {
                                     </div>
                                     <div className="row">
                                         <div className="col-md-6">
-                                            <div className="mb-3">
-                                                <label className="form-label">Origin</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    name="flight_origin"
-                                                    value={formData.flight_origin}
-                                                    onChange={handleChange}
-                                                    placeholder="e.g., DEL - Delhi"
-                                                />
-                                            </div>
+                                            <SearchableSelect
+                                                label="Origin"
+                                                name="flight_origin"
+                                                value={formData.flight_origin}
+                                                onChange={handleChange}
+                                                options={countries}
+                                                placeholder="Search origin country..."
+                                                disabled={loadingCountries}
+                                            />
                                         </div>
                                         <div className="col-md-6">
-                                            <div className="mb-3">
-                                                <label className="form-label">Destination</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    name="flight_destination"
-                                                    value={formData.flight_destination}
-                                                    onChange={handleChange}
-                                                    placeholder="e.g., LHR - London"
-                                                />
-                                            </div>
+                                            <SearchableSelect
+                                                label="Destination"
+                                                name="flight_destination"
+                                                value={formData.flight_destination}
+                                                onChange={handleChange}
+                                                options={countries}
+                                                placeholder="Search destination country..."
+                                                disabled={loadingCountries}
+                                            />
                                         </div>
                                     </div>
                                 </div>
@@ -311,17 +328,15 @@ export default function CreateSpecialOffer({ currency }: CreateProps) {
                                     </div>
                                     <div className="row">
                                         <div className="col-md-6">
-                                            <div className="mb-3">
-                                                <label className="form-label">Country</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    name="hotel_country"
-                                                    value={formData.hotel_country}
-                                                    onChange={handleChange}
-                                                    placeholder="e.g., India"
-                                                />
-                                            </div>
+                                            <SearchableSelect
+                                                label="Country"
+                                                name="hotel_country"
+                                                value={formData.hotel_country}
+                                                onChange={handleChange}
+                                                options={countries}
+                                                placeholder="Search country..."
+                                                disabled={loadingCountries}
+                                            />
                                         </div>
                                         <div className="col-md-6">
                                             <div className="mb-3">
@@ -361,30 +376,26 @@ export default function CreateSpecialOffer({ currency }: CreateProps) {
                                     </div>
                                     <div className="row">
                                         <div className="col-md-6">
-                                            <div className="mb-3">
-                                                <label className="form-label">Destination Country</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    name="visa_destination_country"
-                                                    value={formData.visa_destination_country}
-                                                    onChange={handleChange}
-                                                    placeholder="e.g., France"
-                                                />
-                                            </div>
+                                            <SearchableSelect
+                                                label="Destination Country"
+                                                name="visa_destination_country"
+                                                value={formData.visa_destination_country}
+                                                onChange={handleChange}
+                                                options={countries}
+                                                placeholder="Search country..."
+                                                disabled={loadingCountries}
+                                            />
                                         </div>
                                         <div className="col-md-6">
-                                            <div className="mb-3">
-                                                <label className="form-label">Passport Country</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    name="visa_passport_country"
-                                                    value={formData.visa_passport_country}
-                                                    onChange={handleChange}
-                                                    placeholder="e.g., India"
-                                                />
-                                            </div>
+                                            <SearchableSelect
+                                                label="Passport Country"
+                                                name="visa_passport_country"
+                                                value={formData.visa_passport_country}
+                                                onChange={handleChange}
+                                                options={countries}
+                                                placeholder="Search country..."
+                                                disabled={loadingCountries}
+                                            />
                                         </div>
                                     </div>
                                     {formData.type === "Package" && (
@@ -415,17 +426,15 @@ export default function CreateSpecialOffer({ currency }: CreateProps) {
                                 <div className="card-body">
                                     <div className="row">
                                         <div className="col-md-6">
-                                            <div className="mb-3">
-                                                <label className="form-label">Country</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    name="package_country"
-                                                    value={formData.package_country}
-                                                    onChange={handleChange}
-                                                    placeholder="e.g., France"
-                                                />
-                                            </div>
+                                            <SearchableSelect
+                                                label="Country"
+                                                name="package_country"
+                                                value={formData.package_country}
+                                                onChange={handleChange}
+                                                options={countries}
+                                                placeholder="Search country..."
+                                                disabled={loadingCountries}
+                                            />
                                         </div>
                                         <div className="col-md-6">
                                             <div className="mb-3">

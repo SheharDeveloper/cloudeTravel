@@ -489,6 +489,12 @@ export default function BookingShow() {
                                                 <label className="text-muted small">Infants</label>
                                                 <p className="fw-semibold">{booking.flight_data?.infants || 0}</p>
                                             </div>
+                                            {booking.flight_data?.isFlexibleDates && (
+                                                <div className="col-md-6 mb-3">
+                                                    <label className="text-muted small">Flexibility</label>
+                                                    <p className="fw-semibold">±3 days</p>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
 
@@ -588,6 +594,12 @@ export default function BookingShow() {
                                                 <label className="text-muted small">Children</label>
                                                 <p className="fw-semibold">{booking.package_data?.children || 0}</p>
                                             </div>
+                                            {booking.package_data?.flexibleDays && booking.package_data.flexibleDays > 0 && (
+                                                <div className="col-md-6 mb-3">
+                                                    <label className="text-muted small">Flexibility</label>
+                                                    <p className="fw-semibold">±{booking.package_data.flexibleDays} days</p>
+                                                </div>
+                                            )}
                                         </div>
                                     )}
 
@@ -862,6 +874,12 @@ export default function BookingShow() {
                                                             <td className="fw-semibold text-muted">Infants</td>
                                                             <td>{booking.flight_data?.infants || 0}</td>
                                                         </tr>
+                                                        {booking.flight_data?.isFlexibleDates && (
+                                                            <tr>
+                                                                <td className="fw-semibold text-muted">Flexibility</td>
+                                                                <td>±3 days</td>
+                                                            </tr>
+                                                        )}
                                                     </>
                                                 )}
                                                 {(booking.type === 'hotel' || booking.service === 'hotel') && (
@@ -958,6 +976,12 @@ export default function BookingShow() {
                                                             <td className="fw-semibold text-muted">Children</td>
                                                             <td>{booking.package_data?.children || 0}</td>
                                                         </tr>
+                                                        {booking.package_data?.flexibleDays && booking.package_data.flexibleDays > 0 && (
+                                                            <tr>
+                                                                <td className="fw-semibold text-muted">Flexibility</td>
+                                                                <td>±{booking.package_data.flexibleDays} days</td>
+                                                            </tr>
+                                                        )}
                                                     </>
                                                 )}
                                                 {(booking.type === 'transport') && (

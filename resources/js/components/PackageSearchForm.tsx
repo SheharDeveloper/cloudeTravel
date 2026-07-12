@@ -106,6 +106,11 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
 
     const handleCloseBookingModal = () => {
         setShowBookingModal(false);
+        setShowCountryDropdown(false);
+        setShowAirportDropdown(false);
+    };
+
+    const handleBookingSuccess = () => {
         setSelectedCountry('');
         setSelectedCountryName('');
         setSelectedCity('');
@@ -151,7 +156,7 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
                             e.currentTarget.style.borderColor = '#ddd';
                             e.currentTarget.style.boxShadow = 'none';
                         }}
-                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
+                        style={{ width: '100%', padding: '8px 12px 8px 40px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', height: '40px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
                     />
                     {showCountryDropdown && (
                         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '250px', overflowY: 'auto' }}>
@@ -199,7 +204,7 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
                             e.currentTarget.style.borderColor = '#ddd';
                             e.currentTarget.style.boxShadow = 'none';
                         }}
-                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
+                        style={{ width: '100%', padding: '8px 12px 8px 40px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', height: '40px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
                     />
                 </div>
 
@@ -227,7 +232,7 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
                             e.currentTarget.style.borderColor = '#ddd';
                             e.currentTarget.style.boxShadow = 'none';
                         }}
-                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
+                        style={{ width: '100%', padding: '8px 12px 8px 40px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', height: '40px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
                     />
                     {showAirportDropdown && (
                         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '250px', overflowY: 'auto' }}>
@@ -255,25 +260,25 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px', alignItems: 'flex-start' }}>
                 {/* Check-in Date */}
                 <div ref={calendarRef} style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Check-in Date</label>
+                    <label style={{ display: 'block', fontSize: '10px', color: '#666', marginBottom: '4px', fontWeight: 600 }}>Check-in Date</label>
                     <div
                         onClick={() => {
                             setShowCheckInCalendar(!showCheckInCalendar);
                             setShowNightsDropdown(false);
                         }}
-                        style={{ display: 'flex', alignItems: 'center', height: '54px', border: '1.5px solid #ddd', borderRadius: '10px', background: '#fff', transition: 'border-color 0.3s', cursor: 'pointer', padding: '0 16px' }}
+                        style={{ display: 'flex', alignItems: 'center', height: '40px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff', transition: 'border-color 0.3s', cursor: 'pointer', padding: '0 12px' }}
                         onMouseEnter={(e) => e.currentTarget.style.borderColor = '#ccc'}
                         onMouseLeave={(e) => e.currentTarget.style.borderColor = '#ddd'}
                     >
-                        <div style={{ fontSize: '16px', color: '#000000', marginRight: '12px', display: 'flex', alignItems: 'center' }}>
+                        <div style={{ fontSize: '13px', color: '#000000', marginRight: '8px', display: 'flex', alignItems: 'center' }}>
                             <i className="fa fa-calendar"></i>
                         </div>
                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                            <div style={{ fontSize: '13px', color: '#000000', fontWeight: 600 }}>
+                            <div style={{ fontSize: '12px', color: '#000000', fontWeight: 600 }}>
                                 {checkInDate ? new Date(checkInDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Check-in'}
                             </div>
                         </div>
-                        <div style={{ fontSize: '12px', color: '#000000', marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                        <div style={{ fontSize: '11px', color: '#000000', marginLeft: '8px', display: 'flex', alignItems: 'center' }}>
                             <i className="fa fa-chevron-down"></i>
                         </div>
                     </div>
@@ -294,16 +299,16 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
 
                 {/* Nights Selector */}
                 <div style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Nights</label>
+                    <label style={{ display: 'block', fontSize: '10px', color: '#666', marginBottom: '4px', fontWeight: 600 }}>Nights</label>
                     <div
                         onClick={() => setShowNightsDropdown(!showNightsDropdown)}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '54px', border: '1.5px solid #ddd', borderRadius: '10px', background: '#fff', padding: '0 16px', cursor: 'pointer', transition: 'border-color 0.3s', position: 'relative' }}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '40px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff', padding: '0 12px', cursor: 'pointer', transition: 'border-color 0.3s', position: 'relative' }}
                         onMouseEnter={(e) => e.currentTarget.style.borderColor = '#ccc'}
                         onMouseLeave={(e) => e.currentTarget.style.borderColor = '#ddd'}
                     >
                         <div style={{ display: 'flex', alignItems: 'center' }}>
                             <i className="fa fa-moon" style={{ marginRight: '8px', color: '#000000' }}></i>
-                            <span style={{ fontSize: '13px', color: '#000000', fontWeight: 600 }}>{nights} night{nights !== 1 ? 's' : ''}</span>
+                            <span style={{ fontSize: '12px', color: '#000000', fontWeight: 600 }}>{nights} night{nights !== 1 ? 's' : ''}</span>
                         </div>
                         <i className="fa fa-chevron-down" style={{ fontSize: '12px', color: '#000000' }}></i>
                     </div>
@@ -370,10 +375,10 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
 
                 {/* Guests and Rooms */}
                 <div ref={guestModalRef} style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '12px', color: '#666', marginBottom: '6px', fontWeight: 600 }}>Guests & Rooms</label>
+                    <label style={{ display: 'block', fontSize: '10px', color: '#666', marginBottom: '4px', fontWeight: 600 }}>Guests & Rooms</label>
                     <div
                         onClick={() => setShowGuestModal(!showGuestModal)}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '54px', border: '1.5px solid #ddd', borderRadius: '10px', background: '#fff', padding: '0 16px', cursor: 'pointer', transition: 'border-color 0.3s' }}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '40px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff', padding: '0 12px', cursor: 'pointer', transition: 'border-color 0.3s' }}
                         onMouseEnter={(e) => e.currentTarget.style.borderColor = '#ccc'}
                         onMouseLeave={(e) => e.currentTarget.style.borderColor = '#ddd'}
                     >
@@ -516,6 +521,7 @@ export default function PackageSearchForm({ onCountrySelect }: PackageSearchForm
             <BookingModal
                 isOpen={showBookingModal}
                 onClose={handleCloseBookingModal}
+                onSuccess={handleBookingSuccess}
                 searchDetails={{
                     selectedCountry: selectedCountryName,
                     selectedCity,

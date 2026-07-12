@@ -279,11 +279,6 @@ export default function LandingLayout({ children }: Props) {
             {/* FOOTER */}
             <footer className="landing-footer" style={{ background: '#f0f0f0', color: '#000', padding: '30px', marginTop: '40px', borderTop: '1px solid #e0e0e0' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    {/* Logo Section */}
-                    <div style={{ marginBottom: '30px', paddingBottom: '20px', borderBottom: '1px solid #e0e0e0' }}>
-                        <img src={LOGO_PATH} alt={footerLogoConfig.alt} style={{ width: isMobile ? 60 : 120, height: isMobile ? 60 : 120, objectFit: 'contain' }} />
-                    </div>
-
                     <div className="footer-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '30px', marginBottom: '30px' }}>
                         {/* Contact Info - Detailed */}
                         <div>

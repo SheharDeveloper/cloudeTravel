@@ -17,7 +17,7 @@ export default function FlightSearchForm({
     showTravellerModal,
     setShowTravellerModal
 }: FlightSearchFormProps) {
-    const [tripType, setTripType] = useState('roundtrip');
+    const [tripType, setTripType] = useState('oneway');
     const [adults, setAdults] = useState(1);
     const [children, setChildren] = useState(0);
     const [infants, setInfants] = useState(0);
@@ -87,11 +87,24 @@ export default function FlightSearchForm({
             return;
         }
 
+        // For round trip, auto-populate return date if not selected
+        if (tripType === 'roundtrip' && !returnDate) {
+            const depDate = new Date(departureDate);
+            const retDate = new Date(depDate);
+            retDate.setDate(retDate.getDate() + 3);
+            setReturnDate(retDate.toISOString().split('T')[0]);
+        }
+
         setShowBookingModal(true);
     };
 
     const handleCloseBookingModal = () => {
         setShowBookingModal(false);
+        setShowDateRangePicker(false);
+        setShowTravellerModal(false);
+    };
+
+    const handleBookingSuccess = () => {
         setFromCity('');
         setToCity('');
         setFromSearch('');
@@ -100,7 +113,7 @@ export default function FlightSearchForm({
         setToCityManual('');
         setDepartureDate('');
         setReturnDate('');
-        setTripType('roundtrip');
+        setTripType('oneway');
         setShowDateRangePicker(false);
         setShowTravellerModal(false);
     };
@@ -114,7 +127,7 @@ export default function FlightSearchForm({
                     className="trip-type-btn"
                     style={{
                         background: tripType === 'oneway' ? '#0499ff' : '#fff',
-                        color: tripType === 'oneway' ? '#000000' : '#000000',
+                        color: tripType === 'oneway' ? '#ffffff' : '#000000',
                         border: `2px solid ${tripType === 'oneway' ? '#0499ff' : '#ddd'}`,
                         padding: '10px 20px',
                         borderRadius: '24px',
@@ -144,7 +157,7 @@ export default function FlightSearchForm({
                     className="trip-type-btn"
                     style={{
                         background: tripType === 'roundtrip' ? '#0499ff' : '#fff',
-                        color: tripType === 'roundtrip' ? '#000000' : '#000000',
+                        color: tripType === 'roundtrip' ? '#ffffff' : '#000000',
                         border: `2px solid ${tripType === 'roundtrip' ? '#0499ff' : '#ddd'}`,
                         padding: '10px 20px',
                         borderRadius: '24px',
@@ -175,8 +188,8 @@ export default function FlightSearchForm({
             <div className="flight-search-row1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '50px', marginBottom: '20px', alignItems: 'flex-start', position: 'relative' }}>
                 {/* FROM CITY - Searchable Dropdown */}
                 <div ref={fromRef} style={{ position: 'relative', width: '100%', margin: 0, padding: 0 }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, margin: 0, padding: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>From</label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 16px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                    <label style={{ display: 'block', fontSize: '10px', color: '#000000', marginBottom: '4px', fontWeight: 700, margin: 0, padding: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>From</label>
+                    <div style={{ position: 'absolute', left: '12px', top: 'calc(50% + 7px)', transform: 'translateY(-50%)', fontSize: '13px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-plane"></i>
                     </div>
                     <input
@@ -197,7 +210,7 @@ export default function FlightSearchForm({
                             e.currentTarget.style.borderColor = '#ddd';
                             e.currentTarget.style.boxShadow = 'none';
                         }}
-                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
+                        style={{ width: '100%', padding: '8px 12px 8px 40px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', height: '40px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
                     />
                     {/* FROM DROPDOWN */}
                     {showFromDropdown && (
@@ -227,8 +240,8 @@ export default function FlightSearchForm({
 
                 {/* TO CITY - Searchable Dropdown */}
                 <div ref={toRef} style={{ position: 'relative', width: '100%', margin: 0, padding: 0 }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, margin: 0, padding: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>To</label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 16px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                    <label style={{ display: 'block', fontSize: '10px', color: '#000000', marginBottom: '4px', fontWeight: 700, margin: 0, padding: 0, textTransform: 'uppercase', letterSpacing: '0.5px' }}>To</label>
+                    <div style={{ position: 'absolute', left: '12px', top: 'calc(50% + 7px)', transform: 'translateY(-50%)', fontSize: '13px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-map-marker"></i>
                     </div>
                     <input
@@ -249,7 +262,7 @@ export default function FlightSearchForm({
                             e.currentTarget.style.borderColor = '#ddd';
                             e.currentTarget.style.boxShadow = 'none';
                         }}
-                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
+                        style={{ width: '100%', padding: '8px 12px 8px 40px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', height: '40px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
                     />
                     {/* TO DROPDOWN */}
                     {showToDropdown && (
@@ -289,18 +302,16 @@ export default function FlightSearchForm({
                         setShowFromDropdown(false);
                         setShowToDropdown(false);
                     }}
-                    style={{ position: 'absolute', top: '29px', left: '50%', transform: 'translateX(-50%)', background: '#fff', border: '1px solid #ddd', borderRadius: '60%', cursor: 'pointer', fontSize: '13px', transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '36px', width: '36px', zIndex: 15, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+                    style={{ position: 'absolute', top: 'calc(50% + 7px)', left: '50%', transform: 'translateX(-50%) translateY(-50%)', background: '#fff', border: '1px solid #ddd', borderRadius: '60%', cursor: 'pointer', fontSize: '13px', transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '36px', width: '36px', zIndex: 15, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
                     onMouseEnter={(e) => {
                         e.currentTarget.style.background = '#f0f8ff';
                         e.currentTarget.style.borderColor = '#0066cc';
                         e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,102,204,0.2)';
-                        e.currentTarget.style.transform = 'translateX(-50%) scale(1.1)';
                     }}
                     onMouseLeave={(e) => {
                         e.currentTarget.style.background = '#fff';
                         e.currentTarget.style.borderColor = '#e0e0e0';
                         e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
-                        e.currentTarget.style.transform = 'translateX(-50%) scale(1)';
                     }}
                 >⇄</button>
             </div>
@@ -309,13 +320,13 @@ export default function FlightSearchForm({
             <div className="flight-search-row2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '50px', marginBottom: '16px', alignItems: 'flex-start', marginTop: '8px' }}>
                 {/* Combined Date Range Picker */}
                 <div ref={calendarRef} style={{ width: '100%', position: 'relative' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>When</label>
+                    <label style={{ display: 'block', fontSize: '10px', color: '#000000', marginBottom: '4px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>When</label>
                     <div
                         onClick={() => {
                             setShowDateRangePicker(!showDateRangePicker);
                             if (!showDateRangePicker) setShowTravellerModal(false);
                         }}
-                        style={{ display: 'flex', alignItems: 'center', height: '58px', border: '1.5px solid #ddd', borderRadius: '10px', background: '#fff', transition: 'all 0.3s', cursor: 'pointer', padding: '0 16px' }}
+                        style={{ display: 'flex', alignItems: 'center', height: '40px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff', transition: 'all 0.3s', cursor: 'pointer', padding: '0 12px' }}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.borderColor = '#0499ff';
                             e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
@@ -326,13 +337,13 @@ export default function FlightSearchForm({
                         }}
                     >
                         {/* Calendar Icon */}
-                        <div style={{ fontSize: '16px', color: '#999', marginRight: '12px', display: 'flex', alignItems: 'center' }}>
+                        <div style={{ fontSize: '13px', color: '#999', marginRight: '8px', display: 'flex', alignItems: 'center' }}>
                             <i className="fa fa-calendar"></i>
                         </div>
 
                         {/* Departure Date */}
                         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                            <div style={{ fontSize: '13px', color: '#333', fontWeight: 600 }}>
+                            <div style={{ fontSize: '12px', color: '#333', fontWeight: 600 }}>
                                 {departureDate ? new Date(departureDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Departure'}
                             </div>
                         </div>
@@ -345,14 +356,14 @@ export default function FlightSearchForm({
                         {/* Return Date (only for Round Trip) */}
                         {tripType === 'roundtrip' && (
                             <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                                <div style={{ fontSize: '13px', color: '#333', fontWeight: 600 }}>
+                                <div style={{ fontSize: '12px', color: '#333', fontWeight: 600 }}>
                                     {returnDate ? new Date(returnDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Return'}
                                 </div>
                             </div>
                         )}
 
                         {/* Chevron Icon */}
-                        <div style={{ fontSize: '14px', color: '#999', marginLeft: '12px', display: 'flex', alignItems: 'center' }}>
+                        <div style={{ fontSize: '12px', color: '#999', marginLeft: '8px', display: 'flex', alignItems: 'center' }}>
                             <i className="fa fa-chevron-down"></i>
                         </div>
                     </div>
@@ -374,13 +385,13 @@ export default function FlightSearchForm({
 
                 {/* Travellers & Class */}
                 <div ref={travellerRef} style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Who</label>
+                    <label style={{ display: 'block', fontSize: '10px', color: '#000000', marginBottom: '4px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Who</label>
                     <div
                         onClick={() => {
                             setShowTravellerModal(!showTravellerModal);
                             if (!showTravellerModal) setShowDateRangePicker(false);
                         }}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '58px', border: '1.5px solid #ddd', borderRadius: '10px', background: '#fff', padding: '12px 16px', cursor: 'pointer', transition: 'all 0.3s' }}
+                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '40px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff', padding: '0 12px', cursor: 'pointer', transition: 'all 0.3s' }}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.borderColor = '#0499ff';
                             e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
@@ -391,14 +402,14 @@ export default function FlightSearchForm({
                         }}
                     >
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                            <div style={{ fontSize: '13px', color: '#333', fontWeight: 600 }}>
+                            <div style={{ fontSize: '12px', color: '#333', fontWeight: 600 }}>
                                 {adults > 0 ? `${adults} Adult${adults > 1 ? 's' : ''}` : '0 Adults'} • {selectedClass}
                             </div>
                             <div style={{ fontSize: '12px', color: '#999' }}>
                                 {children > 0 || infants > 0 ? `${children} Child${children !== 1 ? 'ren' : ''}, ${infants} Infant${infants !== 1 ? 's' : ''}` : 'No children'}
                             </div>
                         </div>
-                        <div style={{ fontSize: '16px', color: '#666' }}>
+                        <div style={{ fontSize: '12px', color: '#666' }}>
                             <i className="fa fa-chevron-down"></i>
                         </div>
                     </div>
@@ -578,6 +589,7 @@ export default function FlightSearchForm({
             <BookingModal
                 isOpen={showBookingModal}
                 onClose={handleCloseBookingModal}
+                onSuccess={handleBookingSuccess}
                 searchDetails={{
                     fromCity,
                     toCity,
@@ -592,7 +604,8 @@ export default function FlightSearchForm({
                     departure: departureDate,
                     return: returnDate,
                     class: selectedClass,
-                    tripType
+                    tripType,
+                    isFlexibleDates
                 }}
                 serviceType="flight"
             />

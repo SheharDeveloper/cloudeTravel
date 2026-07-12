@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom';
 interface BookingModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onSuccess?: () => void;
     searchDetails: {
         fromCity?: string;
         toCity?: string;
@@ -23,7 +24,7 @@ interface BookingModalProps {
     serviceType: 'flight' | 'hotel' | 'visa' | 'package' | 'airport-transfer';
 }
 
-export default function BookingModal({ isOpen, onClose, searchDetails, serviceType }: BookingModalProps) {
+export default function BookingModal({ isOpen, onClose, onSuccess, searchDetails, serviceType }: BookingModalProps) {
     const [submitted, setSubmitted] = useState(false);
     const [formData, setFormData] = useState({ firstName: '', email: '', countryCode: '1', phone: '' });
     const [errors, setErrors] = useState<any>({});
@@ -95,6 +96,7 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
                                 children: searchDetails.children,
                                 infants: searchDetails.infants,
                                 selectedClass: searchDetails.selectedClass,
+                                isFlexibleDates: searchDetails.isFlexibleDates,
                             }
                         };
                     case 'hotel':
@@ -184,6 +186,9 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
                     onClose();
                     setSubmitted(false);
                     setFormData({ firstName: '', email: '', countryCode: '1', phone: '' });
+                    if (onSuccess) {
+                        onSuccess();
+                    }
                 }, 3000);
             } else {
                 alert('Error submitting booking');
@@ -264,6 +269,12 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
                             <div>
                                 <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Class</p>
                                 <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>{searchDetails.class}</p>
+                            </div>
+                        )}
+                        {searchDetails.isFlexibleDates && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Flexibility</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>±3 days</p>
                             </div>
                         )}
                     </div>
@@ -378,6 +389,12 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
                                     {searchDetails.adults} Adult{searchDetails.adults !== 1 ? 's' : ''}
                                     {(searchDetails.children ?? 0) > 0 && `, ${searchDetails.children} Child${searchDetails.children !== 1 ? 'ren' : ''}`}
                                 </p>
+                            </div>
+                        )}
+                        {searchDetails.flexibleDays && searchDetails.flexibleDays > 0 && (
+                            <div>
+                                <p style={{ fontSize: '11px', color: '#666', margin: '0 0 4px 0', fontWeight: 600 }}>Flexibility</p>
+                                <p style={{ fontSize: '13px', color: '#000000', margin: 0, fontWeight: 500 }}>±{searchDetails.flexibleDays} days</p>
                             </div>
                         )}
                     </div>
@@ -579,7 +596,7 @@ export default function BookingModal({ isOpen, onClose, searchDetails, serviceTy
                             <button onClick={onClose} style={{ padding: '10px 20px', border: '1.5px solid #ddd', background: '#fff', borderRadius: '6px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', color: '#666', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#999'; e.currentTarget.style.background = '#f9f9f9'; }} onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#ddd'; e.currentTarget.style.background = '#fff'; }}>
                                 Cancel
                             </button>
-                            <button onClick={handleSubmit} style={{ padding: '10px 30px', background: 'linear-gradient(135deg, #0066cc 0%, #0052a3 100%)', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 8px 16px rgba(0, 102, 204, 0.3)'; e.currentTarget.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+                            <button onClick={handleSubmit} style={{ padding: '10px 30px', background: '#0499ff', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 700, cursor: 'pointer', transition: 'all 0.2s' }} onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 8px 16px rgba(4, 153, 255, 0.3)'; e.currentTarget.style.transform = 'translateY(-2px)'; }} onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; }}>
                                 Submit Booking
                             </button>
                         </div>

@@ -68,6 +68,11 @@ export default function HotelsSearchForm(): React.ReactElement {
 
     const handleCloseBookingModal = () => {
         setShowBookingModal(false);
+        setShowDatePicker(false);
+        setShowGuestModal(false);
+    };
+
+    const handleBookingSuccess = () => {
         setHotelCity('');
         setHotelSearch('');
         setHotelCityManual('');
@@ -85,12 +90,12 @@ export default function HotelsSearchForm(): React.ReactElement {
                 <button
                     onClick={() => setStayType('dayuse')}
                     style={{
-                        background: stayType === 'dayuse' ? '#fff5e8' : '#fff',
-                        color: stayType === 'dayuse' ? '#0499ff' : '#666',
+                        background: stayType === 'dayuse' ? '#0499ff' : '#fff',
+                        color: stayType === 'dayuse' ? '#ffffff' : '#000000',
                         border: `2px solid ${stayType === 'dayuse' ? '#0499ff' : '#ddd'}`,
-                        padding: '10px 28px',
+                        padding: '10px 20px',
                         borderRadius: '24px',
-                        fontSize: '14px',
+                        fontSize: '13px',
                         fontWeight: 600,
                         cursor: 'pointer',
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -114,12 +119,12 @@ export default function HotelsSearchForm(): React.ReactElement {
                 <button
                     onClick={() => setStayType('overnight')}
                     style={{
-                        background: stayType === 'overnight' ? '#fff5e8' : '#fff',
-                        color: stayType === 'overnight' ? '#0499ff' : '#666',
+                        background: stayType === 'overnight' ? '#0499ff' : '#fff',
+                        color: stayType === 'overnight' ? '#ffffff' : '#000000',
                         border: `2px solid ${stayType === 'overnight' ? '#0499ff' : '#ddd'}`,
-                        padding: '10px 28px',
+                        padding: '10px 20px',
                         borderRadius: '24px',
-                        fontSize: '14px',
+                        fontSize: '13px',
                         fontWeight: 600,
                         cursor: 'pointer',
                         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -142,12 +147,12 @@ export default function HotelsSearchForm(): React.ReactElement {
                 </button>
             </div>
 
-            {/* Row 1: All fields on one line - WHERE, CITY, WHEN, WHO */}
-            <div className="hotel-search-row1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px', marginBottom: '16px', alignItems: 'flex-start' }}>
+            {/* Row 1: WHERE and CITY */}
+            <div className="hotel-search-row1" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px', alignItems: 'flex-start' }}>
                 {/* WHERE - Country Selection */}
                 <div ref={hotelRef} style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Where</label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
+                    <label style={{ display: 'block', fontSize: '10px', color: '#000000', marginBottom: '4px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Where</label>
+                    <div style={{ position: 'absolute', left: '12px', top: 'calc(50% + 7px)', transform: 'translateY(-50%)', fontSize: '13px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-map-marker"></i>
                     </div>
                     <input
@@ -168,7 +173,7 @@ export default function HotelsSearchForm(): React.ReactElement {
                             e.currentTarget.style.borderColor = '#ddd';
                             e.currentTarget.style.boxShadow = 'none';
                         }}
-                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
+                        style={{ width: '100%', padding: '8px 12px 8px 40px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', height: '40px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
                     />
                     {showHotelDropdown && (
                         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '200px', overflowY: 'auto' }}>
@@ -198,14 +203,14 @@ export default function HotelsSearchForm(): React.ReactElement {
 
                 {/* CITY - Manual City Entry */}
                 <div style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>City</label>
+                    <label style={{ display: 'block', fontSize: '10px', color: '#000000', marginBottom: '4px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>City</label>
                     <input
                         type="text"
                         placeholder="Enter city name..."
                         value={hotelCityManual}
                         onChange={(e) => setHotelCityManual(e.target.value)}
                         disabled={!hotelCity}
-                        style={{ width: '100%', padding: '16px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '14px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500, opacity: hotelCity ? 1 : 0.6, cursor: hotelCity ? 'text' : 'not-allowed' }}
+                        style={{ width: '100%', padding: '8px 12px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', height: '40px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500, opacity: hotelCity ? 1 : 0.6, cursor: hotelCity ? 'text' : 'not-allowed' }}
                         onFocus={(e) => {
                             if (hotelCity) {
                                 e.currentTarget.style.borderColor = '#0499ff';
@@ -218,10 +223,13 @@ export default function HotelsSearchForm(): React.ReactElement {
                         }}
                     />
                 </div>
+            </div>
 
+            {/* Row 2: WHEN and WHO */}
+            <div className="hotel-search-row2" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px', alignItems: 'flex-start' }}>
                 {/* Dates (WHEN) */}
                 <div ref={datePickerRef} style={{ position: 'relative' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    <label style={{ display: 'block', fontSize: '10px', color: '#000000', marginBottom: '4px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                         When
                     </label>
                     <div
@@ -229,7 +237,7 @@ export default function HotelsSearchForm(): React.ReactElement {
                             setShowDatePicker(!showDatePicker);
                             if (!showDatePicker) setShowGuestModal(false);
                         }}
-                        style={{ display: 'flex', alignItems: 'center', height: '58px', border: '1.5px solid #ddd', borderRadius: '10px', background: '#fff', transition: 'all 0.3s', cursor: 'pointer', padding: '0 16px' }}
+                        style={{ display: 'flex', alignItems: 'center', height: '40px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff', transition: 'all 0.3s', cursor: 'pointer', padding: '0 12px' }}
                         onMouseEnter={(e) => {
                             e.currentTarget.style.borderColor = '#0499ff';
                             e.currentTarget.style.boxShadow = '0 0 0 3px rgba(255, 107, 53, 0.1)';
@@ -293,8 +301,8 @@ export default function HotelsSearchForm(): React.ReactElement {
 
                 {/* WHO - Guests and Rooms */}
                 <div ref={guestModalRef} style={{ position: 'relative' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Who</label>
-                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '58px', border: '1.5px solid #ddd', borderRadius: '10px', background: '#fff', padding: '16px', cursor: 'pointer', transition: 'all 0.3s' }}
+                    <label style={{ display: 'block', fontSize: '10px', color: '#000000', marginBottom: '4px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>Who</label>
+                    <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '40px', border: '1px solid #ddd', borderRadius: '6px', background: '#fff', padding: '0 12px', cursor: 'pointer', transition: 'all 0.3s' }}
                         onClick={() => {
                             setShowGuestModal(!showGuestModal);
                             if (!showGuestModal) setShowDatePicker(false);
@@ -323,7 +331,7 @@ export default function HotelsSearchForm(): React.ReactElement {
 
                     {/* Guest Modal - Like Flight Traveler Style */}
                     {showGuestModal && (
-                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 12px 48px rgba(0,0,0,.3)', zIndex: 9999, border: '1px solid #e0e0e0' }}>
+                        <div style={{ position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)', marginTop: '12px', background: '#fff', width: 'clamp(260px, 75vw, 340px)', maxHeight: '650px', overflowY: 'auto', borderRadius: '12px', padding: '24px', boxShadow: '0 12px 48px rgba(0,0,0,.3)', zIndex: 9999, border: '1px solid #e0e0e0' }}>
                     <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#000000', marginBottom: '18px' }}>Room & Guests</h3>
 
                     {/* Room Selector */}
@@ -333,10 +341,10 @@ export default function HotelsSearchForm(): React.ReactElement {
                                 <p style={{ fontSize: '14px', color: '#000000', margin: 0, fontWeight: 600 }}>Rooms</p>
                                 <p style={{ fontSize: '11px', color: '#000000', margin: '4px 0 0 0' }}></p>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
-                                <button onClick={() => setRooms(Math.max(1, rooms - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '40px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-                                <span style={{ fontSize: '16px', fontWeight: 600, color: '#000000', minWidth: '24px', textAlign: 'center', flex: 1 }}>{rooms}</span>
-                                <button onClick={() => setRooms(Math.min(9, rooms + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '40px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <button onClick={() => setRooms(Math.max(1, rooms - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                                <span style={{ fontSize: '16px', fontWeight: 600, color: '#000000', minWidth: '24px', textAlign: 'center' }}>{rooms}</span>
+                                <button onClick={() => setRooms(Math.min(9, rooms + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                             </div>
                         </div>
                     </div>
@@ -348,10 +356,10 @@ export default function HotelsSearchForm(): React.ReactElement {
                                 <p style={{ fontSize: '14px', color: '#000000', margin: 0, fontWeight: 600 }}>Adults</p>
                                 <p style={{ fontSize: '11px', color: '#000000', margin: '4px 0 0 0' }}>18 yrs or above</p>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
-                                <button onClick={() => setAdults(Math.max(1, adults - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '40px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-                                <span style={{ fontSize: '16px', fontWeight: 600, color: '#000000', minWidth: '24px', textAlign: 'center', flex: 1 }}>{adults}</span>
-                                <button onClick={() => setAdults(Math.min(9, adults + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '40px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <button onClick={() => setAdults(Math.max(1, adults - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                                <span style={{ fontSize: '16px', fontWeight: 600, color: '#000000', minWidth: '24px', textAlign: 'center' }}>{adults}</span>
+                                <button onClick={() => setAdults(Math.min(9, adults + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                             </div>
                         </div>
                     </div>
@@ -363,10 +371,10 @@ export default function HotelsSearchForm(): React.ReactElement {
                                 <p style={{ fontSize: '14px', color: '#000000', margin: 0, fontWeight: 600 }}>Children</p>
                                 <p style={{ fontSize: '11px', color: '#000000', margin: '4px 0 0 0' }}>0 - 17 yrs</p>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
-                                <button onClick={() => setChildren(Math.max(0, children - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '40px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-                                <span style={{ fontSize: '16px', fontWeight: 600, color: '#000000', minWidth: '24px', textAlign: 'center', flex: 1 }}>{children}</span>
-                                <button onClick={() => setChildren(Math.min(8, children + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '40px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <button onClick={() => setChildren(Math.max(0, children - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                                <span style={{ fontSize: '16px', fontWeight: 600, color: '#000000', minWidth: '24px', textAlign: 'center' }}>{children}</span>
+                                <button onClick={() => setChildren(Math.min(8, children + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                             </div>
                         </div>
                     </div>
@@ -378,10 +386,10 @@ export default function HotelsSearchForm(): React.ReactElement {
                                 <p style={{ fontSize: '14px', color: '#000000', margin: 0, fontWeight: 600 }}>Infants</p>
                                 <p style={{ fontSize: '11px', color: '#000000', margin: '4px 0 0 0' }}>Under 2 yrs</p>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flex: 1 }}>
-                                <button onClick={() => setInfants(Math.max(0, infants - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '40px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-                                <span style={{ fontSize: '16px', fontWeight: 600, color: '#000000', minWidth: '24px', textAlign: 'center', flex: 1 }}>{infants}</span>
-                                <button onClick={() => setInfants(Math.min(8, infants + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '40px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <button onClick={() => setInfants(Math.max(0, infants - 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                                <span style={{ fontSize: '16px', fontWeight: 600, color: '#000000', minWidth: '24px', textAlign: 'center' }}>{infants}</span>
+                                <button onClick={() => setInfants(Math.min(8, infants + 1))} style={{ background: '#0499ff', color: '#fff', border: 'none', width: '36px', height: '36px', borderRadius: '4px', cursor: 'pointer', fontSize: '18px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                             </div>
                         </div>
                     </div>
@@ -391,7 +399,6 @@ export default function HotelsSearchForm(): React.ReactElement {
                         </div>
                     )}
                 </div>
-
             </div>
 
             {/* Search Button */}
@@ -439,6 +446,7 @@ export default function HotelsSearchForm(): React.ReactElement {
             <BookingModal
                 isOpen={showBookingModal}
                 onClose={handleCloseBookingModal}
+                onSuccess={handleBookingSuccess}
                 searchDetails={{
                     hotelCity: hotelCityManual || hotelCity,
                     hotelCountry: countries.find((c: any) => c.code === hotelCity)?.name,

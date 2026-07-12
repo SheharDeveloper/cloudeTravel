@@ -83,6 +83,9 @@ export default function AirportTransportForm(): React.ReactElement {
 
     const handleCloseBookingModal = () => {
         setShowBookingModal(false);
+    };
+
+    const handleBookingSuccess = () => {
         setPickupAirport('');
         setDestinationLocation('');
         setPickupDate('');
@@ -101,15 +104,16 @@ export default function AirportTransportForm(): React.ReactElement {
                 <button
                     onClick={() => setTripType('oneway')}
                     style={{
-                        background: tripType === 'oneway' ? '#e8f1ff' : '#fff',
-                        color: tripType === 'oneway' ? '#0499ff' : '#666',
+                        background: tripType === 'oneway' ? '#0499ff' : '#fff',
+                        color: tripType === 'oneway' ? '#ffffff' : '#000000',
                         border: `2px solid ${tripType === 'oneway' ? '#0499ff' : '#ddd'}`,
-                        padding: '10px 28px',
+                        padding: '10px 20px',
                         borderRadius: '24px',
-                        fontSize: '14px',
+                        fontSize: '13px',
                         fontWeight: 600,
                         cursor: 'pointer',
-                        transition: 'all 0.3s ease'
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        boxShadow: tripType === 'oneway' ? '0 4px 12px rgba(4, 153, 255, 0.2)' : 'none'
                     }}
                     onMouseEnter={(e) => {
                         if (tripType !== 'oneway') {
@@ -127,15 +131,16 @@ export default function AirportTransportForm(): React.ReactElement {
                 <button
                     onClick={() => setTripType('return')}
                     style={{
-                        background: tripType === 'return' ? '#e8f1ff' : '#fff',
-                        color: tripType === 'return' ? '#0499ff' : '#666',
+                        background: tripType === 'return' ? '#0499ff' : '#fff',
+                        color: tripType === 'return' ? '#ffffff' : '#000000',
                         border: `2px solid ${tripType === 'return' ? '#0499ff' : '#ddd'}`,
-                        padding: '10px 28px',
+                        padding: '10px 20px',
                         borderRadius: '24px',
-                        fontSize: '14px',
+                        fontSize: '13px',
                         fontWeight: 600,
                         cursor: 'pointer',
-                        transition: 'all 0.3s ease'
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        boxShadow: tripType === 'return' ? '0 4px 12px rgba(4, 153, 255, 0.2)' : 'none'
                     }}
                     onMouseEnter={(e) => {
                         if (tripType !== 'return') {
@@ -153,13 +158,13 @@ export default function AirportTransportForm(): React.ReactElement {
             </div>
 
             {/* Row 1: Airport & Location */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '56px', marginBottom: '14px', alignItems: 'flex-start', position: 'relative' }}>
                 {/* Pickup Airport */}
                 <div ref={pickupRef} style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    <label style={{ display: 'block', fontSize: '10px', color: '#000000', marginBottom: '4px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                         FROM
                     </label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
+                    <div style={{ position: 'absolute', left: '12px', top: '65%', transform: 'translateY(-50%)', fontSize: '13px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-plane"></i>
                     </div>
                     <input
@@ -171,7 +176,7 @@ export default function AirportTransportForm(): React.ReactElement {
                             setPickupAirport('');
                             setShowPickupDropdown(true);
                         }}
-                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
+                        style={{ width: '100%', padding: '8px 12px 8px 40px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', height: '40px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500, lineHeight: '24px', verticalAlign: 'middle' }}
                         onFocus={(e) => {
                             setShowPickupDropdown(true);
                             e.currentTarget.style.borderColor = '#0499ff';
@@ -209,10 +214,10 @@ export default function AirportTransportForm(): React.ReactElement {
 
                 {/* Drop-off Location */}
                 <div ref={destinationRef} style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    <label style={{ display: 'block', fontSize: '10px', color: '#000000', marginBottom: '4px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                         TO
                     </label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
+                    <div style={{ position: 'absolute', left: '12px', top: '65%', transform: 'translateY(-50%)', fontSize: '13px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-map-marker"></i>
                     </div>
                     <input
@@ -224,7 +229,7 @@ export default function AirportTransportForm(): React.ReactElement {
                             setDestinationLocation('');
                             setShowDestinationDropdown(true);
                         }}
-                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500 }}
+                        style={{ width: '100%', padding: '8px 12px 8px 40px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', height: '40px', boxSizing: 'border-box', transition: 'all 0.3s', fontWeight: 500, lineHeight: '24px', verticalAlign: 'middle' }}
                         onFocus={(e) => {
                             setShowDestinationDropdown(true);
                             e.currentTarget.style.borderColor = '#0499ff';
@@ -235,26 +240,6 @@ export default function AirportTransportForm(): React.ReactElement {
                             e.currentTarget.style.boxShadow = 'none';
                         }}
                     />
-                    <button
-                        onClick={() => {
-                            const temp = pickupAirport;
-                            setPickupAirport(destinationLocation as any);
-                            setDestinationLocation(temp as any);
-                        }}
-                        style={{ position: 'absolute', top: '50%', right: '12px', transform: 'translateY(-50%)', background: '#fff', border: '1px solid #ccc', borderRadius: '50%', cursor: 'pointer', fontSize: '13px', transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '32px', width: '32px', zIndex: 15, boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.background = '#f0f8ff';
-                            e.currentTarget.style.borderColor = '#0499ff';
-                            e.currentTarget.style.boxShadow = '0 4px 16px rgba(4,153,255,0.2)';
-                            e.currentTarget.style.transform = 'translateY(-50%) scale(1.1)';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.background = '#fff';
-                            e.currentTarget.style.borderColor = '#e0e0e0';
-                            e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.08)';
-                            e.currentTarget.style.transform = 'translateY(-50%) scale(1)';
-                        }}
-                    >⇄</button>
                     {showDestinationDropdown && (
                         <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '200px', overflowY: 'auto' }}>
                             {filterLocations(destinationSearch).length > 0 ? (
@@ -279,21 +264,43 @@ export default function AirportTransportForm(): React.ReactElement {
                         </div>
                     )}
                 </div>
+
+                {/* Swap Button - Centered between FROM and TO */}
+                <button
+                    onClick={() => {
+                        const temp = pickupAirport;
+                        setPickupAirport(destinationLocation as any);
+                        setDestinationLocation(temp as any);
+                    }}
+                    style={{ position: 'absolute', top: 'calc(50% + 7px)', left: '50%', transform: 'translateX(-50%) translateY(-50%)', background: '#fff', border: '1px solid #ddd', borderRadius: '50%', cursor: 'pointer', fontSize: '13px', transition: 'all 0.3s ease', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '36px', width: '36px', zIndex: 15, boxShadow: '0 2px 8px rgba(0,0,0,0.08)' }}
+                    onMouseEnter={(e) => {
+                        e.currentTarget.style.background = '#fff';
+                        e.currentTarget.style.borderColor = '#0499ff';
+                        e.currentTarget.style.boxShadow = '0 4px 16px rgba(4,153,255,0.2)';
+                        e.currentTarget.style.transform = 'translateX(-50%) translateY(-50%) scale(1.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                        e.currentTarget.style.background = '#fff';
+                        e.currentTarget.style.borderColor = '#ddd';
+                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+                        e.currentTarget.style.transform = 'translateX(-50%) translateY(-50%) scale(1)';
+                    }}
+                >⇄</button>
             </div>
 
             {/* Row 2: Date, Time & Passengers */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
                 {/* Pickup Date */}
                 <div style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>WHEN</label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
+                    <label style={{ display: 'block', fontSize: '10px', color: '#000000', marginBottom: '4px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>WHEN</label>
+                    <div style={{ position: 'absolute', left: '12px', top: '65%', transform: 'translateY(-50%)', fontSize: '13px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-calendar"></i>
                     </div>
                     <input
                         type="date"
                         value={pickupDate}
                         onChange={(e) => setPickupDate(e.target.value)}
-                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', cursor: 'pointer', fontWeight: 500 }}
+                        style={{ width: '100%', padding: '8px 12px 8px 40px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', height: '40px', boxSizing: 'border-box', transition: 'all 0.3s', cursor: 'pointer', fontWeight: 500, lineHeight: '24px', verticalAlign: 'middle' }}
                         onFocus={(e) => {
                             e.currentTarget.style.borderColor = '#0499ff';
                             e.currentTarget.style.boxShadow = '0 0 0 3px rgba(4, 153, 255, 0.1)';
@@ -307,15 +314,15 @@ export default function AirportTransportForm(): React.ReactElement {
 
                 {/* Pickup Time */}
                 <div style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>TIME</label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
+                    <label style={{ display: 'block', fontSize: '10px', color: '#000000', marginBottom: '4px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>TIME</label>
+                    <div style={{ position: 'absolute', left: '12px', top: '65%', transform: 'translateY(-50%)', fontSize: '13px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-clock-o"></i>
                     </div>
                     <input
                         type="time"
                         value={pickupTime}
                         onChange={(e) => setPickupTime(e.target.value)}
-                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', cursor: 'pointer', fontWeight: 500 }}
+                        style={{ width: '100%', padding: '8px 12px 8px 40px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', height: '40px', boxSizing: 'border-box', transition: 'all 0.3s', cursor: 'pointer', fontWeight: 500, lineHeight: '24px', verticalAlign: 'middle' }}
                         onFocus={(e) => {
                             e.currentTarget.style.borderColor = '#0499ff';
                             e.currentTarget.style.boxShadow = '0 0 0 3px rgba(4, 153, 255, 0.1)';
@@ -329,14 +336,14 @@ export default function AirportTransportForm(): React.ReactElement {
 
                 {/* Passengers */}
                 <div style={{ position: 'relative', width: '100%' }}>
-                    <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>WHO</label>
-                    <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
+                    <label style={{ display: 'block', fontSize: '10px', color: '#000000', marginBottom: '4px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>WHO</label>
+                    <div style={{ position: 'absolute', left: '12px', top: '65%', transform: 'translateY(-50%)', fontSize: '13px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                         <i className="fa fa-users"></i>
                     </div>
                     <select
                         value={passengers}
                         onChange={(e) => setPassengers(parseInt(e.target.value))}
-                        style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', cursor: 'pointer', backgroundColor: '#fff', transition: 'all 0.3s', fontWeight: 500 }}
+                        style={{ width: '100%', padding: '8px 12px 8px 40px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', height: '40px', boxSizing: 'border-box', cursor: 'pointer', backgroundColor: '#fff', transition: 'all 0.3s', fontWeight: 500 }}
                         onFocus={(e) => {
                             e.currentTarget.style.borderColor = '#0499ff';
                             e.currentTarget.style.boxShadow = '0 0 0 3px rgba(4, 153, 255, 0.1)';
@@ -359,11 +366,11 @@ export default function AirportTransportForm(): React.ReactElement {
                     <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#000000', marginBottom: '16px' }}>Return Trip</h4>
 
                     {/* Return Row 1: Return Locations */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1.2fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '56px', marginBottom: '14px', alignItems: 'flex-start', position: 'relative' }}>
                         {/* Return Pickup Location - Auto-filled from outbound drop-off */}
                         <div style={{ position: 'relative', width: '100%' }}>
-                            <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>RETURN FROM</label>
-                            <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
+                            <label style={{ display: 'block', fontSize: '10px', color: '#000000', marginBottom: '4px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>RETURN FROM</label>
+                            <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '13px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                                 <i className="fa fa-map-marker"></i>
                             </div>
                             <input
@@ -372,15 +379,15 @@ export default function AirportTransportForm(): React.ReactElement {
                                 value={returnPickupLocation || destinationLocation}
                                 onChange={(e) => setReturnPickupLocation(e.target.value)}
                                 disabled={!destinationLocation}
-                                style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '14px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s', backgroundColor: !destinationLocation ? '#f9f9f9' : '#fff', cursor: !destinationLocation ? 'not-allowed' : 'text' }}
+                                style={{ width: '100%', padding: '8px 12px 8px 40px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', height: '40px', boxSizing: 'border-box', transition: 'border-color 0.3s', backgroundColor: !destinationLocation ? '#f9f9f9' : '#fff', cursor: !destinationLocation ? 'not-allowed' : 'text' }}
                             />
                             {!destinationLocation && <span style={{ fontSize: '11px', color: '#000000' }}>Select drop-off location first</span>}
                         </div>
 
                         {/* Return Drop-off Location - Auto-filled from outbound pickup */}
                         <div style={{ position: 'relative', width: '100%' }}>
-                            <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>RETURN TO</label>
-                            <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
+                            <label style={{ display: 'block', fontSize: '10px', color: '#000000', marginBottom: '4px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>RETURN TO</label>
+                            <div style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', fontSize: '13px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                                 <i className="fa fa-map-marker"></i>
                             </div>
                             <input
@@ -389,7 +396,7 @@ export default function AirportTransportForm(): React.ReactElement {
                                 value={returnDestinationLocation || pickupAirport}
                                 onChange={(e) => setReturnDestinationLocation(e.target.value)}
                                 disabled={!pickupAirport}
-                                style={{ width: '100%', padding: '14px 16px 14px 48px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '14px', height: '54px', boxSizing: 'border-box', transition: 'border-color 0.3s', backgroundColor: !pickupAirport ? '#f9f9f9' : '#fff', cursor: !pickupAirport ? 'not-allowed' : 'text' }}
+                                style={{ width: '100%', padding: '8px 12px 8px 40px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', height: '40px', boxSizing: 'border-box', transition: 'border-color 0.3s', backgroundColor: !pickupAirport ? '#f9f9f9' : '#fff', cursor: !pickupAirport ? 'not-allowed' : 'text' }}
                             />
                             {!pickupAirport && <span style={{ fontSize: '11px', color: '#000000' }}>Select pick-up location first</span>}
                         </div>
@@ -399,15 +406,15 @@ export default function AirportTransportForm(): React.ReactElement {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start' }}>
                         {/* Return Date */}
                         <div style={{ position: 'relative', width: '100%' }}>
-                            <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>RETURN WHEN</label>
-                            <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
+                            <label style={{ display: 'block', fontSize: '10px', color: '#000000', marginBottom: '4px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>RETURN WHEN</label>
+                            <div style={{ position: 'absolute', left: '12px', top: '65%', transform: 'translateY(-50%)', fontSize: '13px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                                 <i className="fa fa-calendar"></i>
                             </div>
                             <input
                                 type="date"
                                 value={returnDate}
                                 onChange={(e) => setReturnDate(e.target.value)}
-                                style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', cursor: 'pointer', fontWeight: 500 }}
+                                style={{ width: '100%', padding: '8px 12px 8px 40px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', height: '40px', boxSizing: 'border-box', transition: 'all 0.3s', cursor: 'pointer', fontWeight: 500, lineHeight: '24px', verticalAlign: 'middle' }}
                         onFocus={(e) => {
                             e.currentTarget.style.borderColor = '#0499ff';
                             e.currentTarget.style.boxShadow = '0 0 0 3px rgba(4, 153, 255, 0.1)';
@@ -421,15 +428,15 @@ export default function AirportTransportForm(): React.ReactElement {
 
                         {/* Return Time */}
                         <div style={{ position: 'relative', width: '100%' }}>
-                            <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>RETURN TIME</label>
-                            <div style={{ position: 'absolute', left: '16px', top: 'calc(50% + 14px)', transform: 'translateY(-50%)', fontSize: '18px', color: '#000000', pointerEvents: 'none', zIndex: 5 }}>
+                            <label style={{ display: 'block', fontSize: '10px', color: '#000000', marginBottom: '4px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>RETURN TIME</label>
+                            <div style={{ position: 'absolute', left: '12px', top: '65%', transform: 'translateY(-50%)', fontSize: '13px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
                                 <i className="fa fa-clock-o"></i>
                             </div>
                             <input
                                 type="time"
                                 value={returnTime}
                                 onChange={(e) => setReturnTime(e.target.value)}
-                                style={{ width: '100%', padding: '16px 16px 16px 50px', border: '1.5px solid #ddd', borderRadius: '10px', fontSize: '15px', height: '58px', boxSizing: 'border-box', transition: 'all 0.3s', cursor: 'pointer', fontWeight: 500 }}
+                                style={{ width: '100%', padding: '8px 12px 8px 40px', border: '1px solid #ddd', borderRadius: '6px', fontSize: '13px', height: '40px', boxSizing: 'border-box', transition: 'all 0.3s', cursor: 'pointer', fontWeight: 500, lineHeight: '24px', verticalAlign: 'middle' }}
                         onFocus={(e) => {
                             e.currentTarget.style.borderColor = '#0499ff';
                             e.currentTarget.style.boxShadow = '0 0 0 3px rgba(4, 153, 255, 0.1)';
@@ -489,6 +496,7 @@ export default function AirportTransportForm(): React.ReactElement {
             <BookingModal
                 isOpen={showBookingModal}
                 onClose={handleCloseBookingModal}
+                onSuccess={handleBookingSuccess}
                 searchDetails={{
                     tripType,
                     pickupAirport: pickupAirport ? `${pickupAirport} - ${airportList.find(a => a.code === pickupAirport)?.name}` : '',

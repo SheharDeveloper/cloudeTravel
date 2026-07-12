@@ -527,6 +527,9 @@ export default function Home() {
                     .flight-search-row2 {
                         grid-template-columns: 1fr !important;
                     }
+                    .hotel-search-row1 {
+                        grid-template-columns: 1fr 1fr !important;
+                    }
                 }
             `}</style>
 
@@ -621,7 +624,7 @@ export default function Home() {
 
             {/* BOOKING SEARCH FORM WITH TABS */}
             <div className="booking-form-container" style={{ padding: '0 20px', position: 'relative', zIndex: 10, marginTop: '-180px', paddingBottom: '80px', overflow: 'visible' }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto', background: '#fff', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,.12)', overflow: 'visible' }}>
+                <div style={{ maxWidth: '1100px', margin: '0 auto', background: '#fff', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,.12)', overflow: 'visible' }}>
                     {/* Tab Navigation - Professional Style */}
                     {/* Tabs controlled by activeOfferTab from special offers section */}
                     <div className="tabs-nav" style={{ display: 'flex', gap: 'clamp(0px, 1vw, 8px)', borderBottom: '2px solid #efefef', backgroundColor: '#fff', padding: 'clamp(2px, 1vw, 20px)', justifyContent: 'center', flexWrap: 'nowrap', overflowX: 'auto', boxShadow: '0 2px 8px rgba(0,0,0,.08)' }}>
@@ -629,117 +632,117 @@ export default function Home() {
                         <button className="tab-button"
                             onClick={() => handleOfferTabChange('flight')}
                             style={{
-                                padding: '15px 15px',
+                                padding: '8px 12px',
                                 background: activeOfferTab === 'flight' ? '#0499ff' : 'transparent',
                                 border: 'none',
                                 borderRadius: '8px',
                                 borderBottom: activeOfferTab === 'flight' ? '3px solid #0499ff' : 'none',
-                                color: activeOfferTab === 'flight' ? '#000000' : '#000',
-                                fontSize: '17px',
+                                color: '#ffffff',
+                                fontSize: '15px',
                                 fontWeight: activeOfferTab === 'flight' ? 800 : 600,
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '12px',
+                                gap: '8px',
                                 transition: 'all 0.3s ease',
                                 whiteSpace: 'nowrap',
                                 flexShrink: 0,
                                 letterSpacing: '0.3px'
                             }}
                         >
-                            <i className="fa fa-plane" style={{ fontSize: '19px' }}></i> Flights
+                            <i className="fa fa-plane" style={{ fontSize: '19px', color: activeOfferTab === 'flight' ? '#ffffff' : '#888' }}></i> <span style={{ color: activeOfferTab === 'flight' ? '#ffffff' : '#000' }}>Flights</span>
                         </button>
                         <button className="tab-button"
                             onClick={() => handleOfferTabChange('hotel')}
                             style={{
-                                padding: '10px 10px',
+                                padding: '8px 12px',
                                 background: activeOfferTab === 'hotel' ? '#0499ff' : 'transparent',
                                 border: 'none',
                                 borderRadius: '8px',
                                 borderBottom: activeOfferTab === 'hotel' ? '3px solid #0499ff' : 'none',
-                                color: activeOfferTab === 'hotel' ? '#000000' : '#000',
-                                fontSize: '17px',
-                                fontWeight: activeOfferTab === 'hotel' ? 800 : 500,
+                                color: '#ffffff',
+                                fontSize: '15px',
+                                fontWeight: activeOfferTab === 'hotel' ? 800 : 600,
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '12px',
+                                gap: '8px',
                                 transition: 'all 0.3s ease',
                                 whiteSpace: 'nowrap',
                                 flexShrink: 0,
                                 letterSpacing: '0.3px'
                             }}
                         >
-                            <i className="fa fa-bed" style={{ fontSize: '19px' }}></i> Hotels
+                            <i className="fa fa-bed" style={{ fontSize: '19px', color: activeOfferTab === 'hotel' ? '#ffffff' : '#888' }}></i> <span style={{ color: activeOfferTab === 'hotel' ? '#ffffff' : '#000' }}>Hotels</span>
                         </button>
                         <button className="tab-button"
                             onClick={() => handleOfferTabChange('package')}
                             style={{
-                                padding: '10px 10px',
+                                padding: '8px 12px',
                                 background: activeOfferTab === 'package' ? '#0499ff' : 'transparent',
                                 border: 'none',
                                 borderRadius: '8px',
                                 borderBottom: activeOfferTab === 'package' ? '3px solid #0499ff' : 'none',
-                                color: activeOfferTab === 'package' ? '#000000' : '#000',
-                                fontSize: '17px',
-                                fontWeight: activeOfferTab === 'package' ? 800 : 500,
+                                color: '#ffffff',
+                                fontSize: '15px',
+                                fontWeight: activeOfferTab === 'package' ? 800 : 600,
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '12px',
+                                gap: '8px',
                                 transition: 'all 0.3s ease',
                                 whiteSpace: 'nowrap',
                                 flexShrink: 0,
                                 letterSpacing: '0.3px'
                             }}
                         >
-                            <i className="fa fa-cube" style={{ fontSize: '19px' }}></i> Package
+                            <i className="fa fa-cube" style={{ fontSize: '19px', color: activeOfferTab === 'package' ? '#ffffff' : '#888' }}></i> <span style={{ color: activeOfferTab === 'package' ? '#ffffff' : '#000' }}>Package</span>
                         </button>
                         <button className="tab-button"
                             onClick={() => handleOfferTabChange('visa')}
                             style={{
-                                padding: '10px 10px',
+                                padding: '8px 12px',
                                 background: activeOfferTab === 'visa' ? '#0499ff' : 'transparent',
                                 border: 'none',
                                 borderRadius: '8px',
                                 borderBottom: activeOfferTab === 'visa' ? '3px solid #0499ff' : 'none',
-                                color: activeOfferTab === 'visa' ? '#000000' : '#000',
-                                fontSize: '17px',
-                                fontWeight: activeOfferTab === 'visa' ? 800 : 500,
+                                color: '#ffffff',
+                                fontSize: '15px',
+                                fontWeight: activeOfferTab === 'visa' ? 800 : 600,
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '12px',
+                                gap: '8px',
                                 transition: 'all 0.3s ease',
                                 whiteSpace: 'nowrap',
                                 flexShrink: 0,
                                 letterSpacing: '0.3px'
                             }}
                         >
-                            <i className="fa fa-passport" style={{ fontSize: '19px' }}></i> Visa
+                            <i className="fa fa-passport" style={{ fontSize: '19px', color: activeOfferTab === 'visa' ? '#ffffff' : '#666' }}></i> <span style={{ color: activeOfferTab === 'visa' ? '#ffffff' : '#000' }}>Visa</span>
                         </button>
                         <button className="tab-button"
                             onClick={() => handleOfferTabChange('airport-transfer')}
                             style={{
-                                padding: '10px 10px',
+                                padding: '8px 12px',
                                 background: activeOfferTab === 'airport-transfer' ? '#0499ff' : 'transparent',
                                 border: 'none',
                                 borderRadius: '8px',
                                 borderBottom: activeOfferTab === 'airport-transfer' ? '3px solid #0499ff' : 'none',
-                                color: activeOfferTab === 'airport-transfer' ? '#000000' : '#000',
-                                fontSize: '17px',
-                                fontWeight: activeOfferTab === 'airport-transfer' ? 800 : 500,
+                                color: '#ffffff',
+                                fontSize: '15px',
+                                fontWeight: activeOfferTab === 'airport-transfer' ? 800 : 600,
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
-                                gap: '12px',
+                                gap: '8px',
                                 transition: 'all 0.3s ease',
                                 whiteSpace: 'nowrap',
                                 flexShrink: 0,
                                 letterSpacing: '0.3px'
                             }}
                         >
-                            <i className="fa fa-car" style={{ fontSize: '19px' }}></i> Airport Transport
+                            <i className="fa fa-car" style={{ fontSize: '19px', color: activeOfferTab === 'airport-transfer' ? '#ffffff' : '#666' }}></i> <span style={{ color: activeOfferTab === 'airport-transfer' ? '#ffffff' : '#000' }}>Airport Transport</span>
                         </button>
                     </div>
 
@@ -868,31 +871,6 @@ export default function Home() {
                 </div>
             </div>
 
-
-            {/* VISA SERVICES SECTION */}
-            <section style={{ padding: '50px 40px', background: '#fff', borderTop: '1px solid #f0f0f0' }}>
-                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-                    <h3 style={{ fontSize: '24px', fontWeight: 700, color: '#000000', marginBottom: '30px', textAlign: 'center' }}>🛂 Visa Services</h3>
-                    <div className="visa-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '24px' }}>
-                        {[
-                            { name: 'Schengen Visa', img: 'schengen.jpg', icon: '📋' },
-                            { name: 'India Visa', img: 'india.jpg', icon: '📋' },
-                            { name: 'USA ESTA', img: 'usa.jpg', icon: '📋' },
-                            { name: 'Canada ETA', img: 'canada.jpg', icon: '📋' }
-                        ].map((visa, idx) => (
-                            <div key={idx} style={{ padding: '20px', background: '#f0f4ff', borderRadius: '10px', border: '1.5px solid #d4dff5', textAlign: 'center', transition: 'all 0.3s', cursor: 'pointer', overflow: 'hidden' }} onMouseEnter={(e) => { e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,102,204,.15)'; e.currentTarget.style.transform = 'translateY(-3px)'; e.currentTarget.style.background = '#e8f0ff'; }} onMouseLeave={(e) => { e.currentTarget.style.boxShadow = 'none'; e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = '#f0f4ff'; }}>
-                                <ImageWithFallback
-                                    src={imageService.getImagePath('visas', visa.img)}
-                                    alt={visa.name}
-                                    fallbackSrc={imageService.getFallbackImage('visa')}
-                                    style={{ width: '100%', height: '160px', objectFit: 'cover', borderRadius: '8px', marginBottom: '12px' }}
-                                />
-                                <p style={{ fontSize: '15px', fontWeight: 600, color: '#000000', margin: 0, lineHeight: 1.4 }}>{visa.name}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
 
 
             {/* FEATURED VISAS SECTION */}
