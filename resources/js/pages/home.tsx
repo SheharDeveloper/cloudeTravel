@@ -624,7 +624,7 @@ export default function Home() {
 
             {/* BOOKING SEARCH FORM WITH TABS */}
             <div className="booking-form-container" style={{ padding: '0 20px', position: 'relative', zIndex: 10, marginTop: '-180px', paddingBottom: '80px', overflow: 'visible' }}>
-                <div style={{ maxWidth: '1100px', margin: '0 auto', background: '#fff', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,.12)', overflow: 'visible' }}>
+                <div style={{ maxWidth: '909px', margin: '0 auto', background: '#fff', borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,.12)', overflow: 'visible' }}>
                     {/* Tab Navigation - Professional Style */}
                     {/* Tabs controlled by activeOfferTab from special offers section */}
                     <div className="tabs-nav" style={{ display: 'flex', gap: 'clamp(0px, 1vw, 8px)', borderBottom: '2px solid #efefef', backgroundColor: '#fff', padding: 'clamp(2px, 1vw, 20px)', justifyContent: 'center', flexWrap: 'nowrap', overflowX: 'auto', boxShadow: '0 2px 8px rgba(0,0,0,.08)' }}>
