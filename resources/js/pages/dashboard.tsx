@@ -7,6 +7,7 @@ export default function Dashboard() {
     const [user, setUser] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [latestBookings, setLatestBookings] = useState<any[]>([]);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -18,16 +19,25 @@ export default function Dashboard() {
                 if (response.ok) {
                     const data = await response.json();
                     setUser(data);
+                    localStorage.setItem('user', JSON.stringify(data));
+                } else if (response.status === 401) {
+                    setError('Session expired. Please log in again.');
+                    // Don't redirect - let user see the error message
                 } else {
                     const storedUser = localStorage.getItem('user');
                     if (storedUser) {
                         setUser(JSON.parse(storedUser));
+                    } else {
+                        setError('Failed to load user data');
                     }
                 }
             } catch (err) {
+                console.error('Error fetching user:', err);
                 const storedUser = localStorage.getItem('user');
                 if (storedUser) {
                     setUser(JSON.parse(storedUser));
+                } else {
+                    setError('Failed to connect to server');
                 }
             } finally {
                 setLoading(false);
@@ -55,6 +65,33 @@ export default function Dashboard() {
     }, []);
 
     const userName = user?.name || user?.email || 'Admin';
+
+    if (error) {
+        return (
+            <ProtectedRoute>
+                <MasterLayout title="Dashboard">
+                    <div style={{ padding: '40px', textAlign: 'center' }}>
+                        <div style={{ fontSize: '24px', color: '#dc3545', marginBottom: '20px' }}>
+                            ⚠️ {error}
+                        </div>
+                        <div style={{ marginBottom: '20px', color: '#666' }}>
+                            Please try the following:
+                        </div>
+                        <ul style={{ textAlign: 'left', display: 'inline-block', marginBottom: '20px', color: '#666' }}>
+                            <li>1. Clear your browser cookies and cache</li>
+                            <li>2. Log out and log back in</li>
+                            <li>3. If problem persists, contact support</li>
+                        </ul>
+                        <div>
+                            <a href="/login" style={{ display: 'inline-block', padding: '10px 20px', background: '#0D8BFF', color: 'white', textDecoration: 'none', borderRadius: '4px' }}>
+                                Go to Login
+                            </a>
+                        </div>
+                    </div>
+                </MasterLayout>
+            </ProtectedRoute>
+        );
+    }
 
     return (
         <ProtectedRoute>
