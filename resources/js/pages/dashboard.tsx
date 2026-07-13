@@ -1,7 +1,6 @@
 import MasterLayout from '@/layouts/backend/MasterLayout';
 import { useState, useEffect } from 'react';
 import { apiFetch } from '@/lib/api';
-import { ProtectedRoute } from '@/lib/ProtectedRoute';
 
 export default function Dashboard() {
     const [user, setUser] = useState<any>(null);
@@ -68,34 +67,31 @@ export default function Dashboard() {
 
     if (error) {
         return (
-            <ProtectedRoute>
-                <MasterLayout title="Dashboard">
-                    <div style={{ padding: '40px', textAlign: 'center' }}>
-                        <div style={{ fontSize: '24px', color: '#dc3545', marginBottom: '20px' }}>
-                            ⚠️ {error}
-                        </div>
-                        <div style={{ marginBottom: '20px', color: '#666' }}>
-                            Please try the following:
-                        </div>
-                        <ul style={{ textAlign: 'left', display: 'inline-block', marginBottom: '20px', color: '#666' }}>
-                            <li>1. Clear your browser cookies and cache</li>
-                            <li>2. Log out and log back in</li>
-                            <li>3. If problem persists, contact support</li>
-                        </ul>
-                        <div>
-                            <a href="/login" style={{ display: 'inline-block', padding: '10px 20px', background: '#0D8BFF', color: 'white', textDecoration: 'none', borderRadius: '4px' }}>
-                                Go to Login
-                            </a>
-                        </div>
+            <MasterLayout title="Dashboard">
+                <div style={{ padding: '40px', textAlign: 'center' }}>
+                    <div style={{ fontSize: '24px', color: '#dc3545', marginBottom: '20px' }}>
+                        ⚠️ {error}
                     </div>
-                </MasterLayout>
-            </ProtectedRoute>
+                    <div style={{ marginBottom: '20px', color: '#666' }}>
+                        Please try the following:
+                    </div>
+                    <ul style={{ textAlign: 'left', display: 'inline-block', marginBottom: '20px', color: '#666' }}>
+                        <li>1. Clear your browser cookies and cache</li>
+                        <li>2. Log out and log back in</li>
+                        <li>3. If problem persists, contact support</li>
+                    </ul>
+                    <div>
+                        <a href="/login" style={{ display: 'inline-block', padding: '10px 20px', background: '#0D8BFF', color: 'white', textDecoration: 'none', borderRadius: '4px' }}>
+                            Go to Login
+                        </a>
+                    </div>
+                </div>
+            </MasterLayout>
         );
     }
 
     return (
-        <ProtectedRoute>
-            <MasterLayout title="Dashboard">
+        <MasterLayout title="Dashboard">
 
             {/* Page Title */}
             <div className="page-title">
@@ -298,6 +294,5 @@ export default function Dashboard() {
             </div>
 
             </MasterLayout>
-        </ProtectedRoute>
-    );
-}
+        );
+    }
