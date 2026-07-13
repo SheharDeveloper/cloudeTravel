@@ -50,8 +50,11 @@ export const apiFetch = async (url: string, options: RequestInit = {}) => {
 
     if (response.status === 401) {
         clearAuthToken();
-        if (isBrowser) {
-            window.location.href = '/login';
+        if (isBrowser && window.location.pathname !== '/login') {
+            // Prevent infinite redirect loops - only redirect if not already on login page
+            setTimeout(() => {
+                window.location.href = '/login';
+            }, 100);
         }
         return response;
     }
