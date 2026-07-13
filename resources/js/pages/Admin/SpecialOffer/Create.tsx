@@ -1,6 +1,6 @@
 import { ProtectedRoute } from "@/lib/ProtectedRoute";
 import { router } from "@inertiajs/react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { countryService } from "@/services/countryService";
 import SearchableSelect from "@/components/SearchableSelect";
 
@@ -38,6 +38,7 @@ export default function CreateSpecialOffer({ currency }: CreateProps) {
         visa_name: "",
         visa_destination_country: "",
         visa_passport_country: "",
+        visa_type: "",
         is_visa: false,
         package_country: "",
         package_city: "",
@@ -52,6 +53,19 @@ export default function CreateSpecialOffer({ currency }: CreateProps) {
     const [images, setImages] = useState<File[]>([]);
     const [countries, setCountries] = useState<any[]>([]);
     const [loadingCountries, setLoadingCountries] = useState(true);
+    const [hotelCountrySearch, setHotelCountrySearch] = useState('');
+    const [showHotelCountryDropdown, setShowHotelCountryDropdown] = useState(false);
+    const hotelCountryRef = useRef<HTMLDivElement>(null);
+    const [visaTypesList, setVisaTypesList] = useState<any[]>([]);
+    const [visaDestinationSearch, setVisaDestinationSearch] = useState('');
+    const [visaPassportSearch, setVisaPassportSearch] = useState('');
+    const [visaTypeSearch, setVisaTypeSearch] = useState('');
+    const [showVisaDestinationDropdown, setShowVisaDestinationDropdown] = useState(false);
+    const [showVisaPassportDropdown, setShowVisaPassportDropdown] = useState(false);
+    const [showVisaTypeDropdown, setShowVisaTypeDropdown] = useState(false);
+    const visaDestinationRef = useRef<HTMLDivElement>(null);
+    const visaPassportRef = useRef<HTMLDivElement>(null);
+    const visaTypeRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         const fetchCountries = async () => {
@@ -69,6 +83,49 @@ export default function CreateSpecialOffer({ currency }: CreateProps) {
         };
         fetchCountries();
     }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (hotelCountryRef.current && !hotelCountryRef.current.contains(event.target as Node)) {
+                setShowHotelCountryDropdown(false);
+            }
+            if (visaDestinationRef.current && !visaDestinationRef.current.contains(event.target as Node)) {
+                setShowVisaDestinationDropdown(false);
+            }
+            if (visaPassportRef.current && !visaPassportRef.current.contains(event.target as Node)) {
+                setShowVisaPassportDropdown(false);
+            }
+            if (visaTypeRef.current && !visaTypeRef.current.contains(event.target as Node)) {
+                setShowVisaTypeDropdown(false);
+            }
+        };
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
+
+    useEffect(() => {
+        const fetchVisaTypes = async () => {
+            try {
+                const response = await fetch('/api/visas');
+                const result = await response.json();
+                if (result.data) {
+                    setVisaTypesList(result.data);
+                }
+            } catch (error) {
+                console.error('Error fetching visa types:', error);
+                setVisaTypesList([]);
+            }
+        };
+        fetchVisaTypes();
+    }, []);
+
+    const filterCountries = (search: string) => {
+        if (!search || !countries.length) return countries;
+        return countries.filter(country =>
+            country.code.toLowerCase().includes(search.toLowerCase()) ||
+            country.name.toLowerCase().includes(search.toLowerCase())
+        );
+    };
 
     const handleChange = (e: any) => {
         const { name, value, type, checked } = e.target;
@@ -262,30 +319,32 @@ export default function CreateSpecialOffer({ currency }: CreateProps) {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="row">
-                                        <div className="col-md-6">
-                                            <SearchableSelect
-                                                label="Origin"
-                                                name="flight_origin"
-                                                value={formData.flight_origin}
-                                                onChange={handleChange}
-                                                options={countries}
-                                                placeholder="Search origin country..."
-                                                disabled={loadingCountries}
-                                            />
+                                    {formData.type === "Flight" && (
+                                        <div className="row">
+                                            <div className="col-md-6">
+                                                <SearchableSelect
+                                                    label="Origin"
+                                                    name="flight_origin"
+                                                    value={formData.flight_origin}
+                                                    onChange={handleChange}
+                                                    options={countries}
+                                                    placeholder="Search origin country..."
+                                                    disabled={loadingCountries}
+                                                />
+                                            </div>
+                                            <div className="col-md-6">
+                                                <SearchableSelect
+                                                    label="Destination"
+                                                    name="flight_destination"
+                                                    value={formData.flight_destination}
+                                                    onChange={handleChange}
+                                                    options={countries}
+                                                    placeholder="Search destination country..."
+                                                    disabled={loadingCountries}
+                                                />
+                                            </div>
                                         </div>
-                                        <div className="col-md-6">
-                                            <SearchableSelect
-                                                label="Destination"
-                                                name="flight_destination"
-                                                value={formData.flight_destination}
-                                                onChange={handleChange}
-                                                options={countries}
-                                                placeholder="Search destination country..."
-                                                disabled={loadingCountries}
-                                            />
-                                        </div>
-                                    </div>
+                                    )}
                                 </div>
                             </div>
                         )}
@@ -326,136 +385,306 @@ export default function CreateSpecialOffer({ currency }: CreateProps) {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="row">
-                                        <div className="col-md-6">
-                                            <SearchableSelect
-                                                label="Country"
-                                                name="hotel_country"
-                                                value={formData.hotel_country}
-                                                onChange={handleChange}
-                                                options={countries}
-                                                placeholder="Search country..."
-                                                disabled={loadingCountries}
-                                            />
-                                        </div>
-                                        <div className="col-md-6">
-                                            <div className="mb-3">
-                                                <label className="form-label">City</label>
-                                                <input
-                                                    type="text"
-                                                    className="form-control"
-                                                    name="hotel_city"
-                                                    value={formData.hotel_city}
-                                                    onChange={handleChange}
-                                                    placeholder="e.g., Delhi"
-                                                />
+                                    {formData.type === "Hotel" && (
+                                        <div className="row">
+                                            <div className="col-md-6">
+                                                <div ref={hotelCountryRef} style={{ position: 'relative', width: '100%', marginBottom: '0.8rem' }}>
+                                                    <label className="form-label">Country</label>
+                                                    <div style={{ position: 'absolute', left: '12px', top: 'calc(50% + 20px)', transform: 'translateY(-50%)', fontSize: '13px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                                                        <i className="fa fa-map-marker"></i>
+                                                    </div>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        placeholder="Search country..."
+                                                        value={formData.hotel_country ? `${countries.find((c: any) => c.code === formData.hotel_country)?.code} - ${countries.find((c: any) => c.code === formData.hotel_country)?.name}` : hotelCountrySearch}
+                                                        onChange={(e) => {
+                                                            setHotelCountrySearch(e.target.value);
+                                                            setFormData(prev => ({ ...prev, hotel_country: '' }));
+                                                            setShowHotelCountryDropdown(true);
+                                                        }}
+                                                        onFocus={() => {
+                                                            setShowHotelCountryDropdown(true);
+                                                        }}
+                                                        style={{ paddingLeft: '40px', width: '100%' }}
+                                                        disabled={loadingCountries}
+                                                    />
+                                                    {showHotelCountryDropdown && (
+                                                        <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '200px', overflowY: 'auto' }}>
+                                                            {filterCountries(hotelCountrySearch).length > 0 ? (
+                                                                filterCountries(hotelCountrySearch).map(country => (
+                                                                    <div
+                                                                        key={country.code}
+                                                                        onClick={() => {
+                                                                            setFormData(prev => ({ ...prev, hotel_country: country.code }));
+                                                                            setHotelCountrySearch('');
+                                                                            setShowHotelCountryDropdown(false);
+                                                                        }}
+                                                                        style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#000000', transition: 'background 0.2s' }}
+                                                                        onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
+                                                                        onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
+                                                                    >
+                                                                        <strong>{country.code}</strong> - {country.name}
+                                                                    </div>
+                                                                ))
+                                                            ) : (
+                                                                <div style={{ padding: '12px', color: '#000000', fontSize: '13px', textAlign: 'center' }}>No countries found</div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {/* Visa Details Card */}
-                        {(formData.type === "Visa" || formData.type === "Package") && (
-                            <div className="card">
-                                <div className="card-header">
-                                    <h5 className="mb-0">🛂 Visa</h5>
-                                </div>
-                                <div className="card-body">
-                                    <div className="mb-3">
-                                        <label className="form-label">Visa Name</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="visa_name"
-                                            value={formData.visa_name}
-                                            onChange={handleChange}
-                                            placeholder="e.g., Schengen Visa"
-                                        />
-                                    </div>
-                                    <div className="row">
-                                        <div className="col-md-6">
-                                            <SearchableSelect
-                                                label="Destination Country"
-                                                name="visa_destination_country"
-                                                value={formData.visa_destination_country}
-                                                onChange={handleChange}
-                                                options={countries}
-                                                placeholder="Search country..."
-                                                disabled={loadingCountries}
-                                            />
-                                        </div>
-                                        <div className="col-md-6">
-                                            <SearchableSelect
-                                                label="Passport Country"
-                                                name="visa_passport_country"
-                                                value={formData.visa_passport_country}
-                                                onChange={handleChange}
-                                                options={countries}
-                                                placeholder="Search country..."
-                                                disabled={loadingCountries}
-                                            />
-                                        </div>
-                                    </div>
-                                    {formData.type === "Package" && (
-                                        <div className="form-check">
-                                            <input
-                                                type="checkbox"
-                                                className="form-check-input"
-                                                name="is_visa"
-                                                checked={formData.is_visa}
-                                                onChange={handleChange}
-                                                id="is_visa"
-                                            />
-                                            <label className="form-check-label" htmlFor="is_visa">
-                                                Include Visa
-                                            </label>
+                                            <div className="col-md-6">
+                                                <div className="mb-3">
+                                                    <label className="form-label">City</label>
+                                                    <input
+                                                        type="text"
+                                                        className="form-control"
+                                                        name="hotel_city"
+                                                        value={formData.hotel_city}
+                                                        onChange={handleChange}
+                                                        placeholder="e.g., Delhi"
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
                             </div>
                         )}
 
+                        {/* Visa Details Card */}
+                        {formData.type === "Visa" && (
+                            <div className="card">
+                                <div className="card-header">
+                                    <h5 className="mb-0">🛂 Visa</h5>
+                                </div>
+                                <div className="card-body">
+                                    {/* Destination Country */}
+                                    <div ref={visaDestinationRef} style={{ position: 'relative', width: '100%', marginBottom: '0.8rem' }}>
+                                        <label className="form-label">Destination Country</label>
+                                        <div style={{ position: 'absolute', left: '12px', top: 'calc(50% + 20px)', transform: 'translateY(-50%)', fontSize: '13px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                                            <i className="fa fa-globe"></i>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Search destination country..."
+                                            value={formData.visa_destination_country ? `${countries.find((c: any) => c.code === formData.visa_destination_country)?.code} - ${countries.find((c: any) => c.code === formData.visa_destination_country)?.name}` : visaDestinationSearch}
+                                            onChange={(e) => {
+                                                setVisaDestinationSearch(e.target.value);
+                                                setFormData(prev => ({ ...prev, visa_destination_country: '' }));
+                                                setShowVisaDestinationDropdown(true);
+                                            }}
+                                            onFocus={() => setShowVisaDestinationDropdown(true)}
+                                            style={{ paddingLeft: '40px', width: '100%' }}
+                                            disabled={loadingCountries}
+                                        />
+                                        {showVisaDestinationDropdown && (
+                                            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '200px', overflowY: 'auto' }}>
+                                                {filterCountries(visaDestinationSearch).length > 0 ? (
+                                                    filterCountries(visaDestinationSearch).map(country => (
+                                                        <div
+                                                            key={country.code}
+                                                            onClick={() => {
+                                                                setFormData(prev => ({ ...prev, visa_destination_country: country.code }));
+                                                                setVisaDestinationSearch('');
+                                                                setShowVisaDestinationDropdown(false);
+                                                            }}
+                                                            style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#000000', transition: 'background 0.2s' }}
+                                                            onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
+                                                            onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
+                                                        >
+                                                            <strong>{country.code}</strong> - {country.name}
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div style={{ padding: '12px', color: '#000000', fontSize: '13px', textAlign: 'center' }}>No countries found</div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Passport Country */}
+                                    <div ref={visaPassportRef} style={{ position: 'relative', width: '100%', marginBottom: '0.8rem' }}>
+                                        <label className="form-label">Passport Country</label>
+                                        <div style={{ position: 'absolute', left: '12px', top: 'calc(50% + 20px)', transform: 'translateY(-50%)', fontSize: '13px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                                            <i className="fa fa-passport"></i>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Search passport country..."
+                                            value={formData.visa_passport_country ? `${countries.find((c: any) => c.code === formData.visa_passport_country)?.code} - ${countries.find((c: any) => c.code === formData.visa_passport_country)?.name}` : visaPassportSearch}
+                                            onChange={(e) => {
+                                                setVisaPassportSearch(e.target.value);
+                                                setFormData(prev => ({ ...prev, visa_passport_country: '' }));
+                                                setShowVisaPassportDropdown(true);
+                                            }}
+                                            onFocus={() => setShowVisaPassportDropdown(true)}
+                                            style={{ paddingLeft: '40px', width: '100%' }}
+                                            disabled={loadingCountries}
+                                        />
+                                        {showVisaPassportDropdown && (
+                                            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '200px', overflowY: 'auto' }}>
+                                                {filterCountries(visaPassportSearch).length > 0 ? (
+                                                    filterCountries(visaPassportSearch).map(country => (
+                                                        <div
+                                                            key={country.code}
+                                                            onClick={() => {
+                                                                setFormData(prev => ({ ...prev, visa_passport_country: country.code }));
+                                                                setVisaPassportSearch('');
+                                                                setShowVisaPassportDropdown(false);
+                                                            }}
+                                                            style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#000000', transition: 'background 0.2s' }}
+                                                            onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
+                                                            onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
+                                                        >
+                                                            <strong>{country.code}</strong> - {country.name}
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div style={{ padding: '12px', color: '#000000', fontSize: '13px', textAlign: 'center' }}>No countries found</div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Visa Type */}
+                                    <div ref={visaTypeRef} style={{ position: 'relative', width: '100%', marginBottom: '0.8rem' }}>
+                                        <label className="form-label">Visa Type</label>
+                                        <div style={{ position: 'absolute', left: '12px', top: 'calc(50% + 20px)', transform: 'translateY(-50%)', fontSize: '13px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                                            <i className="fa fa-file"></i>
+                                        </div>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Search visa type..."
+                                            value={formData.visa_type ? visaTypesList.find((v: any) => v.id === formData.visa_type)?.name || '' : visaTypeSearch}
+                                            onChange={(e) => {
+                                                setVisaTypeSearch(e.target.value);
+                                                setFormData(prev => ({ ...prev, visa_type: '' }));
+                                                setShowVisaTypeDropdown(true);
+                                            }}
+                                            onFocus={() => setShowVisaTypeDropdown(true)}
+                                            style={{ paddingLeft: '40px', width: '100%' }}
+                                        />
+                                        {showVisaTypeDropdown && (
+                                            <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '200px', overflowY: 'auto' }}>
+                                                {visaTypesList.length > 0 ? (
+                                                    visaTypesList.filter((v: any) => v.name.toLowerCase().includes(visaTypeSearch.toLowerCase())).map((visaType: any) => (
+                                                        <div
+                                                            key={visaType.id}
+                                                            onClick={() => {
+                                                                setFormData(prev => ({ ...prev, visa_type: visaType.id }));
+                                                                setVisaTypeSearch('');
+                                                                setShowVisaTypeDropdown(false);
+                                                            }}
+                                                            style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#000000', transition: 'background 0.2s' }}
+                                                            onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
+                                                            onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
+                                                        >
+                                                            {visaType.name}
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <div style={{ padding: '12px', color: '#000000', fontSize: '13px', textAlign: 'center' }}>No visa types found</div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         {/* Package Details Card */}
-                        {(formData.type === "Package") && (
+                        {formData.type === "Package" && (
                             <div className="card">
                                 <div className="card-header">
                                     <h5 className="mb-0">📦 Package</h5>
                                 </div>
                                 <div className="card-body">
                                     <div className="row">
-                                        <div className="col-md-6">
-                                            <SearchableSelect
-                                                label="Country"
-                                                name="package_country"
-                                                value={formData.package_country}
-                                                onChange={handleChange}
-                                                options={countries}
-                                                placeholder="Search country..."
-                                                disabled={loadingCountries}
-                                            />
-                                        </div>
-                                        <div className="col-md-6">
-                                            <div className="mb-3">
-                                                <label className="form-label">City</label>
+                                        <div className="col-md-12">
+                                            <div style={{ position: 'relative', width: '100%', marginBottom: '0.8rem' }}>
+                                                <label className="form-label">Country</label>
+                                                <div style={{ position: 'absolute', left: '12px', top: 'calc(50% + 20px)', transform: 'translateY(-50%)', fontSize: '13px', color: '#999', pointerEvents: 'none', zIndex: 5 }}>
+                                                    <i className="fa fa-map-marker"></i>
+                                                </div>
                                                 <input
                                                     type="text"
                                                     className="form-control"
-                                                    name="package_city"
-                                                    value={formData.package_city}
-                                                    onChange={handleChange}
-                                                    placeholder="e.g., Paris"
+                                                    placeholder="Search country..."
+                                                    value={formData.package_country ? `${countries.find((c: any) => c.code === formData.package_country)?.code} - ${countries.find((c: any) => c.code === formData.package_country)?.name}` : hotelCountrySearch}
+                                                    onChange={(e) => {
+                                                        setHotelCountrySearch(e.target.value);
+                                                        setFormData(prev => ({ ...prev, package_country: '' }));
+                                                        setShowHotelCountryDropdown(true);
+                                                    }}
+                                                    onFocus={() => {
+                                                        setShowHotelCountryDropdown(true);
+                                                    }}
+                                                    style={{ paddingLeft: '40px', width: '100%' }}
+                                                    disabled={loadingCountries}
                                                 />
+                                                {showHotelCountryDropdown && (
+                                                    <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, marginTop: '6px', background: '#fff', borderRadius: '6px', boxShadow: '0 4px 16px rgba(0,0,0,.12)', zIndex: 100, maxHeight: '200px', overflowY: 'auto' }}>
+                                                        {filterCountries(hotelCountrySearch).length > 0 ? (
+                                                            filterCountries(hotelCountrySearch).map(country => (
+                                                                <div
+                                                                    key={country.code}
+                                                                    onClick={() => {
+                                                                        setFormData(prev => ({ ...prev, package_country: country.code }));
+                                                                        setHotelCountrySearch('');
+                                                                        setShowHotelCountryDropdown(false);
+                                                                    }}
+                                                                    style={{ padding: '12px 12px', borderBottom: '1px solid #f0f0f0', cursor: 'pointer', fontSize: '13px', color: '#000000', transition: 'background 0.2s' }}
+                                                                    onMouseEnter={(e) => e.currentTarget.style.background = '#f9f9f9'}
+                                                                    onMouseLeave={(e) => e.currentTarget.style.background = '#fff'}
+                                                                >
+                                                                    <strong>{country.code}</strong> - {country.name}
+                                                                </div>
+                                                            ))
+                                                        ) : (
+                                                            <div style={{ padding: '12px', color: '#000000', fontSize: '13px', textAlign: 'center' }}>No countries found</div>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
+                                    </div>
+                                    <div className="form-check mb-3">
+                                        <input
+                                            type="checkbox"
+                                            className="form-check-input"
+                                            name="is_visa"
+                                            checked={formData.is_visa}
+                                            onChange={handleChange}
+                                            id="package_is_visa"
+                                        />
+                                        <label className="form-check-label" htmlFor="package_is_visa">
+                                            Include Visa
+                                        </label>
+                                    </div>
+                                    <div className="form-check">
+                                        <input
+                                            type="checkbox"
+                                            className="form-check-input"
+                                            name="is_transport"
+                                            checked={formData.is_transport}
+                                            onChange={handleChange}
+                                            id="package_is_transport"
+                                        />
+                                        <label className="form-check-label" htmlFor="package_is_transport">
+                                            Include Transport
+                                        </label>
                                     </div>
                                 </div>
                             </div>
                         )}
 
                         {/* Transport Details Card */}
-                        {(formData.type === "Transportation" || formData.type === "Package") && (
+                        {formData.type === "Transportation" && (
                             <div className="card">
                                 <div className="card-header">
                                     <h5 className="mb-0">🚗 Transportation</h5>
@@ -514,21 +743,6 @@ export default function CreateSpecialOffer({ currency }: CreateProps) {
                                             </div>
                                         </div>
                                     </div>
-                                    {formData.type === "Package" && (
-                                        <div className="form-check">
-                                            <input
-                                                type="checkbox"
-                                                className="form-check-input"
-                                                name="is_transport"
-                                                checked={formData.is_transport}
-                                                onChange={handleChange}
-                                                id="is_transport"
-                                            />
-                                            <label className="form-check-label" htmlFor="is_transport">
-                                                Include Transportation
-                                            </label>
-                                        </div>
-                                    )}
                                 </div>
                             </div>
                         )}

@@ -27,6 +27,7 @@ return new class extends Migration
             $table->string('visa_name')->nullable();
             $table->string('visa_destination_country')->nullable();
             $table->string('visa_passport_country')->nullable();
+            $table->integer('visa_type')->nullable();
 
             // Package
             $table->string('package_country')->nullable();
@@ -52,7 +53,7 @@ return new class extends Migration
             $table->dropColumn([
                 'flight_name', 'flight_origin', 'flight_destination',
                 'hotel_name', 'hotel_star_rating', 'hotel_country', 'hotel_city',
-                'visa_name', 'visa_destination_country', 'visa_passport_country',
+                'visa_name', 'visa_destination_country', 'visa_passport_country', 'visa_type',
                 'package_country', 'package_city',
                 'transport_name', 'transport_type', 'transport_origin', 'transport_destination',
                 'rating', 'is_visa', 'is_transport'

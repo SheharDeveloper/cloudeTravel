@@ -117,8 +117,8 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
 
     return (
         <div>
-            {/* Row 1: Destination Country, Passport Country, Visa Type, Travel Date - 4 columns */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start', position: 'relative' }}>
+            {/* Row 1: Destination Country, Passport Country, Visa Type - 3 columns */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '14px', alignItems: 'flex-start', position: 'relative' }}>
                 {/* Destination Country */}
                 <div ref={destinationRef} style={{ position: 'relative', width: '100%', margin: 0, padding: 0 }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>DESTINATION</label>
@@ -283,7 +283,10 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
                         </div>
                     )}
                 </div>
+            </div>
 
+            {/* Row 2: Travel Date and Number of Travelers - 2 columns */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px', alignItems: 'flex-start' }}>
                 {/* Travel Date */}
                 <div style={{ width: '100%', position: 'relative' }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>WHEN</label>
@@ -307,10 +310,6 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
                         />
                     </div>
                 </div>
-            </div>
-
-            {/* Row 2: Number of Travelers */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '16px', marginBottom: '16px', alignItems: 'flex-start' }}>
                 <div style={{ width: '100%', position: 'relative' }}>
                     <label style={{ display: 'block', fontSize: '11px', color: '#000000', marginBottom: '8px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.5px' }}>TRAVELERS</label>
                     <select

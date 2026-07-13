@@ -32,6 +32,7 @@ class SpecialOffer extends Model
         'visa_name',
         'visa_destination_country',
         'visa_passport_country',
+        'visa_type',
         'package_country',
         'package_city',
         'transport_name',
