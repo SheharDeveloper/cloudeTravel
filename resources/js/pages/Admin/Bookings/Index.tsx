@@ -1,4 +1,3 @@
-import { ProtectedRoute } from '@/lib/ProtectedRoute';
 import { router } from '@inertiajs/react';
 import { useBookings } from '@/hooks/useBookings';
 
@@ -84,7 +83,7 @@ export default function BookingsIndex() {
     };
 
     return (
-        <ProtectedRoute>
+        <div>
             <div className="page-title">
                 <nav aria-label="breadcrumb">
                     <ol className="breadcrumb">
@@ -278,6 +277,6 @@ export default function BookingsIndex() {
                     </div>
                 </div>
             </div>
-        </ProtectedRoute>
+        </div>
     );
 }
