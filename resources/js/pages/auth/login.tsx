@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Head, router } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { PublicRoute } from '@/lib/ProtectedRoute';
+import { setAuthToken } from '@/lib/api';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -8,35 +9,47 @@ export default function Login() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+    const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
-        // Use Inertia's router.post() to handle login with Breeze
-        router.post('/login',
-            {
-                email,
-                password,
-            },
-            {
-                onSuccess: () => {
-                    // Inertia will automatically redirect after successful login
-                    setLoading(false);
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
                 },
-                onError: (errors: any) => {
-                    // Handle validation errors or login failure
-                    if (errors.email) {
-                        setError(errors.email);
-                    } else if (errors.password) {
-                        setError(errors.password);
-                    } else {
-                        setError('Login failed. Please check your credentials.');
-                    }
-                    setLoading(false);
-                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    email,
+                    password,
+                }),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                setError(data.message || 'Login failed. Please check your credentials.');
+                setLoading(false);
+                return;
             }
-        );
+
+            // Store token in localStorage
+            setAuthToken(data.data.token);
+
+            // Store user data in localStorage
+            localStorage.setItem('user', JSON.stringify(data.data.user));
+
+            // Redirect to dashboard
+            window.location.href = '/dashboard';
+        } catch (err) {
+            setError('An error occurred. Please try again.');
+            console.error('Login error:', err);
+            setLoading(false);
+        }
     };
 
     return (
