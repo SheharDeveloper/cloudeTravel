@@ -55,8 +55,9 @@ Route::post('bookings', [BookingController::class, 'store'])->name('bookings.sto
 Route::get('tours', [TourController::class, 'index'])->name('tours.index');
 Route::get('tours/{tour}', [TourController::class, 'show'])->name('tours.show');
 
-// Protected API endpoints (authentication required - using session auth via Breeze)
-Route::middleware('auth')->group(function () {
+// Protected API endpoints (authentication required - using session auth via Breeze/Fortify)
+// Need 'web' middleware to load session for authentication
+Route::middleware(['web', 'auth'])->group(function () {
     Route::post('auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
 
     // Tour resource routes - only create, update, delete (read operations are public)
