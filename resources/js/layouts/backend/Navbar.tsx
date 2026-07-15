@@ -1,37 +1,12 @@
-import { clearAuthToken, apiFetch } from '@/lib/api';
-import { useState, useEffect, useRef } from 'react';
+import { clearAuthToken } from '@/lib/api';
+import { useState, useRef } from 'react';
+import { usePage } from '@inertiajs/react';
 
 export default function Navbar() {
-    const [user, setUser] = useState<any>(null);
+    const { auth } = usePage().props as any;
+    const user = auth?.user;
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLLIElement>(null);
-
-    useEffect(() => {
-        const fetchUser = async () => {
-            try {
-                const response = await apiFetch('/api/user', {
-                    method: 'GET',
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    setUser(data);
-                } else {
-                    const storedUser = localStorage.getItem('user');
-                    if (storedUser) {
-                        setUser(JSON.parse(storedUser));
-                    }
-                }
-            } catch (err) {
-                const storedUser = localStorage.getItem('user');
-                if (storedUser) {
-                    setUser(JSON.parse(storedUser));
-                }
-            }
-        };
-
-        fetchUser();
-    }, []);
 
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {

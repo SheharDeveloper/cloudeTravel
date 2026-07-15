@@ -55,13 +55,9 @@ Route::post('bookings', [BookingController::class, 'store'])->name('bookings.sto
 Route::get('tours', [TourController::class, 'index'])->name('tours.index');
 Route::get('tours/{tour}', [TourController::class, 'show'])->name('tours.show');
 
-// Protected API endpoints (authentication required)
-Route::middleware('auth:sanctum')->group(function () {
+// Protected API endpoints (authentication required - using session auth via Breeze)
+Route::middleware('auth')->group(function () {
     Route::post('auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
-
-    Route::get('/user', function (Request $request) {
-        return $request->user();
-    });
 
     // Tour resource routes - only create, update, delete (read operations are public)
     Route::post('tours', [TourController::class, 'store'])->name('tours.store');

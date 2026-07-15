@@ -119,27 +119,12 @@ class AuthController extends Controller
     public function logout(Request $request): JsonResponse
     {
         try {
-            $user = $request->user();
-            if ($user && $user->currentAccessToken()) {
-                $user->tokens()->where('id', $user->currentAccessToken()->id)->delete();
-            }
+            auth()->logout();
 
             $response = response()->json([
                 'status' => 'success',
                 'message' => 'Logged out successfully',
             ], 200);
-
-            // Clear the auth token cookie
-            $response->cookie(
-                name: 'auth_token',
-                value: '',
-                minutes: -1,
-                path: '/',
-                domain: null,
-                secure: app()->environment('production'),
-                httpOnly: true,
-                sameSite: 'lax'
-            );
 
             return $response;
         } catch (Throwable $e) {
