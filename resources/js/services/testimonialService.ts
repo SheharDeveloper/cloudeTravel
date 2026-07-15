@@ -47,8 +47,8 @@ class TestimonialService {
 
     /**
      * Fetch all testimonials for admin (includes active and inactive)
-     * - Requires authentication (Bearer token will be automatically included via apiFetch)
-     * - Backend detects authentication and returns all items without ?all=true
+     * - Requires authentication (session auth via apiFetch)
+     * - Backend detects authentication and returns all items
      * @returns Promise<Testimonial[]> - Array of all testimonials
      */
     async getAllForAdmin(): Promise<Testimonial[]> {

@@ -1,4 +1,4 @@
-import { apiFetch, getAuthToken, clearAuthToken } from '@/lib/api';
+import { apiFetch, clearAuthToken } from '@/lib/api';
 
 interface ApiResponse<T = any> {
     success: boolean;
@@ -27,13 +27,6 @@ class ApiService {
             }
         });
         return queryParams.toString();
-    }
-
-    /**
-     * Check if user is authenticated
-     */
-    isAuthenticated(): boolean {
-        return !!getAuthToken();
     }
 
     /**

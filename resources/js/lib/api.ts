@@ -17,19 +17,11 @@ export const clearAuthToken = (): void => {
 };
 
 export const apiFetch = async (url: string, options: RequestInit = {}) => {
-    const token = getAuthToken();
     const headers: Record<string, string> = {
         'Accept': 'application/json',
         'X-CSRF-TOKEN': isBrowser ? document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '' : '',
         ...options.headers as Record<string, string>,
     };
-
-    if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
-        console.log('✓ Token sent:', token.substring(0, 20) + '...');
-    } else {
-        console.warn('✗ No token found in localStorage');
-    }
 
     // Don't set Content-Type for FormData - let browser handle it
     if (options.body instanceof FormData) {
@@ -38,23 +30,15 @@ export const apiFetch = async (url: string, options: RequestInit = {}) => {
         headers['Content-Type'] = 'application/json';
     }
 
-    console.log('API Request:', { url, method: options.method, headers, bodyType: options.body?.constructor.name });
-
     const response = await fetch(url, {
         ...options,
         headers,
         credentials: 'include',
     });
 
-    console.log('API Response Status:', response.status, 'Content-Type:', response.headers.get('content-type'));
-
     if (response.status === 401) {
-        clearAuthToken();
         if (isBrowser && window.location.pathname !== '/login') {
-            // Prevent infinite redirect loops - only redirect if not already on login page
-            setTimeout(() => {
-                window.location.href = '/login';
-            }, 100);
+            window.location.href = '/login';
         }
         return response;
     }
