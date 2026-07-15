@@ -1,5 +1,5 @@
 import { clearAuthToken } from '@/lib/api';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
 
 export default function Navbar() {
