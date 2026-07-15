@@ -57,7 +57,7 @@ export default function Dashboard() {
                     <div className="card overflow-hidden">
                         <div className="card-body">
                             <div>
-                                <h4 className="fs-16 mb-0">Congratulations <strong>{loading ? 'Loading...' : userName}!</strong></h4>
+                                <h4 className="fs-16 mb-0">Congratulations <strong>{userName}!</strong></h4>
                                 <span>Welcome back to CloudTravel</span>
                             </div>
                             <div className="position-relative">
