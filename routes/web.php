@@ -35,8 +35,15 @@ Route::inertia('/contact-us', 'contact-us')->name('contact-us');
 // Dashboard
 Route::inertia('dashboard', 'dashboard')->name('dashboard');
 
+// Profile Settings (authenticated users)
+Route::middleware('auth')->get('profile', fn() => inertia('ProfileSettings'))->name('profile');
+Route::middleware('auth')->put('profile', [\App\Http\Controllers\Settings\ProfileController::class, 'updateFromProfile'])->name('profile.update.put');
+Route::middleware('auth')->post('profile-upload', [\App\Http\Controllers\Settings\ProfileController::class, 'uploadProfile'])->name('profile.upload');
+Route::middleware('auth')->put('password', [\App\Http\Controllers\Settings\SecurityController::class, 'updatePassword'])->name('password.update.put');
+
 // Admin Routes (requires authentication via session - Breeze/Inertia)
 Route::middleware('auth')->prefix('admin')->group(function () {
+
     // Tours Management (React Components via Inertia)
     Route::inertia('tours', 'Admin/Tour/Index')->name('admin.tours.index');
     Route::inertia('tours/create', 'Admin/Tour/Create')->name('admin.tours.create');

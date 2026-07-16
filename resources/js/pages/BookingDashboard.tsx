@@ -1,7 +1,6 @@
+import { useState } from 'react';
+import { Head } from '@inertiajs/react';
 import MasterLayout from '@/layouts/backend/MasterLayout';
-import { useState, useEffect } from 'react';
-import { usePage } from '@inertiajs/react';
-import { apiFetch } from '@/lib/api';
 import BookingList from '@/components/BookingList';
 import BookingDetails from '@/components/BookingDetails';
 import CancelRequestModal from '@/components/CancelRequestModal';
@@ -15,48 +14,18 @@ interface Booking {
     phone: string;
     status: string;
     created_at: string;
+    total_members?: number;
+    travel_date?: string;
     [key: string]: any;
 }
 
-export default function Dashboard() {
-    const { auth } = usePage().props as any;
-    const user = auth?.user;
-    const userName = user?.name || user?.email || 'Admin';
-
+export default function BookingDashboard() {
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     const [showCancelModal, setShowCancelModal] = useState(false);
-    const [stats, setStats] = useState({
-        total: 0,
-        confirmed: 0,
-        pending: 0,
-        cancelled: 0,
-    });
     const [refreshKey, setRefreshKey] = useState(0);
 
-    useEffect(() => {
-        fetchStats();
-    }, [refreshKey]);
-
-    const fetchStats = async () => {
-        try {
-            const response = await apiFetch('/api/bookings?per_page=100', {
-                method: 'GET',
-            });
-            if (response.ok) {
-                const data = await response.json();
-                const bookings = data.data || [];
-
-                const newStats = {
-                    total: bookings.length,
-                    confirmed: bookings.filter((b: Booking) => b.status === 'confirmed').length,
-                    pending: bookings.filter((b: Booking) => b.status === 'pending').length,
-                    cancelled: bookings.filter((b: Booking) => b.status === 'cancelled').length,
-                };
-                setStats(newStats);
-            }
-        } catch (err) {
-            console.error('Error fetching stats:', err);
-        }
+    const handleSelectBooking = (booking: Booking) => {
+        setSelectedBooking(booking);
     };
 
     const handleOpenCancelModal = () => {
@@ -71,83 +40,26 @@ export default function Dashboard() {
     };
 
     return (
-        <MasterLayout title="Dashboard">
+        <MasterLayout title="Booking Dashboard">
+            <Head title="Booking Dashboard" />
+
             {/* Page Title */}
             <div className="page-title">
                 <nav aria-label="breadcrumb">
                     <ol className="breadcrumb">
-                        <li><h1>Dashboard</h1></li>
-                        <li className="breadcrumb-item">
-                            <a href="/dashboard">
-                                <svg width="16" height="16" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M2.125 6.375L8.5 1.41667L14.875 6.375V14.1667C14.875 14.5424 14.7257 14.9027 14.4601 15.1684C14.1944 15.4341 13.8341 15.5833 13.4583 15.5833H3.54167C3.16594 15.5833 2.80561 15.4341 2.53993 15.1684C2.27426 14.9027 2.125 14.5424 2.125 14.1667V6.375Z" stroke="var(--bs-body-color)" strokeLinecap="round" strokeLinejoin="round" />
-                                    <path d="M6.375 15.5833V8.5H10.625V15.5833" stroke="var(--bs-body-color)" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                                Home
-                            </a>
-                        </li>
-                        <li className="breadcrumb-item active" aria-current="page">Dashboard</li>
+                        <li><h1>Booking Dashboard</h1></li>
+                        <li className="breadcrumb-item active">Manage Your Bookings</li>
                     </ol>
                 </nav>
             </div>
 
+            {/* Main Content */}
             <div className="row">
-                {/* Congratulations */}
-                <div className="col-xl-12">
-                    <div className="card overflow-hidden">
-                        <div className="card-body">
-                            <div>
-                                <h4 className="fs-16 mb-0">Welcome back, <strong>{userName}!</strong></h4>
-                                <span>Here's your booking management dashboard</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Statistics Cards */}
-            <div className="row mt-4">
-                <div className="col-md-3">
-                    <div className="card bg-primary text-white">
-                        <div className="card-body">
-                            <h6 className="text-uppercase mb-2">Total Bookings</h6>
-                            <h3 className="m-0">{stats.total}</h3>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-md-3">
-                    <div className="card bg-success text-white">
-                        <div className="card-body">
-                            <h6 className="text-uppercase mb-2">Confirmed</h6>
-                            <h3 className="m-0">{stats.confirmed}</h3>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-md-3">
-                    <div className="card bg-warning text-white">
-                        <div className="card-body">
-                            <h6 className="text-uppercase mb-2">Pending</h6>
-                            <h3 className="m-0">{stats.pending}</h3>
-                        </div>
-                    </div>
-                </div>
-                <div className="col-md-3">
-                    <div className="card bg-danger text-white">
-                        <div className="card-body">
-                            <h6 className="text-uppercase mb-2">Cancelled</h6>
-                            <h3 className="m-0">{stats.cancelled}</h3>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {/* Main Content - Bookings Section */}
-            <div className="row mt-4">
                 {/* Bookings List - Left Side */}
                 <div className="col-lg-7">
                     <BookingList
                         key={refreshKey}
-                        onSelectBooking={setSelectedBooking}
+                        onSelectBooking={handleSelectBooking}
                     />
                 </div>
 
@@ -160,7 +72,7 @@ export default function Dashboard() {
                                 onCancelClick={handleOpenCancelModal}
                             />
 
-                            {/* Quick Actions */}
+                            {/* Action Cards */}
                             <div className="row mt-3">
                                 <div className="col-12">
                                     <div className="card">
@@ -208,6 +120,42 @@ export default function Dashboard() {
                             </div>
                         </div>
                     )}
+                </div>
+            </div>
+
+            {/* Statistics Cards - Full Width */}
+            <div className="row mt-4">
+                <div className="col-md-3">
+                    <div className="card bg-primary text-white">
+                        <div className="card-body">
+                            <h6 className="text-uppercase">Total Bookings</h6>
+                            <h3 className="m-0 mt-2">—</h3>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-md-3">
+                    <div className="card bg-success text-white">
+                        <div className="card-body">
+                            <h6 className="text-uppercase">Confirmed</h6>
+                            <h3 className="m-0 mt-2">—</h3>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-md-3">
+                    <div className="card bg-warning text-white">
+                        <div className="card-body">
+                            <h6 className="text-uppercase">Pending</h6>
+                            <h3 className="m-0 mt-2">—</h3>
+                        </div>
+                    </div>
+                </div>
+                <div className="col-md-3">
+                    <div className="card bg-danger text-white">
+                        <div className="card-body">
+                            <h6 className="text-uppercase">Cancelled</h6>
+                            <h3 className="m-0 mt-2">—</h3>
+                        </div>
+                    </div>
                 </div>
             </div>
 

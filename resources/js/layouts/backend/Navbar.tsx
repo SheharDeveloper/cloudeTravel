@@ -3,8 +3,9 @@ import { useState, useRef, useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
 
 export default function Navbar() {
-    const { auth } = usePage().props as any;
+    const { auth, name } = usePage().props as any;
     const user = auth?.user;
+    const companyName = (name as string) || 'CloudTravel';
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLLIElement>(null);
 
@@ -69,21 +70,9 @@ export default function Navbar() {
                     <nav className="navbar navbar-expand">
                         <div className="collapse navbar-collapse justify-content-between">
 
-                            {/* Search */}
-                            <div className="header-left">
-                                <form>
-                                    <div className="header-search position-relative">
-                                        <input type="text" className="form-control" placeholder="Search" />
-                                        <span className="input-group-text position-absolute end-0 top-0">
-                                            <button className="bg-transparent border-0" type="button" aria-label="Search">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                    <path opacity="0.3" d="M14.2929 16.7071C13.9024 16.3166 13.9024 15.6834 14.2929 15.2929C14.6834 14.9024 15.3166 14.9024 15.7071 15.2929L19.7071 19.2929C20.0976 19.6834 20.0976 20.3166 19.7071 20.7071C19.3166 21.0976 18.6834 21.0976 18.2929 20.7071L14.2929 16.7071Z" fill="#452B90" />
-                                                    <path d="M11 16C13.7614 16 16 13.7614 16 11C16 8.23859 13.7614 6 11 6C8.23858 6 6 8.23859 6 11C6 13.7614 8.23858 16 11 16ZM11 18C7.13401 18 4 14.866 4 11C4 7.13402 7.13401 4 11 4C14.866 4 18 7.13402 18 11C18 14.866 14.866 18 11 18Z" fill="#452B90" />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </div>
-                                </form>
+                            {/* Company Info */}
+                            <div className="header-left d-flex align-items-center">
+                                <h5 className="mb-0 text-primary fw-bold">{companyName}</h5>
                             </div>
 
                             {/* Right side icons */}
@@ -133,24 +122,21 @@ export default function Navbar() {
                                         >
                                             <div className="profile-head">
                                                 <div className="avatar avatar-sm border-0">
-                                                    <img src="/backend/assets/images/user_3.jpg" alt="Profile" />
+                                                    <img src={user?.profile_image_url} alt="Profile" />
                                                 </div>
                                             </div>
                                         </button>
                                         {dropdownOpen && (
                                             <div className="dropdown-menu dropdown-menu-end py-0 show" style={{ position: 'absolute', top: '100%', right: 0, minWidth: '250px', zIndex: 9999 }}>
                                                 <div className="py-2 d-flex px-3 align-items-center" style={{ borderBottom: '1px solid #e5e7eb' }}>
-                                                    <img src="/backend/assets/images/tab/1_3.jpg" className="avatar avatar-sm rounded-circle" alt="" />
+                                                    <img src={user?.profile_image_url} className="avatar avatar-sm rounded-circle" alt="" />
                                                     <div className="ms-2" style={{ flex: 1, minWidth: 0 }}>
                                                         <h6 className="mb-0" style={{ fontSize: '0.875rem', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.name || user?.email || 'User'}</h6>
                                                         <small style={{ fontSize: '0.75rem', color: '#6b7280', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{user?.role || 'Admin'}</small>
                                                     </div>
                                                 </div>
                                                 <a className="dropdown-item" href="/profile" onClick={() => setDropdownOpen(false)} style={{ padding: '0.75rem 1rem', cursor: 'pointer' }}>
-                                                    Profile
-                                                </a>
-                                                <a className="dropdown-item" href="/settings" onClick={() => setDropdownOpen(false)} style={{ padding: '0.75rem 1rem', cursor: 'pointer' }}>
-                                                    Settings
+                                                    <i className="fa fa-user me-2"></i>Profile
                                                 </a>
                                                 <hr className="dropdown-divider mb-0" style={{ margin: '0.5rem 0' }} />
                                                 <a href="#" className="dropdown-item text-danger" onClick={(e) => { e.preventDefault(); handleLogout(e); setDropdownOpen(false); }} style={{ padding: '0.75rem 1rem', cursor: 'pointer', color: '#dc2626' }}>

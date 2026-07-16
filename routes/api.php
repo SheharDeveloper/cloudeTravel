@@ -12,7 +12,6 @@ use App\Http\Controllers\Api\SpecialOfferController;
 use App\Http\Controllers\Api\HeroImageController;
 use App\Http\Controllers\Api\TestimonialController;
 use App\Http\Controllers\Api\ContactInfoController;
-use App\Http\Controllers\Api\TourController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\BookingNoteController;
 use App\Http\Controllers\Api\VisaController;
@@ -51,20 +50,10 @@ Route::get('packages/{package}', [PackageController::class, 'show'])->name('pack
 // Public booking submit endpoint (no authentication required - for booking modal)
 Route::post('bookings', [BookingController::class, 'store'])->name('bookings.store');
 
-// Public tour endpoints (no authentication required)
-Route::get('tours', [TourController::class, 'index'])->name('tours.index');
-Route::get('tours/{tour}', [TourController::class, 'show'])->name('tours.show');
-
 // Protected API endpoints (authentication required - using session auth via Breeze/Fortify)
 // Need 'web' middleware to load session for authentication
 Route::middleware(['web', 'auth'])->group(function () {
     Route::post('auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
-
-    // Tour resource routes - only create, update, delete (read operations are public)
-    Route::post('tours', [TourController::class, 'store'])->name('tours.store');
-    Route::put('tours/{tour}', [TourController::class, 'update'])->name('tours.update');
-    Route::patch('tours/{tour}', [TourController::class, 'update'])->name('tours.update');
-    Route::delete('tours/{tour}', [TourController::class, 'destroy'])->name('tours.destroy');
 
     // Agency endpoints
     Route::post('agencies', [AgencyController::class, 'store'])->name('agencies.store');

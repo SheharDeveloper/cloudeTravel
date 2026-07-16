@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Settings\PasswordUpdateRequest;
 use App\Http\Requests\Settings\TwoFactorAuthenticationRequest;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Routing\Controllers\HasMiddleware;
 use Illuminate\Routing\Controllers\Middleware;
 use Inertia\Inertia;
@@ -50,9 +52,21 @@ class SecurityController extends Controller implements HasMiddleware
     public function update(PasswordUpdateRequest $request): RedirectResponse
     {
         $request->user()->update([
-            'password' => $request->password,
+            'password' => Hash::make($request->password),
         ]);
 
         return back();
+    }
+
+    /**
+     * Update password from ProfileSettings page (redirects to /profile).
+     */
+    public function updatePassword(PasswordUpdateRequest $request): RedirectResponse
+    {
+        $request->user()->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return to_route('profile');
     }
 }

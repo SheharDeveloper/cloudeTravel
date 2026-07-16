@@ -19,12 +19,16 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone',
         'phone_number',
         'profile_pic',
+        'profile_photo',
         'type',
         'parent_id',
         'status',
     ];
+
+    protected $appends = ['profile_image_url'];
 
     public function parent(): BelongsTo
     {
@@ -39,6 +43,21 @@ class User extends Authenticatable
     public function agencies(): HasMany
     {
         return $this->hasMany(Agency::class);
+    }
+
+    const DEFAULT_PROFILE_IMAGE = '/images/dummyman.png';
+
+    public function getProfileImageUrl(): string
+    {
+        if ($this->profile_pic) {
+            return str_starts_with($this->profile_pic, '/') ? $this->profile_pic : "/storage/{$this->profile_pic}";
+        }
+        return self::DEFAULT_PROFILE_IMAGE;
+    }
+
+    public function getProfileImageUrlAttribute(): string
+    {
+        return $this->getProfileImageUrl();
     }
 
     protected static function boot()
