@@ -1,82 +1,111 @@
-import { useState } from 'react';
+﻿import toast from 'react-hot-toast';
 
 interface DeleteConfirmModalProps {
     show: boolean;
     title: string;
-    message: string;
-    confirmText?: string;
-    cancelText?: string;
-    isLoading?: boolean;
+    message?: string;
     onConfirm: () => void;
     onCancel: () => void;
+    isDeleting?: boolean;
 }
 
 export default function DeleteConfirmModal({
     show,
     title,
-    message,
-    confirmText = 'Delete',
-    cancelText = 'Cancel',
-    isLoading = false,
+    message = 'This action cannot be undone.',
     onConfirm,
     onCancel,
+    isDeleting = false,
 }: DeleteConfirmModalProps) {
     if (!show) return null;
 
     return (
         <>
-            {/* Overlay */}
+            {/* Modal Backdrop */}
             <div
-                className="modal fade show"
-                style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }}
-                tabIndex={-1}
-                role="dialog"
+                className="modal d-block"
+                style={{
+                    display: show ? 'block' : 'none',
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    zIndex: 1050,
+                }}
+                onClick={onCancel}
             >
-                <div className="modal-dialog modal-dialog-centered" role="document">
+                {/* Modal Dialog */}
+                <div
+                    className="modal-dialog"
+                    style={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        zIndex: 1050,
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                >
                     <div className="modal-content">
-                        <div className="modal-header border-danger">
-                            <h5 className="modal-title text-danger">
-                                <i className="fa-solid fa-triangle-exclamation me-2"></i>
-                                {title}
+                        {/* Modal Header */}
+                        <div className="modal-header bg-danger text-white">
+                            <h5 className="modal-title">
+                                <i className="fa fa-exclamation-triangle me-2"></i>
+                                Confirm Delete
                             </h5>
                             <button
                                 type="button"
-                                className="btn-close"
+                                className="btn-close btn-close-white"
                                 onClick={onCancel}
-                                disabled={isLoading}
+                                disabled={isDeleting}
                             ></button>
                         </div>
-                        <div className="modal-body">
-                            <p className="mb-0">{message}</p>
+
+                        {/* Modal Body */}
+                        <div className="modal-body py-4">
+                            <div className="text-center mb-4">
+                                <div
+                                    style={{
+                                        fontSize: '64px',
+                                        color: '#dc2626',
+                                        marginBottom: '16px',
+                                    }}
+                                >
+                                    <i className="fa fa-trash"></i>
+                                </div>
+                            </div>
+
+                            <h6 className="text-center mb-2">Delete "{title}"?</h6>
+                            <p className="text-center text-muted mb-0">{message}</p>
                         </div>
+
+                        {/* Modal Footer */}
                         <div className="modal-footer">
                             <button
                                 type="button"
                                 className="btn btn-secondary"
                                 onClick={onCancel}
-                                disabled={isLoading}
+                                disabled={isDeleting}
                             >
-                                {cancelText}
+                                Cancel
                             </button>
                             <button
                                 type="button"
                                 className="btn btn-danger"
                                 onClick={onConfirm}
-                                disabled={isLoading}
+                                disabled={isDeleting}
                             >
-                                {isLoading ? (
+                                {isDeleting ? (
                                     <>
-                                        <span
-                                            className="spinner-border spinner-border-sm me-2"
-                                            role="status"
-                                            aria-hidden="true"
-                                        ></span>
+                                        <span className="spinner-border spinner-border-sm me-2"></span>
                                         Deleting...
                                     </>
                                 ) : (
                                     <>
-                                        <i className="fa-solid fa-trash me-2"></i>
-                                        {confirmText}
+                                        <i className="fa fa-trash me-2"></i>
+                                        Delete
                                     </>
                                 )}
                             </button>

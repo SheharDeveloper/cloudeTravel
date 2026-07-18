@@ -48,6 +48,10 @@ const getMenuItems = (companyName: string): MenuItem[] => [
     { type: 'link', icon: 'fa-solid fa-passport', label: 'Visa Management', href: '/admin/visa-services' },
     { type: 'link', icon: 'fa-solid fa-gift', label: 'Package Management', href: '/admin/packages' },
     { type: 'link', icon: 'fa-solid fa-concierge-bell', label: 'Service Management', href: '/admin/services' },
+
+    { type: 'title', label: 'PUBLIC & LEGAL' },
+
+    { type: 'link', icon: 'fa-solid fa-file-pdf', label: 'Documents', href: '/admin/documents' },
 ];
 
 // Commented out menu items for future use

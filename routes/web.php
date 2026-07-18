@@ -9,7 +9,10 @@ use App\Http\Controllers\Web\PackageController;
 use App\Http\Controllers\SearchController;
 
 // Landing/Public routes
-Route::inertia('/', 'home')->name('home');
+Route::get('/', function () {
+    $documents = \App\Models\PublicDocument::where('status', 'active')->orderBy('created_at', 'desc')->get();
+    return inertia('home', ['documents' => $documents]);
+})->name('home');
 Route::inertia('/all-offers', 'AllOffers', ['currency' => config('currency')])->name('all-offers');
 Route::get('/offers/{uid}', [\App\Http\Controllers\Web\OfferController::class, 'show'])->name('offers.detail');
 Route::inertia('/flights', 'frontend/flight/flight')->name('flights');
@@ -40,9 +43,14 @@ Route::middleware('auth')->get('profile', fn() => inertia('ProfileSettings'))->n
 Route::middleware('auth')->put('profile', [\App\Http\Controllers\Settings\ProfileController::class, 'updateFromProfile'])->name('profile.update.put');
 Route::middleware('auth')->post('profile-upload', [\App\Http\Controllers\Settings\ProfileController::class, 'uploadProfile'])->name('profile.upload');
 Route::middleware('auth')->put('password', [\App\Http\Controllers\Settings\SecurityController::class, 'updatePassword'])->name('password.update.put');
-
+    
 // Admin Routes (requires authentication via session - Breeze/Inertia)
 Route::middleware('auth')->prefix('admin')->group(function () {
+    // Public Documents
+    Route::get('documents', [\App\Http\Controllers\Admin\DocumentController::class, 'index'])->name('admin.documents.index');
+    Route::post('documents', [\App\Http\Controllers\Admin\DocumentController::class, 'store'])->name('admin.documents.store');
+    Route::put('documents/{publicDocument}', [\App\Http\Controllers\Admin\DocumentController::class, 'update'])->name('admin.documents.update');
+    Route::delete('documents/{publicDocument}', [\App\Http\Controllers\Admin\DocumentController::class, 'destroy'])->name('admin.documents.destroy');
 
     // Tours Management (React Components via Inertia)
     Route::inertia('tours', 'Admin/Tour/Index')->name('admin.tours.index');

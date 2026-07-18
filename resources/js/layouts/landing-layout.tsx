@@ -1,4 +1,4 @@
-import { Link, Head } from '@inertiajs/react';
+import { Link, Head, usePage } from '@inertiajs/react';
 import { ReactNode, useState, useEffect } from 'react';
 import { contactInfoService } from '@/services/contactInfoService';
 import { logoConfig, LOGO_PATH, footerLogoConfig } from '@/config/logo';
@@ -150,10 +150,12 @@ const mobileResponsiveStyles = `
  */
 export default function LandingLayout({ children }: Props) {
     const { isCurrentUrl } = useCurrentUrl();
+    const { documents: propsDocuments } = usePage().props as any;
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [contactInfo, setContactInfo] = useState<any>(null);
     const [isMobile, setIsMobile] = useState(false);
+    const [documents, setDocuments] = useState<any[]>(propsDocuments || []);
 
     useEffect(() => {
         loadContactInfo();
@@ -167,6 +169,12 @@ export default function LandingLayout({ children }: Props) {
         window.addEventListener('resize', checkMobile);
         return () => window.removeEventListener('resize', checkMobile);
     }, []);
+
+    useEffect(() => {
+        if (propsDocuments) {
+            setDocuments(propsDocuments);
+        }
+    }, [propsDocuments]);
 
     const loadContactInfo = async () => {
         const data = await contactInfoService.get();
@@ -316,21 +324,22 @@ export default function LandingLayout({ children }: Props) {
                         <div>
                             <h4 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '15px', color: '#000000' }}>Documents</h4>
                             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                                <li style={{ marginBottom: '8px', fontSize: '11px' }}>
-                                    <a href="/conditions/Safari.pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#333333', textDecoration: 'none' }}>
-                                        <i className="fa fa-file-pdf" style={{ marginRight: '6px' }}></i>Terms & Conditions 1
-                                    </a>
-                                </li>
-                                <li style={{ marginBottom: '8px', fontSize: '11px' }}>
-                                    <a href="/conditions/Safari (1).pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#333333', textDecoration: 'none' }}>
-                                        <i className="fa fa-file-pdf" style={{ marginRight: '6px' }}></i>Terms & Conditions 2
-                                    </a>
-                                </li>
-                                <li style={{ fontSize: '11px' }}>
-                                    <a href="/conditions/Safari (2).pdf" target="_blank" rel="noopener noreferrer" style={{ color: '#333333', textDecoration: 'none' }}>
-                                        <i className="fa fa-file-pdf" style={{ marginRight: '6px' }}></i>Terms & Conditions 3
-                                    </a>
-                                </li>
+                                {documents.length > 0 ? (
+                                    documents.map((doc: any, index) => (
+                                        <li key={doc.id || index} style={{ marginBottom: '8px', fontSize: '11px' }}>
+                                            <a
+                                                href={doc.display_url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                style={{ color: '#333333', textDecoration: 'none' }}
+                                            >
+                                                <i className="fa fa-file-pdf" style={{ marginRight: '6px' }}></i>{doc.title}
+                                            </a>
+                                        </li>
+                                    ))
+                                ) : (
+                                    <li style={{ fontSize: '11px', color: '#999999' }}>No documents available</li>
+                                )}
                             </ul>
                         </div>
                     </div>
