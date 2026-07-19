@@ -1,4 +1,4 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import { useState, useEffect, useRef } from 'react';
 import { specialOfferService } from '@/services/specialOfferService';
 import { heroImageService } from '@/services/heroImageService';
@@ -19,7 +19,7 @@ import SpecialOffers from '@/components/SpecialOffers';
 /**
  * Home/Landing page component with multiple sections
  */
-export default function Home() {
+export default function Home({ isreviewEnabled, documents: propsDocuments }: { isreviewEnabled: boolean; documents: any[] }) {
     // ========== TAB MANAGEMENT ==========
     // Read URL parameter (?tab=visa) to set which form to display on page load
     const getInitialService = () => {
@@ -1047,7 +1047,7 @@ export default function Home() {
             </section>
 
             {/* TESTIMONIALS SECTION */}
-            {testimonials.length > 0 && (
+            {isreviewEnabled && testimonials.length > 0 && (
                 <section style={{ padding: '40px 20px', background: '#ffffff' }}>
                     <style>{`
                         @media (max-width: 768px) {

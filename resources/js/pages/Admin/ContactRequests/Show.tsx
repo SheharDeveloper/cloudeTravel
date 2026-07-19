@@ -1,6 +1,8 @@
 import MasterLayout from '@/layouts/backend/MasterLayout';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { ProtectedRoute } from '@/lib/ProtectedRoute';
+import { router } from '@inertiajs/react';
+import toast, { Toaster } from 'react-hot-toast';
 
 interface ContactRequest {
     id: number;
@@ -12,37 +14,34 @@ interface ContactRequest {
     created_at: string;
 }
 
-export default function ContactRequestShow() {
-    const uid = window.location.pathname.split('/').pop() || '';
-    const [contact, setContact] = useState<ContactRequest | null>(null);
-    const [loading, setLoading] = useState(true);
+export default function ContactRequestShow({ contact: initialContact }: { contact: ContactRequest }) {
+    const [contact, setContact] = useState<ContactRequest>(initialContact);
+    const [showReplyModal, setShowReplyModal] = useState(false);
+    const [replyMessage, setReplyMessage] = useState('');
+    const [sending, setSending] = useState(false);
 
-    useEffect(() => {
-        fetchContact();
-    }, [uid]);
-
-    const fetchContact = async () => {
-        setLoading(true);
-        try {
-            const response = await fetch(`/api/contact-requests/${uid}`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
-                },
-            });
-
-            if (response.ok) {
-                const data = await response.json();
-                setContact(data.data);
-            } else {
-                alert('Failed to load contact request');
-            }
-        } catch (error) {
-            console.error('Error fetching contact:', error);
-            alert('Error loading contact request');
-        } finally {
-            setLoading(false);
+    const handleSendReply = () => {
+        if (!replyMessage.trim()) {
+            toast.error('Please enter a message');
+            return;
         }
+
+        setSending(true);
+        router.post(`/api/contact-requests/${contact.uid}/reply`, {
+            message: replyMessage,
+        }, {
+            onSuccess: () => {
+                toast.success('Reply sent successfully!');
+                setReplyMessage('');
+                setShowReplyModal(false);
+            },
+            onError: () => {
+                toast.error('Failed to send reply');
+            },
+            onFinish: () => {
+                setSending(false);
+            },
+        });
     };
 
     const formatDate = (date: string) => {
@@ -80,13 +79,7 @@ export default function ContactRequestShow() {
                     </nav>
                 </div>
 
-                {loading ? (
-                    <div className="text-center py-5">
-                        <div className="spinner-border" role="status">
-                            <span className="visually-hidden">Loading...</span>
-                        </div>
-                    </div>
-                ) : contact ? (
+                {contact ? (
                     <div className="row">
                         <div className="col-md-8">
                             <div className="card">
@@ -135,9 +128,12 @@ export default function ContactRequestShow() {
                                 </div>
 
                                 <div className="card-footer d-flex gap-2">
-                                    <a href={`mailto:${contact.email}`} className="btn btn-primary">
-                                        <i className="fa fa-envelope me-2"></i> Reply via Email
-                                    </a>
+                                    <button
+                                        onClick={() => setShowReplyModal(true)}
+                                        className="btn btn-primary"
+                                    >
+                                        <i className="fa fa-envelope me-2"></i> Reply
+                                    </button>
                                     <a href="/admin/contact-requests" className="btn btn-secondary">
                                         <i className="fa fa-arrow-left me-2"></i> Back to List
                                     </a>
@@ -193,6 +189,124 @@ export default function ContactRequestShow() {
                         <i className="fa fa-exclamation-triangle me-2"></i> Contact request not found
                     </div>
                 )}
+
+                {/* Reply Modal */}
+                {showReplyModal && (
+                    <div
+                        className="modal d-block"
+                        style={{
+                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                            position: 'fixed',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            zIndex: 1050,
+                        }}
+                        onClick={() => !sending && setShowReplyModal(false)}
+                    >
+                        <div
+                            className="modal-dialog"
+                            style={{
+                                position: 'absolute',
+                                top: '50%',
+                                left: '50%',
+                                transform: 'translate(-50%, -50%)',
+                                zIndex: 1050,
+                                width: '90%',
+                                maxWidth: '900px',
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">
+                                        <i className="fa fa-envelope me-2"></i>
+                                        Reply to {contact.name}
+                                    </h5>
+                                    <button
+                                        type="button"
+                                        className="btn-close"
+                                        onClick={() => !sending && setShowReplyModal(false)}
+                                        disabled={sending}
+                                    ></button>
+                                </div>
+
+                                <div className="modal-body">
+                                    <div className="mb-3">
+                                        <label className="form-label">
+                                            <strong>To:</strong>
+                                        </label>
+                                        <input
+                                            type="email"
+                                            className="form-control"
+                                            value={contact.email}
+                                            disabled
+                                        />
+                                    </div>
+
+                                    <div className="mb-3">
+                                        <label className="form-label">
+                                            <strong>Subject:</strong>
+                                        </label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            value={`Re: ${contact.subject}`}
+                                            disabled
+                                        />
+                                    </div>
+
+                                    <div className="mb-3">
+                                        <label className="form-label">
+                                            <strong>Message:</strong>
+                                        </label>
+                                        <textarea
+                                            className="form-control"
+                                            rows={6}
+                                            placeholder="Type your reply here..."
+                                            value={replyMessage}
+                                            onChange={(e) => setReplyMessage(e.target.value)}
+                                            disabled={sending}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="modal-footer">
+                                    <button
+                                        type="button"
+                                        className="btn btn-secondary"
+                                        onClick={() => setShowReplyModal(false)}
+                                        disabled={sending}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="btn btn-primary"
+                                        onClick={handleSendReply}
+                                        disabled={sending}
+                                    >
+                                        {sending ? (
+                                            <>
+                                                <span className="spinner-border spinner-border-sm me-2"></span>
+                                                Sending...
+                                            </>
+                                        ) : (
+                                            <>
+                                                <i className="fa fa-send me-2"></i>
+                                                Send Reply
+                                            </>
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Toast Notifications */}
+                <Toaster position="top-right" />
         </ProtectedRoute>
     );
 }

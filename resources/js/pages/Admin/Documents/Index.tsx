@@ -184,7 +184,6 @@ export default function DocumentsIndex({ documents }: { documents: Document[] })
                                     <tr>
                                         <th style={{ width: '5%' }}>#</th>
                                         <th style={{ width: '35%' }}>Title</th>
-                                        <th style={{ width: '30%' }}>File Path</th>
                                         <th style={{ width: '15%' }}>Status</th>
                                         <th style={{ width: '15%' }}>Actions</th>
                                     </tr>
@@ -194,11 +193,7 @@ export default function DocumentsIndex({ documents }: { documents: Document[] })
                                         <tr key={doc.id}>
                                             <td>{index + 1}</td>
                                             <td className="fw-bold">{doc.title}</td>
-                                            <td>
-                                                <small className="text-muted text-truncate d-block" style={{ maxWidth: '250px' }}>
-                                                    {doc.document_path}
-                                                </small>
-                                            </td>
+                                            
                                             <td>{getStatusBadge(doc.status)}</td>
                                             <td>
                                                 <div className="btn-group btn-group-sm" role="group">

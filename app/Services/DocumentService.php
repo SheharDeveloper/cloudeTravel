@@ -38,6 +38,13 @@ class DocumentService
         return $document->delete();
     }
 
+    public function getActiveDocuments()
+    {
+        return PublicDocument::where('status', 'active')
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
     private function validateFile(UploadedFile $file): void
     {
         if (!in_array($file->getMimeType(), self::ALLOWED_MIMES)) {

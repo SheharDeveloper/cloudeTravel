@@ -7,12 +7,10 @@ use App\Http\Controllers\Web\AgencyServiceController;
 use App\Http\Controllers\Web\VisaController;
 use App\Http\Controllers\Web\PackageController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\HomeController;
 
 // Landing/Public routes
-Route::get('/', function () {
-    $documents = \App\Models\PublicDocument::where('status', 'active')->orderBy('created_at', 'desc')->get();
-    return inertia('home', ['documents' => $documents]);
-})->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::inertia('/all-offers', 'AllOffers', ['currency' => config('currency')])->name('all-offers');
 Route::get('/offers/{uid}', [\App\Http\Controllers\Web\OfferController::class, 'show'])->name('offers.detail');
 Route::inertia('/flights', 'frontend/flight/flight')->name('flights');
@@ -63,7 +61,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
 
     // Contact Requests Management (Inertia Pages)
     Route::inertia('contact-requests', 'Admin/ContactRequests/Index')->name('admin.contact-requests.index');
-    Route::inertia('contact-requests/{uid}', 'Admin/ContactRequests/Show')->name('admin.contact-requests.show');
+    Route::get('contact-requests/{contact:uid}', [\App\Http\Controllers\Admin\ContactRequestShowController::class, 'show'])->name('admin.contact-requests.show');
 
     // Special Offer Management
     Route::resource('special-offer', \App\Http\Controllers\Admin\SpecialOfferController::class)->except(['show'])->names('admin.special-offer');
@@ -73,8 +71,9 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     // Hero Image Management (Inertia Page)
     Route::inertia('hero-image', 'Admin/HeroImage/Index')->name('admin.hero-image.index');
 
-    // Testimonial Management (Inertia Page)
-    Route::inertia('testimonial', 'Admin/Testimonial/Index')->name('admin.testimonial.index');
+    // Testimonial Management
+    Route::get('testimonial', [\App\Http\Controllers\Admin\TestimonialController::class, 'index'])->name('admin.testimonial.index');
+    Route::put('testimonial/toggle-review', [\App\Http\Controllers\Admin\TestimonialController::class, 'toggleReview'])->name('admin.testimonial.toggle-review');
 
     // Contact Info Management (Inertia Page)
     Route::inertia('contact-info', 'Admin/ContactInfo/Index')->name('admin.contact-info.index');

@@ -4,8 +4,10 @@ import { ProtectedRoute } from '@/lib/ProtectedRoute';
 import DeleteConfirmModal from '@/components/DeleteConfirmModal';
 import { testimonialService } from '@/services/testimonialService';
 import TestimonialForm from './Form';
+import TestimonialSettings from './Settings';
 
 export default function TestimonialIndex() {
+    const [activeTab, setActiveTab] = useState<'testimonials' | 'settings'>('testimonials');
     const [testimonials, setTestimonials] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
@@ -172,7 +174,7 @@ export default function TestimonialIndex() {
                 <div className="page-title">
                     <nav aria-label="breadcrumb">
                         <ol className="breadcrumb">
-                            <li><h1>Testimonials</h1></li>
+                            <li><h1>Testimonials & Settings</h1></li>
                             <li className="breadcrumb-item">
                                 <a href="/dashboard">
                                     <svg width="16" height="16" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -187,7 +189,36 @@ export default function TestimonialIndex() {
                     </nav>
                 </div>
 
-                {/* Testimonials List */}
+                {/* Tabs */}
+                <ul className="nav nav-tabs mb-3" role="tablist">
+                    <li className="nav-item" role="presentation">
+                        <button
+                            className={`nav-link ${activeTab === 'testimonials' ? 'active' : ''}`}
+                            id="testimonials-tab"
+                            onClick={() => setActiveTab('testimonials')}
+                            type="button"
+                            role="tab"
+                        >
+                            <i className="fa fa-comments me-2"></i>
+                            Testimonials
+                        </button>
+                    </li>
+                    <li className="nav-item" role="presentation">
+                        <button
+                            className={`nav-link ${activeTab === 'settings' ? 'active' : ''}`}
+                            id="settings-tab"
+                            onClick={() => setActiveTab('settings')}
+                            type="button"
+                            role="tab"
+                        >
+                            <i className="fa fa-cog me-2"></i>
+                            Settings
+                        </button>
+                    </li>
+                </ul>
+
+                {/* Testimonials Tab */}
+                {activeTab === 'testimonials' && (
                 <div className="row">
                     <div className="col-xl-12">
                         <div className="card">
@@ -324,15 +355,23 @@ export default function TestimonialIndex() {
                         </div>
                     </div>
                 </div>
+                )}
+
+                {/* Settings Tab */}
+                {activeTab === 'settings' && (
+                <div className="row">
+                    <div className="col-xl-12">
+                        <TestimonialSettings />
+                    </div>
+                </div>
+                )}
 
                 {/* Delete Confirmation Modal */}
                 <DeleteConfirmModal
                     show={deleteConfirm !== null}
-                    title="Delete Testimonial"
+                    title="Testimonial"
                     message="Are you sure you want to delete this testimonial? This action cannot be undone."
-                    confirmText="Delete"
-                    cancelText="Cancel"
-                    isLoading={deleting}
+                    isDeleting={deleting}
                     onConfirm={handleConfirmDelete}
                     onCancel={() => setDeleteConfirm(null)}
                 />

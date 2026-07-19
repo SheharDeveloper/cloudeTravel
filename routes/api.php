@@ -18,6 +18,8 @@ use App\Http\Controllers\Api\VisaController;
 use App\Http\Controllers\Api\PackageController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\ContactRequestController;
+use App\Http\Controllers\Api\ContactReplyController;
+use App\Http\Controllers\Admin\SettingsController;
 
 // Public auth endpoints (no authentication required)
 Route::post('auth/login', [AuthController::class, 'login'])->name('auth.login');
@@ -128,4 +130,9 @@ Route::middleware(['web', 'auth'])->group(function () {
     Route::get('contact-requests', [ContactRequestController::class, 'index'])->name('contact-requests.index');
     Route::get('contact-requests/{contact}', [ContactRequestController::class, 'show'])->name('contact-requests.show');
     Route::delete('contact-requests/{contact}', [ContactRequestController::class, 'destroy'])->name('contact-requests.destroy');
+    Route::post('contact-requests/{contact}/reply', [ContactReplyController::class, 'send'])->name('contact-requests.reply');
+
+    // Settings endpoints (authentication required - for admin)
+    Route::get('settings', [SettingsController::class, 'getSettings'])->name('settings.get');
+    Route::put('settings', [SettingsController::class, 'updateSettings'])->name('settings.update');
 });
