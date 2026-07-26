@@ -177,7 +177,7 @@ export default function BackendLayout({ children, title }: BackendLayoutProps) {
                     <div className="copyright text-center">
                         <p className="mb-0">
                             Copyright &copy; Developed by{' '}
-                            <a href="https://dexignzone.com" target="_blank" rel="noreferrer">DexignZone</a>{' '}
+                            <a href="#" target="_blank" rel="noreferrer">HSGroup</a>{' '}
                             {new Date().getFullYear()}
                         </p>
                     </div>

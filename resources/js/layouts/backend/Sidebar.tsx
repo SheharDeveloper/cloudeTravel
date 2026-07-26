@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
 
 // ─── Menu Data ────────────────────────────────────────────────────────────────
@@ -52,6 +52,10 @@ const getMenuItems = (companyName: string): MenuItem[] => [
     { type: 'title', label: 'PUBLIC & LEGAL' },
 
     { type: 'link', icon: 'fa-solid fa-file-pdf', label: 'Documents', href: '/admin/documents' },
+
+    { type: 'title', label: 'QUOTATIONS' },
+
+    { type: 'link', icon: 'fa-solid fa-quote-left', label: 'Travel Quote', href: '/admin/travel-quote' },
 ];
 
 // Commented out menu items for future use
@@ -68,8 +72,17 @@ const getMenuItems = (companyName: string): MenuItem[] => [
 
 // ─── Dropdown Item ────────────────────────────────────────────────────────────
 
-function DropdownItem({ icon, label, children }: { icon: string; label: string; children: { label: string; href: string }[] }) {
-    const [open, setOpen] = useState(false);
+function DropdownItem({ icon, label, children, currentPath }: { icon: string; label: string; children: { label: string; href: string }[]; currentPath: string }) {
+
+    // Check if any child is active
+    const hasActiveChild = children.some(c => currentPath.startsWith(c.href));
+
+    // Auto-open if a child is active, otherwise closed
+    const [open, setOpen] = useState(hasActiveChild);
+
+    useEffect(() => {
+        setOpen(hasActiveChild);
+    }, [hasActiveChild]);
 
     return (
         <li className={open ? 'mm-active' : ''}>
@@ -87,9 +100,16 @@ function DropdownItem({ icon, label, children }: { icon: string; label: string; 
                 style={{ display: open ? 'block' : 'none' }}
                 aria-expanded={open}
             >
-                {children.map((c) => (
-                    <li key={c.href}><a href={c.href}>{c.label}</a></li>
-                ))}
+                {children.map((c) => {
+                    const isActive = currentPath.startsWith(c.href);
+                    return (
+                        <li key={c.href} className={isActive ? 'mm-active' : ''}>
+                            <a href={c.href} className={isActive ? 'sidebar-active' : ''}>
+                                {c.label}
+                            </a>
+                        </li>
+                    );
+                })}
             </ul>
         </li>
     );
@@ -99,11 +119,19 @@ function DropdownItem({ icon, label, children }: { icon: string; label: string; 
 
 export default function Sidebar() {
     const { name } = usePage().props;
+    const { url } = usePage();
     const companyName = (name as string) || 'CloudTravel';
     const menuItems = getMenuItems(companyName);
+    const currentPath = url || '';
 
     return (
         <div className="deznav">
+            <style>{`
+                .sidebar-active {
+                    color: #ffc107 !important;
+                    font-weight: 600 !important;
+                }
+            `}</style>
             <div className="deznav-scroll">
                 <ul className="metismenu" id="menu">
                     {menuItems.map((item: MenuItem, i: number) => {
@@ -112,9 +140,10 @@ export default function Sidebar() {
                         }
 
                         if (item.type === 'link') {
+                            const isActive = currentPath.startsWith(item.href);
                             return (
                                 <li key={i}>
-                                    <a href={item.href}>
+                                    <a href={item.href} className={isActive ? 'sidebar-active' : ''}>
                                         <div className="menu-icon"><i className={item.icon}></i></div>
                                         <span className="nav-text ms-2">{item.label}</span>
                                     </a>
@@ -128,6 +157,7 @@ export default function Sidebar() {
                                 icon={item.icon}
                                 label={item.label}
                                 children={item.children}
+                                currentPath={currentPath}
                             />
                         );
                     })}

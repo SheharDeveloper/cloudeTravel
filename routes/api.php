@@ -58,6 +58,9 @@ Route::get('packages/{package}', [PackageController::class, 'show'])->name('pack
 // Public booking submit endpoint (no authentication required - for booking modal)
 Route::post('bookings', [BookingController::class, 'store'])->name('bookings.store');
 
+// Public travel quote feedback endpoint (no authentication required)
+Route::post('travel-quote-feedback', [\App\Http\Controllers\Api\TravelQuoteFeedbackController::class, 'store'])->name('travel-quote-feedback.store');
+
 // Protected API endpoints (authentication required - using session auth via Breeze/Fortify)
 // Need 'web' middleware to load session for authentication
 Route::middleware(['web', 'auth'])->group(function () {
@@ -135,4 +138,10 @@ Route::middleware(['web', 'auth'])->group(function () {
     // Settings endpoints (authentication required - for admin)
     Route::get('settings', [SettingsController::class, 'getSettings'])->name('settings.get');
     Route::put('settings', [SettingsController::class, 'updateSettings'])->name('settings.update');
+
+    // Travel Quote API endpoints (authentication required - for admin)
+    Route::delete('travel-quote/{id}', [\App\Http\Controllers\Admin\TravelQuoteController::class, 'destroy'])->name('travel-quote.destroy');
+
+    // Travel Quote Feedback update endpoint (authentication required - for admin)
+    Route::put('travel-quote-feedback/{id}', [\App\Http\Controllers\Api\TravelQuoteFeedbackController::class, 'update'])->name('travel-quote-feedback.update');
 });

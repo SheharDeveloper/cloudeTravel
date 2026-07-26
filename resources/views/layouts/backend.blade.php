@@ -59,7 +59,7 @@
         <div class="footer">
             <div class="copyright text-center">
                 <p class="mb-0">Copyright &copy; Developed by
-                    <a href="https://dexignzone.com" target="_blank">DexignZone</a>
+                    <a href="#" target="_blank">HSgroup</a>
                     <span class="current-year">{{ date('Y') }}</span>
                 </p>
             </div>

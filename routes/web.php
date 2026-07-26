@@ -13,6 +13,8 @@ use App\Http\Controllers\HomeController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::inertia('/all-offers', 'AllOffers', ['currency' => config('currency')])->name('all-offers');
 Route::get('/offers/{uid}', [\App\Http\Controllers\Web\OfferController::class, 'show'])->name('offers.detail');
+Route::get('/quote/preview/{uid}', [\App\Http\Controllers\PublicQuotePreviewController::class, '__invoke'])->name('quote.preview');
+Route::post('/quote/feedback/submit', [\App\Http\Controllers\QuoteFeedbackController::class, 'submit'])->name('quote.feedback.submit');
 Route::inertia('/flights', 'frontend/flight/flight')->name('flights');
 Route::inertia('/flights/results', 'FlightResults')->name('flights.results');
 Route::inertia('/hotels', 'frontend/hotel/hotels')->name('hotels');
@@ -86,6 +88,16 @@ Route::middleware('auth')->prefix('admin')->group(function () {
 
     // Packages Management (React Components via Inertia)
     Route::inertia('packages', 'Admin/Packages/Index')->name('admin.packages.index');
+
+    // Travel Quote Management
+    Route::get('travel-quote', [\App\Http\Controllers\Admin\TravelQuoteController::class, 'index'])->name('admin.travel-quote.index');
+    Route::post('travel-quote', [\App\Http\Controllers\Admin\TravelQuoteController::class, 'store'])->name('admin.travel-quote.store');
+    Route::get('travel-quote/{travelQuote:uid}', [\App\Http\Controllers\Admin\TravelQuoteController::class, 'show'])->name('admin.travel-quote.show');
+    Route::put('travel-quote/{travelQuote:uid}', [\App\Http\Controllers\Admin\TravelQuoteController::class, 'update'])->name('admin.travel-quote.update');
+    Route::delete('travel-quote/{travelQuote:uid}', [\App\Http\Controllers\Admin\TravelQuoteController::class, 'destroy'])->name('admin.travel-quote.destroy');
+
+    // Travel Quote Feedback Status Update
+    Route::put('travel-quote-feedback/{id}/status', [\App\Http\Controllers\Admin\TravelQuoteFeedbackController::class, 'updateStatus'])->name('travel-quote-feedback.update-status');
 });
 
 // Agency routes (frontend pages only)
