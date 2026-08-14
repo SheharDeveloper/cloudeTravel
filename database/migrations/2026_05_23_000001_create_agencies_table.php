@@ -10,6 +10,7 @@ return new class extends Migration
     {
         Schema::create('agencies', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uid')->unique();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('agency_name');
             $table->string('legal_name')->nullable();
@@ -28,7 +29,16 @@ return new class extends Migration
             $table->string('account_number', 255)->nullable();
             $table->string('ifsc_code', 50)->nullable();
             $table->text('note')->nullable();
+            $table->json('services')->nullable();
+            $table->string('logo')->nullable();
+            $table->string('zip_code_id')->nullable();
+            $table->string('address_id')->nullable();
+            $table->string('street_id')->nullable();
+            $table->boolean('has_domain')->default(false);
+            $table->uuid('tenant_id')->nullable();
+            $table->json('documents')->nullable();
             $table->tinyInteger('tax_status')->default(0);
+            $table->boolean('status')->default(true);
             $table->timestamps();
         });
     }

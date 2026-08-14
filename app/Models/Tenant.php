@@ -2,41 +2,43 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\Multitenancy\Models\Concerns\UsesLandlordConnection;
+use Spatie\Multitenancy\TenantCollection;
 
 class Tenant extends Model
 {
     use UsesLandlordConnection;
 
     protected $fillable = [
+        'uuid',
         'name',
-        'agency_id',
-        'domain',
-        'database',
-        'is_active',
+        'slug',
+        'plan',
+        'status',
+    ];
+
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
     ];
 
 
 
-    protected static function booted()
-{
-    static::creating(function ($tenant) {
-        if (empty($tenant->agency_id)) {
-            $lastTenant = self::whereNotNull('agency_id')
-                ->orderBy('created_at', 'desc')
-                ->first();
-
-            $nextNumber = 1;
-
-            if ($lastTenant && preg_match('/AGY(\d+)/', $lastTenant->agency_id, $matches)) {
-                $nextNumber = ((int) $matches[1]) + 1;
+    protected static function booted(): void
+    {
+        static::creating(function ($tenant) {
+            if (empty($tenant->uuid)) {
+                $tenant->uuid = \Illuminate\Support\Str::uuid();
             }
+        });
+    }
 
-            $tenant->agency_id = 'AGY' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
-        }
-    });
-}
+    public function newCollection(array $models = []): TenantCollection
+    {
+        return new TenantCollection($models);
+    }
 
 
 public function profile()
@@ -47,6 +49,16 @@ public function profile()
 public function documents()
 {
     return $this->hasMany(AgencyDocument::class, 'tenant_id');
+}
+
+public function domains()
+{
+    return $this->hasMany(Domain::class);
+}
+
+public function primaryDomain()
+{
+    return $this->hasOne(Domain::class)->where('is_primary', true);
 }
 
 

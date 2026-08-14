@@ -26,7 +26,7 @@ class AgencyService
             'name' => $data['agency_name'],
             'email' => $data['email'],
             'password' => Hash::make('agency'),
-            'phone_number' => $data['phone_number'],
+            'phone' => $data['phone_number'],
             'type' => 'agency',
             'parent_id' => $data['user_id'],
         ]);

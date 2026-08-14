@@ -1,11 +1,19 @@
 import { clearAuthToken } from '@/lib/api';
 import { useState, useRef, useEffect } from 'react';
-import { usePage } from '@inertiajs/react';
+import { router, usePage } from '@inertiajs/react';
 
 export default function Navbar() {
-    const { auth, name } = usePage().props as any;
+    const { auth, name, authAgency, impersonating } = usePage().props as any;
     const user = auth?.user;
-    const companyName = (name as string) || 'CloudTravel';
+    const companyName = authAgency?.agency_name || (name as string) || 'CloudTravel';
+    const [stopping, setStopping] = useState(false);
+
+    const stopImpersonating = () => {
+        setStopping(true);
+        router.post('/admin/staff-stop-impersonating', {}, {
+            onFinish: () => setStopping(false),
+        });
+    };
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLLIElement>(null);
 
@@ -50,7 +58,7 @@ export default function Navbar() {
             {/* Nav Header (logo + hamburger) */}
             <div className="nav-header">
                 <a href="/dashboard" className="brand-logo">
-                    <img src="/images/logo.png" alt="Logo" style={{ height: '45px', width: 'auto', objectFit: 'contain' }} />
+                    <img src={authAgency?.logo || '/images/logo.png'} alt={companyName} style={{ height: '45px', width: 'auto', objectFit: 'contain' }} />
                 </a>
                 <div className="nav-control">
                     <div className="hamburger">
@@ -63,6 +71,27 @@ export default function Navbar() {
                     </div>
                 </div>
             </div>
+
+            {/* Impersonation banner */}
+            {impersonating && (
+                <div
+                    className="d-flex align-items-center justify-content-center gap-3 text-white py-2 px-3"
+                    style={{ backgroundColor: '#212529', fontSize: '0.875rem' }}
+                >
+                    <i className="fa fa-user-secret"></i>
+                    <span>
+                        Viewing as <strong>{impersonating.currentName}</strong> &mdash; signed in as <strong>{impersonating.name}</strong>
+                    </span>
+                    <button
+                        type="button"
+                        className="btn btn-sm btn-outline-light"
+                        onClick={stopImpersonating}
+                        disabled={stopping}
+                    >
+                        {stopping ? 'Returning...' : 'Return to my account'}
+                    </button>
+                </div>
+            )}
 
             {/* Top Header bar */}
             <div className="header">
@@ -139,9 +168,20 @@ export default function Navbar() {
                                                     <i className="fa fa-user me-2"></i>Profile
                                                 </a>
                                                 <hr className="dropdown-divider mb-0" style={{ margin: '0.5rem 0' }} />
-                                                <a href="#" className="dropdown-item text-danger" onClick={(e) => { e.preventDefault(); handleLogout(e); setDropdownOpen(false); }} style={{ padding: '0.75rem 1rem', cursor: 'pointer', color: '#dc2626' }}>
-                                                    Logout
-                                                </a>
+                                                {impersonating ? (
+                                                    <a
+                                                        href="#"
+                                                        className="dropdown-item text-danger"
+                                                        onClick={(e) => { e.preventDefault(); setDropdownOpen(false); stopImpersonating(); }}
+                                                        style={{ padding: '0.75rem 1rem', cursor: 'pointer', color: '#dc2626' }}
+                                                    >
+                                                        <i className="fa fa-user-secret me-2"></i>Leave Impersonation
+                                                    </a>
+                                                ) : (
+                                                    <a href="#" className="dropdown-item text-danger" onClick={(e) => { e.preventDefault(); handleLogout(e); setDropdownOpen(false); }} style={{ padding: '0.75rem 1rem', cursor: 'pointer', color: '#dc2626' }}>
+                                                        Logout
+                                                    </a>
+                                                )}
                                             </div>
                                         )}
                                     </div>

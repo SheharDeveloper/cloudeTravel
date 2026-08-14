@@ -12,7 +12,7 @@ use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
-    use HasFactory, HasApiTokens;
+    use HasFactory, HasApiTokens, \Spatie\Permission\Traits\HasRoles;
 
     protected $fillable = [
         'uid',
@@ -20,9 +20,7 @@ class User extends Authenticatable
         'email',
         'password',
         'phone',
-        'phone_number',
         'profile_pic',
-        'profile_photo',
         'type',
         'parent_id',
         'status',
@@ -38,6 +36,46 @@ class User extends Authenticatable
     public function children(): HasMany
     {
         return $this->hasMany(User::class, 'parent_id');
+    }
+
+    public function staffProfile()
+    {
+        return $this->morphOne(StaffProfile::class, 'staffable');
+    }
+
+    public function staffPayment()
+    {
+        return $this->morphOne(StaffPayment::class, 'staffable');
+    }
+
+    public function staffPassport()
+    {
+        return $this->morphOne(StaffPassport::class, 'staffable');
+    }
+
+    public function staffEmergencyContact()
+    {
+        return $this->morphOne(StaffEmergencyContact::class, 'staffable');
+    }
+
+    public function staffEducations()
+    {
+        return $this->morphMany(StaffEducation::class, 'staffable');
+    }
+
+    public function staffTaxDeductions()
+    {
+        return $this->morphMany(StaffTaxDeduction::class, 'staffable');
+    }
+
+    public function staffDocuments()
+    {
+        return $this->morphMany(StaffDocument::class, 'staffable');
+    }
+
+    public function staffActivityLogs()
+    {
+        return $this->morphMany(StaffActivityLog::class, 'staffable');
     }
 
     public function agencies(): HasMany

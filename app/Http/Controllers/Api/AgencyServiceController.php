@@ -18,10 +18,10 @@ class AgencyServiceController extends Controller
      * @param int $userId The user/agency ID
      * @return \Illuminate\Http\JsonResponse List of services
      */
-    public function index($userId)
+    public function index($agencyId)
     {
         try {
-            $services = AgencyService::where('user_id', $userId)->get();
+            $services = AgencyService::where('agency_id', $agencyId)->get();
             return response()->json($services);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -32,21 +32,21 @@ class AgencyServiceController extends Controller
      * Create a new agency service
      *
      * @param Request $request Contains service_name and optional status
-     * @param int $userId The user/agency ID
+     * @param int $agencyId The agency ID
      * @return \Illuminate\Http\JsonResponse Created service object
      */
-    public function store(Request $request, $userId)
+    public function store(Request $request, $agencyId)
     {
         try {
             $validated = $request->validate([
                 'service_name' => 'required|string|max:255',
-                'status' => 'in:Active,Inactive',
+                'status' => 'boolean',
             ]);
 
             $service = AgencyService::create([
-                'user_id' => $userId,
+                'agency_id' => $agencyId,
                 'service_name' => $validated['service_name'],
-                'status' => $validated['status'] ?? 'Active',
+                'status' => $validated['status'] ?? 1,
             ]);
 
             return response()->json($service, 201);
@@ -58,14 +58,14 @@ class AgencyServiceController extends Controller
     /**
      * Delete a service from an agency
      *
-     * @param int $userId The user/agency ID
+     * @param int $agencyId The agency ID
      * @param int $serviceId The service ID to delete
      * @return \Illuminate\Http\JsonResponse Success message
      */
-    public function destroy($userId, $serviceId)
+    public function destroy($agencyId, $serviceId)
     {
         try {
-            $service = AgencyService::where('user_id', $userId)->findOrFail($serviceId);
+            $service = AgencyService::where('agency_id', $agencyId)->findOrFail($serviceId);
             $service->delete();
             return response()->json(['message' => 'Service deleted successfully']);
         } catch (\Exception $e) {

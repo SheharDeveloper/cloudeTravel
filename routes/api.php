@@ -24,10 +24,10 @@ use App\Http\Controllers\Admin\SettingsController;
 // Public auth endpoints (no authentication required)
 Route::post('auth/login', [AuthController::class, 'login'])->name('auth.login');
 
-// Agency Services endpoints (accessible from web session)
-Route::post('users/{userId}/services', [AgencyServiceController::class, 'store'])->name('agency-services.store');
-Route::get('users/{userId}/services', [AgencyServiceController::class, 'index'])->name('agency-services.index');
-Route::delete('users/{userId}/services/{serviceId}', [AgencyServiceController::class, 'destroy'])->name('agency-services.destroy');
+// Agency Services endpoints
+Route::post('agencies/{agencyId}/services', [AgencyServiceController::class, 'store'])->name('agency-services.store');
+Route::get('agencies/{agencyId}/services', [AgencyServiceController::class, 'index'])->name('agency-services.index');
+Route::delete('agencies/{agencyId}/services/{serviceId}', [AgencyServiceController::class, 'destroy'])->name('agency-services.destroy');
 
 // Public endpoints (no authentication required, but will use auth if token provided)
 Route::get('special-offers', [SpecialOfferController::class, 'index'])->name('special-offers.index');
@@ -63,7 +63,7 @@ Route::post('travel-quote-feedback', [\App\Http\Controllers\Api\TravelQuoteFeedb
 
 // Protected API endpoints (authentication required - using session auth via Breeze/Fortify)
 // Need 'web' middleware to load session for authentication
-Route::middleware(['web', 'auth'])->group(function () {
+Route::middleware(['web', 'auth:web,agency'])->group(function () {
     Route::post('auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
 
     // Agency endpoints

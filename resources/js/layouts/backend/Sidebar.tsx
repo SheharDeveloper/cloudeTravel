@@ -5,13 +5,26 @@ import { usePage } from '@inertiajs/react';
 
 type MenuItem =
     | { type: 'title'; label: string }
-    | { type: 'link'; icon: string; label: string; href: string }
+    | { type: 'link'; icon: string; label: string; href: string; permission?: string }
     | { type: 'dropdown'; icon: string; label: string; children: { label: string; href: string }[] };
 
-const getMenuItems = (companyName: string): MenuItem[] => [
+// ── Superadmin menu ───────────────────────────────────────────────────────────
+const getSuperadminMenuItems = (companyName: string): MenuItem[] => [
     { type: 'title', label: companyName.toUpperCase() },
 
     { type: 'link', icon: 'fa-solid fa-house', label: 'Dashboard', href: '/dashboard' },
+
+    { type: 'title', label: 'AGENCY MANAGEMENT' },
+
+    { type: 'link', icon: 'fa-solid fa-building', label: 'Agency Management', href: '/admin/agency-b2b', permission: 'agency.view' },
+
+    { type: 'title', label: 'STAFF MANAGEMENT' },
+
+    { type: 'link', icon: 'fa-solid fa-users', label: 'Staff Management', href: '/admin/staff', permission: 'staff.view' },
+
+    { type: 'title', label: 'ROLE MANAGEMENT' },
+
+    { type: 'link', icon: 'fa-solid fa-user-shield', label: 'Role Management', href: '/admin/roles', permission: 'role.view' },
 
     // { type: 'title', label: 'TOUR MANAGEMENT' },
 
@@ -27,8 +40,8 @@ const getMenuItems = (companyName: string): MenuItem[] => [
 
     { type: 'title', label: 'BOOKING MANAGEMENT' },
 
-    { type: 'link', icon: 'fa-solid fa-calendar-check', label: 'Bookings', href: '/admin/bookings' },
-    { type: 'link', icon: 'fa-solid fa-envelope', label: 'Contact Requests', href: '/admin/contact-requests' },
+    { type: 'link', icon: 'fa-solid fa-calendar-check', label: 'Bookings', href: '/admin/bookings', permission: 'booking.view' },
+    { type: 'link', icon: 'fa-solid fa-envelope', label: 'Contact Requests', href: '/admin/contact-requests', permission: 'contact-request.view' },
 
     { type: 'title', label: 'WEBSITE MANAGEMENT' },
 
@@ -45,17 +58,36 @@ const getMenuItems = (companyName: string): MenuItem[] => [
 
     { type: 'link', icon: 'fa-solid fa-phone', label: 'Contact Info', href: '/admin/contact-info' },
 
-    { type: 'link', icon: 'fa-solid fa-passport', label: 'Visa Management', href: '/admin/visa-services' },
-    { type: 'link', icon: 'fa-solid fa-gift', label: 'Package Management', href: '/admin/packages' },
-    { type: 'link', icon: 'fa-solid fa-concierge-bell', label: 'Service Management', href: '/admin/services' },
+    { type: 'link', icon: 'fa-solid fa-passport', label: 'Visa Management', href: '/admin/visa-services', permission: 'visa.view' },
+    { type: 'link', icon: 'fa-solid fa-gift', label: 'Package Management', href: '/admin/packages', permission: 'package.view' },
+    { type: 'link', icon: 'fa-solid fa-concierge-bell', label: 'Service Management', href: '/admin/services', permission: 'service.view' },
 
     { type: 'title', label: 'PUBLIC & LEGAL' },
 
-    { type: 'link', icon: 'fa-solid fa-file-pdf', label: 'Documents', href: '/admin/documents' },
+    { type: 'link', icon: 'fa-solid fa-file-pdf', label: 'Documents', href: '/admin/documents', permission: 'document.view' },
 
     { type: 'title', label: 'QUOTATIONS' },
 
-    { type: 'link', icon: 'fa-solid fa-quote-left', label: 'Travel Quote', href: '/admin/travel-quote' },
+    { type: 'link', icon: 'fa-solid fa-quote-left', label: 'Travel Quote', href: '/admin/travel-quote', permission: 'travel-quote.view' },
+];
+
+// ── Agency menu (Agency Management is superadmin-only) ────────────────────────
+const getAgencyMenuItems = (agencyName: string): MenuItem[] => [
+    { type: 'title', label: agencyName.toUpperCase() },
+
+    { type: 'link', icon: 'fa-solid fa-house', label: 'Dashboard', href: '/dashboard' },
+
+    { type: 'title', label: 'STAFF MANAGEMENT' },
+
+    { type: 'link', icon: 'fa-solid fa-users', label: 'Staff Management', href: '/admin/staff', permission: 'staff.view' },
+
+    { type: 'title', label: 'ROLE MANAGEMENT' },
+
+    { type: 'link', icon: 'fa-solid fa-user-shield', label: 'Role Management', href: '/admin/roles', permission: 'role.view' },
+
+    { type: 'title', label: 'BOOKING MANAGEMENT' },
+
+    { type: 'link', icon: 'fa-solid fa-calendar-check', label: 'Bookings', href: '/admin/bookings', permission: 'booking.view' },
 ];
 
 // Commented out menu items for future use
@@ -118,10 +150,23 @@ function DropdownItem({ icon, label, children, currentPath }: { icon: string; la
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
 export default function Sidebar() {
-    const { name } = usePage().props;
+    const { name, authAgency, authPermissions } = usePage().props as any;
     const { url } = usePage();
-    const companyName = (name as string) || 'CloudTravel';
-    const menuItems = getMenuItems(companyName);
+    const companyName = authAgency?.agency_name || (name as string) || 'CloudTravel';
+    const allItems = authAgency ? getAgencyMenuItems(companyName) : getSuperadminMenuItems(companyName);
+
+    // authPermissions is null when nobody is signed in; otherwise it is the
+    // permission list for the session (agency permissions, or the user's roles).
+    const allowed = (item: MenuItem) =>
+        item.type !== 'link' || !item.permission || !authPermissions || authPermissions.includes(item.permission);
+
+    // Drop links the session lacks, then any section title left with no links.
+    const kept = allItems.filter(allowed);
+    const menuItems = kept.filter((item, i) => {
+        if (item.type !== 'title') return true;
+        const next = kept[i + 1];
+        return next !== undefined && next.type !== 'title';
+    });
     const currentPath = url || '';
 
     return (

@@ -43,6 +43,11 @@ return [
             'provider' => 'users',
         ],
 
+        'agency' => [
+            'driver' => 'session',
+            'provider' => 'agency_users',
+        ],
+
         'sanctum' => [
             'driver' => 'sanctum',
             'provider' => 'users',
@@ -70,6 +75,11 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', User::class),
+        ],
+
+        'agency_users' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\AgencyUser::class,
         ],
 
         // 'users' => [

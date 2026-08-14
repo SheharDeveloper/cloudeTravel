@@ -18,6 +18,7 @@ class AgencyDocument extends Model
         'document_type',
         'document_master_id',
         'upload_status',
+        'file_path',
     ];
 
     protected $casts = [

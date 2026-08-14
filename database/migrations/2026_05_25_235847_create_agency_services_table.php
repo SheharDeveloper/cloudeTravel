@@ -13,10 +13,12 @@ return new class extends Migration
     {
         Schema::create('agency_services', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('agency_id')->constrained('agencies')->onDelete('cascade');
             $table->string('service_name');
-            $table->enum('status', ['Active', 'Inactive'])->default('Active');
+            $table->boolean('status')->default(1);
             $table->timestamps();
+
+            $table->unique(['agency_id', 'service_name']);
         });
     }
 

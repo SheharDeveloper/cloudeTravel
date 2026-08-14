@@ -15,6 +15,7 @@ return new class extends Migration
             $table->string('document_type', 100);
             $table->bigInteger('document_master_id')->nullable();
             $table->tinyInteger('upload_status')->default(0);
+            $table->string('file_path')->nullable();
             $table->timestamps();
         });
     }

@@ -56,6 +56,29 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Admin Domain
+    |--------------------------------------------------------------------------
+    |
+    | This is the domain used for accessing the admin panel. Requests from this
+    | domain will bypass tenant checking and access the main application.
+    |
+    */
+
+    'admin_domain' => env('ADMIN_DOMAIN', 'localhost'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Email
+    |--------------------------------------------------------------------------
+    |
+    | Email address for administrative inquiries and support contact.
+    |
+    */
+
+    'admin_email' => env('ADMIN_EMAIL', 'admin@example.com'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |

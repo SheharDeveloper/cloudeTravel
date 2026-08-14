@@ -33,6 +33,7 @@ class FortifyServiceProvider extends ServiceProvider
         $this->configureRateLimiting();
     }
 
+
     /**
      * Configure Fortify actions.
      */
@@ -47,11 +48,20 @@ class FortifyServiceProvider extends ServiceProvider
      */
     private function configureViews(): void
     {
-        Fortify::loginView(fn (Request $request) => Inertia::render('auth/login', [
-            'canResetPassword' => Features::enabled(Features::resetPasswords()),
-            'canRegister' => Features::enabled(Features::registration()),
-            'status' => $request->session()->get('status'),
-        ]));
+        Fortify::loginView(function (Request $request) {
+            // ResolveTenantFromDomain sets a tenant only for registered agency
+            // domains. On those hosts the admin login is not applicable, so
+            // send the visitor to the agency login instead.
+            if ($request->attributes->get('tenant')) {
+                return redirect()->route('agency.login');
+            }
+
+            return Inertia::render('auth/login', [
+                'canResetPassword' => Features::enabled(Features::resetPasswords()),
+                'canRegister' => Features::enabled(Features::registration()),
+                'status' => $request->session()->get('status'),
+            ]);
+        });
 
         Fortify::resetPasswordView(fn (Request $request) => Inertia::render('auth/reset-password', [
             'email' => $request->email,
