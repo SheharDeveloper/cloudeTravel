@@ -25,12 +25,14 @@ interface StaffPageProps {
     filters: {
         search?: string;
     };
+    presentToday?: number;
+    totalStaff?: number;
 }
 
 export function useStaff() {
     const page = usePage();
     const props = page.props as unknown as StaffPageProps;
-    const { staff, filters } = props;
+    const { staff, filters, presentToday, totalStaff } = props;
     const [loading, setLoading] = useState(false);
 
     const handleFilterChange = useCallback((newFilters: Partial<StaffPageProps['filters']>) => {
@@ -67,6 +69,8 @@ export function useStaff() {
         perPage: staff?.per_page || 15,
         filters,
         loading,
+        presentToday: presentToday ?? 0,
+        totalStaff: totalStaff ?? 0,
         handleFilterChange,
         handlePageChange,
         handleReset,

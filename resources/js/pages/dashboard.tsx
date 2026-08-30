@@ -1,8 +1,6 @@
 import MasterLayout from '@/layouts/backend/MasterLayout';
-import { useState, useEffect } from 'react';
-import { usePage } from '@inertiajs/react';
-import { apiFetch } from '@/lib/api';
-import BookingList from '@/components/BookingList';
+import { useState } from 'react';
+import { router, usePage } from '@inertiajs/react';
 import BookingDetails from '@/components/BookingDetails';
 import CancelRequestModal from '@/components/CancelRequestModal';
 
@@ -13,51 +11,31 @@ interface Booking {
     first_name: string;
     email: string;
     phone: string;
+    country_code: string;
     status: string;
     created_at: string;
+    updated_at: string;
     [key: string]: any;
 }
 
+interface Stats {
+    total: number;
+    confirmed: number;
+    pending: number;
+    cancelled: number;
+}
+
 export default function Dashboard() {
-    const { auth } = usePage().props as any;
+    const { auth, stats, bookings } = usePage().props as unknown as {
+        auth: { user: any };
+        stats: Stats;
+        bookings: Booking[];
+    };
     const user = auth?.user;
     const userName = user?.name || user?.email || 'Admin';
 
     const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
     const [showCancelModal, setShowCancelModal] = useState(false);
-    const [stats, setStats] = useState({
-        total: 0,
-        confirmed: 0,
-        pending: 0,
-        cancelled: 0,
-    });
-    const [refreshKey, setRefreshKey] = useState(0);
-
-    useEffect(() => {
-        fetchStats();
-    }, [refreshKey]);
-
-    const fetchStats = async () => {
-        try {
-            const response = await apiFetch('/api/bookings?per_page=100', {
-                method: 'GET',
-            });
-            if (response.ok) {
-                const data = await response.json();
-                const bookings = data.data || [];
-
-                const newStats = {
-                    total: bookings.length,
-                    confirmed: bookings.filter((b: Booking) => b.status === 'confirmed').length,
-                    pending: bookings.filter((b: Booking) => b.status === 'pending').length,
-                    cancelled: bookings.filter((b: Booking) => b.status === 'cancelled').length,
-                };
-                setStats(newStats);
-            }
-        } catch (err) {
-            console.error('Error fetching stats:', err);
-        }
-    };
 
     const handleOpenCancelModal = () => {
         if (selectedBooking) {
@@ -66,8 +44,29 @@ export default function Dashboard() {
     };
 
     const handleCancelSuccess = () => {
-        setRefreshKey(prev => prev + 1);
         setSelectedBooking(null);
+        router.reload({ only: ['stats', 'bookings'] });
+    };
+
+    const getStatusBadgeColor = (status: string) => {
+        switch (status) {
+            case 'pending': return 'bg-warning';
+            case 'confirmed': return 'bg-success';
+            case 'cancelled': return 'bg-danger';
+            case 'completed': return 'bg-info';
+            default: return 'bg-secondary';
+        }
+    };
+
+    const getServiceIcon = (type: string) => {
+        const icons: Record<string, string> = {
+            flight: '✈️',
+            hotel: '🏨',
+            visa: '🛂',
+            package: '📦',
+            transport: '🚗',
+        };
+        return icons[type] || '📋';
     };
 
     return (
@@ -111,7 +110,7 @@ export default function Dashboard() {
                     <div className="card bg-primary text-white">
                         <div className="card-body">
                             <h6 className="text-uppercase mb-2">Total Bookings</h6>
-                            <h3 className="m-0">{stats.total}</h3>
+                            <h3 className="m-0">{stats?.total ?? 0}</h3>
                         </div>
                     </div>
                 </div>
@@ -119,7 +118,7 @@ export default function Dashboard() {
                     <div className="card bg-success text-white">
                         <div className="card-body">
                             <h6 className="text-uppercase mb-2">Confirmed</h6>
-                            <h3 className="m-0">{stats.confirmed}</h3>
+                            <h3 className="m-0">{stats?.confirmed ?? 0}</h3>
                         </div>
                     </div>
                 </div>
@@ -127,7 +126,7 @@ export default function Dashboard() {
                     <div className="card bg-warning text-white">
                         <div className="card-body">
                             <h6 className="text-uppercase mb-2">Pending</h6>
-                            <h3 className="m-0">{stats.pending}</h3>
+                            <h3 className="m-0">{stats?.pending ?? 0}</h3>
                         </div>
                     </div>
                 </div>
@@ -135,7 +134,7 @@ export default function Dashboard() {
                     <div className="card bg-danger text-white">
                         <div className="card-body">
                             <h6 className="text-uppercase mb-2">Cancelled</h6>
-                            <h3 className="m-0">{stats.cancelled}</h3>
+                            <h3 className="m-0">{stats?.cancelled ?? 0}</h3>
                         </div>
                     </div>
                 </div>
@@ -145,10 +144,58 @@ export default function Dashboard() {
             <div className="row mt-4">
                 {/* Bookings List - Left Side */}
                 <div className="col-lg-7">
-                    <BookingList
-                        key={refreshKey}
-                        onSelectBooking={setSelectedBooking}
-                    />
+                    <div className="card">
+                        <div className="card-header">
+                            <h5 className="card-title mb-0">Recent Bookings</h5>
+                        </div>
+                        <div className="card-body">
+                            {bookings && bookings.length > 0 ? (
+                                <div className="table-responsive">
+                                    <table className="table table-hover">
+                                        <thead className="table-light">
+                                            <tr>
+                                                <th>Type</th>
+                                                <th>Name</th>
+                                                <th>Email</th>
+                                                <th>Status</th>
+                                                <th>Date</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {bookings.map((booking) => (
+                                                <tr key={booking.id}>
+                                                    <td>
+                                                        <span>{getServiceIcon(booking.type)} {booking.type.charAt(0).toUpperCase() + booking.type.slice(1)}</span>
+                                                    </td>
+                                                    <td>{booking.first_name}</td>
+                                                    <td>{booking.email}</td>
+                                                    <td>
+                                                        <span className={`badge ${getStatusBadgeColor(booking.status)}`}>
+                                                            {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                                                        </span>
+                                                    </td>
+                                                    <td>{new Date(booking.created_at).toLocaleDateString()}</td>
+                                                    <td>
+                                                        <button
+                                                            className="btn btn-sm btn-primary"
+                                                            onClick={() => setSelectedBooking(booking)}
+                                                        >
+                                                            View
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            ) : (
+                                <div className="alert alert-info" role="alert">
+                                    No bookings found
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
                 {/* Booking Details - Right Side */}

@@ -87,6 +87,16 @@ class AgencyUser extends Authenticatable
         return $this->morphMany(StaffActivityLog::class, 'staffable');
     }
 
+    public function attendances()
+    {
+        return $this->morphMany(Attendance::class, 'staffable');
+    }
+
+    public function attendanceHistories()
+    {
+        return $this->morphMany(AttendanceHistory::class, 'staffable');
+    }
+
     /**
      * Mirrors the accessor on User so shared layout components can read the
      * same attribute regardless of which guard is authenticated.

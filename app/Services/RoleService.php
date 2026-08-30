@@ -50,10 +50,15 @@ class RoleService
      */
     public function permissionsByModule(): array
     {
-        $query = Permission::orderBy('name');
+        // Roles are synced against permissions sharing their own guard
+        // ("agency" for agency-created roles, "web" for superadmin's), so
+        // the checkbox list must be scoped the same way or syncPermissions
+        // silently fails to find a match.
+        $agency = $this->currentAgency();
+        $query = Permission::where('guard_name', $agency ? 'agency' : 'web')->orderBy('name');
 
         // An agency can only hand out permissions it has itself.
-        if ($agency = $this->currentAgency()) {
+        if ($agency) {
             $query->whereIn('name', $agency->permissions->pluck('name'));
         }
 

@@ -53,6 +53,10 @@ export default function RoleCreate() {
                 </nav>
             </div>
 
+            {errors?.error && (
+                <div className="alert alert-danger" role="alert">{errors.error}</div>
+            )}
+
             <form onSubmit={submit}>
                 <div className="card h-auto mb-4">
                     <div className="card-header"><h6 className="card-title mb-0">Role Details</h6></div>

@@ -3,7 +3,7 @@ import { useStaff } from '@/hooks/useStaff';
 import { useState } from 'react';
 
 export default function StaffIndex() {
-    const { staff, currentPage, lastPage, filters, loading, handleFilterChange, handlePageChange, handleReset } = useStaff();
+    const { staff, currentPage, lastPage, filters, loading, presentToday, totalStaff, handleFilterChange, handlePageChange, handleReset } = useStaff();
     const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
     const [showImpersonateConfirm, setShowImpersonateConfirm] = useState<string | null>(null);
 
@@ -46,6 +46,23 @@ export default function StaffIndex() {
                         <li className="breadcrumb-item active">All Staff</li>
                     </ol>
                 </nav>
+            </div>
+
+            <div className="row mb-4">
+                <div className="col-md-12">
+                    <div className="card">
+                        <div className="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
+                            <div>
+                                <h6 className="mb-1">Present Today</h6>
+                                <span className="fs-24 fw-bold text-success">{presentToday}</span>
+                                <span className="text-muted"> / {totalStaff}</span>
+                            </div>
+                            <a href="/admin/attendance" className="btn btn-outline-primary">
+                                <i className="fa fa-calendar-check me-2"></i>View Attendance
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div className="row">

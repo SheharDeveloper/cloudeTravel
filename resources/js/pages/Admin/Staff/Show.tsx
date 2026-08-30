@@ -1,5 +1,6 @@
 import { router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import AttendanceCalendar from '@/components/AttendanceCalendar';
 
 const TABS = [
     { key: 'personal', label: 'Personal Information' },
@@ -8,12 +9,21 @@ const TABS = [
     { key: 'education', label: 'Education' },
     { key: 'tax', label: 'Tax & Deduction' },
     { key: 'documents', label: 'Documents' },
+    { key: 'attendance', label: 'Attendance' },
     { key: 'log', label: 'Log' },
 ];
 
 export default function StaffShow() {
-    const { staff, availableRoles, authPermissions, errors } = usePage().props as any;
+    const { staff, availableRoles, authPermissions, errors, attendanceMonth, attendanceHistory } = usePage().props as any;
     const [activeTab, setActiveTab] = useState('personal');
+
+    const handleAttendanceMonthChange = (newMonth: string) => {
+        router.get(window.location.pathname, { attendance_month: newMonth }, {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['attendanceMonth', 'attendanceHistory'],
+        });
+    };
 
     // Mirrors the sidebar's permission check: null means no restriction
     // (superadmin), otherwise the permission name must be granted.
@@ -378,6 +388,7 @@ export default function StaffShow() {
                                         <Field label="Email" value={staff?.email} />
                                         <Field label="Phone" value={staff?.phone} />
                                         <Field label="Date of Birth" value={profile?.dob ? formatDate(profile.dob) : null} />
+                                        <Field label="Joining Date" value={profile?.joining_date ? formatDate(profile.joining_date) : null} />
                                         <Field label="Member Since" value={formatDate(staff?.created_at)} />
                                     </div>
                                 </div>
@@ -679,6 +690,17 @@ export default function StaffShow() {
                             )}
                         </div>
                     </div>
+                )}
+
+                {/* ── Attendance ───────────────────────────── */}
+                {activeTab === 'attendance' && (
+                    <AttendanceCalendar
+                        month={attendanceMonth}
+                        history={attendanceHistory || []}
+                        staffUid={staff?.uid}
+                        canEdit={true}
+                        onMonthChange={handleAttendanceMonthChange}
+                    />
                 )}
                 </div>
             </div>

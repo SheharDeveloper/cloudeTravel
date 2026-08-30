@@ -79,6 +79,28 @@ class HandleInertiaRequests extends Middleware
                 ]
                 : null,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+
+            // True when the signed-in staff member (not superadmin, not an
+            // agency owner) hasn't marked today's attendance yet. Drives a
+            // blocking modal over the current page rather than a redirect.
+            'attendancePending' => function () {
+                $service = app(\App\Services\AttendanceService::class);
+                $principal = $service->currentPrincipal();
+
+                return $principal
+                    && $service->isStaff($principal)
+                    && !$service->hasMarkedToday($principal);
+            },
+
+            // True for an individual staff login (not superadmin, not an
+            // agency owner) — used to hide admin-only sidebar links like
+            // Leave Requests that a staff member can't act on for themselves.
+            'isStaffSession' => function () {
+                $service = app(\App\Services\AttendanceService::class);
+                $principal = $service->currentPrincipal();
+
+                return $principal ? $service->isStaff($principal) : false;
+            },
         ];
     }
 }

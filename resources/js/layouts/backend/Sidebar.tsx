@@ -5,7 +5,7 @@ import { usePage } from '@inertiajs/react';
 
 type MenuItem =
     | { type: 'title'; label: string }
-    | { type: 'link'; icon: string; label: string; href: string; permission?: string }
+    | { type: 'link'; icon: string; label: string; href: string; permission?: string; adminOnly?: boolean }
     | { type: 'dropdown'; icon: string; label: string; children: { label: string; href: string }[] };
 
 // ── Superadmin menu ───────────────────────────────────────────────────────────
@@ -14,36 +14,26 @@ const getSuperadminMenuItems = (companyName: string): MenuItem[] => [
 
     { type: 'link', icon: 'fa-solid fa-house', label: 'Dashboard', href: '/dashboard' },
 
-    { type: 'title', label: 'AGENCY MANAGEMENT' },
+    { type: 'title', label: 'OPERATIONS' },
 
-    { type: 'link', icon: 'fa-solid fa-building', label: 'Agency Management', href: '/admin/agency-b2b', permission: 'agency.view' },
+    { type: 'link', icon: 'fa-solid fa-list-check', label: 'Task Board', href: '/admin/tasks' },
+    { type: 'link', icon: 'fa-solid fa-calendar-check', label: 'Attendance', href: '/admin/attendance' },
+    { type: 'link', icon: 'fa-solid fa-umbrella-beach', label: 'Leave', href: '/admin/leave' },
 
-    { type: 'title', label: 'STAFF MANAGEMENT' },
+    { type: 'title', label: 'PEOPLE & ACCESS' },
 
-    { type: 'link', icon: 'fa-solid fa-users', label: 'Staff Management', href: '/admin/staff', permission: 'staff.view' },
+    { type: 'link', icon: 'fa-solid fa-building', label: 'Agencies', href: '/admin/agency-b2b', permission: 'agency.view' },
+    { type: 'link', icon: 'fa-solid fa-users', label: 'Staff', href: '/admin/staff', permission: 'staff.view' },
+    { type: 'link', icon: 'fa-solid fa-address-book', label: 'Clients', href: '/admin/clients', permission: 'client.view' },
+    { type: 'link', icon: 'fa-solid fa-user-shield', label: 'Roles & Permissions', href: '/admin/roles', permission: 'role.view' },
 
-    { type: 'title', label: 'ROLE MANAGEMENT' },
-
-    { type: 'link', icon: 'fa-solid fa-user-shield', label: 'Role Management', href: '/admin/roles', permission: 'role.view' },
-
-    // { type: 'title', label: 'TOUR MANAGEMENT' },
-
-    // {
-    //     type: 'dropdown',
-    //     icon: 'fa-solid fa-plane',
-    //     label: 'Tours',
-    //     children: [
-    //         { label: 'All Tours', href: '/admin/tours' },
-    //         { label: 'Add New Tour', href: '/admin/tours/create' },
-    //     ],
-    // },
-
-    { type: 'title', label: 'BOOKING MANAGEMENT' },
+    { type: 'title', label: 'BOOKINGS & SALES' },
 
     { type: 'link', icon: 'fa-solid fa-calendar-check', label: 'Bookings', href: '/admin/bookings', permission: 'booking.view' },
     { type: 'link', icon: 'fa-solid fa-envelope', label: 'Contact Requests', href: '/admin/contact-requests', permission: 'contact-request.view' },
+    { type: 'link', icon: 'fa-solid fa-quote-left', label: 'Travel Quotes', href: '/admin/travel-quote', permission: 'travel-quote.view' },
 
-    { type: 'title', label: 'WEBSITE MANAGEMENT' },
+    { type: 'title', label: 'WEBSITE' },
 
     {
         type: 'dropdown',
@@ -57,18 +47,13 @@ const getSuperadminMenuItems = (companyName: string): MenuItem[] => [
     },
 
     { type: 'link', icon: 'fa-solid fa-phone', label: 'Contact Info', href: '/admin/contact-info' },
-
     { type: 'link', icon: 'fa-solid fa-passport', label: 'Visa Management', href: '/admin/visa-services', permission: 'visa.view' },
     { type: 'link', icon: 'fa-solid fa-gift', label: 'Package Management', href: '/admin/packages', permission: 'package.view' },
     { type: 'link', icon: 'fa-solid fa-concierge-bell', label: 'Service Management', href: '/admin/services', permission: 'service.view' },
 
-    { type: 'title', label: 'PUBLIC & LEGAL' },
+    { type: 'title', label: 'CONTENT & DOCUMENTS' },
 
     { type: 'link', icon: 'fa-solid fa-file-pdf', label: 'Documents', href: '/admin/documents', permission: 'document.view' },
-
-    { type: 'title', label: 'QUOTATIONS' },
-
-    { type: 'link', icon: 'fa-solid fa-quote-left', label: 'Travel Quote', href: '/admin/travel-quote', permission: 'travel-quote.view' },
 ];
 
 // ── Agency menu (Agency Management is superadmin-only) ────────────────────────
@@ -77,15 +62,19 @@ const getAgencyMenuItems = (agencyName: string): MenuItem[] => [
 
     { type: 'link', icon: 'fa-solid fa-house', label: 'Dashboard', href: '/dashboard' },
 
-    { type: 'title', label: 'STAFF MANAGEMENT' },
+    { type: 'title', label: 'OPERATIONS' },
 
-    { type: 'link', icon: 'fa-solid fa-users', label: 'Staff Management', href: '/admin/staff', permission: 'staff.view' },
+    { type: 'link', icon: 'fa-solid fa-list-check', label: 'Task Board', href: '/admin/tasks' },
+    { type: 'link', icon: 'fa-solid fa-calendar-check', label: 'Attendance', href: '/admin/attendance' },
+    { type: 'link', icon: 'fa-solid fa-umbrella-beach', label: 'Leave', href: '/admin/leave' },
 
-    { type: 'title', label: 'ROLE MANAGEMENT' },
+    { type: 'title', label: 'PEOPLE & ACCESS' },
 
-    { type: 'link', icon: 'fa-solid fa-user-shield', label: 'Role Management', href: '/admin/roles', permission: 'role.view' },
+    { type: 'link', icon: 'fa-solid fa-users', label: 'Staff', href: '/admin/staff', permission: 'staff.view' },
+    { type: 'link', icon: 'fa-solid fa-address-book', label: 'Clients', href: '/admin/clients', permission: 'client.view' },
+    { type: 'link', icon: 'fa-solid fa-user-shield', label: 'Roles & Permissions', href: '/admin/roles', permission: 'role.view' },
 
-    { type: 'title', label: 'BOOKING MANAGEMENT' },
+    { type: 'title', label: 'BOOKINGS & SALES' },
 
     { type: 'link', icon: 'fa-solid fa-calendar-check', label: 'Bookings', href: '/admin/bookings', permission: 'booking.view' },
 ];
@@ -150,15 +139,18 @@ function DropdownItem({ icon, label, children, currentPath }: { icon: string; la
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
 export default function Sidebar() {
-    const { name, authAgency, authPermissions } = usePage().props as any;
+    const { name, authAgency, authPermissions, isStaffSession } = usePage().props as any;
     const { url } = usePage();
     const companyName = authAgency?.agency_name || (name as string) || 'CloudTravel';
     const allItems = authAgency ? getAgencyMenuItems(companyName) : getSuperadminMenuItems(companyName);
 
     // authPermissions is null when nobody is signed in; otherwise it is the
     // permission list for the session (agency permissions, or the user's roles).
-    const allowed = (item: MenuItem) =>
-        item.type !== 'link' || !item.permission || !authPermissions || authPermissions.includes(item.permission);
+    const allowed = (item: MenuItem) => {
+        if (item.type !== 'link') return true;
+        if (item.adminOnly && isStaffSession) return false;
+        return !item.permission || !authPermissions || authPermissions.includes(item.permission);
+    };
 
     // Drop links the session lacks, then any section title left with no links.
     const kept = allItems.filter(allowed);

@@ -9,13 +9,14 @@ class StaffProfile extends Model
     protected $table = 'staff_profiles';
 
     protected $fillable = [
-        'staffable_type', 'staffable_id', 'owner_type', 'owner_id', 'dob', 'passport_number', 'country',
+        'staffable_type', 'staffable_id', 'owner_type', 'owner_id', 'dob', 'joining_date', 'passport_number', 'country',
         'zip_code_id', 'address_id', 'street_id', 'county', 'city', 'address', 'skills',
     ];
 
     protected $casts = [
         'skills' => 'array',
         'dob' => 'date',
+        'joining_date' => 'date',
     ];
 
     /**

@@ -13,6 +13,9 @@ require __DIR__.'/frontend/web.php';
 Route::middleware('auth:web,agency')->prefix('admin')->group(function () {
     require __DIR__.'/backend/staff.php';
     require __DIR__.'/backend/role.php';
+    require __DIR__.'/backend/attendance.php';
+    require __DIR__.'/backend/task.php';
+    require __DIR__.'/backend/client.php';
 });
 
 Route::middleware('auth')->prefix('admin')->group(function () {

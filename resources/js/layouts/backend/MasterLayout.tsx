@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, usePage } from '@inertiajs/react';
 import Navbar from './Navbar';
 import Sidebar from './Sidebar';
 import Loader from '@/components/Loader';
+import AttendanceGate from '@/components/AttendanceGate';
 
 // Set body attributes immediately (outside component) so CSS selectors work on first paint
 function applyBodyAttrs() {
@@ -37,6 +38,7 @@ interface MasterLayoutProps {
 
 export default function MasterLayout({ children, title }: MasterLayoutProps) {
     const [isLoading, setIsLoading] = useState(true);
+    const { attendancePending } = usePage().props as any;
 
     useEffect(() => {
         // Re-apply in case of SSR hydration
@@ -125,7 +127,11 @@ export default function MasterLayout({ children, title }: MasterLayoutProps) {
             </div>
 
             {/* Main Wrapper — show immediately, don't wait for JS preloader */}
-            <div id="main-wrapper" className="show">
+            <div
+                id="main-wrapper"
+                className="show"
+                style={attendancePending ? { filter: 'blur(4px)', pointerEvents: 'none', userSelect: 'none' } : undefined}
+            >
 
                 {/* Navbar: nav-header (logo) + top header bar */}
                 <Navbar />
@@ -152,6 +158,8 @@ export default function MasterLayout({ children, title }: MasterLayoutProps) {
                 </div>
 
             </div>
+
+            <AttendanceGate />
 
         </>
     );

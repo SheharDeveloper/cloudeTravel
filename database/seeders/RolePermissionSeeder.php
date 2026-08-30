@@ -16,6 +16,7 @@ class RolePermissionSeeder extends Seeder
      */
     private const MODULES = [
         'staff',
+        'client',
         'agency',
         'booking',
         'contact-request',
@@ -35,12 +36,17 @@ class RolePermissionSeeder extends Seeder
     {
         app(PermissionRegistrar::class)->forgetCachedPermissions();
 
+        // Seeded on both guards: superadmin-side roles authenticate on
+        // "web", agency-side roles (assigned to AgencyUser) on "agency" —
+        // a role can only be synced with permissions sharing its guard.
         foreach (self::MODULES as $module) {
             foreach (self::ACTIONS as $action) {
-                Permission::firstOrCreate([
-                    'name' => "{$module}.{$action}",
-                    'guard_name' => 'web',
-                ]);
+                foreach (['web', 'agency'] as $guard) {
+                    Permission::firstOrCreate([
+                        'name' => "{$module}.{$action}",
+                        'guard_name' => $guard,
+                    ]);
+                }
             }
         }
 
@@ -52,16 +58,16 @@ class RolePermissionSeeder extends Seeder
             ? ['creator_type' => User::class, 'creator_id' => $firstUser->id]
             : [];
 
-        // Super admin: every permission.
+        // Super admin: every web-guard permission.
         $superadmin = Role::firstOrCreate(['name' => 'superadmin', 'guard_name' => 'web'], $creator);
         $superadmin->forceFill($creator)->save();
-        $superadmin->syncPermissions(Permission::all());
+        $superadmin->syncPermissions(Permission::where('guard_name', 'web')->get());
 
         // Staff: read-only by default; widen per deployment.
         $staff = Role::firstOrCreate(['name' => 'staff', 'guard_name' => 'web'], $creator);
         $staff->forceFill($creator)->save();
         $staff->syncPermissions(
-            Permission::where('name', 'like', '%.view')->get()
+            Permission::where('guard_name', 'web')->where('name', 'like', '%.view')->get()
         );
 
         if ($firstUser && !$firstUser->hasRole('superadmin')) {

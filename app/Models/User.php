@@ -7,12 +7,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Str;
 
 class User extends Authenticatable
 {
-    use HasFactory, HasApiTokens, \Spatie\Permission\Traits\HasRoles;
+    use HasFactory, \Spatie\Permission\Traits\HasRoles;
 
     protected $fillable = [
         'uid',
@@ -76,6 +75,16 @@ class User extends Authenticatable
     public function staffActivityLogs()
     {
         return $this->morphMany(StaffActivityLog::class, 'staffable');
+    }
+
+    public function attendances()
+    {
+        return $this->morphMany(Attendance::class, 'staffable');
+    }
+
+    public function attendanceHistories()
+    {
+        return $this->morphMany(AttendanceHistory::class, 'staffable');
     }
 
     public function agencies(): HasMany

@@ -46,9 +46,17 @@ Route::get('/visa/{visa}', [VisaController::class, 'show'])->name('visa.show');
 Route::get('/packages/{package}', [PackageController::class, 'show'])->name('packages.show');
 
 // Dashboard - accepts either an admin (web) or an agency session
-Route::inertia('dashboard', 'dashboard')
+Route::get('dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
     ->middleware('auth:web,agency')
     ->name('dashboard');
+
+// Attendance gate for staff (superadmin-side User or agency-side AgencyUser).
+// Marked from a blocking modal shown over whatever page they're already on
+// (see 'attendancePending' shared prop + AttendanceGate component), not a
+// separate page, so there's no GET route here.
+Route::post('attendance/mark', [\App\Http\Controllers\AttendanceController::class, 'store'])
+    ->middleware('auth:web,agency')
+    ->name('attendance.mark.store');
 
 // Profile Settings (authenticated users)
 Route::middleware('auth:web,agency')->get('profile', fn() => inertia('ProfileSettings'))->name('profile');

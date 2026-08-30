@@ -31,7 +31,6 @@ class TestimonialController extends Controller
             'status_param'   => $status,
             'auth_check'     => $isAuthenticated,
             'user'           => auth()->user(),
-            'sanctum_token'  => request()->bearerToken(),
         ]);
 
         // Determine showAll flag

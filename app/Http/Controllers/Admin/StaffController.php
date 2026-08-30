@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Services\AddressService;
+use App\Services\AttendanceService;
 use App\Services\StaffService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,10 +13,12 @@ use Inertia\Inertia;
 class StaffController extends Controller
 {
     protected StaffService $staffService;
+    protected AttendanceService $attendanceService;
 
-    public function __construct(StaffService $staffService)
+    public function __construct(StaffService $staffService, AttendanceService $attendanceService)
     {
         $this->staffService = $staffService;
+        $this->attendanceService = $attendanceService;
     }
 
     /**
@@ -24,7 +27,7 @@ class StaffController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->get('per_page', 10);
-   
+
         $search = (string) ($request->get('search') ?? '');
 
         $staff = $this->staffService->searchStaff($search, $perPage);
@@ -39,6 +42,8 @@ class StaffController extends Controller
             'filters' => [
                 'search' => $search,
             ],
+            'presentToday' => $this->attendanceService->presentTodayCount(),
+            'totalStaff' => $this->staffService->searchStaff('', 1)->total(),
         ]);
     }
 
@@ -90,15 +95,18 @@ class StaffController extends Controller
     /**
      * Display the specified staff member
      */
-    public function show($uid)
+    public function show(Request $request, $uid)
     {
         $staff = $this->staffService->findByUid($uid);
         $staff = $this->staffService->getStaffById($staff);
-        
+
+        $attendanceMonth = $request->get('attendance_month') ?: now()->format('Y-m');
 
         return Inertia::render('Admin/Staff/Show', [
             'staff' => $staff,
             'availableRoles' => $this->staffService->availableRoles($staff)->pluck('name'),
+            'attendanceMonth' => $attendanceMonth,
+            'attendanceHistory' => $this->attendanceService->monthlyHistory($staff, $attendanceMonth)->values(),
         ]);
     }
 

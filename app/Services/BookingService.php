@@ -219,6 +219,19 @@ class BookingService
     }
 
     /**
+     * Get booking counts by status, for dashboard summary cards
+     */
+    public function getStats(): array
+    {
+        return [
+            'total' => $this->model->count(),
+            'confirmed' => $this->model->where('status', 'confirmed')->count(),
+            'pending' => $this->model->where('status', 'pending')->count(),
+            'cancelled' => $this->model->where('status', 'cancelled')->count(),
+        ];
+    }
+
+    /**
      * Get booking by id
      */
     public function getById(int $id): ?Booking

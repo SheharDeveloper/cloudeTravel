@@ -375,6 +375,7 @@ class StaffService
             $this->staffableAttributes($staff),
             $this->ownerAttributes() + [
                 'dob' => $data['dob'] ?? null,
+                'joining_date' => $data['joining_date'] ?? null,
                 'country' => $data['country'] ?? null,
                 'zip_code_id' => $data['zip_code_id'] ?? null,
                 'address_id' => $data['address_id'] ?? null,
@@ -592,6 +593,7 @@ class StaffService
             'profile_pic' => $photoRule,
             'password' => $passwordRule,
             'dob' => 'nullable|date',
+            'joining_date' => 'nullable|date',
             'skills' => 'nullable|array',
             'skills.*' => 'nullable|string|max:255',
         ];

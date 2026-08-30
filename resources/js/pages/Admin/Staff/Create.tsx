@@ -24,6 +24,7 @@ export default function StaffCreate() {
         profile_pic: null as File | null,
         password: '',
         dob: '',
+        joining_date: '',
         passport_number: '',
         country: '',
         zip_code_id: '',
@@ -102,6 +103,7 @@ export default function StaffCreate() {
         if (data.profile_pic) formData.append('profile_pic', data.profile_pic);
         formData.append('password', data.password);
         formData.append('dob', data.dob);
+        formData.append('joining_date', data.joining_date);
         data.skills.forEach((s) => formData.append('skills[]', s));
     };
 
@@ -326,6 +328,16 @@ export default function StaffCreate() {
                                             {errors.dob && <div className="invalid-feedback d-block">{errors.dob}</div>}
                                         </div>
 
+                                        <div className="col-sm-6 mb-4">
+                                            <DatePicker
+                                                label="Joining Date"
+                                                value={data.joining_date}
+                                                onChange={(date) => { set({ joining_date: date }); clearError('joining_date'); }}
+                                                maxDate={new Date().toISOString().split('T')[0]}
+                                                autoSelect={true}
+                                            />
+                                            {errors.joining_date && <div className="invalid-feedback d-block">{errors.joining_date}</div>}
+                                        </div>
 
                                         <div className="col-sm-6 mb-4">
                                             <label className="form-label">Photo</label>

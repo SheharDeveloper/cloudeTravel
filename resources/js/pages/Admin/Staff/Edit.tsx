@@ -29,6 +29,7 @@ export default function StaffEdit() {
         profile_pic: null as File | null,
         password: '',
         dob: profile?.dob ? String(profile.dob).slice(0, 10) : '',
+        joining_date: profile?.joining_date ? String(profile.joining_date).slice(0, 10) : '',
         passport_number: profile?.passport_number || '',
         country: profile?.country || '',
         zip_code_id: profile?.zip_code_id || '',
@@ -107,6 +108,7 @@ export default function StaffEdit() {
         if (data.profile_pic) formData.append('profile_pic', data.profile_pic);
         formData.append('password', data.password);
         formData.append('dob', data.dob);
+        formData.append('joining_date', data.joining_date);
         data.skills.forEach((s) => formData.append('skills[]', s));
     };
 
@@ -338,6 +340,16 @@ export default function StaffEdit() {
                                             {errors.dob && <div className="invalid-feedback d-block">{errors.dob}</div>}
                                         </div>
 
+                                        <div className="col-sm-6 mb-4">
+                                            <DatePicker
+                                                label="Joining Date"
+                                                value={data.joining_date}
+                                                onChange={(date) => { set({ joining_date: date }); clearError('joining_date'); }}
+                                                maxDate={new Date().toISOString().split('T')[0]}
+                                                autoSelect={true}
+                                            />
+                                            {errors.joining_date && <div className="invalid-feedback d-block">{errors.joining_date}</div>}
+                                        </div>
 
                                         <div className="col-sm-6 mb-4">
                                             <label className="form-label">Photo <small className="text-muted">(leave empty to keep current)</small></label>
