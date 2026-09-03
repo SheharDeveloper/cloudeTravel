@@ -199,7 +199,7 @@ export default function LandingLayout({ children }: Props) {
             {/* NAVBAR */}
             <nav className="landing-navbar" style={{ background: '#FFFFFF', padding: '0 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: '70px', borderBottom: '1px solid #f0f0f0', boxShadow: '0 2px 8px rgba(0,0,0,.06)' }}>
                 <Link className="navbar-logo" href="/" style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', minWidth: isMobile ? '60px' : '120px' }}>
-                    <img src={LOGO_PATH} alt={logoConfig.alt} style={{ width: isMobile ? 45 : 150, height: isMobile ? 45 : 150, objectFit: 'contain' }} />
+                    <img src={contactInfo?.logo || LOGO_PATH} alt={logoConfig.alt} style={{ height: isMobile ? 40 : 50, width: 'auto', maxWidth: isMobile ? 100 : 160, objectFit: 'contain' }} />
                 </Link>
 
                 {/* Hamburger Button */}
@@ -288,27 +288,37 @@ export default function LandingLayout({ children }: Props) {
             <footer className="landing-footer" style={{ background: '#f0f0f0', color: '#000', padding: '30px', marginTop: '40px', borderTop: '1px solid #e0e0e0' }}>
                 <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
                     <div className="footer-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '30px', marginBottom: '30px' }}>
-                        {/* Contact Info - Detailed */}
-                        <div>
-                            <h4 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '15px', color: '#000000' }}>Contact Info</h4>
-                            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                                <li style={{ marginBottom: '10px', fontSize: '14px', color: '#333333' }}>
-                                    <i className="fa fa-map-pin" style={{ color: '#000000', marginRight: '8px' }}></i>
-                                    <strong>Address:</strong><br />
-                                    <span style={{ marginLeft: '20px', display: 'block' }}>62 King Street<br />Southall, Middlesex<br />UB2 4DB, United Kingdom</span>
-                                </li>
-                                <li style={{ marginBottom: '10px', fontSize: '12px', color: '#333333' }}>
-                                    <i className="fa fa-phone" style={{ color: '#000000', marginRight: '8px' }}></i>
-                                    <strong>Telephone:</strong><br />
-                                    <a href="tel:02035000000" style={{ color: '#333333', textDecoration: 'none', marginLeft: '20px', display: 'block' }}>0203500 0000</a>
-                                </li>
-                                <li style={{ fontSize: '12px', color: '#333333' }}>
-                                    <i className="fa fa-mobile" style={{ color: '#000000', marginRight: '8px' }}></i>
-                                    <strong>Mobile:</strong><br />
-                                    <a href="tel:07944495552" style={{ color: '#333333', textDecoration: 'none', marginLeft: '20px', display: 'block' }}>07944495552</a>
-                                </li>
-                            </ul>
-                        </div>
+                        {/* Contact Info - Detailed. Nothing renders here at
+                            all until this agency has set its own — no
+                            fallback to the superadmin's address/phone/email. */}
+                        {(contactInfo?.address || contactInfo?.phone || contactInfo?.email) && (
+                            <div>
+                                <h4 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '15px', color: '#000000' }}>Contact Info</h4>
+                                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                                    {contactInfo?.address && (
+                                        <li style={{ marginBottom: '10px', fontSize: '14px', color: '#333333' }}>
+                                            <i className="fa fa-map-pin" style={{ color: '#000000', marginRight: '8px' }}></i>
+                                            <strong>Address:</strong><br />
+                                            <span style={{ marginLeft: '20px', display: 'block' }}>{contactInfo.address}</span>
+                                        </li>
+                                    )}
+                                    {contactInfo?.phone && (
+                                        <li style={{ marginBottom: '10px', fontSize: '12px', color: '#333333' }}>
+                                            <i className="fa fa-phone" style={{ color: '#000000', marginRight: '8px' }}></i>
+                                            <strong>Phone:</strong><br />
+                                            <a href={`tel:${contactInfo.phone}`} style={{ color: '#333333', textDecoration: 'none', marginLeft: '20px', display: 'block' }}>{contactInfo.phone}</a>
+                                        </li>
+                                    )}
+                                    {contactInfo?.email && (
+                                        <li style={{ fontSize: '12px', color: '#333333' }}>
+                                            <i className="fa fa-envelope" style={{ color: '#000000', marginRight: '8px' }}></i>
+                                            <strong>Email:</strong><br />
+                                            <a href={`mailto:${contactInfo.email}`} style={{ color: '#333333', textDecoration: 'none', marginLeft: '20px', display: 'block' }}>{contactInfo.email}</a>
+                                        </li>
+                                    )}
+                                </ul>
+                            </div>
+                        )}
 
                         {/* Quick Links */}
                         <div>

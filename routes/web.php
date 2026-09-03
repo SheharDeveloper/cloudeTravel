@@ -16,20 +16,24 @@ Route::middleware('auth:web,agency')->prefix('admin')->group(function () {
     require __DIR__.'/backend/attendance.php';
     require __DIR__.'/backend/task.php';
     require __DIR__.'/backend/client.php';
+
+    // Website content agencies manage for their own public site (falls
+    // back to the superadmin's global set when an agency has none of its
+    // own — see the owner-scoping in each of these features' services).
+    require __DIR__.'/backend/document.php';
+    require __DIR__.'/backend/special-offer.php';
+    require __DIR__.'/backend/hero-image.php';
+    require __DIR__.'/backend/testimonial.php';
+    require __DIR__.'/backend/contact-info.php';
 });
 
 Route::middleware('auth')->prefix('admin')->group(function () {
     // Backend Routes
     require __DIR__.'/backend/agency.php';
     require __DIR__.'/backend/travel-quote.php';
-    require __DIR__.'/backend/document.php';
     require __DIR__.'/backend/tour.php';
     require __DIR__.'/backend/booking.php';
     require __DIR__.'/backend/contact-request.php';
-    require __DIR__.'/backend/special-offer.php';
-    require __DIR__.'/backend/hero-image.php';
-    require __DIR__.'/backend/testimonial.php';
-    require __DIR__.'/backend/contact-info.php';
     require __DIR__.'/backend/visa-service.php';
     require __DIR__.'/backend/service.php';
     require __DIR__.'/backend/package.php';

@@ -10,6 +10,10 @@ return new class extends Migration
     {
         Schema::create('hero_images', function (Blueprint $table) {
             $table->id();
+            // Who this hero image belongs to: App\Models\Agency (their own
+            // site) or App\Models\User (the superadmin's global default,
+            // shown to any agency that hasn't added its own).
+            $table->nullableMorphs('owner');
             $table->uuid('uid')->unique();
             $table->string('image_url');
             $table->string('title')->nullable();

@@ -10,8 +10,10 @@ export default function ContactInfoIndex() {
     const [saving, setSaving] = useState(false);
     const [logoFile, setLogoFile] = useState<File | null>(null);
     const [touchImageFile, setTouchImageFile] = useState<File | null>(null);
+    const [loaderVideoFile, setLoaderVideoFile] = useState<File | null>(null);
     const [logoPreview, setLogoPreview] = useState<string>('');
     const [touchImagePreview, setTouchImagePreview] = useState<string>('');
+    const [loaderVideoPreview, setLoaderVideoPreview] = useState<string>('');
     const [formData, setFormData] = useState<ContactInfo>({
         email: '',
         phone: '',
@@ -24,6 +26,7 @@ export default function ContactInfoIndex() {
         linkedin_url: '',
         logo: '',
         get_in_touch_image: '',
+        loader_video: '',
     });
 
     useEffect(() => {
@@ -64,6 +67,9 @@ export default function ContactInfoIndex() {
                 setTouchImagePreview(e.target?.result as string);
             };
             reader.readAsDataURL(file);
+        } else if (fieldName === 'loader_video') {
+            setLoaderVideoFile(file);
+            setLoaderVideoPreview(URL.createObjectURL(file));
         }
     };
 
@@ -74,10 +80,10 @@ export default function ContactInfoIndex() {
         try {
             let submitData: any = formData;
 
-            if (logoFile || touchImageFile) {
+            if (logoFile || touchImageFile || loaderVideoFile) {
                 const formDataObj = new FormData();
                 Object.keys(formData).forEach(key => {
-                    if (key !== 'logo' && key !== 'get_in_touch_image') {
+                    if (key !== 'logo' && key !== 'get_in_touch_image' && key !== 'loader_video') {
                         formDataObj.append(key, (formData as any)[key] || '');
                     }
                 });
@@ -86,6 +92,9 @@ export default function ContactInfoIndex() {
                 }
                 if (touchImageFile) {
                     formDataObj.append('get_in_touch_image', touchImageFile);
+                }
+                if (loaderVideoFile) {
+                    formDataObj.append('loader_video', loaderVideoFile);
                 }
                 submitData = formDataObj;
             }
@@ -96,8 +105,10 @@ export default function ContactInfoIndex() {
                 setFormData(result);
                 setLogoFile(null);
                 setTouchImageFile(null);
+                setLoaderVideoFile(null);
                 setLogoPreview('');
                 setTouchImagePreview('');
+                setLoaderVideoPreview('');
             } else {
                 toast.error('Failed to update contact information');
             }
@@ -152,6 +163,7 @@ export default function ContactInfoIndex() {
                                         onFileChange={handleFileChange}
                                         logoPreview={logoPreview}
                                         touchImagePreview={touchImagePreview}
+                                        loaderVideoPreview={loaderVideoPreview}
                                         onSubmit={handleSubmit}
                                         isLoading={saving}
                                     />

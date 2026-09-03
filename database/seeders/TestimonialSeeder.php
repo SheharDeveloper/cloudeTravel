@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Testimonial;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class TestimonialSeeder extends Seeder
@@ -12,7 +13,12 @@ class TestimonialSeeder extends Seeder
      */
     public function run(): void
     {
-        Testimonial::create([
+        // Owned by the superadmin: this is the global/default set shown to
+        // any agency that hasn't added its own testimonials.
+        $firstUser = User::orderBy('id')->first();
+        $owner = $firstUser ? ['owner_type' => User::class, 'owner_id' => $firstUser->id] : [];
+
+        Testimonial::create($owner + [
             'client_name' => 'Sarah Johnson',
             'client_image' => 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=300&q=80',
             'message' => 'CloudTravel made my vacation booking so easy! From flights to hotels, everything was seamless. Highly recommended!',
@@ -21,7 +27,7 @@ class TestimonialSeeder extends Seeder
             'order' => 1,
         ]);
 
-        Testimonial::create([
+        Testimonial::create($owner + [
             'client_name' => 'Michael Chen',
             'client_image' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=80',
             'message' => 'The best travel booking platform I\'ve used. Great prices and excellent customer support throughout my journey.',
@@ -30,7 +36,7 @@ class TestimonialSeeder extends Seeder
             'order' => 2,
         ]);
 
-        Testimonial::create([
+        Testimonial::create($owner + [
             'client_name' => 'Emma Wilson',
             'client_image' => 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&q=80',
             'message' => 'Visa processing through CloudTravel was incredibly fast. I got my travel documents in just 2 weeks!',
@@ -39,7 +45,7 @@ class TestimonialSeeder extends Seeder
             'order' => 3,
         ]);
 
-        Testimonial::create([
+        Testimonial::create($owner + [
             'client_name' => 'James Rodriguez',
             'client_image' => 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&q=80',
             'message' => 'CloudTravel offers unbeatable prices on flights and hotels. Their customer service is always ready to help!',
@@ -48,7 +54,7 @@ class TestimonialSeeder extends Seeder
             'order' => 4,
         ]);
 
-        Testimonial::create([
+        Testimonial::create($owner + [
             'client_name' => 'Lisa Anderson',
             'client_image' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&q=80',
             'message' => 'My family had an amazing trip thanks to CloudTravel\'s comprehensive travel packages and 24/7 support!',

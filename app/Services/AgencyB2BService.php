@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Agency;
 use App\Models\Tenant;
 use App\Models\Domain;
+use App\Services\ContactInfoService;
 use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -12,6 +13,10 @@ use Illuminate\Support\Str;
 
 class AgencyB2BService
 {
+    public function __construct(private ContactInfoService $contactInfoService)
+    {
+    }
+
     /**
      * Get all agencies with pagination
      */
@@ -42,11 +47,19 @@ class AgencyB2BService
     }
 
     /**
+     * Look up an agency by its public uid.
+     */
+    public function getAgencyByUid(string $uid): Agency
+    {
+        return Agency::where('uid', $uid)->firstOrFail();
+    }
+
+    /**
      * Get single agency by ID with relationships
      */
     public function getAgencyById(Agency $agency)
     {
-        $agency->load('user', 'agencyDocuments', 'agencyServices', 'permissions');
+        $agency->load('user', 'agencyDocuments', 'agencyServices', 'permissions', 'contactInfo');
 
         // Load domain name if agency has a domain
         if ($agency->tenant_id) {
@@ -201,6 +214,7 @@ class AgencyB2BService
             $this->storeAgencyDocuments($agency->id, $documents);
             $this->storeAgencyServices($agency->id, $services);
             $this->createAgencyUser($agency);
+            $this->contactInfoService->createDefaultForAgency($agency);
 
             return $agency;
         } catch (Exception $e) {

@@ -3,12 +3,18 @@
 namespace Database\Seeders;
 
 use App\Models\SpecialOffer;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class SpecialOfferSeeder extends Seeder
 {
     public function run(): void
     {
+        // Owned by the superadmin: this is the global/default set shown to
+        // any agency that hasn't added its own special offers.
+        $firstUser = User::orderBy('id')->first();
+        $owner = $firstUser ? ['owner_type' => User::class, 'owner_id' => $firstUser->id] : [];
+
         $offers = [
             // 1. Dubai - Flight + Hotel
             [
@@ -234,7 +240,7 @@ class SpecialOfferSeeder extends Seeder
         foreach ($offers as $offer) {
             SpecialOffer::firstOrCreate(
                 ['name' => $offer['name']],
-                $offer
+                $owner + $offer
             );
         }
     }

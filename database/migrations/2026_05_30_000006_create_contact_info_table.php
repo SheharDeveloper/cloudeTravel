@@ -10,6 +10,10 @@ return new class extends Migration
     {
         Schema::create('contact_info', function (Blueprint $table) {
             $table->id();
+            // Who this contact info belongs to: App\Models\Agency (their
+            // own site) or App\Models\User (the superadmin's global
+            // default, shown to any agency that hasn't added its own).
+            $table->nullableMorphs('owner');
             $table->uuid('uid')->unique();
             $table->string('email')->nullable();
             $table->string('phone')->nullable();
@@ -21,6 +25,7 @@ return new class extends Migration
             $table->string('linkedin_url')->nullable();
             $table->text('about_text')->nullable();
             $table->string('logo')->nullable();
+            $table->string('loader_video')->nullable();
             $table->timestamps();
         });
     }

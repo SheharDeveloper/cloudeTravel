@@ -2,24 +2,64 @@
 
 namespace App\Services;
 
+use App\Models\Agency;
+use App\Models\AgencyUser;
 use App\Models\HeroImage;
+use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class HeroImageService
 {
     /**
-     * Get all hero images
-     * - If $status is provided, filter by that status value
-     * - If $showAll is true and no status filter, show all
-     * - Default: show status=1 only
+     * Whoever is signed in right now (agency staff or superadmin), or null
+     * for an anonymous visitor on the public site.
+     */
+    public function currentOwner(): Agency|User|null
+    {
+        $agencyUser = Auth::guard('agency')->user();
+        if ($agencyUser instanceof AgencyUser) {
+            return $agencyUser->agency;
+        }
+
+        return Auth::guard('web')->user();
+    }
+
+    /**
+     * The agency that owns the domain a visitor is currently on, resolved
+     * from the tenant the ResolveTenantFromDomain middleware attached to
+     * the request.
+     */
+    private function viewingAgency(): ?Agency
+    {
+        $tenant = request()->attributes->get('tenant');
+
+        return $tenant ? Agency::where('tenant_id', $tenant->id)->first() : null;
+    }
+
+    /**
+     * Get hero images.
+     * - Signed in (admin context): only this agency's own images (or the
+     *   superadmin's own, for the global/default set).
+     * - Anonymous (public site): only the viewing agency's own images — no
+     *   fallback to the global set, so an agency's homepage stays empty
+     *   (not branded with someone else's photos) until it uploads its own.
      */
     public function getAll($status = null): array
     {
         $query = HeroImage::orderBy('order');
 
-        // If status parameter is provided, filter by it
         if ($status !== null) {
             $query->where('status', $status);
+        }
+
+        if ($owner = $this->currentOwner()) {
+            $query->where('owner_type', get_class($owner))->where('owner_id', $owner->id);
+        } elseif ($agency = $this->viewingAgency()) {
+            $query->where('owner_type', Agency::class)->where('owner_id', $agency->id);
+        } else {
+            $query->where('owner_type', User::class);
         }
 
         return $query->get()->toArray();
@@ -38,6 +78,11 @@ class HeroImageService
      */
     public function create(array $data): HeroImage
     {
+        if ($owner = $this->currentOwner()) {
+            $data['owner_type'] = get_class($owner);
+            $data['owner_id'] = $owner->id;
+        }
+
         // Store the uploaded file if present
         if (isset($data['image_url']) && is_object($data['image_url'])) {
             $file = $data['image_url'];
@@ -49,6 +94,18 @@ class HeroImageService
     }
 
     /**
+     * A hero image may only be managed by its own owner.
+     */
+    private function authorizeOwner(HeroImage $image): void
+    {
+        $owner = $this->currentOwner();
+
+        if (!$owner || $image->owner_type !== get_class($owner) || (int) $image->owner_id !== (int) $owner->id) {
+            throw new AuthorizationException('You are not allowed to manage this hero image.');
+        }
+    }
+
+    /**
      * Update a hero image
      */
     public function update(int $id, array $data): ?HeroImage
@@ -57,6 +114,8 @@ class HeroImageService
         if (!$image) {
             return null;
         }
+
+        $this->authorizeOwner($image);
 
         // Store the uploaded file if present
         if (isset($data['image_url']) && is_object($data['image_url'])) {
@@ -86,6 +145,8 @@ class HeroImageService
         if (!$image) {
             return false;
         }
+
+        $this->authorizeOwner($image);
 
         // Delete the image file if it exists
         if ($image->image_url && strpos($image->image_url, 'storage/') !== false) {

@@ -6,11 +6,12 @@ interface ContactInfoFormProps {
     onFileChange: (fieldName: string, file: File) => void;
     logoPreview?: string;
     touchImagePreview?: string;
+    loaderVideoPreview?: string;
     onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
     isLoading?: boolean;
 }
 
-export default function ContactInfoForm({ data, onChange, onFileChange, logoPreview, touchImagePreview, onSubmit, isLoading = false }: ContactInfoFormProps) {
+export default function ContactInfoForm({ data, onChange, onFileChange, logoPreview, touchImagePreview, loaderVideoPreview, onSubmit, isLoading = false }: ContactInfoFormProps) {
     return (
         <form onSubmit={onSubmit}>
             {/* Basic Information */}
@@ -164,6 +165,33 @@ export default function ContactInfoForm({ data, onChange, onFileChange, logoPrev
                     />
                     {(touchImagePreview || data.get_in_touch_image) && (
                         <img src={touchImagePreview || data.get_in_touch_image} alt="Get in Touch" style={{ maxWidth: '100px', marginTop: '10px', borderRadius: '4px' }} />
+                    )}
+                </div>
+            </div>
+
+            {/* Loader Video */}
+            <h6 className="mb-3 mt-4">Loading Screen</h6>
+            <div className="row">
+                <div className="col-md-6 mb-3">
+                    <label className="form-label">Loader Video</label>
+                    <input
+                        type="file"
+                        className="form-control"
+                        accept="video/mp4,video/webm,video/quicktime"
+                        onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                                onFileChange('loader_video', e.target.files[0]);
+                            }
+                        }}
+                    />
+                    <small className="text-muted">Shown while your site is loading. Leave empty to use the default.</small>
+                    {(loaderVideoPreview || data.loader_video) && (
+                        <video
+                            src={loaderVideoPreview || data.loader_video}
+                            controls
+                            muted
+                            style={{ maxWidth: '200px', marginTop: '10px', borderRadius: '4px', display: 'block' }}
+                        />
                     )}
                 </div>
             </div>

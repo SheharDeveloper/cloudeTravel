@@ -14,6 +14,8 @@ class HeroImage extends Model
 
     protected $fillable = [
         'uid',
+        'owner_type',
+        'owner_id',
         'image_url',
         'title',
         'subtitle',
@@ -31,5 +33,13 @@ class HeroImage extends Model
                 $model->uid = Str::uuid();
             }
         });
+    }
+
+    /**
+     * Who this hero image belongs to: App\Models\Agency or App\Models\User
+     */
+    public function owner()
+    {
+        return $this->morphTo();
     }
 }

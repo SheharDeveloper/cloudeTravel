@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\ContactInfo\ContactInfoRequest;
 use App\Models\Agency;
 use App\Services\AgencyB2BService;
+use App\Services\ContactInfoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -12,10 +14,12 @@ use Inertia\Inertia;
 class AgencyB2BController extends Controller
 {
     protected AgencyB2BService $agencyB2BService;
+    protected ContactInfoService $contactInfoService;
 
-    public function __construct(AgencyB2BService $agencyB2BService)
+    public function __construct(AgencyB2BService $agencyB2BService, ContactInfoService $contactInfoService)
     {
         $this->agencyB2BService = $agencyB2BService;
+        $this->contactInfoService = $contactInfoService;
     }
 
     /**
@@ -128,6 +132,21 @@ class AgencyB2BController extends Controller
             $agency->syncPermissions($validated['permissions'] ?? []);
 
             return back()->with('success', 'Agency permissions updated successfully');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Update the contact info belonging to the specified agency.
+     */
+    public function updateContactInfo(ContactInfoRequest $request, $uid)
+    {
+        $agency = $this->agencyB2BService->getAgencyByUid($uid);
+
+        try {
+            $this->contactInfoService->save($request->payload(), $agency);
+            return back()->with('success', 'Contact information updated successfully');
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }

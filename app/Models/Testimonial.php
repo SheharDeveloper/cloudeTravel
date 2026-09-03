@@ -12,6 +12,8 @@ class Testimonial extends Model
 
     protected $fillable = [
         'uid',
+        'owner_type',
+        'owner_id',
         'client_name',
         'client_image',
         'message',
@@ -29,5 +31,13 @@ class Testimonial extends Model
                 $model->uid = Str::uuid();
             }
         });
+    }
+
+    /**
+     * Who this testimonial belongs to: App\Models\Agency or App\Models\User
+     */
+    public function owner()
+    {
+        return $this->morphTo();
     }
 }

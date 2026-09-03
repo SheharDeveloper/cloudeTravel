@@ -25,9 +25,7 @@ export default function ContactUs() {
 
             {/* Hero Section */}
             <div style={{
-                backgroundImage: 'url(https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200&h=400&fit=crop)',
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
+                background: 'linear-gradient(135deg, #0a2647 0%, #0499ff 100%)',
                 height: '300px',
                 display: 'flex',
                 alignItems: 'center',
@@ -36,15 +34,6 @@ export default function ContactUs() {
                 textAlign: 'center',
                 position: 'relative'
             }}>
-                <div style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    background: 'linear-gradient(to bottom, rgba(0,20,60,.5) 0%, rgba(0,20,60,.3) 60%, rgba(0,20,60,.6) 100%)',
-                    zIndex: 1
-                }}></div>
                 <div style={{ position: 'relative', zIndex: 2 }}>
                     <h1 style={{
                         fontFamily: "'Playfair Display', serif",
@@ -74,33 +63,36 @@ export default function ContactUs() {
                             <img
                                 src={contactInfo.get_in_touch_image}
                                 alt="Get in Touch"
-                                style={{ width: '100%', borderRadius: '8px', marginBottom: '30px', objectFit: 'contain', height: 'auto', maxHeight: '300px', backgroundColor: '#f5f5f5', padding: '10px' }}
+                                style={{ maxWidth: '160px', maxHeight: '160px', width: 'auto', height: 'auto', borderRadius: '8px', marginBottom: '30px', objectFit: 'contain', backgroundColor: '#f5f5f5', padding: '10px' }}
                             />
                         )}
 
-                        <div style={{ marginBottom: '25px' }}>
-                            <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#0499ff', marginBottom: '8px' }}>Address</h4>
-                            <p style={{ fontSize: '13px', color: '#666', margin: 0, lineHeight: 1.6 }}>
-                                62 King Street<br />
-                                Southall<br />
-                                Middlesex UB2 4DB<br />
-                                United Kingdom
-                            </p>
-                        </div>
+                        {contactInfo?.address && (
+                            <div style={{ marginBottom: '25px' }}>
+                                <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#0499ff', marginBottom: '8px' }}>Address</h4>
+                                <p style={{ fontSize: '13px', color: '#666', margin: 0, lineHeight: 1.6 }}>
+                                    {contactInfo.address}
+                                </p>
+                            </div>
+                        )}
 
-                        <div style={{ marginBottom: '25px' }}>
-                            <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#0499ff', marginBottom: '8px' }}>Phone</h4>
-                            <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>
-                                <a href="tel:07944495552" style={{ textDecoration: 'none', color: '#ff6b35', fontWeight: 600 }}>07944495552</a>
-                            </p>
-                        </div>
+                        {contactInfo?.phone && (
+                            <div style={{ marginBottom: '25px' }}>
+                                <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#0499ff', marginBottom: '8px' }}>Phone</h4>
+                                <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>
+                                    <a href={`tel:${contactInfo.phone}`} style={{ textDecoration: 'none', color: '#ff6b35', fontWeight: 600 }}>{contactInfo.phone}</a>
+                                </p>
+                            </div>
+                        )}
 
-                        <div style={{ marginBottom: '25px' }}>
-                            <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#0499ff', marginBottom: '8px' }}>Email</h4>
-                            <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>
-                                <a href="mailto:info@cloudtravels.co.uk" style={{ textDecoration: 'none', color: '#ff6b35', fontWeight: 600 }}>info@cloudtravels.co.uk</a>
-                            </p>
-                        </div>
+                        {contactInfo?.email && (
+                            <div style={{ marginBottom: '25px' }}>
+                                <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#0499ff', marginBottom: '8px' }}>Email</h4>
+                                <p style={{ fontSize: '13px', color: '#666', margin: 0 }}>
+                                    <a href={`mailto:${contactInfo.email}`} style={{ textDecoration: 'none', color: '#ff6b35', fontWeight: 600 }}>{contactInfo.email}</a>
+                                </p>
+                            </div>
+                        )}
 
                         <div style={{ marginBottom: '25px' }}>
                             <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#0499ff', marginBottom: '12px' }}>Business Hours</h4>
@@ -114,15 +106,26 @@ export default function ContactUs() {
                         <div>
                             <h4 style={{ fontSize: '13px', fontWeight: 700, color: '#0499ff', marginBottom: '12px' }}>Follow Us</h4>
                             <div style={{ display: 'flex', gap: '10px' }}>
-                                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" style={{ width: 32, height: 32, borderRadius: '50%', background: '#4267B2', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
-                                    <i className="fab fa-facebook-f"></i>
-                                </a>
-                                <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" style={{ width: 32, height: 32, borderRadius: '50%', background: '#1DA1F2', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
-                                    <i className="fab fa-twitter"></i>
-                                </a>
-                                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" style={{ width: 32, height: 32, borderRadius: '50%', background: '#E1306C', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
-                                    <i className="fab fa-instagram"></i>
-                                </a>
+                                {contactInfo?.facebook_url && (
+                                    <a href={contactInfo.facebook_url} target="_blank" rel="noopener noreferrer" style={{ width: 32, height: 32, borderRadius: '50%', background: '#4267B2', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
+                                        <i className="fab fa-facebook-f"></i>
+                                    </a>
+                                )}
+                                {contactInfo?.twitter_url && (
+                                    <a href={contactInfo.twitter_url} target="_blank" rel="noopener noreferrer" style={{ width: 32, height: 32, borderRadius: '50%', background: '#1DA1F2', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
+                                        <i className="fab fa-twitter"></i>
+                                    </a>
+                                )}
+                                {contactInfo?.instagram_url && (
+                                    <a href={contactInfo.instagram_url} target="_blank" rel="noopener noreferrer" style={{ width: 32, height: 32, borderRadius: '50%', background: '#E1306C', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
+                                        <i className="fab fa-instagram"></i>
+                                    </a>
+                                )}
+                                {contactInfo?.linkedin_url && (
+                                    <a href={contactInfo.linkedin_url} target="_blank" rel="noopener noreferrer" style={{ width: 32, height: 32, borderRadius: '50%', background: '#0077B5', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
+                                        <i className="fab fa-linkedin-in"></i>
+                                    </a>
+                                )}
                                 <a href="https://wa.me/message/W5DBNURIYOKOF1" target="_blank" rel="noopener noreferrer" style={{ width: 32, height: 32, borderRadius: '50%', background: '#25D366', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', textDecoration: 'none' }}>
                                     <i className="fab fa-whatsapp"></i>
                                 </a>

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphOne;
 use Illuminate\Support\Str;
 
 class Agency extends Model
@@ -68,6 +69,11 @@ class Agency extends Model
     public function agencyServices(): HasMany
     {
         return $this->hasMany(AgencyService::class);
+    }
+
+    public function contactInfo(): MorphOne
+    {
+        return $this->morphOne(ContactInfo::class, 'owner');
     }
 
     protected static function booted(): void

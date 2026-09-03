@@ -21,10 +21,8 @@ class DocumentController extends Controller
 
     public function index(): Response
     {
-        $documents = PublicDocument::orderBy('created_at', 'desc')->get();
-
         return Inertia::render('Admin/Documents/Index', [
-            'documents' => $documents,
+            'documents' => $this->documentService->getAllForAdmin(),
         ]);
     }
 
@@ -66,6 +64,7 @@ class DocumentController extends Controller
                     $validated['status']
                 );
             } else {
+                $this->documentService->authorizeOwner($publicDocument);
                 $publicDocument->update([
                     'title' => $validated['title'],
                     'status' => $validated['status'],

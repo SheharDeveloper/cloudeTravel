@@ -25,6 +25,13 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);
+
+        // The public content endpoints (hero images, testimonials, special
+        // offers, contact info, documents) need to know which agency's
+        // domain they're being called from too.
+        $middleware->api(prepend: [
+            ResolveTenantFromDomain::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

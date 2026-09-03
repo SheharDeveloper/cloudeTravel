@@ -12,5 +12,6 @@ Route::put('agency-b2b/{uid}', [\App\Http\Controllers\Admin\AgencyB2BController:
 Route::delete('agency-b2b/{uid}', [\App\Http\Controllers\Admin\AgencyB2BController::class, 'destroy'])->name('admin.agency-b2b.destroy');
 Route::post('agency-b2b/{uid}/toggle-status', [\App\Http\Controllers\Admin\AgencyB2BController::class, 'toggleStatus'])->name('admin.agency-b2b.toggle-status');
 Route::post('agency-b2b/{uid}/permissions', [\App\Http\Controllers\Admin\AgencyB2BController::class, 'updatePermissions'])->name('admin.agency-b2b.permissions');
+Route::put('agency-b2b/{uid}/contact-info', [\App\Http\Controllers\Admin\AgencyB2BController::class, 'updateContactInfo'])->name('admin.agency-b2b.contact-info.update');
 Route::post('agency-b2b/validate-step', [\App\Http\Controllers\Admin\AgencyB2BController::class, 'validateFormStep'])->name('admin.agency-b2b.validate-step');
 Route::delete('agency-documents/{id}', [\App\Http\Controllers\Admin\AgencyB2BController::class, 'deleteDocument'])->name('agency-documents.destroy');

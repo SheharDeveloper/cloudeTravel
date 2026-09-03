@@ -13,6 +13,8 @@ class SpecialOffer extends Model
 
     protected $fillable = [
         'uid',
+        'owner_type',
+        'owner_id',
         'name',
         'type',
         'description',
@@ -67,5 +69,13 @@ class SpecialOffer extends Model
     public function images(): HasMany
     {
         return $this->hasMany(SpecialOfferImage::class);
+    }
+
+    /**
+     * Who this offer belongs to: App\Models\Agency or App\Models\User
+     */
+    public function owner()
+    {
+        return $this->morphTo();
     }
 }

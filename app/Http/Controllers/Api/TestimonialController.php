@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Services\TestimonialService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class TestimonialController extends Controller
 {
@@ -25,23 +24,13 @@ class TestimonialController extends Controller
     public function index(): JsonResponse
     {
         $status = request()->query('status');
-        $isAuthenticated = auth()->check();
+        // No login is required to reach this endpoint — this only decides
+        // the default: an anonymous homepage visitor sees active (1) only,
+        // a signed-in admin managing their own list sees everything.
+        $isAuthenticated = auth()->guard('agency')->check() || auth()->guard('web')->check();
 
-        Log::info('Testimonials Request:', [
-            'status_param'   => $status,
-            'auth_check'     => $isAuthenticated,
-            'user'           => auth()->user(),
-        ]);
-
-        // Determine showAll flag
         $showAll = $isAuthenticated && $status === null;
         $testimonials = $this->testimonialService->getAll($showAll, $status);
-
-        Log::info('Testimonials Response:', [
-            'showAll'        => $showAll,
-            'status_filter'  => $status ?? ($showAll ? 'all' : 'status=1 default'),
-            'testimonials_count' => count($testimonials),
-        ]);
 
         return response()->json($testimonials);
     }

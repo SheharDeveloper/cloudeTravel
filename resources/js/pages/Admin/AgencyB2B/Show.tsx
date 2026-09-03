@@ -1,5 +1,8 @@
 import { router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
+import ContactInfoForm from '../ContactInfo/Form';
+import { ContactInfo } from '@/services/contactInfoService';
 
 export default function AgencyB2BShow() {
     const { agency, permissionGroups } = usePage().props as any;
@@ -10,6 +13,82 @@ export default function AgencyB2BShow() {
     );
     const [permSearch, setPermSearch] = useState('');
     const [savingPerms, setSavingPerms] = useState(false);
+
+    const [contactData, setContactData] = useState<ContactInfo>({
+        email: agency?.contact_info?.email || '',
+        phone: agency?.contact_info?.phone || '',
+        location: agency?.contact_info?.location || '',
+        address: agency?.contact_info?.address || '',
+        about_text: agency?.contact_info?.about_text || '',
+        facebook_url: agency?.contact_info?.facebook_url || '',
+        instagram_url: agency?.contact_info?.instagram_url || '',
+        twitter_url: agency?.contact_info?.twitter_url || '',
+        linkedin_url: agency?.contact_info?.linkedin_url || '',
+        logo: agency?.contact_info?.logo || '',
+        get_in_touch_image: agency?.contact_info?.get_in_touch_image || '',
+        loader_video: agency?.contact_info?.loader_video || '',
+    });
+    const [contactLogoFile, setContactLogoFile] = useState<File | null>(null);
+    const [contactTouchImageFile, setContactTouchImageFile] = useState<File | null>(null);
+    const [contactLoaderVideoFile, setContactLoaderVideoFile] = useState<File | null>(null);
+    const [contactLogoPreview, setContactLogoPreview] = useState('');
+    const [contactTouchImagePreview, setContactTouchImagePreview] = useState('');
+    const [contactLoaderVideoPreview, setContactLoaderVideoPreview] = useState('');
+    const [savingContact, setSavingContact] = useState(false);
+
+    const handleContactInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setContactData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleContactFileChange = (fieldName: string, file: File) => {
+        if (fieldName === 'logo') {
+            setContactLogoFile(file);
+            const reader = new FileReader();
+            reader.onload = (e) => setContactLogoPreview(e.target?.result as string);
+            reader.readAsDataURL(file);
+        } else if (fieldName === 'get_in_touch_image') {
+            setContactTouchImageFile(file);
+            const reader = new FileReader();
+            reader.onload = (e) => setContactTouchImagePreview(e.target?.result as string);
+            reader.readAsDataURL(file);
+        } else if (fieldName === 'loader_video') {
+            setContactLoaderVideoFile(file);
+            setContactLoaderVideoPreview(URL.createObjectURL(file));
+        }
+    };
+
+    const handleContactSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setSavingContact(true);
+
+        const formData = new FormData();
+        Object.entries(contactData).forEach(([key, value]) => {
+            if (key !== 'logo' && key !== 'get_in_touch_image' && key !== 'loader_video') {
+                formData.append(key, (value as string) || '');
+            }
+        });
+        if (contactLogoFile) formData.append('logo', contactLogoFile);
+        if (contactTouchImageFile) formData.append('get_in_touch_image', contactTouchImageFile);
+        if (contactLoaderVideoFile) formData.append('loader_video', contactLoaderVideoFile);
+
+        router.put(`/admin/agency-b2b/${agency.uid}/contact-info`, formData, {
+            preserveScroll: true,
+            onSuccess: () => {
+                toast.success('Contact information updated successfully!');
+                setContactLogoFile(null);
+                setContactTouchImageFile(null);
+                setContactLoaderVideoFile(null);
+                setContactLogoPreview('');
+                setContactTouchImagePreview('');
+                setContactLoaderVideoPreview('');
+            },
+            onError: () => {
+                toast.error('Failed to update contact information');
+            },
+            onFinish: () => setSavingContact(false),
+        });
+    };
 
     const permQuery = permSearch.trim().toLowerCase();
     const visiblePermGroups = Object.entries((permissionGroups || {}) as Record<string, any[]>)
@@ -146,6 +225,15 @@ export default function AgencyB2BShow() {
                                 role="tab"
                             >
                                 Permissions
+                            </button>
+                        </li>
+                        <li className="nav-item" role="presentation">
+                            <button
+                                className={`nav-link py-3 px-1 border-3 ${activeTab === 'contact-info' ? 'active' : ''}`}
+                                onClick={() => setActiveTab('contact-info')}
+                                role="tab"
+                            >
+                                Contact Info
                             </button>
                         </li>
                     </ul>
@@ -489,7 +577,34 @@ export default function AgencyB2BShow() {
                         </div>
                     </div>
                 )}
+
+                {/* Contact Info Tab */}
+                {activeTab === 'contact-info' && (
+                    <div className="row">
+                        <div className="col-lg-12">
+                            <div className="card">
+                                <div className="card-header">
+                                    <h6 className="card-title mb-0">Contact Information</h6>
+                                </div>
+                                <div className="card-body">
+                                    <ContactInfoForm
+                                        data={contactData}
+                                        onChange={handleContactInputChange}
+                                        onFileChange={handleContactFileChange}
+                                        logoPreview={contactLogoPreview}
+                                        touchImagePreview={contactTouchImagePreview}
+                                        loaderVideoPreview={contactLoaderVideoPreview}
+                                        onSubmit={handleContactSubmit}
+                                        isLoading={savingContact}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
+
+            <Toaster position="top-right" />
         </div>
     );
 }

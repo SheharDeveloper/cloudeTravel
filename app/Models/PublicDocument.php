@@ -9,6 +9,8 @@ class PublicDocument extends Model
     protected $table = 'public_documents';
 
     protected $fillable = [
+        'owner_type',
+        'owner_id',
         'title',
         'document_path',
         'status',
@@ -25,5 +27,13 @@ class PublicDocument extends Model
     {
         $path = ltrim($this->document_path, '/');
         return route('documents.show', ['filename' => basename($path)]);
+    }
+
+    /**
+     * Who this document belongs to: App\Models\Agency or App\Models\User
+     */
+    public function owner()
+    {
+        return $this->morphTo();
     }
 }

@@ -2,8 +2,13 @@
 
 namespace App\Services;
 
+use App\Models\Agency;
+use App\Models\AgencyUser;
 use App\Models\PublicDocument;
+use App\Models\User;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class DocumentService
@@ -13,6 +18,30 @@ class DocumentService
     public const ALLOWED_MIMES = ['application/pdf'];
     public const MAX_FILE_SIZE = 10240;
 
+    /**
+     * Whoever is signed in right now (agency staff or superadmin), or null
+     * for an anonymous visitor on the public site.
+     */
+    public function currentOwner(): Agency|User|null
+    {
+        $agencyUser = Auth::guard('agency')->user();
+        if ($agencyUser instanceof AgencyUser) {
+            return $agencyUser->agency;
+        }
+
+        return Auth::guard('web')->user();
+    }
+
+    /**
+     * The agency that owns the domain a visitor is currently on.
+     */
+    private function viewingAgency(): ?Agency
+    {
+        $tenant = request()->attributes->get('tenant');
+
+        return $tenant ? Agency::where('tenant_id', $tenant->id)->first() : null;
+    }
+
     public function uploadDocument(UploadedFile $file, string $title, string $status = 'active'): PublicDocument
     {
         $this->validateFile($file);
@@ -20,15 +49,36 @@ class DocumentService
         $fileName = $this->generateFileName($file);
         $filePath = $file->storeAs(self::DOCUMENTS_PATH, $fileName, self::DOCUMENTS_DISK);
 
-        return PublicDocument::create([
+        $data = [
             'title' => $title,
             'document_path' => '/' . $filePath,
             'status' => $status,
-        ]);
+        ];
+
+        if ($owner = $this->currentOwner()) {
+            $data['owner_type'] = get_class($owner);
+            $data['owner_id'] = $owner->id;
+        }
+
+        return PublicDocument::create($data);
+    }
+
+    /**
+     * A document may only be managed by its own owner.
+     */
+    public function authorizeOwner(PublicDocument $document): void
+    {
+        $owner = $this->currentOwner();
+
+        if (!$owner || $document->owner_type !== get_class($owner) || (int) $document->owner_id !== (int) $owner->id) {
+            throw new AuthorizationException('You are not allowed to manage this document.');
+        }
     }
 
     public function deleteDocument(PublicDocument $document): bool
     {
+        $this->authorizeOwner($document);
+
         $path = ltrim($document->document_path, '/');
 
         if (Storage::disk(self::DOCUMENTS_DISK)->exists($path)) {
@@ -38,11 +88,36 @@ class DocumentService
         return $document->delete();
     }
 
+    /**
+     * All documents belonging to the current admin session (this agency's
+     * own, or the superadmin's own global/default set).
+     */
+    public function getAllForAdmin()
+    {
+        $query = PublicDocument::orderBy('created_at', 'desc');
+
+        if ($owner = $this->currentOwner()) {
+            $query->where('owner_type', get_class($owner))->where('owner_id', $owner->id);
+        }
+
+        return $query->get();
+    }
+
+    /**
+     * Active documents for the viewing agency's domain, falling back to the
+     * global/default set if it has none of its own.
+     */
     public function getActiveDocuments()
     {
-        return PublicDocument::where('status', 'active')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = PublicDocument::where('status', 'active');
+
+        if (($agency = $this->viewingAgency()) && PublicDocument::where('owner_type', Agency::class)->where('owner_id', $agency->id)->exists()) {
+            $query->where('owner_type', Agency::class)->where('owner_id', $agency->id);
+        } else {
+            $query->where('owner_type', User::class);
+        }
+
+        return $query->orderBy('created_at', 'desc')->get();
     }
 
     private function validateFile(UploadedFile $file): void

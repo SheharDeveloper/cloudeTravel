@@ -46,6 +46,9 @@ export default function Home({ isreviewEnabled, documents: propsDocuments }: { i
     const [contactInfo, setContactInfo] = useState<any>(null);
     const [currency, setCurrency] = useState({ symbol: '£', code: 'GBP' });
     const [heroImageLoading, setHeroImageLoading] = useState(true);
+    // null until a loader video URL has been confirmed reachable; stays
+    // null (spinner shown instead) if none is available or it 404s.
+    const [loaderVideoSrc, setLoaderVideoSrc] = useState<string | null>(null);
     const [featuredVisas, setFeaturedVisas] = useState<any[]>([]);
     const [featuredPackages, setFeaturedPackages] = useState<any[]>([]);
     const [searchedCountry, setSearchedCountry] = useState<string>('');
@@ -85,12 +88,29 @@ export default function Home({ isreviewEnabled, documents: propsDocuments }: { i
     }, []);
 
     useEffect(() => {
-        loadSpecialOffers();
-        loadHeroImages();
-        loadTestimonials();
-        loadContactInfo();
-        loadFeaturedVisas();
-        loadFeaturedPackages();
+        // Keep the loader up until the page's own data has actually
+        // arrived (contact info especially — dismissing on a flat timer
+        // let the overlay disappear before it had loaded, leaving the
+        // footer/contact sections to visibly pop in empty-then-filled).
+        // A minimum display time still applies so the loader doesn't just
+        // flash on a fast connection.
+        const minDisplay = new Promise<void>((resolve) => setTimeout(resolve, 1500));
+        // allSettled, not all: a single endpoint failing (e.g. featured
+        // visas/packages, which reject rather than swallow their errors)
+        // must not block the loader from ever dismissing.
+        const dataLoaded = Promise.allSettled([
+            loadSpecialOffers(),
+            loadHeroImages(),
+            loadTestimonials(),
+            loadContactInfo(),
+            loadFeaturedVisas(),
+            loadFeaturedPackages(),
+        ]);
+
+        Promise.all([minDisplay, dataLoaded]).then(() => {
+            setHeroImageLoading(false);
+            isInitialLoadRef.current = false;
+        });
     }, []);
 
     useEffect(() => {
@@ -101,19 +121,6 @@ export default function Home({ isreviewEnabled, documents: propsDocuments }: { i
     useEffect(() => {
         startHeroAutoPlay();
         return () => stopHeroAutoPlay();
-    }, [heroImages]);
-
-    useEffect(() => {
-        // Only show loader on initial page load, not on every slider transition
-        if (isInitialLoadRef.current && heroImages.length > 0) {
-            setHeroImageLoading(true);
-            // Ensure loader shows for at least 3 seconds on initial load
-            const timer = setTimeout(() => {
-                setHeroImageLoading(false);
-                isInitialLoadRef.current = false;
-            }, 3000);
-            return () => clearTimeout(timer);
-        }
     }, [heroImages]);
 
     useEffect(() => {
@@ -128,7 +135,10 @@ export default function Home({ isreviewEnabled, documents: propsDocuments }: { i
 
     const loadHeroImages = async () => {
         const images = await heroImageService.getAll(1); // status=1 (active only)
-        setHeroImages(images.length > 0 ? images : [heroImageService.getDefault()]);
+        // No client-side default injection: an agency with no hero images
+        // of its own should see an empty hero banner, not a CloudTravel-
+        // branded stock photo.
+        setHeroImages(images);
     };
 
     const loadTestimonials = async () => {
@@ -139,6 +149,26 @@ export default function Home({ isreviewEnabled, documents: propsDocuments }: { i
     const loadContactInfo = async () => {
         const data = await contactInfoService.get();
         setContactInfo(data);
+
+        // The backend decides what (if anything) the loader video should
+        // be — an agency with none of its own gets nothing here (spinner
+        // shown, never the shared default), while the superadmin gets the
+        // shared default already filled in. We still verify it's actually
+        // reachable before ever rendering <video> for it — a <video>
+        // element's error event isn't reliable enough (it can fire after
+        // the loading overlay has already dismissed on its own timer), so
+        // check up front instead.
+        if (!data?.loader_video) {
+            setLoaderVideoSrc(null);
+            return;
+        }
+
+        try {
+            const res = await fetch(data.loader_video, { method: 'HEAD' });
+            setLoaderVideoSrc(res.ok ? data.loader_video : null);
+        } catch {
+            setLoaderVideoSrc(null);
+        }
     };
 
     const loadFeaturedVisas = async () => {
@@ -218,19 +248,32 @@ export default function Home({ isreviewEnabled, documents: propsDocuments }: { i
                     alignItems: 'center',
                     justifyContent: 'center',
                 }}>
-                    <video
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        style={{
-                            width: '50%',
-                            height: '50%',
-                            objectFit: 'contain',
-                        }}
-                    >
-                        <source src="/images/loader.mp4" type="video/mp4" />
-                    </video>
+                    {loaderVideoSrc ? (
+                        <video
+                            key={loaderVideoSrc}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            onError={() => setLoaderVideoSrc(null)}
+                            style={{
+                                width: '50%',
+                                height: '50%',
+                                objectFit: 'contain',
+                            }}
+                        >
+                            <source src={loaderVideoSrc} type="video/mp4" />
+                        </video>
+                    ) : (
+                        <div style={{
+                            width: '60px',
+                            height: '60px',
+                            border: '4px solid #e0e0e0',
+                            borderTop: '4px solid #0499ff',
+                            borderRadius: '50%',
+                            animation: 'heroSpin 1s linear infinite',
+                        }} />
+                    )}
                 </div>
             )}
 
@@ -533,83 +576,106 @@ export default function Home({ isreviewEnabled, documents: propsDocuments }: { i
                 }
             `}</style>
 
-            {/* HERO SECTION */}
-            {heroImages.length > 0 && (
-            <div className="hero-section" style={{ position: 'relative', minHeight: '280px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-start', textAlign: 'center', overflow: 'hidden', backgroundImage: `url(${heroImages[currentHeroIndex]?.image_url})`, backgroundSize: 'cover', backgroundPosition: 'center', transition: 'background-image 0.5s ease-in-out', marginBottom: '50px', paddingTop: '40px' }}>
-                {/* Hidden image to track loading */}
-                {heroImageLoading && (
-                    <img
-                        src={heroImages[currentHeroIndex]?.image_url}
-                        style={{ display: 'none' }}
-                        alt="hero"
-                    />
-                )}
-
-                {/* Small Loading Popup - Inside Website with Blurred Background */}
-                {heroImageLoading && (
+            {/* HERO SECTION — always rendered so the search form below still
+                has a banner to overlap; agencies with no hero images of
+                their own get a plain gradient instead of a photo. */}
+            <div className="hero-section" style={{
+                position: 'relative',
+                minHeight: '280px',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'flex-start',
+                textAlign: 'center',
+                overflow: 'hidden',
+                ...(heroImages.length > 0
+                    ? { backgroundImage: `url(${heroImages[currentHeroIndex]?.image_url})`, backgroundSize: 'cover', backgroundPosition: 'center', transition: 'background-image 0.5s ease-in-out' }
+                    : { background: 'linear-gradient(135deg, #0a2647 0%, #0499ff 100%)' }),
+                marginBottom: '50px',
+                paddingTop: '40px',
+            }}>
+                {heroImages.length > 0 && (
                     <>
-                        {/* Blurred Background Overlay */}
-                        <div style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            background: 'rgba(0, 0, 0, 0.3)',
-                            backdropFilter: 'blur(6px)',
-                            WebkitBackdropFilter: 'blur(6px)',
-                            zIndex: 49,
-                            borderRadius: '12px'
-                        }}></div>
+                        {/* Hidden image to track loading */}
+                        {heroImageLoading && (
+                            <img
+                                src={heroImages[currentHeroIndex]?.image_url}
+                                style={{ display: 'none' }}
+                                alt="hero"
+                            />
+                        )}
 
-                        {/* Loader Popup */}
-                        <div style={{
-                            position: 'absolute',
-                            top: '50%',
-                            left: '50%',
-                            transform: 'translate(-50%, -50%)',
-                            background: '#ffffff',
-                            borderRadius: '12px',
-                            padding: '24px',
-                            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
-                            zIndex: 50,
-                            display: 'flex',
-                            flexDirection: 'column',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            gap: '12px',
-                            maxWidth: '200px'
-                        }}>
-                            {/* Video Loader - Replace with your video */}
-                            <video
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
-                                style={{
-                                    width: '80px',
-                                    height: '80px',
-                                    objectFit: 'contain',
-                                    borderRadius: '8px'
-                                }}
-                            >
-                                <source src="/images/loader.mp4" type="video/mp4" />
-                                {/* Fallback spinner if video not available */}
+                        {/* Small Loading Popup - Inside Website with Blurred Background */}
+                        {heroImageLoading && (
+                            <>
+                                {/* Blurred Background Overlay */}
                                 <div style={{
-                                    width: '30px',
-                                    height: '30px',
-                                    border: '3px solid #e0e0e0',
-                                    borderTop: '3px solid #0499ff',
-                                    borderRadius: '50%',
-                                    animation: 'heroSpin 1s linear infinite'
-                                }} />
-                            </video>
-                            <span style={{ color: '#000000', fontSize: '12px', fontWeight: 600 }}>Loading...</span>
-                        </div>
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    background: 'rgba(0, 0, 0, 0.3)',
+                                    backdropFilter: 'blur(6px)',
+                                    WebkitBackdropFilter: 'blur(6px)',
+                                    zIndex: 49,
+                                    borderRadius: '12px'
+                                }}></div>
+
+                                {/* Loader Popup */}
+                                <div style={{
+                                    position: 'absolute',
+                                    top: '50%',
+                                    left: '50%',
+                                    transform: 'translate(-50%, -50%)',
+                                    background: '#ffffff',
+                                    borderRadius: '12px',
+                                    padding: '24px',
+                                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.2)',
+                                    zIndex: 50,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '12px',
+                                    maxWidth: '200px'
+                                }}>
+                                    {/* Video Loader, falling back to a spinner if the video isn't available */}
+                                    {loaderVideoSrc ? (
+                                        <video
+                                            key={loaderVideoSrc}
+                                            autoPlay
+                                            loop
+                                            muted
+                                            playsInline
+                                            onError={() => setLoaderVideoSrc(null)}
+                                            style={{
+                                                width: '80px',
+                                                height: '80px',
+                                                objectFit: 'contain',
+                                                borderRadius: '8px'
+                                            }}
+                                        >
+                                            <source src={loaderVideoSrc} type="video/mp4" />
+                                        </video>
+                                    ) : (
+                                        <div style={{
+                                            width: '30px',
+                                            height: '30px',
+                                            border: '3px solid #e0e0e0',
+                                            borderTop: '3px solid #0499ff',
+                                            borderRadius: '50%',
+                                            animation: 'heroSpin 1s linear infinite'
+                                        }} />
+                                    )}
+                                    <span style={{ color: '#000000', fontSize: '12px', fontWeight: 600 }}>Loading...</span>
+                                </div>
+                            </>
+                        )}
+
+                        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,20,60,.6) 0%, rgba(0,20,60,.3) 60%, rgba(0,20,60,.7) 100%)' }}></div>
                     </>
                 )}
-
-                <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(0,20,60,.6) 0%, rgba(0,20,60,.3) 60%, rgba(0,20,60,.7) 100%)' }}></div>
                 <div style={{ position: 'relative', zIndex: 2, padding: '0 20px' }}>
                     <h3 className="hero-title" style={{ fontFamily: "'Playfair Display', serif", fontSize: '28px', fontWeight: 700, color: '#ffffff', marginBottom: '5px', textShadow: '0 2px 12px rgba(0,0,0,.5)', transition: 'opacity 0.5s ease-in-out' }}>
                         {heroImages[currentHeroIndex]?.title || 'Discover the World with CloudTravel'}
@@ -620,7 +686,6 @@ export default function Home({ isreviewEnabled, documents: propsDocuments }: { i
                     {/* Removed inline buttons - using tabbed interface below */}
                 </div>
             </div>
-            )}
 
             {/* BOOKING SEARCH FORM WITH TABS */}
             <div className="booking-form-container" style={{ padding: '0 20px', position: 'relative', zIndex: 10, marginTop: '-180px', paddingBottom: '80px', overflow: 'visible' }}>
@@ -1040,8 +1105,43 @@ export default function Home({ isreviewEnabled, documents: propsDocuments }: { i
                             <ContactForm />
                         </div>
 
-                        {/* Gallery */}
-                        <div style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=500&q=80)', backgroundSize: 'cover', backgroundPosition: 'center', borderRadius: '8px' }}></div>
+                        {/* This agency's own uploaded image if it has one,
+                            capped to a sane max size (not stretched to fill
+                            the panel) so a small/logo-shaped upload doesn't
+                            get blown up huge and blurry; otherwise a branded
+                            placeholder panel so the layout always keeps its
+                            two-column balance. */}
+                        {contactInfo?.get_in_touch_image ? (
+                            <div style={{
+                                background: '#f5f5f5',
+                                borderRadius: '8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                minHeight: '260px',
+                            }}>
+                                <img
+                                    src={contactInfo.get_in_touch_image}
+                                    alt="Get in Touch"
+                                    style={{ maxWidth: '220px', maxHeight: '220px', width: 'auto', height: 'auto', objectFit: 'contain' }}
+                                />
+                            </div>
+                        ) : (
+                            <div style={{
+                                background: 'linear-gradient(135deg, #0a2647 0%, #0499ff 100%)',
+                                borderRadius: '8px',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: '16px',
+                                minHeight: '260px',
+                                color: '#fff',
+                            }}>
+                                <i className="fa fa-paper-plane" style={{ fontSize: '48px', opacity: 0.85 }}></i>
+                                <span style={{ fontSize: '14px', fontWeight: 600, opacity: 0.9 }}>We'd love to hear from you</span>
+                            </div>
+                        )}
                     </div>
                 </div>
             </section>

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\ContactInfo;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class ContactInfoSeeder extends Seeder
@@ -12,7 +13,13 @@ class ContactInfoSeeder extends Seeder
      */
     public function run(): void
     {
+        // Owned by the superadmin: this is the global/default record shown
+        // to any agency that hasn't added its own contact info.
+        $firstUser = User::orderBy('id')->first();
+
         ContactInfo::create([
+            'owner_type' => $firstUser ? User::class : null,
+            'owner_id' => $firstUser?->id,
             'email' => 'info@cloudtravel.com',
             'phone' => '+1 (555) 123-4567',
             'location' => 'London, United Kingdom',

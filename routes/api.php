@@ -29,17 +29,22 @@ Route::post('agencies/{agencyId}/services', [AgencyServiceController::class, 'st
 Route::get('agencies/{agencyId}/services', [AgencyServiceController::class, 'index'])->name('agency-services.index');
 Route::delete('agencies/{agencyId}/services/{serviceId}', [AgencyServiceController::class, 'destroy'])->name('agency-services.destroy');
 
-// Public endpoints (no authentication required, but will use auth if token provided)
-Route::get('special-offers', [SpecialOfferController::class, 'index'])->name('special-offers.index');
-Route::get('special-offers-detail/{uid}', [SpecialOfferController::class, 'showByUid'])->name('special-offers.show-by-uid');
-Route::get('hero-images', [HeroImageController::class, 'index'])->name('hero-images.index');
-Route::get('testimonials', [TestimonialController::class, 'index'])->name('testimonials.index');
+// Public endpoints (no authentication required, but will use auth if a
+// session is present — the 'web' middleware loads that session without
+// requiring one, so these stay open to anonymous visitors while still
+// letting a signed-in agency/superadmin see their own admin-scoped list).
+Route::middleware('web')->group(function () {
+    Route::get('special-offers', [SpecialOfferController::class, 'index'])->name('special-offers.index');
+    Route::get('special-offers-detail/{uid}', [SpecialOfferController::class, 'showByUid'])->name('special-offers.show-by-uid');
+    Route::get('hero-images', [HeroImageController::class, 'index'])->name('hero-images.index');
+    Route::get('testimonials', [TestimonialController::class, 'index'])->name('testimonials.index');
 
-// Public contact info endpoint
-Route::get('contact-info', [ContactInfoController::class, 'index'])->name('contact-info.index');
+    // Public contact info endpoint
+    Route::get('contact-info', [ContactInfoController::class, 'index'])->name('contact-info.index');
 
-// Public documents endpoint
-Route::get('public-documents', [\App\Http\Controllers\Api\PublicDocumentController::class, 'index'])->name('public-documents.index');
+    // Public documents endpoint
+    Route::get('public-documents', [\App\Http\Controllers\Api\PublicDocumentController::class, 'index'])->name('public-documents.index');
+});
 
 // Public document display/download endpoint
 Route::get('documents/{filename}', [\App\Http\Controllers\DocumentDisplayController::class, 'show'])->name('documents.show');

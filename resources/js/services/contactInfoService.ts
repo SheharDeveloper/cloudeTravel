@@ -17,6 +17,7 @@ export interface ContactInfo {
     about_text?: string; // Company description/about text
     logo?: string; // Company logo image URL
     get_in_touch_image?: string; // Call-to-action section image URL
+    loader_video?: string; // Custom loading-screen video URL
     created_at?: string;
     updated_at?: string;
 }
@@ -38,6 +39,11 @@ const DEFAULT_CONTACT: ContactInfo = {
 
 // Service class for contact information operations
 class ContactInfoService {
+    // Every page using the landing layout fetches contact info itself, and
+    // the layout does too, so two calls land on mount at once. Sharing the
+    // in-flight request collapses them into a single network call.
+    private pendingRequest: Promise<ContactInfo> | null = null;
+
     /**
      * Fetch contact information from the API
      * - Used by frontend to display contact details in footer and contact page
@@ -45,6 +51,18 @@ class ContactInfoService {
      * @returns Promise<ContactInfo> - Contact information object
      */
     async get(): Promise<ContactInfo> {
+        if (this.pendingRequest) {
+            return this.pendingRequest;
+        }
+
+        this.pendingRequest = this.fetchContactInfo().finally(() => {
+            this.pendingRequest = null;
+        });
+
+        return this.pendingRequest;
+    }
+
+    private async fetchContactInfo(): Promise<ContactInfo> {
         try {
             const response = await fetch('/api/contact-info');
             if (response.ok) {

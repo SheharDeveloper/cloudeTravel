@@ -28,27 +28,13 @@ class SpecialOfferController extends Controller
         $featured = request()->query('featured', null);
         $search = request()->query('search', null);
 
-        $query = \App\Models\SpecialOffer::with('images')->where('is_active', true);
-
-        // Filter by type
-        if ($type) {
-            $query->where('type', $type);
-        }
-
-        // Filter featured
-        if ($featured === 'true' || $featured === '1') {
-            $query->where('is_featured', true);
-        }
-
-        // Search by name or description
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('description', 'like', "%{$search}%");
-            });
-        }
-
-        $offers = $query->latest()->paginate($perPage, ['*'], 'page', $page);
+        $offers = $this->specialOfferService->getAll(
+            (int) $perPage,
+            (int) $page,
+            $type,
+            $featured === 'true' || $featured === '1',
+            $search
+        );
 
         return response()->json([
             'offers' => $offers->items(),

@@ -14,6 +14,8 @@ class ContactInfo extends Model
 
     protected $fillable = [
         'uid',
+        'owner_type',
+        'owner_id',
         'email',
         'phone',
         'location',
@@ -25,6 +27,7 @@ class ContactInfo extends Model
         'about_text',
         'logo',
         'get_in_touch_image',
+        'loader_video',
     ];
 
     protected static function boot()
@@ -36,5 +39,13 @@ class ContactInfo extends Model
                 $model->uid = Str::uuid();
             }
         });
+    }
+
+    /**
+     * Who this contact info belongs to: App\Models\Agency or App\Models\User
+     */
+    public function owner()
+    {
+        return $this->morphTo();
     }
 }

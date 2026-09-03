@@ -10,6 +10,10 @@ return new class extends Migration
     {
         Schema::create('special_offers', function (Blueprint $table) {
             $table->id();
+            // Who this offer belongs to: App\Models\Agency (their own site)
+            // or App\Models\User (the superadmin's global default, shown to
+            // any agency that hasn't added its own).
+            $table->nullableMorphs('owner');
             $table->uuid('uid')->unique();
             $table->string('name');
             $table->string('type')->nullable();
