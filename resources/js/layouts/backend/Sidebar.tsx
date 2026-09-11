@@ -54,6 +54,7 @@ const getSuperadminMenuItems = (companyName: string): MenuItem[] => [
     { type: 'title', label: 'CONTENT & DOCUMENTS' },
 
     { type: 'link', icon: 'fa-solid fa-file-pdf', label: 'Documents', href: '/admin/documents', permission: 'document.view' },
+    { type: 'link', icon: 'fa-solid fa-globe', label: 'Countries', href: '/admin/countries' },
 ];
 
 // ── Agency menu (Agency Management is superadmin-only) ────────────────────────
@@ -167,6 +168,25 @@ export default function Sidebar() {
                 .sidebar-active {
                     color: #ffc107 !important;
                     font-weight: 600 !important;
+                }
+                .deznav-scroll {
+                    overflow-y: auto !important;
+                    scrollbar-width: thin !important;
+                    scrollbar-color: rgba(255, 255, 255, 0.25) transparent !important;
+                }
+                .deznav-scroll::-webkit-scrollbar {
+                    width: 6px !important;
+                    opacity: 1 !important;
+                }
+                .deznav-scroll::-webkit-scrollbar-track {
+                    background: transparent !important;
+                }
+                .deznav-scroll::-webkit-scrollbar-thumb {
+                    background: rgba(255, 255, 255, 0.25) !important;
+                    border-radius: 10px !important;
+                }
+                .deznav-scroll::-webkit-scrollbar-thumb:hover {
+                    background: rgba(255, 255, 255, 0.4) !important;
                 }
             `}</style>
             <div className="deznav-scroll">

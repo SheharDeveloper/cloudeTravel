@@ -79,7 +79,7 @@ class TaskController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'details' => 'nullable|string|max:5000',
-            'priority' => 'required|in:low,medium,high,urgent',
+            'priority' => 'required|in:new_job,urgent',
             'due_date' => 'nullable|date',
             'status' => 'nullable|in:todo,in_progress,review,done',
             'assigned_to' => 'nullable|string',
@@ -110,7 +110,7 @@ class TaskController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'details' => 'nullable|string|max:5000',
-            'priority' => 'required|in:low,medium,high,urgent',
+            'priority' => 'required|in:new_job,urgent',
             'due_date' => 'nullable|date',
             'assigned_to' => 'nullable|string',
             'attachments' => 'nullable|array',
@@ -142,9 +142,10 @@ class TaskController extends Controller
 
         $validated = $request->validate([
             'status' => 'required|in:todo,in_progress,review,done',
+            'priority' => 'nullable|in:new_job,urgent',
         ]);
 
-        $this->taskService->updateStatus($task, $validated['status']);
+        $this->taskService->updateStatus($task, $validated['status'], $validated['priority'] ?? null);
 
         return back();
     }

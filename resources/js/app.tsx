@@ -55,6 +55,8 @@ createInertiaApp({
             // Backend pages manage their own layout via MasterLayout
             case name === 'dashboard':
             case name === 'ProfileSettings':
+            case name === 'ProfileOverview':
+            case name === 'ProfileEditDetails':
             case name.startsWith('agency/'):
                 return null;
             // Frontend service pages use LandingLayout

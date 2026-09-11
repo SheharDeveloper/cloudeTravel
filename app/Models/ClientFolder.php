@@ -9,7 +9,11 @@ class ClientFolder extends Model
     protected $table = 'client_folders';
 
     protected $fillable = [
-        'client_id', 'parent_id', 'owner_type', 'owner_id', 'name',
+        'client_id', 'parent_id', 'owner_type', 'owner_id', 'name', 'delete_date',
+    ];
+
+    protected $casts = [
+        'delete_date' => 'date',
     ];
 
     public function client()

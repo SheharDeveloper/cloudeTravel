@@ -2,12 +2,27 @@ import { useState } from 'react';
 import { router } from '@inertiajs/react';
 import axios from 'axios';
 import DatePicker from '@/components/DatePicker';
+import { isExpiringSoon } from '@/lib/utils';
 
-type FamilyMember = { name: string; relation: string; dob: string; passport_number: string; id_number: string };
+type FamilyMember = {
+    name: string; relation: string; dob: string; passport_number: string;
+    place_of_issue: string; date_of_issue: string; expiry_date: string;
+    front_image: File | null; back_image: File | null;
+    id_number: string;
+};
 
 const STEPS = ['1. Basic Info', '2. Address', '3. Passport & Visa', '4. Family Details'];
 
-const emptyFamilyMember: FamilyMember = { name: '', relation: '', dob: '', passport_number: '', id_number: '' };
+const emptyFamilyMember: FamilyMember = {
+    name: '', relation: '', dob: '', passport_number: '',
+    place_of_issue: '', date_of_issue: '', expiry_date: '',
+    front_image: null, back_image: null,
+    id_number: '',
+};
+
+// A passport within 6 months of expiring isn't valid enough for travel
+// bookings, so the main client's own passport must be good for longer.
+const PASSPORT_MIN_VALIDITY_MESSAGE = 'Passport must be valid for at least 6 months from today.';
 
 export default function ClientCreate() {
     const [step, setStep] = useState(1);
@@ -16,7 +31,8 @@ export default function ClientCreate() {
     const [successMessage, setSuccessMessage] = useState('');
 
     const [data, setData] = useState({
-        name: '',
+        first_name: '',
+        last_name: '',
         email: '',
         phone: '',
         nationality: '',
@@ -52,7 +68,8 @@ export default function ClientCreate() {
     };
 
     const appendBasic = (formData: FormData) => {
-        formData.append('name', data.name);
+        formData.append('first_name', data.first_name);
+        formData.append('last_name', data.last_name);
         formData.append('email', data.email);
         formData.append('phone', data.phone);
         formData.append('nationality', data.nationality);
@@ -91,6 +108,11 @@ export default function ClientCreate() {
             formData.append(`family_members[${i}][relation]`, row.relation);
             if (row.dob) formData.append(`family_members[${i}][dob]`, row.dob);
             formData.append(`family_members[${i}][passport_number]`, row.passport_number);
+            formData.append(`family_members[${i}][place_of_issue]`, row.place_of_issue);
+            if (row.date_of_issue) formData.append(`family_members[${i}][date_of_issue]`, row.date_of_issue);
+            if (row.expiry_date) formData.append(`family_members[${i}][expiry_date]`, row.expiry_date);
+            if (row.front_image) formData.append(`family_members[${i}][front_image]`, row.front_image);
+            if (row.back_image) formData.append(`family_members[${i}][back_image]`, row.back_image);
             formData.append(`family_members[${i}][id_number]`, row.id_number);
         });
     };
@@ -174,11 +196,11 @@ export default function ClientCreate() {
                                     style={{ width: 80, height: 80 }}
                                 >
                                     <span className="text-primary fw-bold fs-24">
-                                        {data.name ? data.name.charAt(0).toUpperCase() : 'C'}
+                                        {data.first_name ? data.first_name.charAt(0).toUpperCase() : 'C'}
                                     </span>
                                 </div>
                                 <div className="clearfix mt-3">
-                                    <h6 className="mb-0">{data.name || 'Client Name'}</h6>
+                                    <h6 className="mb-0">{`${data.first_name} ${data.last_name}`.trim() || 'Client Name'}</h6>
                                     <span className="text-muted">Client</span>
                                 </div>
                             </div>
@@ -228,10 +250,17 @@ export default function ClientCreate() {
                                 {step === 1 && (
                                     <div className="row">
                                         <div className="col-sm-6 mb-4">
-                                            <label className="form-label">Full Name</label>
-                                            <input type="text" className={`form-control ${errors.name ? 'is-invalid' : ''}`} value={data.name}
-                                                onChange={(e) => { set({ name: e.target.value }); clearError('name'); }} />
-                                            {errors.name && <div className="invalid-feedback d-block">{errors.name}</div>}
+                                            <label className="form-label">First Name</label>
+                                            <input type="text" className={`form-control ${errors.first_name ? 'is-invalid' : ''}`} value={data.first_name}
+                                                onChange={(e) => { set({ first_name: e.target.value }); clearError('first_name'); }} />
+                                            {errors.first_name && <div className="invalid-feedback d-block">{errors.first_name}</div>}
+                                        </div>
+
+                                        <div className="col-sm-6 mb-4">
+                                            <label className="form-label">Last Name</label>
+                                            <input type="text" className={`form-control ${errors.last_name ? 'is-invalid' : ''}`} value={data.last_name}
+                                                onChange={(e) => { set({ last_name: e.target.value }); clearError('last_name'); }} />
+                                            {errors.last_name && <div className="invalid-feedback d-block">{errors.last_name}</div>}
                                         </div>
 
                                         <div className="col-sm-6 mb-4">
@@ -361,6 +390,12 @@ export default function ClientCreate() {
                                                 minDate={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
                                                 autoSelect={true} />
                                             {errors.expiry_date && <div className="invalid-feedback d-block">{errors.expiry_date}</div>}
+                                            {!errors.expiry_date && isExpiringSoon(data.expiry_date) && (
+                                                <div className="text-danger small mt-1">
+                                                    <i className="fa fa-triangle-exclamation me-1"></i>
+                                                    {PASSPORT_MIN_VALIDITY_MESSAGE}
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div className="col-sm-6 mb-4">
@@ -484,6 +519,53 @@ export default function ClientCreate() {
                                                             onChange={(e) => {
                                                                 const next = [...data.family_members];
                                                                 next[i] = { ...next[i], id_number: e.target.value };
+                                                                set({ family_members: next });
+                                                            }} />
+                                                    </div>
+                                                    <div className="col-md-4 mb-3">
+                                                        <label className="form-label">Place of Issue</label>
+                                                        <input type="text" className="form-control" value={row.place_of_issue}
+                                                            onChange={(e) => {
+                                                                const next = [...data.family_members];
+                                                                next[i] = { ...next[i], place_of_issue: e.target.value };
+                                                                set({ family_members: next });
+                                                            }} />
+                                                    </div>
+                                                    <div className="col-md-4 mb-3">
+                                                        <DatePicker label="Date of Issue" value={row.date_of_issue}
+                                                            onChange={(d) => {
+                                                                const next = [...data.family_members];
+                                                                next[i] = { ...next[i], date_of_issue: d };
+                                                                set({ family_members: next });
+                                                            }}
+                                                            maxDate={new Date(Date.now() - 86400000).toISOString().split('T')[0]}
+                                                            autoSelect={true} />
+                                                    </div>
+                                                    <div className="col-md-4 mb-3">
+                                                        <DatePicker label="Passport Expiry Date" value={row.expiry_date}
+                                                            onChange={(d) => {
+                                                                const next = [...data.family_members];
+                                                                next[i] = { ...next[i], expiry_date: d };
+                                                                set({ family_members: next });
+                                                            }}
+                                                            minDate={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
+                                                            autoSelect={true} />
+                                                    </div>
+                                                    <div className="col-md-4 mb-3">
+                                                        <label className="form-label">Passport Front</label>
+                                                        <input type="file" className="form-control" accept="image/*"
+                                                            onChange={(e) => {
+                                                                const next = [...data.family_members];
+                                                                next[i] = { ...next[i], front_image: e.target.files?.[0] || null };
+                                                                set({ family_members: next });
+                                                            }} />
+                                                    </div>
+                                                    <div className="col-md-4 mb-3">
+                                                        <label className="form-label">Passport Back</label>
+                                                        <input type="file" className="form-control" accept="image/*"
+                                                            onChange={(e) => {
+                                                                const next = [...data.family_members];
+                                                                next[i] = { ...next[i], back_image: e.target.files?.[0] || null };
                                                                 set({ family_members: next });
                                                             }} />
                                                     </div>

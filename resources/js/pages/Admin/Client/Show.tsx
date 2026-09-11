@@ -1,5 +1,8 @@
 import { router, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
+import DatePicker from '@/components/DatePicker';
+import AlertBell from '@/components/AlertBell';
+import { isExpiringSoon } from '@/lib/utils';
 import DataTable from 'datatables.net-buttons-bs5';
 import JSZip from 'jszip';
 import pdfMake from 'pdfmake/build/pdfmake';
@@ -67,7 +70,7 @@ const timeAgo = (dateStr: string) => {
     return `${days} days ago`;
 };
 
-type ClientFolder = { id: number; parent_id: number | null; name: string };
+type ClientFolder = { id: number; parent_id: number | null; name: string; delete_date: string | null };
 type DeleteTarget = { type: 'document' | 'folder'; id: number };
 
 const buildBreadcrumbs = (folders: ClientFolder[], currentId: number | null): ClientFolder[] => {
@@ -86,6 +89,7 @@ function DocumentsGrid({ clientUid, documents, folders }: { clientUid: string; d
     const [view, setView] = useState<'grid' | 'list'>('grid');
     const [documentType, setDocumentType] = useState('other');
     const [files, setFiles] = useState<File[]>([]);
+    const [uploadDeleteDate, setUploadDeleteDate] = useState('');
     const [processing, setProcessing] = useState(false);
     const [error, setError] = useState('');
     const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
@@ -93,8 +97,9 @@ function DocumentsGrid({ clientUid, documents, folders }: { clientUid: string; d
     const [currentFolderId, setCurrentFolderId] = useState<number | null>(null);
     const [showFolderModal, setShowFolderModal] = useState(false);
     const [folderName, setFolderName] = useState('');
+    const [folderDeleteDate, setFolderDeleteDate] = useState('');
     const [folderProcessing, setFolderProcessing] = useState(false);
-    const [folderError, setFolderError] = useState('');
+    const [folderError, setFolderError] = useState<Record<string, string>>({});
     const [showUploadModal, setShowUploadModal] = useState(false);
 
     const breadcrumbs = buildBreadcrumbs(folders, currentFolderId);
@@ -108,12 +113,13 @@ function DocumentsGrid({ clientUid, documents, folders }: { clientUid: string; d
     };
 
     const upload = () => {
-        if (files.length === 0) return;
+        if (files.length === 0 || !uploadDeleteDate) return;
         setProcessing(true);
         setError('');
 
         const formData = new FormData();
         formData.append('document_type', documentType);
+        formData.append('delete_date', uploadDeleteDate);
         if (currentFolderId !== null) formData.append('folder_id', String(currentFolderId));
         files.forEach((f) => formData.append('files[]', f));
 
@@ -121,9 +127,10 @@ function DocumentsGrid({ clientUid, documents, folders }: { clientUid: string; d
             preserveScroll: true,
             onSuccess: () => {
                 setFiles([]);
+                setUploadDeleteDate('');
                 setShowUploadModal(false);
             },
-            onError: (err: any) => setError(err.files || err['files.0'] || 'Upload failed'),
+            onError: (err: any) => setError(err.files || err['files.0'] || err.delete_date || 'Upload failed'),
             onFinish: () => setProcessing(false),
         });
     };
@@ -136,27 +143,34 @@ function DocumentsGrid({ clientUid, documents, folders }: { clientUid: string; d
     };
 
     const removeFolder = (id: number) => {
+        const isCurrentFolder = id === currentFolderId;
+        const parentId = isCurrentFolder ? (folders.find((f) => f.id === id)?.parent_id ?? null) : null;
+
         router.delete(`/admin/client-folders/${id}`, {
             preserveScroll: true,
-            onSuccess: () => setDeleteTarget(null),
+            onSuccess: () => {
+                setDeleteTarget(null);
+                if (isCurrentFolder) setCurrentFolderId(parentId);
+            },
         });
     };
 
     const createFolder = () => {
-        if (!folderName.trim()) return;
+        if (!folderName.trim() || !folderDeleteDate) return;
         setFolderProcessing(true);
-        setFolderError('');
+        setFolderError({});
 
         router.post(
             `/admin/clients/${clientUid}/folders`,
-            { name: folderName.trim(), parent_id: currentFolderId },
+            { name: folderName.trim(), parent_id: currentFolderId, delete_date: folderDeleteDate },
             {
                 preserveScroll: true,
                 onSuccess: () => {
                     setFolderName('');
+                    setFolderDeleteDate('');
                     setShowFolderModal(false);
                 },
-                onError: (err: any) => setFolderError(err.name || 'Could not create folder'),
+                onError: (err: any) => setFolderError(err),
                 onFinish: () => setFolderProcessing(false),
             }
         );
@@ -235,6 +249,11 @@ function DocumentsGrid({ clientUid, documents, folders }: { clientUid: string; d
                                         </div>
                                         <div className="text-truncate fw-semibold" title={folder.name}>{folder.name}</div>
                                         <div className="text-muted small">{folderItemCount(folder.id)} item{folderItemCount(folder.id) === 1 ? '' : 's'}</div>
+                                        {folder.delete_date && (
+                                            <div className="text-danger small">
+                                                <i className="fa fa-clock me-1"></i>Deletes {new Date(folder.delete_date).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: '2-digit' })}
+                                            </div>
+                                        )}
                                     </a>
                                 </div>
                             </div>
@@ -261,6 +280,11 @@ function DocumentsGrid({ clientUid, documents, folders }: { clientUid: string; d
                                             </div>
                                             <div className="text-truncate fw-semibold" title={doc.document_name}>{doc.document_name}</div>
                                             <div className="text-muted small">{timeAgo(doc.created_at)}</div>
+                                            {doc.delete_date && (
+                                                <div className="text-danger small">
+                                                    <i className="fa fa-clock me-1"></i>Deletes {new Date(doc.delete_date).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: '2-digit' })}
+                                                </div>
+                                            )}
                                         </a>
                                     </div>
                                 </div>
@@ -280,7 +304,15 @@ function DocumentsGrid({ clientUid, documents, folders }: { clientUid: string; d
                                     </div>
                                     <div>
                                         <div className="fw-semibold">{folder.name}</div>
-                                        <div className="text-muted small">{folderItemCount(folder.id)} item{folderItemCount(folder.id) === 1 ? '' : 's'}</div>
+                                        <div className="text-muted small">
+                                            {folderItemCount(folder.id)} item{folderItemCount(folder.id) === 1 ? '' : 's'}
+                                            {folder.delete_date && (
+                                                <span className="text-danger ms-2">
+                                                    <i className="fa fa-clock me-1"></i>
+                                                    Deletes {new Date(folder.delete_date).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: '2-digit' })}
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
                                 </a>
                                 <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => setDeleteTarget({ type: 'folder', id: folder.id })}>
@@ -301,7 +333,15 @@ function DocumentsGrid({ clientUid, documents, folders }: { clientUid: string; d
                                         </div>
                                         <div>
                                             <div className="fw-semibold">{doc.document_name}</div>
-                                            <div className="text-muted small">{formatDocType(doc.document_type)} &middot; {timeAgo(doc.created_at)}</div>
+                                            <div className="text-muted small">
+                                                {formatDocType(doc.document_type)} &middot; {timeAgo(doc.created_at)}
+                                                {doc.delete_date && (
+                                                    <span className="text-danger ms-2">
+                                                        <i className="fa fa-clock me-1"></i>
+                                                        Deletes {new Date(doc.delete_date).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: '2-digit' })}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     </a>
                                     <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => setDeleteTarget({ type: 'document', id: doc.id })}>
@@ -319,7 +359,7 @@ function DocumentsGrid({ clientUid, documents, folders }: { clientUid: string; d
                             <div className="modal-content">
                                 <div className="modal-header">
                                     <h5 className="modal-title">Upload File</h5>
-                                    <button type="button" className="btn-close" onClick={() => { setShowUploadModal(false); setFiles([]); setError(''); }}></button>
+                                    <button type="button" className="btn-close" onClick={() => { setShowUploadModal(false); setFiles([]); setUploadDeleteDate(''); setError(''); }}></button>
                                 </div>
                                 <div className="modal-body">
                                     <div className="mb-3">
@@ -332,15 +372,25 @@ function DocumentsGrid({ clientUid, documents, folders }: { clientUid: string; d
                                             onChange={(e) => setDocumentType(e.target.value)}
                                         />
                                     </div>
-                                    <div>
+                                    <div className="mb-3">
                                         <label className="form-label small">Files</label>
                                         <input type="file" multiple className="form-control" onChange={(e) => setFiles(Array.from(e.target.files ?? []))} />
                                     </div>
-                                    {error && <small className="text-danger">{error}</small>}
+                                    <div>
+                                        <DatePicker
+                                            label="Delete Date"
+                                            value={uploadDeleteDate}
+                                            onChange={(d) => setUploadDeleteDate(d)}
+                                            minDate={new Date().toISOString().split('T')[0]}
+                                            autoSelect={true}
+                                        />
+                                        <small className="text-muted">This file becomes eligible for deletion once this date arrives.</small>
+                                    </div>
+                                    {error && <small className="text-danger d-block mt-2">{error}</small>}
                                 </div>
                                 <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" onClick={() => { setShowUploadModal(false); setFiles([]); setError(''); }}>Cancel</button>
-                                    <button type="button" className="btn btn-primary" onClick={upload} disabled={processing || files.length === 0}>
+                                    <button type="button" className="btn btn-secondary" onClick={() => { setShowUploadModal(false); setFiles([]); setUploadDeleteDate(''); setError(''); }}>Cancel</button>
+                                    <button type="button" className="btn btn-primary" onClick={upload} disabled={processing || files.length === 0 || !uploadDeleteDate}>
                                         {processing ? 'Uploading...' : 'Upload'}
                                     </button>
                                 </div>
@@ -355,23 +405,35 @@ function DocumentsGrid({ clientUid, documents, folders }: { clientUid: string; d
                             <div className="modal-content">
                                 <div className="modal-header">
                                     <h5 className="modal-title">Create Folder</h5>
-                                    <button type="button" className="btn-close" onClick={() => { setShowFolderModal(false); setFolderName(''); setFolderError(''); }}></button>
+                                    <button type="button" className="btn-close" onClick={() => { setShowFolderModal(false); setFolderName(''); setFolderDeleteDate(''); setFolderError({}); }}></button>
                                 </div>
                                 <div className="modal-body">
-                                    <label className="form-label small">Folder Name</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={folderName}
-                                        autoFocus
-                                        onChange={(e) => setFolderName(e.target.value)}
-                                        onKeyDown={(e) => { if (e.key === 'Enter') createFolder(); }}
-                                    />
-                                    {folderError && <small className="text-danger">{folderError}</small>}
+                                    <div className="mb-3">
+                                        <label className="form-label small">Folder Name</label>
+                                        <input
+                                            type="text"
+                                            className={`form-control ${folderError.name ? 'is-invalid' : ''}`}
+                                            value={folderName}
+                                            autoFocus
+                                            onChange={(e) => setFolderName(e.target.value)}
+                                        />
+                                        {folderError.name && <small className="text-danger">{folderError.name}</small>}
+                                    </div>
+                                    <div>
+                                        <DatePicker
+                                            label="Delete Date"
+                                            value={folderDeleteDate}
+                                            onChange={(d) => setFolderDeleteDate(d)}
+                                            minDate={new Date().toISOString().split('T')[0]}
+                                            autoSelect={true}
+                                        />
+                                        <small className="text-muted">This folder (and everything in it) becomes eligible for deletion once this date arrives.</small>
+                                        {folderError.delete_date && <small className="text-danger d-block">{folderError.delete_date}</small>}
+                                    </div>
                                 </div>
                                 <div className="modal-footer">
-                                    <button type="button" className="btn btn-secondary" onClick={() => { setShowFolderModal(false); setFolderName(''); setFolderError(''); }}>Cancel</button>
-                                    <button type="button" className="btn btn-primary" onClick={createFolder} disabled={folderProcessing || !folderName.trim()}>
+                                    <button type="button" className="btn btn-secondary" onClick={() => { setShowFolderModal(false); setFolderName(''); setFolderDeleteDate(''); setFolderError({}); }}>Cancel</button>
+                                    <button type="button" className="btn btn-primary" onClick={createFolder} disabled={folderProcessing || !folderName.trim() || !folderDeleteDate}>
                                         {folderProcessing ? 'Creating...' : 'Create'}
                                     </button>
                                 </div>
@@ -688,6 +750,26 @@ export default function ClientShow() {
     const folders = client?.folders || [];
     const communications = client?.communications || [];
 
+    const clientAlerts: string[] = [];
+    if (isExpiringSoon(passport?.expiry_date)) clientAlerts.push('Passport expires within 6 months');
+    if (passport?.is_foreigner && isExpiringSoon(passport?.visa_expiry_date)) clientAlerts.push('Visa expires within 6 months');
+    if (!passport?.passport_number) clientAlerts.push('Passport number is missing');
+    if (!passport?.front_image || !passport?.back_image) clientAlerts.push('Passport photo is missing');
+    if (!address?.address) clientAlerts.push('Address is missing');
+    if (!client?.email) clientAlerts.push('Email is missing');
+
+    const passportExpiringSoon = isExpiringSoon(passport?.expiry_date);
+    const [showExpiryPopup, setShowExpiryPopup] = useState(false);
+
+    // Pop this up on every visit to the page (not just once), so the
+    // reminder can't be missed while the passport is close to expiring.
+    useEffect(() => {
+        if (passportExpiringSoon) {
+            setShowExpiryPopup(true);
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [client?.uid]);
+
     const formatDate = (date: string | null) => {
         if (!date) return 'N/A';
         return new Date(date).toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: '2-digit' });
@@ -717,26 +799,37 @@ export default function ClientShow() {
                         <div>
                             <h3 className="fw-semibold mb-2">{client.name}</h3>
                             <div className="d-flex flex-wrap gap-2 mb-2">
-                                <span className={`badge ${client.status === 'active' ? 'bg-success bg-opacity-10 text-success' : 'bg-secondary bg-opacity-10 text-secondary'} text-capitalize`}>
-                                    {client.status}
-                                </span>
+                                <span className="badge bg-primary bg-opacity-10 text-primary">{client.cid || 'N/A'}</span>
                                 {client.nationality && (
                                     <span className="badge bg-info bg-opacity-10 text-info-emphasis">{client.nationality}</span>
                                 )}
                             </div>
                             <p className="text-muted small mb-0">
-                                {client.email || 'No email'} &middot; {client.phone || 'No phone'}
+                                {client.email || 'No email'} &middot; {client.phone || 'No phone'} &middot; {client.owner?.name || 'Superadmin'}
                             </p>
                         </div>
 
-                        <div className="d-flex gap-2">
-                            <button onClick={() => router.visit(`/admin/clients/${client.uid}/edit`)} className="btn btn-primary btn-sm">
-                                <i className="fa fa-edit me-2"></i>Edit
-                            </button>
-                            <button onClick={() => setShowDeleteConfirm(true)} className="btn btn-outline-danger btn-sm">
-                                <i className="fa fa-trash me-2"></i>Delete
-                            </button>
+                        <div className="text-end">
+                            <div className="d-flex align-items-center justify-content-end gap-2 mb-3">
+                                <AlertBell alerts={clientAlerts} />
+                                <span className={`badge ${client.status === 'active' ? 'bg-success' : 'bg-danger'} text-capitalize`}>
+                                    {client.status}
+                                </span>
+                            </div>
+                            <small className="text-muted d-block">Created on</small>
+                            <strong>{formatDate(client.created_at)}</strong>
                         </div>
+                    </div>
+                </div>
+
+                <div className="card-footer py-3 d-flex flex-wrap justify-content-end align-items-center">
+                    <div className="d-flex gap-2">
+                        <button onClick={() => router.visit(`/admin/clients/${client.uid}/edit`)} className="btn btn-primary btn-sm">
+                            <i className="fa fa-edit me-2"></i>Edit
+                        </button>
+                        <button onClick={() => setShowDeleteConfirm(true)} className="btn btn-outline-danger btn-sm">
+                            <i className="fa fa-trash me-2"></i>Delete
+                        </button>
                     </div>
                 </div>
             </div>
@@ -768,6 +861,14 @@ export default function ClientShow() {
                             <div className="card-header"><h6 className="card-title mb-0">Overview</h6></div>
                             <div className="card-body">
                                 <div className="row">
+                                    <div className="col-sm-6 mb-3">
+                                        <div className="text-muted small">Client ID</div>
+                                        <div>{client.cid || 'N/A'}</div>
+                                    </div>
+                                    <div className="col-sm-6 mb-3">
+                                        <div className="text-muted small">Agency</div>
+                                        <div>{client.owner?.name || 'Superadmin'}</div>
+                                    </div>
                                     <div className="col-sm-6 mb-3">
                                         <div className="text-muted small">Full Name</div>
                                         <div>{client.name}</div>
@@ -911,7 +1012,10 @@ export default function ClientShow() {
                                                     <th>Relation</th>
                                                     <th>Date of Birth</th>
                                                     <th>Passport Number</th>
+                                                    <th>Place of Issue</th>
+                                                    <th>Passport Expiry</th>
                                                     <th>ID Number</th>
+                                                    <th>Photos</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
@@ -921,7 +1025,20 @@ export default function ClientShow() {
                                                         <td>{m.relation || 'N/A'}</td>
                                                         <td>{formatDate(m.dob)}</td>
                                                         <td>{m.passport_number || 'N/A'}</td>
+                                                        <td>{m.place_of_issue || 'N/A'}</td>
+                                                        <td>{m.expiry_date ? formatDate(m.expiry_date) : 'N/A'}</td>
                                                         <td>{m.id_number || 'N/A'}</td>
+                                                        <td>
+                                                            <div className="d-flex gap-2">
+                                                                {m.front_image && (
+                                                                    <a href={m.front_image} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary">Front</a>
+                                                                )}
+                                                                {m.back_image && (
+                                                                    <a href={m.back_image} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary">Back</a>
+                                                                )}
+                                                                {!m.front_image && !m.back_image && <span className="text-muted small">N/A</span>}
+                                                            </div>
+                                                        </td>
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -958,6 +1075,27 @@ export default function ClientShow() {
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-secondary" onClick={() => setShowDeleteConfirm(false)}>Cancel</button>
                                 <button type="button" className="btn btn-danger" onClick={handleDelete}>Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {showExpiryPopup && (
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog modal-dialog-centered">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title text-danger">
+                                    <i className="fa fa-triangle-exclamation me-2"></i>Passport Expiring Soon
+                                </h5>
+                                <button type="button" className="btn-close" onClick={() => setShowExpiryPopup(false)}></button>
+                            </div>
+                            <div className="modal-body">
+                                <strong>{client.name}</strong>'s passport expires on <strong>{formatDate(passport?.expiry_date)}</strong> — within the next 6 months. Please follow up to get it renewed.
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-primary" onClick={() => setShowExpiryPopup(false)}>OK</button>
                             </div>
                         </div>
                     </div>

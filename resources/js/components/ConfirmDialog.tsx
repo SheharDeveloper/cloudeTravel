@@ -7,6 +7,7 @@ interface ConfirmDialogProps {
     confirmText?: string;
     cancelText?: string;
     isLoading?: boolean;
+    confirmVariant?: 'danger' | 'primary';
 }
 
 export default function ConfirmDialog({
@@ -18,6 +19,7 @@ export default function ConfirmDialog({
     confirmText = 'Delete',
     cancelText = 'Cancel',
     isLoading = false,
+    confirmVariant = 'danger',
 }: ConfirmDialogProps) {
     if (!isOpen) return null;
 
@@ -48,7 +50,7 @@ export default function ConfirmDialog({
                         </button>
                         <button
                             type="button"
-                            className="btn btn-danger"
+                            className={`btn btn-${confirmVariant}`}
                             onClick={onConfirm}
                             disabled={isLoading}
                         >

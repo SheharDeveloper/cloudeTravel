@@ -3,10 +3,21 @@ import { useState, useRef, useEffect } from 'react';
 import { router, usePage } from '@inertiajs/react';
 
 export default function Navbar() {
-    const { auth, name, authAgency, impersonating } = usePage().props as any;
+    const { auth, name, authAgency, impersonating, isStaffSession } = usePage().props as any;
     const user = auth?.user;
     const companyName = authAgency?.agency_name || (name as string) || 'CloudTravel';
     const [stopping, setStopping] = useState(false);
+    const [showDueItemsConfirm, setShowDueItemsConfirm] = useState(false);
+    const [dueItemsProcessing, setDueItemsProcessing] = useState(false);
+
+    const deleteDueItems = () => {
+        setDueItemsProcessing(true);
+        router.delete('/admin/clients-due-items', {
+            preserveScroll: true,
+            onSuccess: () => setShowDueItemsConfirm(false),
+            onFinish: () => setDueItemsProcessing(false),
+        });
+    };
 
     const stopImpersonating = () => {
         setStopping(true);
@@ -107,6 +118,21 @@ export default function Navbar() {
                             {/* Right side icons */}
                             <ul className="navbar-nav header-right align-items-center">
 
+                                {/* Delete Due Items — admin/superadmin only, not staff */}
+                                {!isStaffSession && (
+                                    <li className="nav-item">
+                                        <button
+                                            type="button"
+                                            className="nav-link bg-white rounded-3 mx-1"
+                                            title="Delete Due Items"
+                                            aria-label="Delete Due Items"
+                                            onClick={() => setShowDueItemsConfirm(true)}
+                                        >
+                                            <i className="fa fa-clock text-danger"></i>
+                                        </button>
+                                    </li>
+                                )}
+
                                 {/* Notification */}
                                 <li className="nav-item dropdown notification_dropdown">
                                     <div className="dropdown">
@@ -192,6 +218,28 @@ export default function Navbar() {
                     </nav>
                 </div>
             </div>
+
+            {showDueItemsConfirm && (
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Delete Due Items</h5>
+                                <button type="button" className="btn-close" onClick={() => setShowDueItemsConfirm(false)}></button>
+                            </div>
+                            <div className="modal-body">
+                                This permanently deletes every folder and every file, across all clients, whose delete date has arrived. Items with no delete date, or a future one, are left alone. This cannot be undone.
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={() => setShowDueItemsConfirm(false)}>Cancel</button>
+                                <button type="button" className="btn btn-danger" onClick={deleteDueItems} disabled={dueItemsProcessing}>
+                                    {dueItemsProcessing ? 'Deleting...' : 'Delete Due Items'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }

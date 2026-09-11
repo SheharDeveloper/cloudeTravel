@@ -68,7 +68,7 @@ class ClientController extends Controller
                 }
             }
 
-            $validated['family_members'] = $request->input('family_members', []);
+            $validated['family_members'] = $this->collectFamilyMembers($request);
 
             $this->clientService->createClient($validated);
 
@@ -123,7 +123,7 @@ class ClientController extends Controller
                 }
             }
 
-            $validated['family_members'] = $request->input('family_members', []);
+            $validated['family_members'] = $this->collectFamilyMembers($request);
 
             $this->clientService->updateClient($client, $validated);
 
@@ -162,10 +162,42 @@ class ClientController extends Controller
                 $client,
                 $request->file('files', []),
                 $validated['document_type'],
-                $validated['folder_id'] ?? null
+                $validated['folder_id'] ?? null,
+                $validated['delete_date']
             );
 
             return back()->with('success', 'Document(s) uploaded successfully');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Delete every document for this client whose delete date has arrived.
+     */
+    public function destroyDueDocuments($uid)
+    {
+        try {
+            $client = $this->clientService->findByUid($uid);
+            $count = $this->clientService->deleteDueDocuments($client);
+
+            return back()->with('success', "{$count} due file(s) deleted successfully");
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Global navbar action: delete every due folder and due document across
+     * all of the current session's clients at once — not scoped to a
+     * single client's uid.
+     */
+    public function destroyDueItems()
+    {
+        try {
+            $result = $this->clientService->deleteDueItemsForSession();
+
+            return back()->with('success', "{$result['folders']} due folder(s) and {$result['files']} due file(s) deleted successfully");
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
@@ -195,9 +227,29 @@ class ClientController extends Controller
         $validated = $request->validate($this->clientService->folderRules());
 
         try {
-            $this->clientService->createFolder($client, $validated['parent_id'] ?? null, $validated['name']);
+            $this->clientService->createFolder(
+                $client,
+                $validated['parent_id'] ?? null,
+                $validated['name'],
+                $validated['delete_date']
+            );
 
             return back()->with('success', 'Folder created successfully');
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Delete every folder for this client whose delete date has arrived.
+     */
+    public function destroyDueFolders($uid)
+    {
+        try {
+            $client = $this->clientService->findByUid($uid);
+            $count = $this->clientService->deleteDueFolders($client);
+
+            return back()->with('success', "{$count} due folder(s) deleted successfully");
         } catch (\Exception $e) {
             return back()->withErrors(['error' => $e->getMessage()]);
         }
@@ -299,5 +351,32 @@ class ClientController extends Controller
                 'errors' => $e->errors(),
             ], 422);
         }
+    }
+
+    /**
+     * Merge uploaded family member passport photos back into each row. On
+     * edit, a row with no newly uploaded file falls back to whatever path
+     * the frontend sent as existing_front_image/existing_back_image (the
+     * image already on record), so re-saving a row without picking a new
+     * photo doesn't wipe out the one it already has.
+     */
+    private function collectFamilyMembers(Request $request): array
+    {
+        $members = [];
+
+        foreach ($request->input('family_members', []) as $index => $member) {
+            $frontFile = $request->file("family_members.{$index}.front_image");
+            $backFile = $request->file("family_members.{$index}.back_image");
+
+            $members[$index] = $member;
+            $members[$index]['front_image'] = $frontFile
+                ? $this->clientService->uploadFile($frontFile, 'client-family-passports')
+                : ($member['existing_front_image'] ?? null);
+            $members[$index]['back_image'] = $backFile
+                ? $this->clientService->uploadFile($backFile, 'client-family-passports')
+                : ($member['existing_back_image'] ?? null);
+        }
+
+        return $members;
     }
 }

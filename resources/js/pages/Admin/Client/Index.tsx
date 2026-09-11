@@ -67,7 +67,9 @@ export default function ClientIndex() {
                                         <table className="table table-hover">
                                             <thead className="table-light">
                                                 <tr>
+                                                    <th>CID</th>
                                                     <th>Name</th>
+                                                    <th>Agency</th>
                                                     <th>Email</th>
                                                     <th>Phone</th>
                                                     <th>Nationality</th>
@@ -79,9 +81,11 @@ export default function ClientIndex() {
                                             <tbody>
                                                 {list.map((client: any) => (
                                                     <tr key={client.id}>
+                                                        <td><small className="text-muted">{client.cid || 'N/A'}</small></td>
                                                         <td>
                                                             <strong>{client.name}</strong>
                                                         </td>
+                                                        <td><small>{client.owner?.name || 'Superadmin'}</small></td>
                                                         <td><small>{client.email || 'N/A'}</small></td>
                                                         <td><small>{client.phone || 'N/A'}</small></td>
                                                         <td><small>{client.nationality || 'N/A'}</small></td>

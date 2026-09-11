@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import DatePicker from '@/components/DatePicker';
+import { isExpiringSoon } from '@/lib/utils';
 
 type Education = { name: string; photo: File | null };
 type TaxDeduction = { name: string; value: string; type: string };
@@ -735,6 +736,12 @@ export default function StaffCreate() {
                                                 minDate={new Date(Date.now() + 86400000).toISOString().split('T')[0]}
                                                 autoSelect={true} />
                                             {errors.expiry_date && <div className="invalid-feedback d-block">{errors.expiry_date}</div>}
+                                            {isExpiringSoon(data.expiry_date) && (
+                                                <div className="text-warning small mt-1">
+                                                    <i className="fa fa-triangle-exclamation me-1"></i>
+                                                    This passport expires within 6 months.
+                                                </div>
+                                            )}
                                         </div>
 
                                         <div className="col-sm-6 mb-4">
@@ -794,6 +801,12 @@ export default function StaffCreate() {
                                                     <DatePicker label="Visa Expiry Date" value={data.visa_expiry_date}
                                                         onChange={(d) => { set({ visa_expiry_date: d }); clearError('visa_expiry_date'); }} autoSelect={true} />
                                                     {errors.visa_expiry_date && <div className="invalid-feedback d-block">{errors.visa_expiry_date}</div>}
+                                                    {isExpiringSoon(data.visa_expiry_date) && (
+                                                        <div className="text-warning small mt-1">
+                                                            <i className="fa fa-triangle-exclamation me-1"></i>
+                                                            This visa expires within 6 months.
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </>
                                         )}

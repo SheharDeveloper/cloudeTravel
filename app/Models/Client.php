@@ -10,7 +10,7 @@ class Client extends Model
     protected $table = 'clients';
 
     protected $fillable = [
-        'uid', 'owner_type', 'owner_id', 'name', 'email', 'phone', 'nationality', 'gender', 'dob', 'status', 'notes',
+        'uid', 'cid', 'owner_type', 'owner_id', 'name', 'first_name', 'last_name', 'email', 'phone', 'nationality', 'gender', 'dob', 'status', 'notes',
     ];
 
     protected $casts = [
@@ -74,6 +74,26 @@ class Client extends Model
             if (empty($client->uid)) {
                 $client->uid = Str::uuid();
             }
+
+            if (empty($client->cid)) {
+                $client->cid = self::generateCid($client->owner_type);
+            }
         });
+    }
+
+    /**
+     * CLDC0000001 for a superadmin-owned client, CLDCA00001 for an
+     * agency-owned one. Each prefix runs its own count, shared across all
+     * agencies rather than reset per agency. Locks the count row-scan so
+     * two clients created in the same instant don't collide.
+     */
+    private static function generateCid(?string $ownerType): string
+    {
+        $isAgency = $ownerType === Agency::class;
+        $count = self::where('owner_type', $ownerType)->lockForUpdate()->count();
+
+        return $isAgency
+            ? 'CLDCA' . str_pad((string) ($count + 1), 5, '0', STR_PAD_LEFT)
+            : 'CLDC' . str_pad((string) ($count + 1), 7, '0', STR_PAD_LEFT);
     }
 }

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import DatePicker from '@/components/DatePicker';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 interface StaffOption {
     uid: string;
@@ -22,7 +23,7 @@ interface TaskNote {
 }
 
 type Status = 'todo' | 'in_progress' | 'review' | 'done';
-type Priority = 'low' | 'medium' | 'high' | 'urgent';
+type Priority = 'new_job' | 'urgent';
 
 interface TaskEntry {
     uid: string;
@@ -52,23 +53,38 @@ interface PageProps {
     history: TaskEntry[];
 }
 
-const COLUMNS: { key: Status; label: string }[] = [
-    { key: 'todo', label: 'To Do' },
-    { key: 'in_progress', label: 'In Progress' },
-    { key: 'review', label: 'Review' },
-    { key: 'done', label: 'Done' },
+type BoardColumnKey = 'new_job' | 'urgent' | 'in_progress' | 'review' | 'done';
+
+interface BoardColumn {
+    key: BoardColumnKey;
+    label: string;
+    matches: (task: TaskEntry) => boolean;
+    target: { status: Status; priority?: Priority };
+}
+
+// The board splits the "todo" status into two columns by priority (New Job /
+// Urgent) so triage happens up front; later columns are plain status stages.
+const BOARD_COLUMNS: BoardColumn[] = [
+    { key: 'new_job', label: 'New Job', matches: (t) => t.status === 'todo' && t.priority === 'new_job', target: { status: 'todo', priority: 'new_job' } },
+    { key: 'urgent', label: 'Urgent', matches: (t) => t.status === 'todo' && t.priority === 'urgent', target: { status: 'todo', priority: 'urgent' } },
+    { key: 'in_progress', label: 'Progress', matches: (t) => t.status === 'in_progress', target: { status: 'in_progress' } },
+    { key: 'review', label: 'Review', matches: (t) => t.status === 'review', target: { status: 'review' } },
+    { key: 'done', label: 'Done', matches: (t) => t.status === 'done', target: { status: 'done' } },
 ];
 
 const PRIORITY_BADGE: Record<Priority, string> = {
-    low: 'bg-secondary bg-opacity-10 text-secondary',
-    medium: 'bg-info bg-opacity-10 text-info-emphasis',
-    high: 'bg-warning bg-opacity-10 text-warning-emphasis',
+    new_job: 'bg-info bg-opacity-10 text-info-emphasis',
     urgent: 'bg-danger bg-opacity-10 text-danger',
+};
+
+const PRIORITY_LABEL: Record<Priority, string> = {
+    new_job: 'New Job',
+    urgent: 'Urgent',
 };
 
 const STATUS_LABEL: Record<Status, string> = {
     todo: 'To Do',
-    in_progress: 'In Progress',
+    in_progress: 'Progress',
     review: 'Review',
     done: 'Done',
 };
@@ -76,7 +92,7 @@ const STATUS_LABEL: Record<Status, string> = {
 const emptyForm = {
     title: '',
     details: '',
-    priority: 'medium' as Priority,
+    priority: 'new_job' as Priority,
     due_date: '',
     assigned_to: '',
 };
@@ -97,9 +113,9 @@ export default function TaskBoard() {
     const [saving, setSaving] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [draggedUid, setDraggedUid] = useState<string | null>(null);
-    const [dragOverCol, setDragOverCol] = useState<Status | null>(null);
-
-    const tasksByStatus = (status: Status) => tasks.filter((t) => t.status === status);
+    const [dragOverCol, setDragOverCol] = useState<BoardColumnKey | null>(null);
+    const [view, setView] = useState<'kanban' | 'table'>('kanban');
+    const [pendingAssign, setPendingAssign] = useState<{ task: TaskEntry; staffUid: string | null; staffName: string } | null>(null);
 
     const canTouch = (task: TaskEntry) => canManageTasks || (!!currentStaffUid && task.assigned_to_uid === currentStaffUid);
 
@@ -169,8 +185,12 @@ export default function TaskBoard() {
         setShowNoteModal(false);
     };
 
-    const moveStatus = (task: TaskEntry, status: Status) => {
-        router.patch(`/admin/tasks/${task.uid}/status`, { status }, { preserveScroll: true });
+    const moveStatus = (task: TaskEntry, target: { status: Status; priority?: Priority }) => {
+        router.patch(
+            `/admin/tasks/${task.uid}/status`,
+            target.priority ? { status: target.status, priority: target.priority } : { status: target.status },
+            { preserveScroll: true },
+        );
     };
 
     const handleDragStart = (task: TaskEntry) => {
@@ -178,12 +198,12 @@ export default function TaskBoard() {
         setDraggedUid(task.uid);
     };
 
-    const handleDrop = (status: Status) => {
+    const handleDrop = (col: BoardColumn) => {
         const task = tasks.find((t) => t.uid === draggedUid);
         setDraggedUid(null);
         setDragOverCol(null);
-        if (!task || task.status === status || !canTouch(task)) return;
-        moveStatus(task, status);
+        if (!task || col.matches(task) || !canTouch(task)) return;
+        moveStatus(task, col.target);
     };
 
     const saveRemark = () => {
@@ -229,24 +249,29 @@ export default function TaskBoard() {
 
     const assignToMe = (task: TaskEntry) => {
         if (!currentStaffUid) return;
-        router.patch(`/admin/tasks/${task.uid}/assign`, { assigned_to: currentStaffUid }, {
-            preserveScroll: true,
-            onSuccess: () => setDetailTask(null),
-        });
+        setPendingAssign({ task, staffUid: currentStaffUid, staffName: 'yourself' });
     };
 
     const unassign = (task: TaskEntry) => {
-        router.patch(`/admin/tasks/${task.uid}/assign`, { assigned_to: null }, {
-            preserveScroll: true,
-            onSuccess: () => setDetailTask(null),
-        });
+        setPendingAssign({ task, staffUid: null, staffName: task.assigned_to_name ?? 'this staff member' });
     };
 
     const reassign = (task: TaskEntry, staffUid: string) => {
-        router.patch(`/admin/tasks/${task.uid}/assign`, { assigned_to: staffUid || null }, {
+        if (!staffUid) {
+            setPendingAssign({ task, staffUid: null, staffName: task.assigned_to_name ?? 'this staff member' });
+            return;
+        }
+        const staffName = staffOptions.find((s) => s.uid === staffUid)?.name ?? 'this staff member';
+        setPendingAssign({ task, staffUid, staffName });
+    };
+
+    const confirmAssign = () => {
+        if (!pendingAssign) return;
+        router.patch(`/admin/tasks/${pendingAssign.task.uid}/assign`, { assigned_to: pendingAssign.staffUid }, {
             preserveScroll: true,
             onSuccess: () => setDetailTask(null),
         });
+        setPendingAssign(null);
     };
 
     return (
@@ -258,18 +283,37 @@ export default function TaskBoard() {
                         <li className="breadcrumb-item active">Tasks</li>
                     </ol>
                 </nav>
-                {canManageTasks && (
-                    <button type="button" className="btn btn-primary" onClick={openCreate}>
-                        <i className="fa fa-plus me-2"></i>Add Task
-                    </button>
-                )}
+                <div className="d-flex align-items-center gap-2">
+                    <div className="btn-group" role="group" aria-label="View toggle">
+                        <button
+                            type="button"
+                            className={`btn btn-sm ${view === 'kanban' ? 'btn-primary' : 'btn-outline-primary'}`}
+                            onClick={() => setView('kanban')}
+                        >
+                            <i className="fa fa-table-columns me-1"></i>Kanban
+                        </button>
+                        <button
+                            type="button"
+                            className={`btn btn-sm ${view === 'table' ? 'btn-primary' : 'btn-outline-primary'}`}
+                            onClick={() => setView('table')}
+                        >
+                            <i className="fa fa-list me-1"></i>Table
+                        </button>
+                    </div>
+                    {canManageTasks && (
+                        <button type="button" className="btn btn-primary" onClick={openCreate}>
+                            <i className="fa fa-plus me-2"></i>Add Task
+                        </button>
+                    )}
+                </div>
             </div>
 
-            <div className="row g-3">
-                {COLUMNS.map((col) => {
-                    const colTasks = tasksByStatus(col.key);
+            {view === 'kanban' ? (
+            <div className="row g-3 row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-5">
+                {BOARD_COLUMNS.map((col) => {
+                    const colTasks = tasks.filter(col.matches);
                     return (
-                        <div className="col-lg-3 col-sm-6" key={col.key}>
+                        <div className="col" key={col.key}>
                             <div className="card h-100">
                                 <div className="card-header d-flex justify-content-between align-items-center">
                                     <span className="fw-semibold">{col.label}</span>
@@ -280,7 +324,7 @@ export default function TaskBoard() {
                                     style={{ minHeight: 160 }}
                                     onDragOver={(e) => { e.preventDefault(); setDragOverCol(col.key); }}
                                     onDragLeave={() => setDragOverCol((cur) => (cur === col.key ? null : cur))}
-                                    onDrop={(e) => { e.preventDefault(); handleDrop(col.key); }}
+                                    onDrop={(e) => { e.preventDefault(); handleDrop(col); }}
                                 >
                                     {colTasks.length === 0 && (
                                         <div className="text-muted small text-center py-3">No tasks</div>
@@ -299,7 +343,7 @@ export default function TaskBoard() {
                                             <div className="d-flex justify-content-between align-items-start gap-2">
                                                 <span className="fw-semibold">{task.title}</span>
                                                 <div className="d-flex align-items-center gap-2">
-                                                    <span className={`badge ${PRIORITY_BADGE[task.priority]} text-capitalize`}>{task.priority}</span>
+                                                    <span className={`badge ${PRIORITY_BADGE[task.priority]}`}>{PRIORITY_LABEL[task.priority]}</span>
                                                     <button
                                                         type="button"
                                                         className="btn btn-sm btn-link p-0 text-muted"
@@ -341,6 +385,48 @@ export default function TaskBoard() {
                     );
                 })}
             </div>
+            ) : (
+            <div className="card">
+                <div className="table-responsive">
+                    <table className="table table-hover align-middle mb-0">
+                        <thead className="table-light">
+                            <tr>
+                                <th>Title</th>
+                                <th>Type of Task</th>
+                                <th>Status</th>
+                                <th>Assigned To</th>
+                                <th>Due Date</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {tasks.length === 0 && (
+                                <tr><td colSpan={6} className="text-center text-muted py-4">No tasks</td></tr>
+                            )}
+                            {tasks.map((task) => (
+                                <tr key={task.uid} role="button" onClick={() => openDetail(task)}>
+                                    <td>{task.title}</td>
+                                    <td><span className={`badge ${PRIORITY_BADGE[task.priority]}`}>{PRIORITY_LABEL[task.priority]}</span></td>
+                                    <td><span className="badge bg-primary bg-opacity-10 text-primary">{STATUS_LABEL[task.status]}</span></td>
+                                    <td>{task.assigned_to_name ?? 'Unassigned'}</td>
+                                    <td className={isOverdue(task) ? 'text-danger' : ''}>{task.due_date ? formatDueDate(task.due_date) : '—'}</td>
+                                    <td className="text-end">
+                                        <button
+                                            type="button"
+                                            className="btn btn-sm btn-link p-0 text-muted"
+                                            title="View task"
+                                            onClick={(e) => { e.stopPropagation(); router.visit(`/admin/tasks/${task.uid}`); }}
+                                        >
+                                            <i className="fa fa-eye"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            )}
 
             {history.length > 0 && (
                 <div className="card mt-4">
@@ -353,7 +439,7 @@ export default function TaskBoard() {
                             <thead className="table-light">
                                 <tr>
                                     <th>Title</th>
-                                    <th>Priority</th>
+                                    <th>Type of Task</th>
                                     <th>Assigned To</th>
                                     <th>Completed</th>
                                 </tr>
@@ -362,7 +448,7 @@ export default function TaskBoard() {
                                 {history.map((task) => (
                                     <tr key={task.uid} role="button" onClick={() => router.visit(`/admin/tasks/${task.uid}`)}>
                                         <td>{task.title}</td>
-                                        <td><span className={`badge ${PRIORITY_BADGE[task.priority]} text-capitalize`}>{task.priority}</span></td>
+                                        <td><span className={`badge ${PRIORITY_BADGE[task.priority]}`}>{PRIORITY_LABEL[task.priority]}</span></td>
                                         <td>{task.assigned_to_name ?? 'Unassigned'}</td>
                                         <td className="text-muted small">{task.status_updated_at}</td>
                                     </tr>
@@ -375,14 +461,15 @@ export default function TaskBoard() {
 
             {(showCreate || editingTask) && (
                 <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-                    <div className="modal-dialog">
+                    <div className="modal-dialog modal-lg modal-dialog-centered">
                         <div className="modal-content">
                             <div className="modal-header">
                                 <h5 className="modal-title">{editingTask ? 'Edit Task' : 'Add Task'}</h5>
                                 <button type="button" className="btn-close" onClick={closeForm}></button>
                             </div>
                             <div className="modal-body">
-                                <div className="mb-3">
+                                <div className="row g-3 mb-3">
+                                <div className="col-sm-6">
                                     <label className="form-label">Title</label>
                                     <input
                                         type="text"
@@ -391,6 +478,16 @@ export default function TaskBoard() {
                                         onChange={(e) => setForm({ ...form, title: e.target.value })}
                                     />
                                     {errors.title && <div className="invalid-feedback d-block">{errors.title}</div>}
+                                </div>
+
+                                <div className="col-sm-6">
+                                    <DatePicker
+                                        label="Due Date"
+                                        value={form.due_date}
+                                        onChange={(date) => setForm({ ...form, due_date: date })}
+                                        minDate={new Date().toISOString().split('T')[0]}
+                                    />
+                                </div>
                                 </div>
                                 <div className="mb-3">
                                     <label className="form-label">Details</label>
@@ -403,14 +500,14 @@ export default function TaskBoard() {
                                 </div>
                                 <div className="row g-3 mb-3">
                                     <div className="col-sm-6">
-                                        <label className="form-label">Priority</label>
+                                        <label className="form-label">Type of Task</label>
                                         <select
                                             className="form-select"
                                             value={form.priority}
                                             onChange={(e) => setForm({ ...form, priority: e.target.value as Priority })}
                                         >
                                             {priorities.map((p) => (
-                                                <option key={p} value={p} className="text-capitalize">{p}</option>
+                                                <option key={p} value={p}>{PRIORITY_LABEL[p]}</option>
                                             ))}
                                         </select>
                                     </div>
@@ -428,13 +525,7 @@ export default function TaskBoard() {
                                         </select>
                                     </div>
                                 </div>
-                                <div className="mb-3">
-                                    <DatePicker
-                                        label="Due Date"
-                                        value={form.due_date}
-                                        onChange={(date) => setForm({ ...form, due_date: date })}
-                                    />
-                                </div>
+                                
                                 <div className="mb-3">
                                     <label className="form-label">Attachments</label>
                                     <input
@@ -471,7 +562,7 @@ export default function TaskBoard() {
                             </div>
                             <div className="modal-body">
                                 <div className="d-flex flex-wrap gap-2 mb-3">
-                                    <span className={`badge ${PRIORITY_BADGE[detailTask.priority]} text-capitalize`}>{detailTask.priority} priority</span>
+                                    <span className={`badge ${PRIORITY_BADGE[detailTask.priority]}`}>{PRIORITY_LABEL[detailTask.priority]}</span>
                                     <span className="badge bg-primary bg-opacity-10 text-primary">{STATUS_LABEL[detailTask.status]}</span>
                                     {detailTask.due_date && (
                                         <span className={`badge ${isOverdue(detailTask) ? 'bg-danger bg-opacity-10 text-danger' : 'bg-secondary bg-opacity-10 text-secondary'}`}>
@@ -523,12 +614,15 @@ export default function TaskBoard() {
                                     <div className="mb-3">
                                         <label className="form-label small fw-semibold">Move to</label>
                                         <div className="d-flex flex-wrap gap-2">
-                                            {COLUMNS.map((col) => (
+                                            {BOARD_COLUMNS.map((col) => (
                                                 <button
                                                     key={col.key}
                                                     type="button"
-                                                    className={`btn btn-sm ${detailTask.status === col.key ? 'btn-primary' : 'btn-outline-secondary'}`}
-                                                    onClick={() => { moveStatus(detailTask, col.key); setDetailTask({ ...detailTask, status: col.key }); }}
+                                                    className={`btn btn-sm ${col.matches(detailTask) ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                                    onClick={() => {
+                                                        moveStatus(detailTask, col.target);
+                                                        setDetailTask({ ...detailTask, status: col.target.status, priority: col.target.priority ?? detailTask.priority });
+                                                    }}
                                                 >
                                                     {col.label}
                                                 </button>
@@ -668,6 +762,20 @@ export default function TaskBoard() {
                     </div>
                 </div>
             )}
+
+            <ConfirmDialog
+                isOpen={!!pendingAssign}
+                title={pendingAssign?.staffUid ? 'Confirm Assignment' : 'Confirm Unassignment'}
+                message={
+                    pendingAssign?.staffUid
+                        ? `Are you sure you want to assign "${pendingAssign.task.title}" to ${pendingAssign.staffName}?`
+                        : `Are you sure you want to unassign "${pendingAssign?.task.title ?? ''}" from ${pendingAssign?.staffName ?? ''}?`
+                }
+                onConfirm={confirmAssign}
+                onCancel={() => setPendingAssign(null)}
+                confirmText={pendingAssign?.staffUid ? 'Yes, Assign' : 'Yes, Unassign'}
+                confirmVariant="primary"
+            />
         </div>
     );
 }

@@ -11,9 +11,15 @@ return new class extends Migration
         Schema::create('clients', function (Blueprint $table) {
             $table->id();
             $table->uuid('uid')->unique();
+            // Human-readable client id: CLDC0000001 for a superadmin-owned
+            // client, CLDCA00001 for an agency-owned one — each prefix has
+            // its own running count, shared across all agencies.
+            $table->string('cid', 20)->unique()->nullable();
             // Who this client belongs to: App\Models\Agency or App\Models\User (superadmin)
             $table->nullableMorphs('owner');
             $table->string('name', 255);
+            $table->string('first_name', 255)->nullable();
+            $table->string('last_name', 255)->nullable();
             $table->string('email', 255)->nullable();
             $table->string('phone', 20)->nullable();
             $table->string('nationality', 100)->nullable();
@@ -58,6 +64,11 @@ return new class extends Migration
             $table->string('relation', 100)->nullable();
             $table->date('dob')->nullable();
             $table->string('passport_number', 100)->nullable();
+            $table->string('place_of_issue', 255)->nullable();
+            $table->date('date_of_issue')->nullable();
+            $table->date('expiry_date')->nullable();
+            $table->string('front_image', 255)->nullable();
+            $table->string('back_image', 255)->nullable();
             $table->string('id_number', 100)->nullable();
             $table->timestamps();
         });
@@ -70,6 +81,11 @@ return new class extends Migration
             // Who created the folder: App\Models\Agency or App\Models\User
             $table->nullableMorphs('owner');
             $table->string('name', 255);
+            // Scheduled cleanup: when set, this folder (and everything
+            // nested inside it) becomes eligible for deletion once this
+            // date arrives — either via the manual "delete due folders"
+            // action or, later, an automatic scheduled job.
+            $table->date('delete_date')->nullable();
             $table->timestamps();
         });
     }

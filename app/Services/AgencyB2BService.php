@@ -250,6 +250,16 @@ class AgencyB2BService
                     ]);
 
                     $data['tenant_id'] = $tenant->id;
+                } else {
+                    // The agency already has a tenant/domain — update the
+                    // existing records in place instead of silently
+                    // ignoring the edited domain name.
+                    Domain::where('tenant_id', $agency->tenant_id)->update(['domain' => $domain_name]);
+
+                    Tenant::where('id', $agency->tenant_id)->update([
+                        'name' => $domain_name,
+                        'slug' => Str::slug($domain_name),
+                    ]);
                 }
             } else {
                 $data['tenant_id'] = null;
@@ -338,8 +348,8 @@ class AgencyB2BService
                 // Step 1 - Basic Info validation
                 // For edits: logo is optional (only if provided), for creates: logo is required
                 $logoRule = $existingAgency
-                    ? 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048|min:50|dimensions:min_width=100,min_height=100'
-                    : 'required|image|mimes:jpeg,png,jpg,gif|max:2048|min:50|dimensions:min_width=100,min_height=100';
+                    ? 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120|dimensions:min_width=200,min_height=200'
+                    : 'required|image|mimes:jpeg,png,jpg,gif|max:5120|dimensions:min_width=200,min_height=200';
 
                 $rules = [
                     'agency_name' => 'required|string|max:255',
@@ -385,8 +395,8 @@ class AgencyB2BService
                 // Step 4 - Full validation for submission (all required fields)
                 // For edits: logo is optional (only if provided), for creates: logo is required
                 $logoRule = $existingAgency
-                    ? 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048|min:50|dimensions:min_width=100,min_height=100'
-                    : 'required|image|mimes:jpeg,png,jpg,gif|max:2048|min:50|dimensions:min_width=100,min_height=100';
+                    ? 'nullable|image|mimes:jpeg,png,jpg,gif|max:5120|dimensions:min_width=200,min_height=200'
+                    : 'required|image|mimes:jpeg,png,jpg,gif|max:5120|dimensions:min_width=200,min_height=200';
 
                 $rules = [
                     'agency_name' => 'required|string|max:255',

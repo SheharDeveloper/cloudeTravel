@@ -37,6 +37,7 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     require __DIR__.'/backend/visa-service.php';
     require __DIR__.'/backend/service.php';
     require __DIR__.'/backend/package.php';
+    require __DIR__.'/backend/country.php';
 
     // Settings Management
     Route::inertia('settings', 'Admin/Settings/Index')->name('admin.settings.index');

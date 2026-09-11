@@ -87,6 +87,11 @@ class User extends Authenticatable
         return $this->morphMany(AttendanceHistory::class, 'staffable');
     }
 
+    public function assignedTasks()
+    {
+        return $this->morphMany(Task::class, 'assigned_to');
+    }
+
     public function agencies(): HasMany
     {
         return $this->hasMany(Agency::class);

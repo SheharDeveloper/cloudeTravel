@@ -19,7 +19,7 @@ return new class extends Migration
             $table->nullableMorphs('owner');
             $table->string('title', 255);
             $table->text('details')->nullable();
-            $table->enum('priority', ['low', 'medium', 'high', 'urgent'])->default('medium');
+            $table->enum('priority', ['new_job', 'urgent'])->default('new_job');
             $table->date('due_date')->nullable();
             $table->enum('status', ['todo', 'in_progress', 'review', 'done'])->default('todo');
             // When the status last changed — drives the board's "done

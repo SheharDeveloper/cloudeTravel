@@ -20,7 +20,7 @@ use Illuminate\Support\Facades\Storage;
 
 class ClientService
 {
-    private const RELATIONS = ['address', 'passport', 'familyMembers', 'documents', 'folders', 'communications.causer'];
+    private const RELATIONS = ['address', 'passport', 'familyMembers', 'documents', 'folders', 'communications.causer', 'owner'];
 
     /**
      * The agency owning the current session, or null for a superadmin.
@@ -50,7 +50,7 @@ class ClientService
      */
     public function searchClients(string $search = '', int $perPage = 15)
     {
-        $query = Client::where($this->ownerAttributes());
+        $query = Client::with('owner')->where($this->ownerAttributes());
 
         if (!empty($search)) {
             $query->where(function ($q) use ($search) {
@@ -110,9 +110,13 @@ class ClientService
     public function createClient(array $data): Client
     {
         try {
+            $fullName = trim(($data['first_name'] ?? '') . ' ' . ($data['last_name'] ?? ''));
+
             $client = Client::create(
                 $this->ownerAttributes() + [
-                    'name' => $data['name'],
+                    'name' => $fullName,
+                    'first_name' => $data['first_name'] ?? null,
+                    'last_name' => $data['last_name'] ?? null,
                     'email' => $data['email'] ?? null,
                     'phone' => $data['phone'] ?? null,
                     'nationality' => $data['nationality'] ?? null,
@@ -141,8 +145,12 @@ class ClientService
     public function updateClient(Client $client, array $data): Client
     {
         try {
+            $fullName = trim(($data['first_name'] ?? '') . ' ' . ($data['last_name'] ?? ''));
+
             $client->update([
-                'name' => $data['name'],
+                'name' => $fullName,
+                'first_name' => $data['first_name'] ?? null,
+                'last_name' => $data['last_name'] ?? null,
                 'email' => $data['email'] ?? null,
                 'phone' => $data['phone'] ?? null,
                 'nationality' => $data['nationality'] ?? null,
@@ -218,6 +226,11 @@ class ClientService
                 'relation' => $member['relation'] ?? null,
                 'dob' => $member['dob'] ?? null,
                 'passport_number' => $member['passport_number'] ?? null,
+                'place_of_issue' => $member['place_of_issue'] ?? null,
+                'date_of_issue' => $member['date_of_issue'] ?? null,
+                'expiry_date' => $member['expiry_date'] ?? null,
+                'front_image' => $member['front_image'] ?? null,
+                'back_image' => $member['back_image'] ?? null,
                 'id_number' => $member['id_number'] ?? null,
             ]);
         }
@@ -231,7 +244,7 @@ class ClientService
      * @param UploadedFile[] $files
      * @return ClientDocument[]
      */
-    public function addDocuments(Client $client, array $files, string $documentType, ?int $folderId = null): array
+    public function addDocuments(Client $client, array $files, string $documentType, ?int $folderId = null, ?string $deleteDate = null): array
     {
         $this->ensureClientFolder($client);
 
@@ -257,6 +270,7 @@ class ClientService
                     'document_type' => $documentType,
                     'file_path' => $path,
                     'file_type' => $file->getClientOriginalExtension(),
+                    'delete_date' => $deleteDate,
                 ]
             );
         }
@@ -276,9 +290,52 @@ class ClientService
     }
 
     /**
-     * Create a folder for the client, optionally nested inside another one.
+     * Delete every document belonging to this client (any folder, or the
+     * root) whose delete_date has arrived — mirrors deleteDueFolders().
      */
-    public function createFolder(Client $client, ?int $parentId, string $name): ClientFolder
+    public function deleteDueDocuments(Client $client): int
+    {
+        $dueDocuments = $client->documents()
+            ->whereNotNull('delete_date')
+            ->whereDate('delete_date', '<=', now())
+            ->get();
+
+        foreach ($dueDocuments as $document) {
+            if ($document->file_path) {
+                Storage::disk('public')->delete(str_replace('/storage/', '', $document->file_path));
+            }
+
+            $document->delete();
+        }
+
+        return $dueDocuments->count();
+    }
+
+    /**
+     * Delete every due folder and every due document across all of the
+     * current session's clients (an agency's own, or a superadmin's own) —
+     * the global "Delete Due Items" navbar action, not scoped to one client.
+     */
+    public function deleteDueItemsForSession(): array
+    {
+        $clients = Client::where($this->ownerAttributes())->get();
+
+        $folderCount = 0;
+        $fileCount = 0;
+
+        foreach ($clients as $client) {
+            $folderCount += $this->deleteDueFolders($client);
+            $fileCount += $this->deleteDueDocuments($client);
+        }
+
+        return ['folders' => $folderCount, 'files' => $fileCount];
+    }
+
+    /**
+     * Create a folder for the client, optionally nested inside another one
+     * and/or with a scheduled delete date.
+     */
+    public function createFolder(Client $client, ?int $parentId, string $name, ?string $deleteDate = null): ClientFolder
     {
         if ($parentId) {
             ClientFolder::where('client_id', $client->id)->findOrFail($parentId);
@@ -289,6 +346,7 @@ class ClientService
                 'client_id' => $client->id,
                 'parent_id' => $parentId,
                 'name' => $name,
+                'delete_date' => $deleteDate,
             ]
         );
     }
@@ -309,6 +367,36 @@ class ClientService
         });
 
         return (bool) $folder->delete();
+    }
+
+    /**
+     * Delete every folder belonging to this client whose delete_date has
+     * arrived (today or earlier) — folders with no delete date, or one
+     * still in the future, are left untouched. A folder nested inside
+     * another due folder is skipped once its ancestor's cascade delete
+     * has already removed it. Currently triggered by a manual action; the
+     * same method is the natural hook for a scheduled job later.
+     */
+    public function deleteDueFolders(Client $client): int
+    {
+        $dueFolderIds = $client->folders()
+            ->whereNotNull('delete_date')
+            ->whereDate('delete_date', '<=', now())
+            ->pluck('id');
+
+        $deleted = 0;
+
+        foreach ($dueFolderIds as $id) {
+            $folder = ClientFolder::find($id);
+            if (!$folder) {
+                continue;
+            }
+
+            $this->deleteFolder($folder);
+            $deleted++;
+        }
+
+        return $deleted;
     }
 
     /**
@@ -359,6 +447,7 @@ class ClientService
         return [
             'document_type' => 'required|string|max:100',
             'folder_id' => 'nullable|integer|exists:client_folders,id',
+            'delete_date' => 'required|date',
             'files' => 'required|array|min:1',
             'files.*' => 'file|mimes:jpeg,png,jpg,gif,pdf,doc,docx,xls,xlsx,ppt,pptx,csv,txt,mp3,mp4|max:5120',
         ];
@@ -372,6 +461,7 @@ class ClientService
         return [
             'name' => 'required|string|max:255',
             'parent_id' => 'nullable|integer|exists:client_folders,id',
+            'delete_date' => 'required|date',
         ];
     }
 
@@ -456,7 +546,8 @@ class ClientService
     public function validateStep(int $step, array $data): array
     {
         $basicRules = [
-            'name' => 'required|string|max:255',
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'required|string|max:255',
             'email' => 'nullable|email|max:255',
             'phone' => 'required|string|max:20',
             'nationality' => 'nullable|string|max:100',
@@ -477,7 +568,9 @@ class ClientService
             'passport_number' => 'nullable|string|max:100',
             'place_of_issue' => 'nullable|string|max:255',
             'date_of_issue' => 'nullable|date|before:today',
-            'expiry_date' => 'nullable|date|after:today',
+            // Expiring within 6 months only surfaces as a warning on the
+            // form (isExpiringSoon) — it doesn't block creating the client.
+            'expiry_date' => 'nullable|date',
             'front_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'back_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'is_foreigner' => 'nullable|boolean',
@@ -492,6 +585,11 @@ class ClientService
             'family_members.*.relation' => 'nullable|string|max:100',
             'family_members.*.dob' => 'nullable|date',
             'family_members.*.passport_number' => 'nullable|string|max:100',
+            'family_members.*.place_of_issue' => 'nullable|string|max:255',
+            'family_members.*.date_of_issue' => 'nullable|date|before:today',
+            'family_members.*.expiry_date' => 'nullable|date|after:today',
+            'family_members.*.front_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'family_members.*.back_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'family_members.*.id_number' => 'nullable|string|max:100',
         ];
 

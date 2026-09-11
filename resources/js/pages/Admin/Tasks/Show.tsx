@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import DatePicker from '@/components/DatePicker';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 interface StaffOption {
     uid: string;
@@ -30,7 +31,7 @@ interface AssignmentHistoryEntry {
 }
 
 type Status = 'todo' | 'in_progress' | 'review' | 'done';
-type Priority = 'low' | 'medium' | 'high' | 'urgent';
+type Priority = 'new_job' | 'urgent';
 
 interface TaskDetail {
     uid: string;
@@ -60,23 +61,38 @@ interface PageProps {
     priorities: Priority[];
 }
 
-const COLUMNS: { key: Status; label: string }[] = [
-    { key: 'todo', label: 'To Do' },
-    { key: 'in_progress', label: 'In Progress' },
-    { key: 'review', label: 'Review' },
-    { key: 'done', label: 'Done' },
+type BoardColumnKey = 'new_job' | 'urgent' | 'in_progress' | 'review' | 'done';
+
+interface BoardColumn {
+    key: BoardColumnKey;
+    label: string;
+    matches: (task: TaskDetail) => boolean;
+    target: { status: Status; priority?: Priority };
+}
+
+// Mirrors the board on the Tasks index: "todo" splits into New Job / Urgent
+// columns by priority, the rest are plain status stages.
+const BOARD_COLUMNS: BoardColumn[] = [
+    { key: 'new_job', label: 'New Job', matches: (t) => t.status === 'todo' && t.priority === 'new_job', target: { status: 'todo', priority: 'new_job' } },
+    { key: 'urgent', label: 'Urgent', matches: (t) => t.status === 'todo' && t.priority === 'urgent', target: { status: 'todo', priority: 'urgent' } },
+    { key: 'in_progress', label: 'Progress', matches: (t) => t.status === 'in_progress', target: { status: 'in_progress' } },
+    { key: 'review', label: 'Review', matches: (t) => t.status === 'review', target: { status: 'review' } },
+    { key: 'done', label: 'Done', matches: (t) => t.status === 'done', target: { status: 'done' } },
 ];
 
 const PRIORITY_BADGE: Record<Priority, string> = {
-    low: 'bg-secondary bg-opacity-10 text-secondary',
-    medium: 'bg-info bg-opacity-10 text-info-emphasis',
-    high: 'bg-warning bg-opacity-10 text-warning-emphasis',
+    new_job: 'bg-info bg-opacity-10 text-info-emphasis',
     urgent: 'bg-danger bg-opacity-10 text-danger',
+};
+
+const PRIORITY_LABEL: Record<Priority, string> = {
+    new_job: 'New Job',
+    urgent: 'Urgent',
 };
 
 const STATUS_LABEL: Record<Status, string> = {
     todo: 'To Do',
-    in_progress: 'In Progress',
+    in_progress: 'Progress',
     review: 'Review',
     done: 'Done',
 };
@@ -114,6 +130,7 @@ export default function TaskShow() {
     const [noteDraft, setNoteDraft] = useState('');
     const [savingNote, setSavingNote] = useState(false);
     const [showAddNote, setShowAddNote] = useState(false);
+    const [pendingAssign, setPendingAssign] = useState<{ staffUid: string | null; staffName: string } | null>(null);
 
     const canTouch = canManageTasks || (!!currentStaffUid && task.assigned_to_uid === currentStaffUid);
 
@@ -122,8 +139,12 @@ export default function TaskShow() {
 
     const isOverdue = !!task.due_date && task.status !== 'done' && task.due_date < new Date().toISOString().split('T')[0];
 
-    const moveStatus = (status: Status) => {
-        router.patch(`/admin/tasks/${task.uid}/status`, { status }, { preserveScroll: true });
+    const moveStatus = (target: { status: Status; priority?: Priority }) => {
+        router.patch(
+            `/admin/tasks/${task.uid}/status`,
+            target.priority ? { status: target.status, priority: target.priority } : { status: target.status },
+            { preserveScroll: true },
+        );
     };
 
     const saveRemark = () => {
@@ -146,15 +167,26 @@ export default function TaskShow() {
 
     const assignToMe = () => {
         if (!currentStaffUid) return;
-        router.patch(`/admin/tasks/${task.uid}/assign`, { assigned_to: currentStaffUid }, { preserveScroll: true });
+        setPendingAssign({ staffUid: currentStaffUid, staffName: 'yourself' });
     };
 
     const unassign = () => {
-        router.patch(`/admin/tasks/${task.uid}/assign`, { assigned_to: null }, { preserveScroll: true });
+        setPendingAssign({ staffUid: null, staffName: task.assigned_to_name ?? 'this staff member' });
     };
 
     const reassign = (staffUid: string) => {
-        router.patch(`/admin/tasks/${task.uid}/assign`, { assigned_to: staffUid || null }, { preserveScroll: true });
+        if (!staffUid) {
+            setPendingAssign({ staffUid: null, staffName: task.assigned_to_name ?? 'this staff member' });
+            return;
+        }
+        const staffName = staffOptions.find((s) => s.uid === staffUid)?.name ?? 'this staff member';
+        setPendingAssign({ staffUid, staffName });
+    };
+
+    const confirmAssign = () => {
+        if (!pendingAssign) return;
+        router.patch(`/admin/tasks/${task.uid}/assign`, { assigned_to: pendingAssign.staffUid }, { preserveScroll: true });
+        setPendingAssign(null);
     };
 
     const openEdit = () => {
@@ -225,7 +257,7 @@ export default function TaskShow() {
                         <div>
                             <h3 className="fw-semibold mb-2">{task.title}</h3>
                             <div className="d-flex flex-wrap gap-2 mb-2">
-                                <span className={`badge ${PRIORITY_BADGE[task.priority]} text-capitalize`}>{task.priority} priority</span>
+                                <span className={`badge ${PRIORITY_BADGE[task.priority]}`}>{PRIORITY_LABEL[task.priority]}</span>
                                 <span className="badge bg-primary bg-opacity-10 text-primary">{STATUS_LABEL[task.status]}</span>
                                 {task.due_date && (
                                     <span className={`badge ${isOverdue ? 'bg-danger bg-opacity-10 text-danger' : 'bg-secondary bg-opacity-10 text-secondary'}`}>
@@ -283,14 +315,14 @@ export default function TaskShow() {
                                 </div>
                                 <div className="row g-3 mb-3">
                                     <div className="col-sm-6">
-                                        <label className="form-label">Priority</label>
+                                        <label className="form-label">Type of Task</label>
                                         <select
                                             className="form-select"
                                             value={form.priority}
                                             onChange={(e) => setForm({ ...form, priority: e.target.value as Priority })}
                                         >
                                             {priorities.map((p) => (
-                                                <option key={p} value={p} className="text-capitalize">{p}</option>
+                                                <option key={p} value={p}>{PRIORITY_LABEL[p]}</option>
                                             ))}
                                         </select>
                                     </div>
@@ -376,6 +408,20 @@ export default function TaskShow() {
                 </div>
             )}
 
+            <ConfirmDialog
+                isOpen={!!pendingAssign}
+                title={pendingAssign?.staffUid ? 'Confirm Assignment' : 'Confirm Unassignment'}
+                message={
+                    pendingAssign?.staffUid
+                        ? `Are you sure you want to assign "${task.title}" to ${pendingAssign.staffName}?`
+                        : `Are you sure you want to unassign "${task.title}" from ${pendingAssign?.staffName ?? ''}?`
+                }
+                onConfirm={confirmAssign}
+                onCancel={() => setPendingAssign(null)}
+                confirmText={pendingAssign?.staffUid ? 'Yes, Assign' : 'Yes, Unassign'}
+                confirmVariant="primary"
+            />
+
             <div className="row">
                 <div className="col-lg-3 col-xl-2 mb-4">
                     <div className="card h-auto">
@@ -418,12 +464,12 @@ export default function TaskShow() {
                                         <div className="card-header"><h6 className="card-title mb-0">Move To</h6></div>
                                         <div className="card-body">
                                             <div className="d-flex flex-wrap gap-2">
-                                                {COLUMNS.map((col) => (
+                                                {BOARD_COLUMNS.map((col) => (
                                                     <button
                                                         key={col.key}
                                                         type="button"
-                                                        className={`btn btn-sm ${task.status === col.key ? 'btn-primary' : 'btn-outline-secondary'}`}
-                                                        onClick={() => moveStatus(col.key)}
+                                                        className={`btn btn-sm ${col.matches(task) ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                                        onClick={() => moveStatus(col.target)}
                                                     >
                                                         {col.label}
                                                     </button>

@@ -10,7 +10,11 @@ class ClientDocument extends Model
 
     protected $fillable = [
         'documentable_type', 'documentable_id', 'owner_type', 'owner_id', 'folder_id',
-        'document_name', 'document_type', 'file_path', 'file_type',
+        'document_name', 'document_type', 'file_path', 'file_type', 'delete_date',
+    ];
+
+    protected $casts = [
+        'delete_date' => 'date',
     ];
 
     /**

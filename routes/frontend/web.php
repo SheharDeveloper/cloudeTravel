@@ -60,6 +60,11 @@ Route::post('attendance/mark', [\App\Http\Controllers\AttendanceController::clas
 
 // Profile Settings (authenticated users)
 Route::middleware('auth:web,agency')->get('profile', fn() => inertia('ProfileSettings'))->name('profile');
+Route::middleware('auth:web,agency')->get('profile/overview', [App\Http\Controllers\Settings\ProfileController::class, 'overview'])->name('profile.overview');
+Route::middleware('auth:web,agency')->get('profile/edit-details', [App\Http\Controllers\Settings\ProfileController::class, 'editDetails'])->name('profile.edit-details');
+Route::middleware('auth:web,agency')->put('profile/edit-details', [App\Http\Controllers\Settings\ProfileController::class, 'updateDetails'])->name('profile.edit-details.update');
+Route::middleware('auth:web,agency')->delete('profile/educations/{id}', [App\Http\Controllers\Settings\ProfileController::class, 'deleteEducation'])->name('profile.educations.destroy');
+Route::middleware('auth:web,agency')->delete('profile/documents/{id}', [App\Http\Controllers\Settings\ProfileController::class, 'deleteDocument'])->name('profile.documents.destroy');
 Route::middleware('auth:web,agency')->put('profile', [App\Http\Controllers\Settings\ProfileController::class, 'updateFromProfile'])->name('profile.update.put');
 Route::middleware('auth:web,agency')->post('profile-upload', [App\Http\Controllers\Settings\ProfileController::class, 'uploadProfile'])->name('profile.upload');
 Route::middleware('auth:web,agency')->put('password', [App\Http\Controllers\Settings\SecurityController::class, 'updatePassword'])->name('password.update.put');

@@ -1,6 +1,8 @@
 import { router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import AttendanceCalendar from '@/components/AttendanceCalendar';
+import AlertBell from '@/components/AlertBell';
+import { isExpiringSoon } from '@/lib/utils';
 
 const TABS = [
     { key: 'personal', label: 'Personal Information' },
@@ -45,6 +47,16 @@ export default function StaffShow() {
     const documents = staff?.staff_documents || [];
     const activityLogs = staff?.staff_activity_logs || [];
     const currentRole = staff?.roles?.[0]?.name || '';
+
+    const staffAlerts: string[] = [];
+    if (isExpiringSoon(passport?.expiry_date)) staffAlerts.push('Passport expires within 6 months');
+    if (passport?.is_foreigner && isExpiringSoon(passport?.visa_expiry_date)) staffAlerts.push('Visa expires within 6 months');
+    if (!payment?.salary) staffAlerts.push('Salary is not added');
+    if (!payment?.bank_name || !payment?.account_number) staffAlerts.push('Bank account details are missing');
+    if (!payment?.ifsc_code) staffAlerts.push('Bank IFSC code is missing');
+    if (!passport?.passport_number) staffAlerts.push('Passport number is missing');
+    if (!passport?.front_image || !passport?.back_image) staffAlerts.push('Passport photo is missing');
+    if (!emergency) staffAlerts.push('Emergency contact details are missing');
 
     const submitRole = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -98,10 +110,16 @@ export default function StaffShow() {
         return map[action] || 'bg-secondary';
     };
 
-    const Field = ({ label, value }: { label: string; value: any }) => (
+    const Field = ({ label, value, warning }: { label: string; value: any; warning?: string }) => (
         <div className="col-md-6 mb-3">
             <label className="text-muted small">{label}</label>
-            <p className="fw-semibold">{value || 'N/A'}</p>
+            <p className="fw-semibold mb-0">{value || 'N/A'}</p>
+            {warning && (
+                <div className="text-warning small">
+                    <i className="fa fa-triangle-exclamation me-1"></i>
+                    {warning}
+                </div>
+            )}
         </div>
     );
 
@@ -172,7 +190,8 @@ export default function StaffShow() {
                         </div>
 
                         <div className="text-end">
-                            <div className="mb-3">
+                            <div className="d-flex align-items-center justify-content-end gap-2 mb-3">
+                                <AlertBell alerts={staffAlerts} />
                                 <span className={`badge ${staff?.status === 'active' ? 'bg-success' : 'bg-danger'}`}>
                                     {staff?.status === 'active' ? 'Active' : 'Inactive'}
                                 </span>
@@ -443,7 +462,11 @@ export default function StaffShow() {
                                         <Field label="Passport Number" value={passport?.passport_number} />
                                         <Field label="Place of Issue" value={passport?.place_of_issue} />
                                         <Field label="Date of Issue" value={passport?.date_of_issue ? formatDate(passport.date_of_issue) : null} />
-                                        <Field label="Expiry Date" value={passport?.expiry_date ? formatDate(passport.expiry_date) : null} />
+                                        <Field
+                                            label="Expiry Date"
+                                            value={passport?.expiry_date ? formatDate(passport.expiry_date) : null}
+                                            warning={isExpiringSoon(passport?.expiry_date) ? 'This passport expires within 6 months.' : undefined}
+                                        />
 
                                         <div className="col-md-6 mb-3">
                                             <label className="text-muted small">Passport Front</label>
@@ -482,7 +505,11 @@ export default function StaffShow() {
                                             <>
                                                 <Field label="Type of Visa" value={passport?.visa_type} />
                                                 <Field label="Visa Number" value={passport?.visa_number} />
-                                                <Field label="Visa Expiry Date" value={passport?.visa_expiry_date ? formatDate(passport.visa_expiry_date) : null} />
+                                                <Field
+                                                    label="Visa Expiry Date"
+                                                    value={passport?.visa_expiry_date ? formatDate(passport.visa_expiry_date) : null}
+                                                    warning={isExpiringSoon(passport?.visa_expiry_date) ? 'This visa expires within 6 months.' : undefined}
+                                                />
                                             </>
                                         )}
                                     </div>

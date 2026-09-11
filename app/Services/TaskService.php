@@ -18,7 +18,7 @@ class TaskService
 {
     private const STATUSES = ['todo', 'in_progress', 'review', 'done'];
 
-    private const PRIORITIES = ['low', 'medium', 'high', 'urgent'];
+    private const PRIORITIES = ['new_job', 'urgent'];
 
     public function statuses(): array
     {
@@ -124,6 +124,24 @@ class TaskService
     }
 
     /**
+     * Every task assigned to a specific staff member — newest first. Used
+     * by that person's own profile page, unlike boardForCurrentSession()
+     * which is scoped by owner (agency-wide) rather than assignee. Works
+     * for either a superadmin-side User or an agency-side AgencyUser —
+     * assignedTasks() is a polymorphic relation defined on both models, so
+     * it queries the right table automatically.
+     */
+    public function tasksAssignedTo(User|AgencyUser $staff): Collection
+    {
+        return $staff->assignedTasks()
+            ->with(['assignedTo', 'createdBy', 'attachments', 'notes.author'])
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(fn (Task $task) => $this->present($task))
+            ->values();
+    }
+
+    /**
      * Fetch a task the current session is allowed to see.
      */
     public function findTask(string $uid): Task
@@ -196,7 +214,7 @@ class TaskService
         $task = Task::create($this->currentOwnerAttributes() + [
             'title' => $data['title'],
             'details' => $data['details'] ?? null,
-            'priority' => $data['priority'] ?? 'medium',
+            'priority' => $data['priority'] ?? 'new_job',
             'due_date' => $data['due_date'] ?? null,
             'status' => $data['status'] ?? 'todo',
             'assigned_to_type' => $assignedTo ? get_class($assignedTo) : null,
@@ -271,9 +289,20 @@ class TaskService
         return $task->fresh(['assignedTo', 'createdBy', 'attachments']);
     }
 
-    public function updateStatus(Task $task, string $status): Task
+    /**
+     * Move a task between board columns. An optional priority accompanies
+     * the move when the target column is "New Job" or "Urgent" — both map
+     * to the 'todo' status but are split by priority on the board.
+     */
+    public function updateStatus(Task $task, string $status, ?string $priority = null): Task
     {
-        $task->update(['status' => $status, 'status_updated_at' => now()]);
+        $updates = ['status' => $status, 'status_updated_at' => now()];
+
+        if ($priority !== null) {
+            $updates['priority'] = $priority;
+        }
+
+        $task->update($updates);
 
         return $task->fresh(['assignedTo', 'createdBy', 'attachments']);
     }

@@ -21,6 +21,10 @@ return new class extends Migration
             $table->string('document_type', 100)->default('other');
             $table->string('file_path', 255);
             $table->string('file_type', 100)->nullable();
+            // Scheduled cleanup: when set, this file becomes eligible for
+            // deletion once this date arrives — mirrors client_folders'
+            // delete_date.
+            $table->date('delete_date')->nullable();
             $table->timestamps();
         });
     }

@@ -16,6 +16,7 @@ class DatabaseSeeder extends Seeder
         // Seed admin user
         $this->call(AdminUserSeeder::class);
         $this->call(RolePermissionSeeder::class);
+        $this->call(CountrySeeder::class);
         $this->call(ContactInfoSeeder::class);
         $this->call(HeroImageSeeder::class);
         $this->call(SpecialOfferSeeder::class);
