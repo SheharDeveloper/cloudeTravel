@@ -5,17 +5,40 @@ type CountryEntry = {
     id: number;
     countryCode: string;
     countryName: string;
+    currency_code: string | null;
+    exchange_rate: string | null;
     flag_url: string;
 };
 
 export default function CountryIndex() {
-    const { countries, filters } = usePage().props as any;
+    const { countries, filters, allCountries, defaultCountryId } = usePage().props as any;
     const [editingId, setEditingId] = useState<number | null>(null);
     const [countryCode, setCountryCode] = useState('');
     const [countryName, setCountryName] = useState('');
+    const [currencyCode, setCurrencyCode] = useState('');
+    const [exchangeRate, setExchangeRate] = useState('');
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [deleteTarget, setDeleteTarget] = useState<CountryEntry | null>(null);
+
+    const [defaultCountry, setDefaultCountry] = useState(defaultCountryId ? String(defaultCountryId) : '');
+    const [savingDefault, setSavingDefault] = useState(false);
+
+    const saveDefaultCountry = () => {
+        if (!defaultCountry) return;
+        setSavingDefault(true);
+        router.post('/admin/countries/default-country', { country_id: Number(defaultCountry) }, {
+            preserveScroll: true,
+            onFinish: () => setSavingDefault(false),
+        });
+    };
+
+    const selectedDefaultCountry: CountryEntry | undefined = (allCountries || []).find(
+        (c: CountryEntry) => c.id === Number(defaultCountry)
+    );
+    const defaultCurrencyLabel = selectedDefaultCountry
+        ? (selectedDefaultCountry.currency_code || selectedDefaultCountry.countryCode)
+        : 'USD';
 
     const list: CountryEntry[] = countries?.data || [];
     const currentPage = countries?.current_page || 1;
@@ -33,6 +56,8 @@ export default function CountryIndex() {
         setEditingId(null);
         setCountryCode('');
         setCountryName('');
+        setCurrencyCode('');
+        setExchangeRate('');
         setErrors({});
     };
 
@@ -40,6 +65,8 @@ export default function CountryIndex() {
         setEditingId(country.id);
         setCountryCode(country.countryCode);
         setCountryName(country.countryName);
+        setCurrencyCode(country.currency_code ?? '');
+        setExchangeRate(country.exchange_rate ?? '');
         setErrors({});
     };
 
@@ -48,7 +75,12 @@ export default function CountryIndex() {
         setProcessing(true);
         setErrors({});
 
-        const data = { countryCode: countryCode.trim(), countryName: countryName.trim() };
+        const data = {
+            countryCode: countryCode.trim(),
+            countryName: countryName.trim(),
+            currency_code: currencyCode.trim() ? currencyCode.trim().toUpperCase() : null,
+            exchange_rate: exchangeRate ? Number(exchangeRate) : null,
+        };
         const onDone = {
             preserveScroll: true,
             onSuccess: () => resetForm(),
@@ -81,6 +113,36 @@ export default function CountryIndex() {
                 </nav>
             </div>
 
+            <div className="card mb-4">
+                <div className="card-body d-flex flex-wrap align-items-end gap-3">
+                    <div style={{ minWidth: 260 }}>
+                        <label className="form-label mb-1">
+                            <i className="fa fa-globe me-1"></i>Default Country
+                        </label>
+                        <select
+                            className="form-select"
+                            value={defaultCountry}
+                            onChange={(e) => setDefaultCountry(e.target.value)}
+                        >
+                            <option value="">Select default country...</option>
+                            {(allCountries || []).map((country: CountryEntry) => (
+                                <option key={country.id} value={country.id}>
+                                    {country.countryName}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={saveDefaultCountry}
+                        disabled={savingDefault || !defaultCountry || Number(defaultCountry) === defaultCountryId}
+                    >
+                        {savingDefault ? 'Saving...' : 'Save Default Country'}
+                    </button>
+                </div>
+            </div>
+
             <div className="row">
                 <div className="col-md-4 mb-4">
                     <div className="card h-auto">
@@ -110,6 +172,31 @@ export default function CountryIndex() {
                                     onChange={(e) => setCountryName(e.target.value)}
                                 />
                                 {errors.countryName && <div className="invalid-feedback d-block">{errors.countryName}</div>}
+                            </div>
+                            <div className="mb-3">
+                                <label className="form-label">Currency Code</label>
+                                <input
+                                    type="text"
+                                    className={`form-control ${errors.currency_code ? 'is-invalid' : ''}`}
+                                    placeholder="e.g. INR"
+                                    value={currencyCode}
+                                    onChange={(e) => setCurrencyCode(e.target.value.toUpperCase())}
+                                    maxLength={10}
+                                />
+                                {errors.currency_code && <div className="invalid-feedback d-block">{errors.currency_code}</div>}
+                            </div>
+                            <div className="mb-3">
+                                <label className="form-label">Exchange Rate (per 1 {defaultCurrencyLabel})</label>
+                                <input
+                                    type="number"
+                                    step="0.0001"
+                                    min="0"
+                                    className={`form-control ${errors.exchange_rate ? 'is-invalid' : ''}`}
+                                    placeholder="e.g. 83.25"
+                                    value={exchangeRate}
+                                    onChange={(e) => setExchangeRate(e.target.value)}
+                                />
+                                {errors.exchange_rate && <div className="invalid-feedback d-block">{errors.exchange_rate}</div>}
                             </div>
                             <div className="d-flex gap-2">
                                 <button
@@ -150,6 +237,8 @@ export default function CountryIndex() {
                                                     <th>Flag</th>
                                                     <th>Code</th>
                                                     <th>Name</th>
+                                                    <th>Currency</th>
+                                                    <th>Exchange Rate</th>
                                                     <th>Actions</th>
                                                 </tr>
                                             </thead>
@@ -168,6 +257,8 @@ export default function CountryIndex() {
                                                         </td>
                                                         <td><span className="badge bg-secondary bg-opacity-10 text-secondary">{country.countryCode}</span></td>
                                                         <td>{country.countryName}</td>
+                                                        <td>{country.currency_code ?? <span className="text-muted">—</span>}</td>
+                                                        <td>{country.exchange_rate ?? <span className="text-muted">—</span>}</td>
                                                         <td>
                                                             <div className="d-flex gap-2">
                                                                 <button className="btn btn-sm btn-outline-primary" onClick={() => editCountry(country)} title="Edit">

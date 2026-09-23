@@ -53,8 +53,6 @@ Route::get('documents/{filename}', [\App\Http\Controllers\DocumentDisplayControl
 Route::post('contact', [ContactController::class, 'store'])->name('contact.store');
 
 // Public visa endpoints (no authentication required)
-Route::get('visas', [VisaController::class, 'index'])->name('visas.index');
-Route::get('visas/{visa}', [VisaController::class, 'show'])->name('visas.show');
 
 // Public package endpoints (no authentication required)
 Route::get('packages', [PackageController::class, 'index'])->name('packages.index');
@@ -113,10 +111,6 @@ Route::middleware(['web', 'auth:web,agency'])->group(function () {
     Route::put('contact-info', [ContactInfoController::class, 'update'])->name('contact-info.update');
 
     // Visa resource routes (create, update, delete)
-    Route::post('visas', [VisaController::class, 'store'])->name('visas.store');
-    Route::put('visas/{visa}', [VisaController::class, 'update'])->name('visas.update');
-    Route::patch('visas/{visa}', [VisaController::class, 'update'])->name('visas.update');
-    Route::delete('visas/{visa}', [VisaController::class, 'destroy'])->name('visas.destroy');
 
     // Package resource routes (create, update, delete)
     Route::post('packages', [PackageController::class, 'store'])->name('packages.store');

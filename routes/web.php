@@ -25,6 +25,7 @@ Route::middleware('auth:web,agency')->prefix('admin')->group(function () {
     require __DIR__.'/backend/hero-image.php';
     require __DIR__.'/backend/testimonial.php';
     require __DIR__.'/backend/contact-info.php';
+    require __DIR__.'/backend/visa-service.php';
 });
 
 Route::middleware('auth')->prefix('admin')->group(function () {
@@ -34,10 +35,10 @@ Route::middleware('auth')->prefix('admin')->group(function () {
     require __DIR__.'/backend/tour.php';
     require __DIR__.'/backend/booking.php';
     require __DIR__.'/backend/contact-request.php';
-    require __DIR__.'/backend/visa-service.php';
     require __DIR__.'/backend/service.php';
     require __DIR__.'/backend/package.php';
     require __DIR__.'/backend/country.php';
+    require __DIR__.'/backend/tax-setup.php';
 
     // Settings Management
     Route::inertia('settings', 'Admin/Settings/Index')->name('admin.settings.index');

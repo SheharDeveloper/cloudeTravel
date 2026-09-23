@@ -5,7 +5,6 @@ import { heroImageService } from '@/services/heroImageService';
 import { testimonialService } from '@/services/testimonialService';
 import { contactInfoService } from '@/services/contactInfoService';
 import { imageService } from '@/services/imageService';
-import { fetchFeaturedVisas } from '@/services/visaService';
 import { fetchFeaturedPackages } from '@/services/packageService';
 import FlightSearchForm from '@/components/FlightSearchForm';
 import HotelsSearchForm from '@/components/HotelsSearchForm';
@@ -19,7 +18,7 @@ import SpecialOffers from '@/components/SpecialOffers';
 /**
  * Home/Landing page component with multiple sections
  */
-export default function Home({ isreviewEnabled, documents: propsDocuments }: { isreviewEnabled: boolean; documents: any[] }) {
+export default function Home({ isreviewEnabled, documents: propsDocuments, featuredVisas = [] }: { isreviewEnabled: boolean; documents: any[]; featuredVisas?: any[] }) {
     // ========== TAB MANAGEMENT ==========
     // Read URL parameter (?tab=visa) to set which form to display on page load
     const getInitialService = () => {
@@ -49,7 +48,6 @@ export default function Home({ isreviewEnabled, documents: propsDocuments }: { i
     // null until a loader video URL has been confirmed reachable; stays
     // null (spinner shown instead) if none is available or it 404s.
     const [loaderVideoSrc, setLoaderVideoSrc] = useState<string | null>(null);
-    const [featuredVisas, setFeaturedVisas] = useState<any[]>([]);
     const [featuredPackages, setFeaturedPackages] = useState<any[]>([]);
     const [searchedCountry, setSearchedCountry] = useState<string>('');
     const [activeOfferTab, setActiveOfferTabState] = useState<string>(getInitialService());
@@ -103,7 +101,6 @@ export default function Home({ isreviewEnabled, documents: propsDocuments }: { i
             loadHeroImages(),
             loadTestimonials(),
             loadContactInfo(),
-            loadFeaturedVisas(),
             loadFeaturedPackages(),
         ]);
 
@@ -169,11 +166,6 @@ export default function Home({ isreviewEnabled, documents: propsDocuments }: { i
         } catch {
             setLoaderVideoSrc(null);
         }
-    };
-
-    const loadFeaturedVisas = async () => {
-        const visas = await fetchFeaturedVisas();
-        setFeaturedVisas(visas);
     };
 
     const loadFeaturedPackages = async () => {

@@ -38,6 +38,7 @@ createInertiaApp({
             case name === 'TourDetail':
             case name === 'tickets':
             case name === 'visa-services':
+            case name === 'visa-requirements':
             case name === 'visas/visa-detail':
             case name === 'other-services':
             case name === 'about-us':

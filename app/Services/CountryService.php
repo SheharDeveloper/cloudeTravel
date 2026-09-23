@@ -24,6 +24,14 @@ class CountryService
         return $query->orderBy('countryName')->paginate($perPage);
     }
 
+    /**
+     * Lightweight list of every country, for populating dropdowns.
+     */
+    public function all()
+    {
+        return Country::orderBy('countryName')->get(['id', 'uid', 'countryName', 'countryCode', 'currency_code', 'exchange_rate']);
+    }
+
     public function create(array $data): Country
     {
         return Country::create($data);

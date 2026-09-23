@@ -150,6 +150,7 @@ const mobileResponsiveStyles = `
  */
 export default function LandingLayout({ children }: Props) {
     const { isCurrentUrl } = useCurrentUrl();
+    const isVisaActive = isCurrentUrl('/visa-requirements') || isCurrentUrl('/visa-services');
     const { documents: propsDocuments } = usePage().props as any;
     const [openDropdown, setOpenDropdown] = useState<string | null>(null);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -216,7 +217,7 @@ export default function LandingLayout({ children }: Props) {
                     <li><Link href="/" style={{ color: isCurrentUrl('/') ? '#0499ff' : '#333', fontSize: '14px', fontWeight: isCurrentUrl('/') ? 600 : 500, textDecoration: 'none', borderBottom: isCurrentUrl('/') ? '3px solid #0499ff' : 'none', paddingBottom: '5px', transition: 'all 0.3s' }} onMouseEnter={(e) => !isCurrentUrl('/') && (e.currentTarget.style.color = '#0499ff')} onMouseLeave={(e) => !isCurrentUrl('/') && (e.currentTarget.style.color = '#333')}>Home</Link></li>
 
                     {/* Visa Services Link */}
-                    <li><Link href="/visa-services" style={{ color: isCurrentUrl('/visa-services') ? '#0499ff' : '#333', fontSize: '14px', fontWeight: isCurrentUrl('/visa-services') ? 600 : 500, textDecoration: 'none', borderBottom: isCurrentUrl('/visa-services') ? '3px solid #0499ff' : 'none', paddingBottom: '5px', transition: 'all 0.3s' }} onMouseEnter={(e) => !isCurrentUrl('/visa-services') && (e.currentTarget.style.color = '#0499ff')} onMouseLeave={(e) => !isCurrentUrl('/visa-services') && (e.currentTarget.style.color = '#333')}>Visa Services</Link></li>
+                    <li><Link href="/visa-requirements" style={{ color: isVisaActive ? '#0499ff' : '#333', fontSize: '14px', fontWeight: isVisaActive ? 600 : 500, textDecoration: 'none', borderBottom: isVisaActive ? '3px solid #0499ff' : 'none', paddingBottom: '5px', transition: 'all 0.3s' }} onMouseEnter={(e) => !isVisaActive && (e.currentTarget.style.color = '#0499ff')} onMouseLeave={(e) => !isVisaActive && (e.currentTarget.style.color = '#333')}>Visa Services</Link></li>
 
                     {/* Other Services Dropdown */}
                     {/* <li
@@ -324,7 +325,7 @@ export default function LandingLayout({ children }: Props) {
                         <div>
                             <h4 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '15px', color: '#000000' }}>Quick Links</h4>
                             <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                                <li style={{ marginBottom: '8px' }}><a href="/visa-services" style={{ color: '#333333', textDecoration: 'none', fontSize: '12px' }}>Visa Services</a></li>
+                                <li style={{ marginBottom: '8px' }}><a href="/visa-requirements" style={{ color: '#333333', textDecoration: 'none', fontSize: '12px' }}>Visa Services</a></li>
                                 <li style={{ marginBottom: '8px' }}><a href="/contact-us" style={{ color: '#333333', textDecoration: 'none', fontSize: '12px' }}>Contact Us</a></li>
                                 <li><a href="/about-us" style={{ color: '#333333', textDecoration: 'none', fontSize: '12px' }}>About Us</a></li>
                             </ul>

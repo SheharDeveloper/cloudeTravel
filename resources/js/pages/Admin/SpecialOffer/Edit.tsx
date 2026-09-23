@@ -1,5 +1,5 @@
 import { ProtectedRoute } from "@/lib/ProtectedRoute";
-import { router } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 import { useState, useEffect, useRef } from "react";
 import { countryService } from "@/services/countryService";
 import SearchableSelect from "@/components/SearchableSelect";
@@ -61,7 +61,8 @@ export default function EditSpecialOffer({ offer, currency }: EditProps) {
     const [hotelCountrySearch, setHotelCountrySearch] = useState('');
     const [showHotelCountryDropdown, setShowHotelCountryDropdown] = useState(false);
     const hotelCountryRef = useRef<HTMLDivElement>(null);
-    const [visaTypesList, setVisaTypesList] = useState<any[]>([]);
+    const { visas } = usePage().props as unknown as { visas?: any[] };
+    const visaTypesList: any[] = visas ?? [];
     const [visaDestinationSearch, setVisaDestinationSearch] = useState('');
     const [visaPassportSearch, setVisaPassportSearch] = useState('');
     const [visaTypeSearch, setVisaTypeSearch] = useState('');
@@ -106,22 +107,6 @@ export default function EditSpecialOffer({ offer, currency }: EditProps) {
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    useEffect(() => {
-        const fetchVisaTypes = async () => {
-            try {
-                const response = await fetch('/api/visas');
-                const result = await response.json();
-                if (result.data) {
-                    setVisaTypesList(result.data);
-                }
-            } catch (error) {
-                console.error('Error fetching visa types:', error);
-                setVisaTypesList([]);
-            }
-        };
-        fetchVisaTypes();
     }, []);
 
     const filterCountries = (search: string) => {

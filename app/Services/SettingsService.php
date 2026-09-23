@@ -17,6 +17,22 @@ class SettingsService
         return Setting::set('isreview', $value);
     }
 
+    /**
+     * The country whose currency Tax Setup price values are entered in.
+     * Other countries' amounts are converted from this via exchange_rate.
+     */
+    public function getDefaultTaxCountryId()
+    {
+        $value = Setting::get('default_tax_country_id');
+
+        return $value ? (int) $value : null;
+    }
+
+    public function setDefaultTaxCountryId($countryId)
+    {
+        return Setting::set('default_tax_country_id', $countryId);
+    }
+
     public function getAll()
     {
         return [

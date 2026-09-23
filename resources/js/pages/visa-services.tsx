@@ -1,25 +1,9 @@
 ﻿import { Head, Link } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
-import { fetchAllVisas } from '@/services/visaService';
 
 /**
  * Visa Services page component
  */
-export default function VisaServices() {
-    const [visas, setVisas] = useState<any[]>([]);
-
-    useEffect(() => {
-        loadVisas();
-    }, []);
-
-    const loadVisas = async () => {
-        try {
-            const data = await fetchAllVisas();
-            setVisas(data);
-        } catch (error) {
-            console.error('Error loading visas:', error);
-        }
-    };
+export default function VisaServices({ visas = [] }: { visas?: any[] }) {
 
     return (
         <>

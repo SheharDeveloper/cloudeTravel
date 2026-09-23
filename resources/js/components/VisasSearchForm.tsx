@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { usePage } from '@inertiajs/react';
 import BookingModal from '@/components/BookingModal';
 import { countryService } from '@/services/countryService';
 
@@ -17,7 +18,8 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
     const [showPassportDropdown, setShowPassportDropdown] = useState(false);
     const [destinationSearch, setDestinationSearch] = useState('');
     const [passportSearch, setPassportSearch] = useState('');
-    const [visaTypesList, setVisaTypesList] = useState<any[]>([]);
+    const { visas } = usePage().props as unknown as { visas?: any[] };
+    const visaTypesList: any[] = visas ?? [];
     const [visaSearch, setVisaSearch] = useState('');
     const [showVisaDropdown, setShowVisaDropdown] = useState(false);
     const [showBookingModal, setShowBookingModal] = useState(false);
@@ -61,26 +63,6 @@ export default function VisasSearchForm({ prefilledVisaType = '', disableVisaTyp
 
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    // Fetch visa types from API
-    useEffect(() => {
-        const fetchVisaTypes = async () => {
-            try {
-                const response = await fetch('/api/visas');
-                const result = await response.json();
-
-                if (result.data) {
-                    setVisaTypesList(result.data);
-                    // Don't auto-select first visa - let user choose
-                }
-            } catch (error) {
-                console.error('Error fetching visa types:', error);
-                setVisaTypesList([]);
-            }
-        };
-
-        fetchVisaTypes();
     }, []);
 
     const filterCountries = (search: string) => {

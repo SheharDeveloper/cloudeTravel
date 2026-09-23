@@ -5,16 +5,19 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\SpecialOffer;
 use App\Services\SpecialOfferService;
+use App\Services\VisaService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class SpecialOfferController extends Controller
 {
     protected SpecialOfferService $service;
+    protected VisaService $visaService;
 
-    public function __construct(SpecialOfferService $service)
+    public function __construct(SpecialOfferService $service, VisaService $visaService)
     {
         $this->service = $service;
+        $this->visaService = $visaService;
     }
 
     public function index(Request $request)
@@ -37,6 +40,7 @@ class SpecialOfferController extends Controller
     {
         return Inertia::render('Admin/SpecialOffer/Create', [
             'currency' => config('currency'),
+            'visas' => $this->visaService->all(),
         ]);
     }
 
@@ -108,6 +112,7 @@ class SpecialOfferController extends Controller
         return Inertia::render('Admin/SpecialOffer/Show', [
             'offer' => $offer->toArray(),
             'currency' => config('currency'),
+            'visas' => $this->visaService->all(),
         ]);
     }
 
@@ -122,6 +127,7 @@ class SpecialOfferController extends Controller
         return Inertia::render('Admin/SpecialOffer/Edit', [
             'offer' => $offer->toArray(),
             'currency' => config('currency'),
+            'visas' => $this->visaService->all(),
         ]);
     }
 

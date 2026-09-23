@@ -1,5 +1,5 @@
 import { ProtectedRoute } from "@/lib/ProtectedRoute";
-import { router } from "@inertiajs/react";
+import { router, usePage } from "@inertiajs/react";
 import { useEffect, useState } from "react";
 import { countryService } from "@/services/countryService";
 
@@ -52,7 +52,8 @@ interface ShowProps {
 
 export default function ShowSpecialOffer({ offer, currency }: ShowProps) {
     const [countries, setCountries] = useState<any[]>([]);
-    const [visaTypes, setVisaTypes] = useState<any[]>([]);
+    const { visas } = usePage().props as unknown as { visas?: any[] };
+    const visaTypes: any[] = visas ?? [];
 
     useEffect(() => {
         const fetchCountries = async () => {
@@ -65,22 +66,6 @@ export default function ShowSpecialOffer({ offer, currency }: ShowProps) {
             }
         };
         fetchCountries();
-    }, []);
-
-    useEffect(() => {
-        const fetchVisaTypes = async () => {
-            try {
-                const response = await fetch('/api/visas');
-                const result = await response.json();
-                if (result.data) {
-                    setVisaTypes(result.data);
-                }
-            } catch (error) {
-                console.error('Error fetching visa types:', error);
-                setVisaTypes([]);
-            }
-        };
-        fetchVisaTypes();
     }, []);
 
     const getCountryName = (code?: string) => {

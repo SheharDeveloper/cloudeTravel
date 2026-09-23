@@ -6,13 +6,19 @@ import { usePage } from '@inertiajs/react';
 type MenuItem =
     | { type: 'title'; label: string }
     | { type: 'link'; icon: string; label: string; href: string; permission?: string; adminOnly?: boolean }
-    | { type: 'dropdown'; icon: string; label: string; children: { label: string; href: string }[] };
+    | { type: 'dropdown'; icon: string; label: string; children: { label: string; href: string; soon?: boolean }[] };
 
 // ── Superadmin menu ───────────────────────────────────────────────────────────
 const getSuperadminMenuItems = (companyName: string): MenuItem[] => [
     { type: 'title', label: companyName.toUpperCase() },
 
     { type: 'link', icon: 'fa-solid fa-house', label: 'Dashboard', href: '/dashboard' },
+
+    { type: 'title', label: 'Visa Management' },
+
+    { type: 'link', icon: 'fa-solid fa-tags', label: 'Visa Type', href: '/admin/visa-types', permission: 'visa.view' },
+    { type: 'link', icon: 'fa-solid fa-passport', label: 'Visas', href: '/admin/visa-services', permission: 'visa.view' },
+    { type: 'link', icon: 'fa-solid fa-file-invoice-dollar', label: 'Tax Setup', href: '/admin/tax-setups' },
 
     { type: 'title', label: 'OPERATIONS' },
 
@@ -47,8 +53,7 @@ const getSuperadminMenuItems = (companyName: string): MenuItem[] => [
     },
 
     { type: 'link', icon: 'fa-solid fa-phone', label: 'Contact Info', href: '/admin/contact-info' },
-    { type: 'link', icon: 'fa-solid fa-passport', label: 'Visa Management', href: '/admin/visa-services', permission: 'visa.view' },
-    { type: 'link', icon: 'fa-solid fa-gift', label: 'Package Management', href: '/admin/packages', permission: 'package.view' },
+   { type: 'link', icon: 'fa-solid fa-gift', label: 'Package Management', href: '/admin/packages', permission: 'package.view' },
     { type: 'link', icon: 'fa-solid fa-concierge-bell', label: 'Service Management', href: '/admin/services', permission: 'service.view' },
 
     { type: 'title', label: 'CONTENT & DOCUMENTS' },
@@ -58,10 +63,12 @@ const getSuperadminMenuItems = (companyName: string): MenuItem[] => [
 ];
 
 // ── Agency menu (Agency Management is superadmin-only) ────────────────────────
-const getAgencyMenuItems = (agencyName: string): MenuItem[] => [
+const getAgencyMenuItems = (agencyName: string, serviceItems: MenuItem[]): MenuItem[] => [
     { type: 'title', label: agencyName.toUpperCase() },
 
     { type: 'link', icon: 'fa-solid fa-house', label: 'Dashboard', href: '/dashboard' },
+
+    ...serviceItems,
 
     { type: 'title', label: 'OPERATIONS' },
 
@@ -80,6 +87,35 @@ const getAgencyMenuItems = (agencyName: string): MenuItem[] => [
     { type: 'link', icon: 'fa-solid fa-calendar-check', label: 'Bookings', href: '/admin/bookings', permission: 'booking.view' },
 ];
 
+// Where each service id opens. A service without an entry has no page yet and
+// shows as "Soon". Staff see a page's entries only with its permission.
+// The first entry carries the service's own name; later ones need a label.
+const SERVICE_PAGES: Record<string, { label?: string; href: string; permission?: string }[]> = {
+    visa: [
+        { href: '/admin/visa-search', permission: 'visa.view' },
+    ],
+};
+
+const buildServiceItems = (
+    services: { id: string; name: string }[],
+    canSee: (permission?: string) => boolean,
+): MenuItem[] => {
+    const children = services.flatMap((service) => {
+        const pages = SERVICE_PAGES[service.id];
+        if (!pages) return [{ label: service.name, href: '#', soon: true }];
+        return pages
+            .filter((page) => canSee(page.permission))
+            .map((page) => ({ label: page.label ?? service.name, href: page.href }));
+    });
+
+    if (children.length === 0) return [];
+
+    return [
+        { type: 'title', label: 'SERVICES' },
+        { type: 'dropdown', icon: 'fa-solid fa-concierge-bell', label: 'Services', children },
+    ];
+};
+
 // Commented out menu items for future use
 // { type: 'link', icon: 'fa-solid fa-passport', label: 'Visa Services', href: '/admin/visa-services' },
 // { type: 'link', icon: 'fa-solid fa-briefcase', label: 'Other Services', href: '/admin/other-services' },
@@ -94,10 +130,10 @@ const getAgencyMenuItems = (agencyName: string): MenuItem[] => [
 
 // ─── Dropdown Item ────────────────────────────────────────────────────────────
 
-function DropdownItem({ icon, label, children, currentPath }: { icon: string; label: string; children: { label: string; href: string }[]; currentPath: string }) {
+function DropdownItem({ icon, label, children, currentPath }: { icon: string; label: string; children: { label: string; href: string; soon?: boolean }[]; currentPath: string }) {
 
     // Check if any child is active
-    const hasActiveChild = children.some(c => currentPath.startsWith(c.href));
+    const hasActiveChild = children.some(c => !c.soon && currentPath.startsWith(c.href));
 
     // Auto-open if a child is active, otherwise closed
     const [open, setOpen] = useState(hasActiveChild);
@@ -123,6 +159,15 @@ function DropdownItem({ icon, label, children, currentPath }: { icon: string; la
                 aria-expanded={open}
             >
                 {children.map((c) => {
+                    if (c.soon) {
+                        return (
+                            <li key={c.label}>
+                                <a href="#" onClick={(e) => e.preventDefault()} style={{ opacity: 0.55, cursor: 'default' }}>
+                                    {c.label} <small className="ms-1">(Soon)</small>
+                                </a>
+                            </li>
+                        );
+                    }
                     const isActive = currentPath.startsWith(c.href);
                     return (
                         <li key={c.href} className={isActive ? 'mm-active' : ''}>
@@ -140,10 +185,15 @@ function DropdownItem({ icon, label, children, currentPath }: { icon: string; la
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
 export default function Sidebar() {
-    const { name, authAgency, authPermissions, isStaffSession } = usePage().props as any;
+    const { name, authAgency, authPermissions, isStaffSession, agencyServices } = usePage().props as any;
     const { url } = usePage();
     const companyName = authAgency?.agency_name || (name as string) || 'CloudTravel';
-    const allItems = authAgency ? getAgencyMenuItems(companyName) : getSuperadminMenuItems(companyName);
+    // Staff need the page's permission; the agency owner gets every service the superadmin assigned.
+    const canSee = (permission?: string) =>
+        !permission || !isStaffSession || !authPermissions || authPermissions.includes(permission);
+    const allItems = authAgency
+        ? getAgencyMenuItems(companyName, buildServiceItems(agencyServices ?? [], canSee))
+        : getSuperadminMenuItems(companyName);
 
     // authPermissions is null when nobody is signed in; otherwise it is the
     // permission list for the session (agency permissions, or the user's roles).

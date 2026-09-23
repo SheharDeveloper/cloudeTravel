@@ -274,6 +274,7 @@ class CountrySeeder extends Seeder
 
         $insertData = array_map(function($item) use ($timestamp) {
             return [
+                'uid' => (string) \Illuminate\Support\Str::uuid(),
                 'countryCode' => $item[0],
                 'countryName' => $item[1],
                 'created_at' => $timestamp,

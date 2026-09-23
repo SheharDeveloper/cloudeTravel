@@ -70,6 +70,24 @@ class HandleInertiaRequests extends Middleware
                 ? \Illuminate\Support\Facades\Auth::guard('agency')->user()->agency
                 : null,
 
+            // Active services ({id, name}, e.g. visa, hotel) the superadmin added
+            // to the signed-in agency. Null outside agency sessions, where
+            // no service restriction applies.
+            'agencyServices' => function () {
+                $agencyUser = \Illuminate\Support\Facades\Auth::guard('agency')->user();
+
+                if (!$agencyUser) {
+                    return null;
+                }
+
+                $names = collect(config('services.types'))->pluck('name', 'id');
+
+                return $agencyUser->agency->agencyServices()->where('status', 1)->pluck('service_name')
+                    ->map(fn ($id) => ['id' => $id, 'name' => $names[$id] ?? \Illuminate\Support\Str::headline($id)])
+                    ->values()
+                    ->all();
+            },
+
             // Set while an impersonation session is active, so the layout
             // can show a persistent "return to my account" banner.
             'impersonating' => fn () => $request->session()->has('impersonator_id')
