@@ -23,7 +23,7 @@ class DatabaseSeeder extends Seeder
         $this->call(TestimonialSeeder::class);
         $this->call(VisaServiceCategorySeeder::class);
         $this->call(VisaSectionSeeder::class);
-        $this->call(VisaSeeder::class);
+        // $this->call(VisaSeeder::class);
         $this->call(PackageSeeder::class);
     }
 }
