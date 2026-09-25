@@ -20,9 +20,13 @@ class ResolveTenantFromDomain
         // either one reaching here should bypass tenant resolution.
         $appUrlHost = parse_url((string) config('app.url'), PHP_URL_HOST);
 
-        // Only bypass tenant checking for the admin/app host from .env
+        // Only bypass tenant checking for the admin/app host from .env — but
+        // RewriteTenantPathPrefix may already have resolved a tenant from a
+        // path prefix before this ever ran; never overwrite that.
         if (($adminDomain && $host === $adminDomain) || ($appUrlHost && $host === $appUrlHost)) {
-            $request->attributes->set('tenant', null);
+            if (!$request->attributes->has('tenant')) {
+                $request->attributes->set('tenant', null);
+            }
             return $next($request);
         }
 

@@ -12,8 +12,9 @@ return new class extends Migration
             $table->id();
             $table->char('uuid', 36)->unique();
             $table->foreignId('tenant_id')->constrained('tenants')->onDelete('cascade');
-            $table->string('domain', 255)->unique();
-            $table->enum('type', ['subdomain', 'custom'])->default('subdomain');
+            $table->string('domain', 255);
+            $table->enum('type', ['subdomain', 'custom', 'path'])->default('subdomain');
+            $table->unique(['domain', 'type']);
             $table->boolean('is_primary')->default(false);
             $table->timestamp('verified_at')->nullable();
             $table->enum('ssl_status', ['pending', 'active', 'failed'])->default('pending');

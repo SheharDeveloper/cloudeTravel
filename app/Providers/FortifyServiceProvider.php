@@ -49,11 +49,16 @@ class FortifyServiceProvider extends ServiceProvider
     private function configureViews(): void
     {
         Fortify::loginView(function (Request $request) {
-            // ResolveTenantFromDomain sets a tenant only for registered agency
-            // domains. On those hosts the admin login is not applicable, so
-            // send the visitor to the agency login instead.
+            // A tenant is set either for a registered agency domain
+            // (ResolveTenantFromDomain) or a tenant path prefix/cookie
+            // (RewriteTenantPathPrefix). On those the admin login is not
+            // applicable, so send the visitor to the agency login instead —
+            // keeping the /{slug} prefix whenever one is active, so this
+            // redirect doesn't drop them onto the bare admin host.
             if ($request->attributes->get('tenant')) {
-                return redirect()->route('agency.login');
+                $slug = $request->attributes->get('tenant_path');
+
+                return redirect($slug ? "/{$slug}/agency/login" : route('agency.login'));
             }
 
             return Inertia::render('auth/login', [

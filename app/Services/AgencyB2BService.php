@@ -196,6 +196,19 @@ class AgencyB2BService
                     'ssl_status' => 'active',
                 ]);
 
+                // Same agency, reachable at http://127.0.0.1:8000/{domain_name}
+                // too — RewriteTenantPathPrefix looks up type=path rows the
+                // same way ResolveTenantFromDomain looks up type=subdomain
+                // rows, so no separate step is needed to enable this.
+                Domain::create([
+                    'domain' => $domain_name,
+                    'tenant_id' => $tenant->id,
+                    'type' => 'path',
+                    'is_primary' => false,
+                    'verified_at' => now(),
+                    'ssl_status' => 'active',
+                ]);
+
                 $data['tenant_id'] = $tenant->id;
             } else {
                 $data['tenant_id'] = null;
@@ -249,12 +262,28 @@ class AgencyB2BService
                         'ssl_status' => 'active',
                     ]);
 
+                    Domain::create([
+                        'domain' => $domain_name,
+                        'tenant_id' => $tenant->id,
+                        'type' => 'path',
+                        'is_primary' => false,
+                        'verified_at' => now(),
+                        'ssl_status' => 'active',
+                    ]);
+
                     $data['tenant_id'] = $tenant->id;
                 } else {
                     // The agency already has a tenant/domain — update the
                     // existing records in place instead of silently
-                    // ignoring the edited domain name.
-                    Domain::where('tenant_id', $agency->tenant_id)->update(['domain' => $domain_name]);
+                    // ignoring the edited domain name. Both the subdomain
+                    // and path row (if it exists yet) move to the new name;
+                    // updateOrCreate covers agencies that predate this /{slug}
+                    // feature and don't have a path row yet.
+                    Domain::where('tenant_id', $agency->tenant_id)->where('type', 'subdomain')->update(['domain' => $domain_name]);
+                    Domain::updateOrCreate(
+                        ['tenant_id' => $agency->tenant_id, 'type' => 'path'],
+                        ['domain' => $domain_name, 'is_primary' => false, 'verified_at' => now(), 'ssl_status' => 'active'],
+                    );
 
                     Tenant::where('id', $agency->tenant_id)->update([
                         'name' => $domain_name,

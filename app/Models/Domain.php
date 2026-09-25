@@ -10,6 +10,22 @@ class Domain extends Model
 {
     use UsesLandlordConnection;
 
+    /**
+     * First path segments a "path" domain slug must never equal — every
+     * top-level route the app already serves, so a slug can never collide
+     * with a real route. Checked by RewriteTenantPathPrefix.
+     */
+    public const RESERVED_PATH_SLUGS = [
+        'about-us', 'admin', 'agency', 'all-offers', 'api', 'assets', 'attendance',
+        'build', 'confirm-password', 'contact-us', 'dashboard', 'email', 'favicon.ico',
+        'flights', 'forgot-password', 'horizon', 'hotels', 'login', 'logout',
+        'offers', 'other-services', 'packages', 'password', 'profile', 'profile-upload',
+        'quote', 'register', 'reset-password', 'robots.txt', 'sanctum', 'search',
+        'settings', 'sitemap.xml', 'static', 'storage', 'telescope', 'tenancy',
+        'tickets', 'tours', 'two-factor-challenge', 'up', 'user', 'verify-email',
+        'visa', 'visa-requirements', 'visa-services', 'visas', '__clockwork',
+    ];
+
     protected $fillable = [
         'uuid',
         'tenant_id',
@@ -57,6 +73,11 @@ class Domain extends Model
     public function isSubdomain(): bool
     {
         return $this->type === 'subdomain';
+    }
+
+    public function isPath(): bool
+    {
+        return $this->type === 'path';
     }
 
     public function markAsVerified(): void

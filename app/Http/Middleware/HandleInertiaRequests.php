@@ -88,6 +88,10 @@ class HandleInertiaRequests extends Middleware
                     ->all();
             },
 
+            // The agency's own path slug, when the current URL is under
+            // /{slug}/... (RewriteTenantPathPrefix) — null everywhere else.
+            'tenantPath' => fn () => $request->attributes->get('tenant_path'),
+
             // Set while an impersonation session is active, so the layout
             // can show a persistent "return to my account" banner.
             'impersonating' => fn () => $request->session()->has('impersonator_id')
