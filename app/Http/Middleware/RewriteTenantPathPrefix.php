@@ -61,6 +61,31 @@ class RewriteTenantPathPrefix
             return $response;
         }
 
+        // A slug that looks like a real hostname (has a dot, e.g.
+        // "test.localhost") and is registered as a subdomain belongs on
+        // its own subdomain, not under /{slug} on the admin host — even
+        // though createAgency/updateAgency also create a type=path row
+        // with that same value, so it WOULD otherwise match below.
+        if ($slug && str_contains($slug, '.')) {
+            $subdomain = Domain::where('type', 'subdomain')->where('domain', $slug)->first();
+
+            if ($subdomain) {
+                $tenant = Tenant::find($subdomain->tenant_id);
+
+                if ($tenant && $tenant->status === 'active') {
+                    $remaining = array_slice($segments, 1);
+                    $newPath = $remaining ? '/' . implode('/', $remaining) : '/';
+                    $query = $request->getQueryString();
+                    $port = $request->getPort();
+                    $portSuffix = in_array($port, [80, 443], true) ? '' : ":{$port}";
+
+                    return redirect(
+                        "{$request->getScheme()}://{$slug}{$portSuffix}{$newPath}" . ($query ? "?{$query}" : '')
+                    );
+                }
+            }
+        }
+
         if ($slug && !in_array($slug, Domain::RESERVED_PATH_SLUGS, true)) {
             $domain = Domain::where('type', 'path')->where('domain', $slug)->first();
 

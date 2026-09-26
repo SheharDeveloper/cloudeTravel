@@ -70,10 +70,18 @@ class AgencyB2BService
             }
 
             // The same tenant's type=path row (see createAgency/updateAgency)
-            // is the actual URL the agency's site is reachable at.
+            // is the actual URL the agency's site is reachable at — unless
+            // the domain looks like a real hostname (has a dot), in which
+            // case RewriteTenantPathPrefix redirects /{domain} to its own
+            // subdomain, so that's the URL to show instead.
             $pathDomain = Domain::where('tenant_id', $agency->tenant_id)->where('type', 'path')->first();
             if ($pathDomain) {
-                $agency->tenant_url = rtrim(config('app.url'), '/') . '/' . $pathDomain->domain;
+                $appUrl = rtrim(config('app.url'), '/');
+
+                $agency->tenant_url = str_contains($pathDomain->domain, '.')
+                    ? parse_url($appUrl, PHP_URL_SCHEME) . '://' . $pathDomain->domain
+                        . (parse_url($appUrl, PHP_URL_PORT) ? ':' . parse_url($appUrl, PHP_URL_PORT) : '') . '/'
+                    : $appUrl . '/' . $pathDomain->domain;
             }
         }
 

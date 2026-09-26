@@ -15,6 +15,14 @@ const slugify = (value: string) =>
         .replace(/[^a-z0-9]+/g, '-')
         .replace(/^-+|-+$/g, '');
 
+// A domain that looks like a real hostname (has a dot, e.g. "test.localhost")
+// belongs on its own subdomain, not under /{domain} on this admin host —
+// RewriteTenantPathPrefix redirects it there for exactly this reason.
+const previewUrl = (domainName: string) =>
+    domainName.includes('.')
+        ? `${window.location.protocol}//${domainName}${window.location.port ? `:${window.location.port}` : ''}/`
+        : `${window.location.origin}/${domainName}`;
+
 export default function AgencyB2BEdit() {
     const { agency, services, zipCodes, addressData } = usePage().props as any;
     const [step, setStep] = useState(1);
@@ -469,7 +477,7 @@ export default function AgencyB2BEdit() {
                                             {errors.domain_name && <div className="invalid-feedback d-block">{errors.domain_name}</div>}
                                             {data.domain_name && (
                                                 <small className="text-muted d-block mt-1">
-                                                    Will be accessible at: <strong>{window.location.origin}/{data.domain_name}</strong>
+                                                    Will be accessible at: <strong>{previewUrl(data.domain_name)}</strong>
                                                 </small>
                                             )}
                                         </div>
