@@ -108,6 +108,13 @@ export default function AgencyB2BShow() {
         });
     };
 
+    const Field = ({ label, value, col = 'col-md-6', last = false }: { label: string; value: React.ReactNode; col?: string; last?: boolean }) => (
+        <div className={`${col} ${last ? 'mb-0' : 'mb-3'}`}>
+            <label className="text-muted small">{label}</label>
+            <p className="fw-semibold mb-0">{value ?? 'N/A'}</p>
+        </div>
+    );
+
     return (
         <div>
             <div className="page-title">
@@ -250,51 +257,37 @@ export default function AgencyB2BShow() {
             <div className="container-fluid">
                 {/* Overview Tab */}
                 {activeTab === 'overview' && (
+                    <>
                     <div className="row">
-                        <div className="col-lg-12">
+                        <div className="col-lg-6">
                             {/* Basic Information */}
-                            <div className="card mb-4">
-                                <div className="card-header">
+                            <div className="card mb-4" style={{ height: 'auto' }}>
+                                <div className="card-header" style={{ padding: '12px 20px' }}>
                                     <h6 className="card-title mb-0">Basic Information</h6>
                                 </div>
-                                <div className="card-body">
+                                <div className="card-body" style={{ padding: '18px 20px' }}>
                                     <div className="row">
-                                        <div className="col-md-6 mb-3">
-                                            <label className="text-muted small">Agency Name</label>
-                                            <p className="fw-semibold">{agency?.agency_name}</p>
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label className="text-muted small">Legal Name</label>
-                                            <p className="fw-semibold">{agency?.legal_name}</p>
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label className="text-muted small">Email</label>
-                                            <p className="fw-semibold">{agency?.email}</p>
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label className="text-muted small">Phone</label>
-                                            <p className="fw-semibold">{agency?.phone_number}</p>
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label className="text-muted small">Alternate Phone</label>
-                                            <p className="fw-semibold">{agency?.alternate_phone || 'N/A'}</p>
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label className="text-muted small">Website</label>
-                                            <p className="fw-semibold">
-                                                {agency?.website ? (
-                                                    <a href={agency?.website} target="_blank" rel="noopener noreferrer">
-                                                        {agency?.website}
+                                        <Field label="Agency Name" value={agency?.agency_name} />
+                                        <Field label="Legal Name" value={agency?.legal_name} />
+                                        <Field label="Email" value={agency?.email} />
+                                        <Field label="Phone" value={agency?.phone_number} />
+                                        <Field label="Alternate Phone" value={agency?.alternate_phone} />
+                                        <Field
+                                            label="Website"
+                                            value={
+                                                agency?.website && (
+                                                    <a href={agency.website} target="_blank" rel="noopener noreferrer">
+                                                        {agency.website}
                                                     </a>
-                                                ) : (
-                                                    'N/A'
-                                                )}
-                                            </p>
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label className="text-muted small">Services</label>
-                                            <div>
-                                                {agency?.agency_services && agency.agency_services.length > 0 ? (
+                                                )
+                                            }
+                                        />
+                                        <Field
+                                            label="Services"
+                                            col="col-md-12"
+                                            last
+                                            value={
+                                                agency?.agency_services?.length > 0 && (
                                                     <div className="d-flex flex-wrap gap-2">
                                                         {agency.agency_services.map((service: any, idx: number) => (
                                                             <span key={idx} className="badge bg-primary">
@@ -302,103 +295,85 @@ export default function AgencyB2BShow() {
                                                             </span>
                                                         ))}
                                                     </div>
-                                                ) : (
-                                                    <p className="fw-semibold">N/A</p>
-                                                )}
-                                            </div>
-                                        </div>
+                                                )
+                                            }
+                                        />
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
+                        <div className="col-lg-6">
                             {/* Business Information */}
-                            <div className="card mb-4">
-                                <div className="card-header">
+                            <div className="card mb-4" style={{ height: 'auto' }}>
+                                <div className="card-header" style={{ padding: '12px 20px' }}>
                                     <h6 className="card-title mb-0">Business Information</h6>
                                 </div>
-                                <div className="card-body">
+                                <div className="card-body" style={{ padding: '18px 20px' }}>
                                     <div className="row">
-                                        <div className="col-md-6 mb-3">
-                                            <label className="text-muted small">Country</label>
-                                            <p className="fw-semibold">{agency?.country}</p>
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label className="text-muted small">State</label>
-                                            <p className="fw-semibold">{agency?.state}</p>
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label className="text-muted small">City</label>
-                                            <p className="fw-semibold">{agency?.city}</p>
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label className="text-muted small">Postal Code</label>
-                                            <p className="fw-semibold">{agency?.postal_code}</p>
-                                        </div>
-                                        <div className="col-md-12 mb-3">
-                                            <label className="text-muted small">Address</label>
-                                            <p className="fw-semibold">{agency?.address}</p>
-                                        </div>
+                                        <Field label="Country" value={agency?.country} />
+                                        <Field label="State" value={agency?.state} />
+                                        <Field label="City" value={agency?.city} />
+                                        <Field label="Postal Code" value={agency?.postal_code} />
+                                        <Field label="Address" value={agency?.address} col="col-md-12" last />
                                     </div>
                                 </div>
                             </div>
+                        </div>
+                    </div>
 
+                    <div className="row">
+                        <div className="col-lg-6">
                             {/* Tax & Bank Information */}
-                            <div className="card mb-4">
-                                <div className="card-header">
+                            <div className="card mb-4" style={{ height: 'auto' }}>
+                                <div className="card-header" style={{ padding: '12px 20px' }}>
                                     <h6 className="card-title mb-0">Tax & Bank Information</h6>
                                 </div>
-                                <div className="card-body">
+                                <div className="card-body" style={{ padding: '18px 20px' }}>
                                     <div className="row">
-                                        <div className="col-md-4 mb-3">
-                                            <label className="text-muted small">Registration Number</label>
-                                            <p className="fw-semibold">{agency?.registration_number || 'N/A'}</p>
-                                        </div>
-                                        <div className="col-md-4 mb-3">
-                                            <label className="text-muted small">GST Number</label>
-                                            <p className="fw-semibold">{agency?.gst_number || 'N/A'}</p>
-                                        </div>
-                                        <div className="col-md-4 mb-3">
-                                            <label className="text-muted small">PAN Number</label>
-                                            <p className="fw-semibold">{agency?.pan_number || 'N/A'}</p>
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label className="text-muted small">Account Number</label>
-                                            <p className="fw-semibold">{agency?.account_number || 'N/A'}</p>
-                                        </div>
-                                        <div className="col-md-6 mb-3">
-                                            <label className="text-muted small">IFSC Code</label>
-                                            <p className="fw-semibold">{agency?.ifsc_code || 'N/A'}</p>
+                                        <Field label="Registration Number" value={agency?.registration_number} col="col-md-4" />
+                                        <Field label="GST Number" value={agency?.gst_number} col="col-md-4" />
+                                        <Field label="PAN Number" value={agency?.pan_number} col="col-md-4" />
+                                        <Field label="Account Number" value={agency?.account_number} />
+                                        <Field label="IFSC Code" value={agency?.ifsc_code} last />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {agency?.has_domain && (
+                            <div className="col-lg-6">
+                                {/* Tenant Information */}
+                                <div className="card mb-4" style={{ height: 'auto' }}>
+                                    <div className="card-header" style={{ padding: '12px 20px' }}>
+                                        <h6 className="card-title mb-0">Tenant Information</h6>
+                                    </div>
+                                    <div className="card-body" style={{ padding: '18px 20px' }}>
+                                        <div className="row">
+                                            <Field label="Has Tenant Assignment" value={<span className="badge bg-success">Yes</span>} />
+                                            <Field label="Tenant ID" value={agency?.tenant_id} />
+                                            <Field
+                                                label="Website URL"
+                                                col="col-md-12"
+                                                last
+                                                value={
+                                                    agency?.tenant_url && (
+                                                        <a href={agency.tenant_url} target="_blank" rel="noopener noreferrer">
+                                                            {agency.tenant_url}
+                                                        </a>
+                                                    )
+                                                }
+                                            />
                                         </div>
                                     </div>
                                 </div>
                             </div>
+                        )}
 
-                            {/* Tenant Information */}
-                            {agency?.has_domain && (
-                                <div className="card mb-4">
-                                    <div className="card-header">
-                                        <h6 className="card-title mb-0">Tenant Information</h6>
-                                    </div>
-                                    <div className="card-body">
-                                        <div className="row">
-                                            <div className="col-md-6 mb-3">
-                                                <label className="text-muted small">Has Tenant Assignment</label>
-                                                <p className="fw-semibold">
-                                                    <span className="badge bg-success">Yes</span>
-                                                </p>
-                                            </div>
-                                            <div className="col-md-6 mb-3">
-                                                <label className="text-muted small">Tenant ID</label>
-                                                <p className="fw-semibold">{agency?.tenant_id || 'N/A'}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Notes */}
-                            {agency?.note && (
-                                <div className="card mb-4">
+                        {agency?.note && (
+                            <div className="col-lg-12">
+                                {/* Notes */}
+                                <div className="card mb-4" style={{ height: 'auto' }}>
                                     <div className="card-header">
                                         <h6 className="card-title mb-0">Notes</h6>
                                     </div>
@@ -406,9 +381,10 @@ export default function AgencyB2BShow() {
                                         <p>{agency?.note}</p>
                                     </div>
                                 </div>
-                            )}
-                        </div>
+                            </div>
+                        )}
                     </div>
+                    </>
                 )}
 
                 {/* Documents Tab */}

@@ -10,6 +10,7 @@ use Exception;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class AgencyB2BService
 {
@@ -63,9 +64,16 @@ class AgencyB2BService
 
         // Load domain name if agency has a domain
         if ($agency->tenant_id) {
-            $domain = \App\Models\Domain::where('tenant_id', $agency->tenant_id)->first();
+            $domain = Domain::where('tenant_id', $agency->tenant_id)->where('type', 'subdomain')->first();
             if ($domain) {
                 $agency->domain_name = $domain->domain;
+            }
+
+            // The same tenant's type=path row (see createAgency/updateAgency)
+            // is the actual URL the agency's site is reachable at.
+            $pathDomain = Domain::where('tenant_id', $agency->tenant_id)->where('type', 'path')->first();
+            if ($pathDomain) {
+                $agency->tenant_url = rtrim(config('app.url'), '/') . '/' . $pathDomain->domain;
             }
         }
 
@@ -387,12 +395,8 @@ class AgencyB2BService
                     'phone_number' => 'required|string|max:20',
                     'logo' => $logoRule,
                     'has_domain' => 'nullable|boolean',
+                    'domain_name' => ['required', 'string', 'max:255', $this->uniqueDomainRule($existingAgency)],
                 ];
-                if (!empty($data['has_domain'])) {
-                    $rules['domain_name'] = 'required|string|max:255';
-                } else {
-                    $rules['domain_name'] = 'nullable|string|max:255';
-                }
                 break;
 
             case 2:
@@ -451,15 +455,26 @@ class AgencyB2BService
                     'city' => 'nullable|string|max:255',
                     'county' => 'nullable|string|max:255',
                     'address' => 'nullable|string|max:500',
+                    'domain_name' => ['required', 'string', 'max:255', $this->uniqueDomainRule($existingAgency)],
                 ];
-                if (!empty($data['has_domain'])) {
-                    $rules['domain_name'] = 'required|string|max:255';
-                } else {
-                    $rules['domain_name'] = 'nullable|string|max:255';
-                }
                 break;
         }
 
         return $rules;
+    }
+
+    /**
+     * A domain is always required now, and must be unique — but editing an
+     * agency shouldn't reject its own existing domain value, so its own
+     * tenant's rows (the subdomain + path pair createAgency/updateAgency
+     * always create together) are excluded from the uniqueness check.
+     */
+    private function uniqueDomainRule(?Agency $existingAgency)
+    {
+        return Rule::unique('domains', 'domain')->where(function ($query) use ($existingAgency) {
+            if ($existingAgency?->tenant_id) {
+                $query->where('tenant_id', '!=', $existingAgency->tenant_id);
+            }
+        });
     }
 }

@@ -8,6 +8,13 @@ type AgencyDocument = {
     file: File | null;
 };
 
+const slugify = (value: string) =>
+    value
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+
 export default function AgencyB2BCreate() {
     const { services, zipCodes, addressData } = usePage().props as any;
     const [step, setStep] = useState(1);
@@ -29,7 +36,7 @@ export default function AgencyB2BCreate() {
         note: '',
         services: [] as string[],
         logo: null as File | null,
-        has_domain: false,
+        has_domain: true,
         domain_name: '',
         zip_code_id: '',
         address_id: '',
@@ -81,8 +88,25 @@ export default function AgencyB2BCreate() {
         });
     };
 
+    const handleGenerateDomain = () => {
+        if (!data.agency_name.trim()) {
+            setErrors({ ...errors, domain_name: 'Enter the agency name first' });
+            return;
+        }
+
+        const base = slugify(data.agency_name) || 'agency';
+        const uniqueSuffix = Date.now().toString(36).slice(-5);
+        setData({ ...data, domain_name: `${base}-${uniqueSuffix}` });
+
+        if (errors.domain_name) {
+            const newErrors = { ...errors };
+            delete newErrors.domain_name;
+            setErrors(newErrors);
+        }
+    };
+
     const validateForm = (): boolean => {
-        const requiredFields = ['agency_name', 'legal_name', 'email', 'phone_number'];
+        const requiredFields = ['agency_name', 'legal_name', 'email', 'phone_number', 'domain_name'];
         const newErrors: Record<string, string> = {};
         const phoneRegex = /^[0-9\-\+\s]+$/;
 
@@ -128,10 +152,8 @@ export default function AgencyB2BCreate() {
             if (data.logo) {
                 formData.append('logo', data.logo);
             }
-            formData.append('has_domain', data.has_domain ? '1' : '0');
-            if (data.has_domain) {
-                formData.append('domain_name', data.domain_name);
-            }
+            formData.append('has_domain', '1');
+            formData.append('domain_name', data.domain_name);
         } else if (step === 2) {
             // Step 2 fields
             formData.append('country', data.country);
@@ -207,15 +229,12 @@ export default function AgencyB2BCreate() {
             data.services.forEach((service: string) => {
                 formData.append('services[]', service);
             });
-            formData.append('has_domain', data.has_domain ? '1' : '0');
+            formData.append('has_domain', '1');
             formData.append('zip_code_id', data.zip_code_id);
             formData.append('address_id', data.address_id);
             formData.append('street_id', data.street_id);
             formData.append('tax_status', data.tax_status.toString());
-
-            if (data.has_domain && data.domain_name) {
-                formData.append('domain_name', data.domain_name);
-            }
+            formData.append('domain_name', data.domain_name);
             if (data.logo) {
                 formData.append('logo', data.logo);
             }
@@ -437,23 +456,10 @@ export default function AgencyB2BCreate() {
                                         </div>
 
                                         <div className="col-12 col-sm-6 mb-4">
-                                            <div className="form-check mt-4">
-                                                <input
-                                                    type="checkbox"
-                                                    className="form-check-input"
-                                                    id="has_domain"
-                                                    checked={data.has_domain}
-                                                    onChange={(e) => setData({ ...data, has_domain: e.target.checked, domain_name: '' })}
-                                                />
-                                                <label className="form-check-label" htmlFor="has_domain">
-                                                    Do you have a Domain?
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        {data.has_domain && (
-                                            <div className="col-12 col-sm-6 mb-4">
-                                                <label className="form-label">Domain </label>
+                                            <label className="form-label">
+                                                Domain <span className="text-danger">*</span>
+                                            </label>
+                                            <div className="input-group">
                                                 <input
                                                     type="text"
                                                     className={`form-control ${errors.domain_name ? 'is-invalid' : ''}`}
@@ -468,9 +474,21 @@ export default function AgencyB2BCreate() {
                                                         }
                                                     }}
                                                 />
-                                                {errors.domain_name && <div className="invalid-feedback d-block">{errors.domain_name}</div>}
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-outline-secondary"
+                                                    onClick={handleGenerateDomain}
+                                                >
+                                                    Generate Domain
+                                                </button>
                                             </div>
-                                        )}
+                                            {errors.domain_name && <div className="invalid-feedback d-block">{errors.domain_name}</div>}
+                                            {data.domain_name && (
+                                                <small className="text-muted d-block mt-1">
+                                                    Will be accessible at: <strong>{window.location.origin}/{data.domain_name}</strong>
+                                                </small>
+                                            )}
+                                        </div>
                                     </div>
                                 )}
 
