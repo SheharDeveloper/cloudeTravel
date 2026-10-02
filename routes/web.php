@@ -26,6 +26,8 @@ Route::middleware('auth:web,agency')->prefix('admin')->group(function () {
     require __DIR__.'/backend/testimonial.php';
     require __DIR__.'/backend/contact-info.php';
     require __DIR__.'/backend/visa-service.php';
+    require __DIR__.'/backend/agency-settings.php';
+    require __DIR__.'/backend/service-booking.php';
 });
 
 Route::middleware('auth')->prefix('admin')->group(function () {

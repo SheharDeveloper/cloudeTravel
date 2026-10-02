@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\UpdateVisaDocumentsRequest;
 use App\Http\Requests\UpdateVisaFieldsRequest;
 use App\Models\Visa;
+use App\Models\VisaField;
+use App\Models\VisaSection;
 use App\Services\CountryService;
 use App\Services\VisaDocumentService;
 use App\Services\VisaFieldConfigService;
@@ -58,7 +60,7 @@ class VisaController extends Controller
     /** Country search (from / to) rendered inside the admin layout. */
     public function search(Request $request)
     {
-        return Inertia::render('Admin/Visa/Search', $this->requirementsService->pageData($request));
+        return Inertia::render('Admin/Visa/Search', $this->requirementsService->pageData($request, firstStep: true));
     }
 
     /**
@@ -82,6 +84,21 @@ class VisaController extends Controller
         } catch (ValidationException) {
             abort(404);
         }
+    }
+
+    /** The "GET STARTED" screen: one visa's chosen cost row, ready to apply for a client. */
+    public function apply(Request $request)
+    {
+        return Inertia::render('Admin/Visa/Apply', $this->requirementsService->applyData($request));
+    }
+
+    /** "Proceed To Payment": books the visa, one application per passenger. */
+    public function storeApplication(Request $request)
+    {
+        $booking = $this->requirementsService->storeApplication($request);
+
+        return redirect()->route('admin.service-bookings.show', $booking->uid)
+            ->with('success', "Booking {$booking->invoice_number} created.");
     }
 
     /** The wizard steps and the fields each one holds, for validating step by step. */
@@ -144,6 +161,56 @@ class VisaController extends Controller
         $this->fieldConfigService->sync($visa, $request->validated('sections'));
 
         return back()->with('success', 'Visa fields updated successfully');
+    }
+
+    /** Assign Field → "+ Add Field": a new field in a section, switched on for this visa (JSON). */
+    public function storeField(Request $request, Visa $visa)
+    {
+        abort_unless((bool) $request->user('web')?->hasRole('superadmin'), 403);
+        $data = $this->validateFieldDefinition($request, withSection: true);
+
+        $field = $this->fieldConfigService->createField(VisaSection::findOrFail($data['visa_section_id']), $data);
+
+        return response()->json(['field' => $this->fieldPayload($field, enabled: true)]);
+    }
+
+    /** Assign Field → edit a field's name, type and options (JSON). Shared by every visa using it. */
+    public function updateField(Request $request, Visa $visa, VisaField $field)
+    {
+        abort_unless((bool) $request->user('web')?->hasRole('superadmin'), 403);
+        $data = $this->validateFieldDefinition($request, withSection: false);
+
+        $field = $this->fieldConfigService->updateField($field, $data);
+
+        return response()->json(['field' => $this->fieldPayload($field)]);
+    }
+
+    private function validateFieldDefinition(Request $request, bool $withSection): array
+    {
+        return $request->validate([
+            'field_name' => 'required|string|max:255',
+            'field_type' => ['required', \Illuminate\Validation\Rule::in(array_keys(VisaField::TYPES))],
+            'options' => ['nullable', 'array', 'max:100', \Illuminate\Validation\Rule::requiredIf(fn () => in_array($request->input('field_type'), VisaField::CHOICE_TYPES, true))],
+            'options.*' => 'nullable|string|max:255',
+        ] + ($withSection ? ['visa_section_id' => 'required|integer|exists:visa_sections,id'] : []), [
+            'options.required' => 'Add at least one option for this field type.',
+        ], [
+            'field_name' => 'field name',
+            'field_type' => 'field type',
+        ]);
+    }
+
+    private function fieldPayload(VisaField $field, bool $enabled = false): array
+    {
+        return [
+            'id' => $field->id,
+            'field_name' => $field->field_name,
+            'field_type' => $field->field_type,
+            'options' => $field->options ?? [],
+            'home_section_id' => $field->visa_section_id,
+            'enabled' => $enabled,
+            'required' => false,
+        ];
     }
 
     public function updateDocuments(UpdateVisaDocumentsRequest $request, Visa $visa)
@@ -211,6 +278,7 @@ class VisaController extends Controller
             'visa' => $this->visaService->load($visa),
             'currency' => config('currency'),
             'canConfigureFields' => $canConfigure,
+            'fieldTypes' => VisaField::TYPES,
             'fieldConfig' => $canConfigure ? $this->fieldConfigService->configuration($visa) : [],
             'visaDocuments' => $canConfigure ? $this->documentService->forVisa($visa) : [],
         ];

@@ -71,6 +71,11 @@ class Agency extends Model
         return $this->hasMany(AgencyService::class);
     }
 
+    public function commissions(): HasMany
+    {
+        return $this->hasMany(AgencyCommission::class);
+    }
+
     public function contactInfo(): MorphOne
     {
         return $this->morphOne(ContactInfo::class, 'owner');

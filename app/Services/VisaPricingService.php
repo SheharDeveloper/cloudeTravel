@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\AgencyCommission;
 use App\Models\Country;
 use App\Models\TaxSetup;
 use App\Models\Visa;
@@ -25,12 +26,17 @@ class VisaPricingService
      * currency, conversion factor, the taxes that apply, and a note when
      * something is missing and prices fall back to the base currency.
      * $taxEnabled is the agency's Tax Status; when off, no tax is applied at all.
+     * $commission is the signed-in agency's own visa commission (none for the
+     * superadmin), added to the service fee.
      */
-    public function context(?Country $livingIn, bool $taxEnabled = true): array
+    public function context(?Country $livingIn, bool $taxEnabled = true, ?AgencyCommission $commission = null): array
     {
         $baseCode = strtoupper(config('currency.code'));
 
         $context = [
+            'commission' => $commission
+                ? ['type' => $commission->commission_type, 'value' => $commission->commission_value]
+                : null,
             'living_country' => $livingIn?->countryName,
             'code' => $baseCode,
             'symbol' => config('currency.symbol'),
@@ -90,14 +96,22 @@ class VisaPricingService
     /**
      * The visa's cost rows priced with the given context. Tax applies to the
      * service fee (the embassy fee is a government charge and is not taxed).
+     * The agency's commission is added to the service fee first, so it is
+     * taxed along with it.
      */
     public function priceRows(Visa $visa, array $context): array
     {
         $taxPercent = collect($context['taxes'])->sum('percent');
+        $commission = $context['commission'] ?? null;
 
-        return $visa->costDetails->map(function ($row) use ($context, $taxPercent) {
+        return $visa->costDetails->map(function ($row) use ($context, $taxPercent, $commission) {
             $embassy = (float) ($row->embassy_fee ?? $row->credit_amount ?? 0);
             $service = (float) ($row->service_fee ?? 0);
+            if ($commission) {
+                $service += $commission['type'] === AgencyCommission::TYPE_FIXED
+                    ? $commission['value']
+                    : $service * $commission['value'] / 100;
+            }
             $tax = $service * $taxPercent / 100;
 
             $convert = fn (float $amount) => round($amount * $context['rate'], 2);

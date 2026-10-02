@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
 
-// ─── Menu Data ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Menu Data â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 type MenuItem =
     | { type: 'title'; label: string }
     | { type: 'link'; icon: string; label: string; href: string; permission?: string; adminOnly?: boolean }
     | { type: 'dropdown'; icon: string; label: string; children: { label: string; href: string; soon?: boolean }[] };
 
-// ── Superadmin menu ───────────────────────────────────────────────────────────
+// â”€â”€ Superadmin menu â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const getSuperadminMenuItems = (companyName: string): MenuItem[] => [
     { type: 'title', label: companyName.toUpperCase() },
 
@@ -19,6 +19,8 @@ const getSuperadminMenuItems = (companyName: string): MenuItem[] => [
     { type: 'link', icon: 'fa-solid fa-tags', label: 'Visa Type', href: '/admin/visa-types', permission: 'visa.view' },
     { type: 'link', icon: 'fa-solid fa-passport', label: 'Visas', href: '/admin/visa-services', permission: 'visa.view' },
     { type: 'link', icon: 'fa-solid fa-file-invoice-dollar', label: 'Tax Setup', href: '/admin/tax-setups' },
+    { type: 'link', icon: 'fa-solid fa-file-signature', label: 'Visa Applications', href: '/admin/service-bookings?service=visa&status=not_pending', permission: 'visa.view' },
+    { type: 'link', icon: 'fa-solid fa-hourglass-half', label: 'Pending Applications', href: '/admin/service-bookings?service=visa&status=pending', permission: 'visa.view' },
 
     { type: 'title', label: 'OPERATIONS' },
 
@@ -36,6 +38,7 @@ const getSuperadminMenuItems = (companyName: string): MenuItem[] => [
     { type: 'title', label: 'BOOKINGS & SALES' },
 
     { type: 'link', icon: 'fa-solid fa-calendar-check', label: 'Bookings', href: '/admin/bookings', permission: 'booking.view' },
+    { type: 'link', icon: 'fa-solid fa-file-invoice', label: 'Service Bookings', href: '/admin/service-bookings' },
     { type: 'link', icon: 'fa-solid fa-envelope', label: 'Contact Requests', href: '/admin/contact-requests', permission: 'contact-request.view' },
     { type: 'link', icon: 'fa-solid fa-quote-left', label: 'Travel Quotes', href: '/admin/travel-quote', permission: 'travel-quote.view' },
 
@@ -62,7 +65,7 @@ const getSuperadminMenuItems = (companyName: string): MenuItem[] => [
     { type: 'link', icon: 'fa-solid fa-globe', label: 'Countries', href: '/admin/countries' },
 ];
 
-// ── Agency menu (Agency Management is superadmin-only) ────────────────────────
+// â”€â”€ Agency menu (Agency Management is superadmin-only) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const getAgencyMenuItems = (agencyName: string, serviceItems: MenuItem[]): MenuItem[] => [
     { type: 'title', label: agencyName.toUpperCase() },
 
@@ -85,6 +88,11 @@ const getAgencyMenuItems = (agencyName: string, serviceItems: MenuItem[]): MenuI
     { type: 'title', label: 'BOOKINGS & SALES' },
 
     { type: 'link', icon: 'fa-solid fa-calendar-check', label: 'Bookings', href: '/admin/bookings', permission: 'booking.view' },
+    { type: 'link', icon: 'fa-solid fa-file-invoice', label: 'Service Bookings', href: '/admin/service-bookings' },
+
+    { type: 'title', label: 'SETTINGS' },
+
+    { type: 'link', icon: 'fa-solid fa-cog', label: 'Settings', href: '/admin/agency-settings', adminOnly: true },
 ];
 
 // Where each service id opens. A service without an entry has no page yet and
@@ -96,10 +104,71 @@ const SERVICE_PAGES: Record<string, { label?: string; href: string; permission?:
     ],
 };
 
+// Extra sidebar sections for a service, shown below the Services dropdown
+// only while the superadmin has that service active for the agency.
+const SERVICE_SECTIONS: Record<string, { title: string; links: { icon: string; label: string; href: string; permission?: string }[] }> = {
+    visa: {
+        title: 'VISA MANAGEMENT',
+        links: [
+            { icon: 'fa-solid fa-file-signature', label: 'Visa Applications', href: '/admin/service-bookings?service=visa&status=not_pending', permission: 'visa.view' },
+            { icon: 'fa-solid fa-hourglass-half', label: 'Pending Applications', href: '/admin/service-bookings?service=visa&status=pending', permission: 'visa.view' },
+        ],
+    },
+};
+
+/**
+ * How well a menu href matches the current URL, or -1 if it doesn't. The
+ * path must match (or be a parent of it) and every query value in the href
+ * must be in the URL; more query values and longer paths win, so only the
+ * most specific link lights up ("Pending Applications" over "Visa
+ * Applications" over "Service Bookings").
+ */
+const matchScore = (currentUrl: string, href: string): number => {
+    if (!href || href === '#') return -1;
+    const current = new URL(currentUrl, 'http://menu');
+    const target = new URL(href, 'http://menu');
+    const pathMatches = current.pathname === target.pathname || current.pathname.startsWith(`${target.pathname}/`);
+    if (!pathMatches) return -1;
+    for (const [key, value] of target.searchParams) {
+        if (current.searchParams.get(key) !== value) return -1;
+    }
+    return [...target.searchParams].length * 1000 + target.pathname.length;
+};
+
+/** The one href in the menu that best matches the current URL. */
+const bestHref = (items: MenuItem[], currentUrl: string): string | null => {
+    const hrefs = items.flatMap((item) =>
+        item.type === 'link' ? [item.href] : item.type === 'dropdown' ? item.children.filter((c) => !c.soon).map((c) => c.href) : [],
+    );
+    let best: string | null = null;
+    let bestScore = -1;
+    for (const href of hrefs) {
+        const score = matchScore(currentUrl, href);
+        if (score > bestScore) {
+            best = href;
+            bestScore = score;
+        }
+    }
+    return best;
+};
+
 const buildServiceItems = (
     services: { id: string; name: string }[],
     canSee: (permission?: string) => boolean,
 ): MenuItem[] => {
+    // Services' extra sections (e.g. VISA MANAGEMENT). The links are
+    // already filtered here (canSee), so they carry no `permission` for the
+    // sidebar's own filter, which would hide them from the agency owner.
+    const sections: MenuItem[] = services.flatMap((service) => {
+        const section = SERVICE_SECTIONS[service.id];
+        if (!section) return [];
+        const links: MenuItem[] = section.links
+            .filter((link) => canSee(link.permission))
+            .map(({ permission: _permission, ...link }) => ({ type: 'link' as const, ...link }));
+        return links.length ? [{ type: 'title' as const, label: section.title }, ...links] : [];
+    });
+
+    // Every assigned service in the Services dropdown, as before
     const children = services.flatMap((service) => {
         const pages = SERVICE_PAGES[service.id];
         if (!pages) return [{ label: service.name, href: '#', soon: true }];
@@ -108,11 +177,14 @@ const buildServiceItems = (
             .map((page) => ({ label: page.label ?? service.name, href: page.href }));
     });
 
-    if (children.length === 0) return [];
-
     return [
-        { type: 'title', label: 'SERVICES' },
-        { type: 'dropdown', icon: 'fa-solid fa-concierge-bell', label: 'Services', children },
+        ...(children.length
+            ? [
+                { type: 'title' as const, label: 'SERVICES' },
+                { type: 'dropdown' as const, icon: 'fa-solid fa-concierge-bell', label: 'Services', children },
+            ]
+            : []),
+        ...sections,
     ];
 };
 
@@ -128,12 +200,12 @@ const buildServiceItems = (
 // { type: 'title', label: 'Operations' },
 // { type: 'title', label: 'Approvals & Legal' },
 
-// ─── Dropdown Item ────────────────────────────────────────────────────────────
+// â”€â”€â”€ Dropdown Item â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-function DropdownItem({ icon, label, children, currentPath }: { icon: string; label: string; children: { label: string; href: string; soon?: boolean }[]; currentPath: string }) {
+function DropdownItem({ icon, label, children, activeHref }: { icon: string; label: string; children: { label: string; href: string; soon?: boolean }[]; activeHref: string | null }) {
 
     // Check if any child is active
-    const hasActiveChild = children.some(c => !c.soon && currentPath.startsWith(c.href));
+    const hasActiveChild = children.some(c => !c.soon && c.href === activeHref);
 
     // Auto-open if a child is active, otherwise closed
     const [open, setOpen] = useState(hasActiveChild);
@@ -168,7 +240,7 @@ function DropdownItem({ icon, label, children, currentPath }: { icon: string; la
                             </li>
                         );
                     }
-                    const isActive = currentPath.startsWith(c.href);
+                    const isActive = c.href === activeHref;
                     return (
                         <li key={c.href} className={isActive ? 'mm-active' : ''}>
                             <a href={c.href} className={isActive ? 'sidebar-active' : ''}>
@@ -182,7 +254,7 @@ function DropdownItem({ icon, label, children, currentPath }: { icon: string; la
     );
 }
 
-// ─── Sidebar ──────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Sidebar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 export default function Sidebar() {
     const { name, authAgency, authPermissions, isStaffSession, agencyServices } = usePage().props as any;
@@ -210,7 +282,7 @@ export default function Sidebar() {
         const next = kept[i + 1];
         return next !== undefined && next.type !== 'title';
     });
-    const currentPath = url || '';
+    const activeHref = bestHref(menuItems, url || '');
 
     return (
         <div className="deznav">
@@ -247,7 +319,7 @@ export default function Sidebar() {
                         }
 
                         if (item.type === 'link') {
-                            const isActive = currentPath.startsWith(item.href);
+                            const isActive = item.href === activeHref;
                             return (
                                 <li key={i}>
                                     <a href={item.href} className={isActive ? 'sidebar-active' : ''}>
@@ -264,7 +336,7 @@ export default function Sidebar() {
                                 icon={item.icon}
                                 label={item.label}
                                 children={item.children}
-                                currentPath={currentPath}
+                                activeHref={activeHref}
                             />
                         );
                     })}

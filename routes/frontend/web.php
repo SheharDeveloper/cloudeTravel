@@ -35,6 +35,13 @@ Route::get('/offers/{uid}', [OfferController::class, 'show'])->name('offers.deta
 Route::get('/quote/preview/{uid}', [PublicQuotePreviewController::class, '__invoke'])->name('quote.preview');
 Route::post('/quote/feedback/submit', [QuoteFeedbackController::class, 'submit'])->name('quote.feedback.submit');
 
+// Document Signing Portal ("Doc Sign" on a booking): the secret token is the only key
+Route::get('/documents/sign/{token}', [\App\Http\Controllers\DocumentSignController::class, 'show'])->name('documents.sign');
+Route::post('/documents/sign/{token}', [\App\Http\Controllers\DocumentSignController::class, 'submit'])
+    ->middleware('throttle:10,1')
+    ->name('documents.sign.submit');
+Route::get('/documents/invoice/{token}', [\App\Http\Controllers\DocumentSignController::class, 'invoice'])->name('documents.invoice');
+
 // Search
 Route::match(['get', 'post'], '/search/flight', [SearchController::class, 'flightSearch'])->name('search.flight');
 Route::match(['get', 'post'], '/search/hotel', [SearchController::class, 'hotelSearch'])->name('search.hotel');

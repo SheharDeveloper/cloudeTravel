@@ -1,9 +1,17 @@
 import { Head, usePage } from '@inertiajs/react';
 import { ProtectedRoute } from '@/lib/ProtectedRoute';
 import VisaRequirementsSearch, { type VisaRequirementsProps } from '@/components/VisaRequirementsSearch';
+import EditingBookingBanner, { type EditingBooking } from '@/components/EditingBookingBanner';
 
 export default function VisaSearch() {
-    const props = usePage().props as unknown as Omit<VisaRequirementsProps, 'basePath' | 'resultPath'>;
+    const { editing, ...props } = usePage().props as unknown as Omit<VisaRequirementsProps, 'basePath' | 'resultPath'> & {
+        editing?: EditingBooking | null;
+    };
+
+    // While editing a booking, its uid (and Living In) go along to the next step
+    const extraParams = editing
+        ? { booking: editing.uid, ...(editing.living_in && { living_in: editing.living_in }) }
+        : undefined;
 
     return (
         <ProtectedRoute>
@@ -19,7 +27,13 @@ export default function VisaSearch() {
                     </ol>
                 </nav>
             </div>
-            <VisaRequirementsSearch {...props} basePath="/admin/visa-search" resultPath="/admin/visa-search/result" />
+            {editing && <EditingBookingBanner booking={editing} />}
+            <VisaRequirementsSearch
+                {...props}
+                basePath="/admin/visa-search"
+                resultPath="/admin/visa-search/result"
+                extraParams={extraParams}
+            />
         </ProtectedRoute>
     );
 }

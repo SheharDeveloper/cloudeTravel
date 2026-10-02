@@ -46,6 +46,8 @@ export interface VisaRequirementsProps {
     basePath: string;
     /** When set, Check Requirements opens this results page instead of showing results in place. */
     resultPath?: string;
+    /** Sent along with the search (e.g. the booking being edited). */
+    extraParams?: Record<string, string>;
 }
 
 const ACCENT = '#29a9e0';
@@ -194,7 +196,7 @@ function CountrySelect({
     );
 }
 
-export default function VisaRequirementsSearch({ countries, filters, searched, visas, contact, currency, basePath, resultPath }: VisaRequirementsProps) {
+export default function VisaRequirementsSearch({ countries, filters, searched, visas, contact, currency, basePath, resultPath, extraParams }: VisaRequirementsProps) {
     const [from, setFrom] = useState<string | null>(filters.from);
     const [to, setTo] = useState<string | null>(filters.to);
     const [showHint, setShowHint] = useState(false);
@@ -222,7 +224,7 @@ export default function VisaRequirementsSearch({ countries, filters, searched, v
         setShowHint(false);
         router.get(
             resultPath ?? basePath,
-            { ...(from !== null && { from }), ...(to !== null && { to }) },
+            { ...extraParams, ...(from !== null && { from }), ...(to !== null && { to }) },
             resultPath
                 ? {}
                 : {

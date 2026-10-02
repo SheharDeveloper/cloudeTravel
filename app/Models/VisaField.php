@@ -6,9 +6,27 @@ use Illuminate\Database\Eloquent\Model;
 
 class VisaField extends Model
 {
-    protected $fillable = ['visa_section_id', 'field_name', 'slug', 'field_type', 'status'];
+    protected $fillable = ['visa_section_id', 'field_name', 'slug', 'field_type', 'options', 'status'];
 
-    protected $casts = ['status' => 'boolean'];
+    protected $casts = ['status' => 'boolean', 'options' => 'array'];
+
+    /** The types a field can have (Assign Field → Add / Edit field). */
+    public const TYPES = [
+        'text' => 'Text',
+        'textarea' => 'Long Text',
+        'number' => 'Number',
+        'email' => 'Email',
+        'tel' => 'Phone',
+        'date' => 'Date',
+        'select' => 'Dropdown',
+        'radio' => 'Radio Buttons',
+        'checkbox' => 'Checkboxes',
+        'yesno' => 'Yes / No',
+        'file' => 'File Upload',
+    ];
+
+    /** Types that need a list of options. */
+    public const CHOICE_TYPES = ['select', 'radio', 'checkbox'];
 
     public function section()
     {

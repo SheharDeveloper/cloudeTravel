@@ -1,9 +1,13 @@
 import { Head, usePage } from '@inertiajs/react';
 import { ProtectedRoute } from '@/lib/ProtectedRoute';
 import VisaResultView, { type VisaResultProps } from '@/components/VisaResultView';
+import EditingBookingBanner, { type EditingBooking } from '@/components/EditingBookingBanner';
 
 export default function VisaResult() {
-    const { isPreview, ...props } = usePage().props as unknown as Omit<VisaResultProps, 'resultPath'> & { isPreview?: boolean };
+    const { isPreview, editing, ...props } = usePage().props as unknown as Omit<VisaResultProps, 'resultPath'> & {
+        isPreview?: boolean;
+        editing?: EditingBooking | null;
+    };
 
     return (
         <ProtectedRoute>
@@ -30,7 +34,15 @@ export default function VisaResult() {
                     </nav>
                 </div>
             )}
-            <VisaResultView {...props} resultPath="/admin/visa-search/result" hideGetStarted={isPreview} />
+            {editing && <EditingBookingBanner booking={editing} />}
+            <VisaResultView
+                {...props}
+                resultPath="/admin/visa-search/result"
+                hideGetStarted={isPreview}
+                // While editing, the booking goes along to Apply and its visa starts selected
+                extraParams={editing ? { booking: editing.uid } : undefined}
+                initialVisaUid={editing?.visa_uid}
+            />
         </ProtectedRoute>
     );
 }

@@ -55,6 +55,10 @@ export interface VisaResultProps {
     resultPath: string;
     /** Hides the GET STARTED buttons (used for the admin's Preview). */
     hideGetStarted?: boolean;
+    /** Sent along with every search and GET STARTED (e.g. the booking being edited). */
+    extraParams?: Record<string, string>;
+    /** The visa to start on instead of the first one, when it's in the list. */
+    initialVisaUid?: string | null;
 }
 
 const ACCENT = '#29a9e0';
@@ -227,20 +231,22 @@ function Field({
  * below. The first visa found is chosen automatically; picking another one
  * from Visa Type (or the list below) switches the picture and the details.
  */
-export default function VisaResultView({ countries, filters, visas, pricing, contact, resultPath, hideGetStarted }: VisaResultProps) {
+export default function VisaResultView({ countries, filters, visas, pricing, contact, resultPath, hideGetStarted, extraParams, initialVisaUid }: VisaResultProps) {
     const [destination, setDestination] = useState<string | null>(filters.to);
     const [citizenship, setCitizenship] = useState<string | null>(filters.from);
     // Only what the user picked; Living In follows Citizenship until they pick one.
     const [livingIn, setLivingIn] = useState<string | null>(filters.living_in);
     const livingValue = livingIn ?? citizenship;
     const [showHint, setShowHint] = useState(false);
-    const [selectedUid, setSelectedUid] = useState<string>(visas[0].uid);
+    // Starts on initialVisaUid (the booking being edited) when it's in the list
+    const firstUid = () => (initialVisaUid && visas.some((visa) => visa.uid === initialVisaUid) ? initialVisaUid : visas[0].uid);
+    const [selectedUid, setSelectedUid] = useState<string>(firstUid);
 
     // A new search starts on its first visa. Changing only Living In reloads the
     // same visas with new prices, so the visa picked stays picked.
     const visaKey = visas.map((visa) => visa.uid).join('|');
     useEffect(() => {
-        setSelectedUid(visas[0].uid);
+        setSelectedUid(firstUid());
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [visaKey]);
 
@@ -262,7 +268,7 @@ export default function VisaResultView({ countries, filters, visas, pricing, con
         setLivingIn(key);
         router.get(
             resultPath,
-            { from: filters.from, to: filters.to, ...(key && { living_in: key }) },
+            { ...extraParams, from: filters.from, to: filters.to, ...(key && { living_in: key }) },
             { preserveState: true, preserveScroll: true },
         );
     };
@@ -274,10 +280,21 @@ export default function VisaResultView({ countries, filters, visas, pricing, con
         }
         setShowHint(false);
         router.get(resultPath, {
+            ...extraParams,
             from: citizenship,
             to: destination,
             ...(livingIn && { living_in: livingIn }),
         });
+    };
+
+    // The visa application screen needs the same search context (who's
+    // asking, what they picked) plus which cost row to apply for — the
+    // first one, since there's no row picker here yet.
+    const applyHref = (visa: VisaResult) => {
+        const params = new URLSearchParams({ ...extraParams, visa: visa.uid, from: filters.from, to: filters.to });
+        if (livingValue) params.set('living_in', livingValue);
+        if (visa.priced_costs[0]?.id != null) params.set('cost', String(visa.priced_costs[0].id));
+        return `/admin/visa-search/apply?${params.toString()}`;
     };
 
     const money = (value: number) => `${pricing.symbol}${value.toFixed(2)}`;
@@ -434,7 +451,7 @@ export default function VisaResultView({ countries, filters, visas, pricing, con
 
                     {/* Selected visa */}
                     <div style={{ flex: '1 1 480px', minWidth: 0, background: '#fff', border: `1px solid ${BORDER}`, padding: 14 }}>
-                        {!hideGetStarted && <a href={`/visa/${selected.uid}`} style={getStarted}>GET STARTED</a>}
+                        {!hideGetStarted && <a href={applyHref(selected)} style={getStarted}>GET STARTED</a>}
 
                         <div style={{ fontSize: 13, color: '#111', margin: '14px 0' }}>
                             {selected.description ? (
@@ -479,7 +496,7 @@ export default function VisaResultView({ countries, filters, visas, pricing, con
 
                         {!hideGetStarted && (
                             <div style={{ marginTop: 14 }}>
-                                <a href={`/visa/${selected.uid}`} style={getStarted}>GET STARTED</a>
+                                <a href={applyHref(selected)} style={getStarted}>GET STARTED</a>
                             </div>
                         )}
                     </div>

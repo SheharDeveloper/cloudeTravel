@@ -1,12 +1,23 @@
 import { useMemo, useRef, useState } from 'react';
 import { router } from '@inertiajs/react';
+import axios from 'axios';
 
 export interface ConfigField {
     id: number;
     field_name: string;
+    field_type: string;
+    options: string[];
+    // The field's own section; it's "moved" for this visa when listed elsewhere
+    home_section_id: number;
     enabled: boolean;
     required: boolean;
 }
+
+// Types whose answers come from a list of options
+const CHOICE_TYPES = ['select', 'radio', 'checkbox'];
+
+/** The Add / Edit field popup: name, type and (for choice types) options. */
+type FieldDraft = { mode: 'add'; sectionId: number } | { mode: 'edit'; field: ConfigField };
 
 export interface ConfigSection {
     id: number;
@@ -20,6 +31,7 @@ interface Props {
     visaName: string;
     countryLabel: string;
     initial: ConfigSection[];
+    fieldTypes: Record<string, string>;
 }
 
 type DragItem = { kind: 'section'; id: number } | { kind: 'field'; sectionId: number; id: number };
@@ -35,7 +47,7 @@ const moveBefore = <T extends { id: number }>(list: T[], dragId: number, targetI
     return rest;
 };
 
-export default function VisaFieldConfig({ visaUid, visaName, countryLabel, initial }: Props) {
+export default function VisaFieldConfig({ visaUid, visaName, countryLabel, initial, fieldTypes }: Props) {
     const [sections, setSections] = useState<ConfigSection[]>(initial);
     const [expanded, setExpanded] = useState<Set<number>>(new Set());
     const [search, setSearch] = useState('');
@@ -90,6 +102,52 @@ export default function VisaFieldConfig({ visaUid, visaName, countryLabel, initi
             enabled: enabled ? true : section.enabled,
             fields: section.fields.map((field) => ({ ...field, enabled, required: enabled ? field.required : false })),
         }));
+
+    // ---- move a field to another section (for this visa only) ----
+    const moveField = (fromId: number, fieldId: number, toId: number) => {
+        if (fromId === toId) return;
+        const field = sections.find((s) => s.id === fromId)?.fields.find((f) => f.id === fieldId);
+        if (!field) return;
+        update(
+            sections.map((section) => {
+                if (section.id === fromId) return { ...section, fields: section.fields.filter((f) => f.id !== fieldId) };
+                if (section.id === toId) {
+                    // An enabled field switches its new section on, so it's saved there
+                    return { ...section, enabled: field.enabled ? true : section.enabled, fields: [...section.fields, field] };
+                }
+                return section;
+            }),
+        );
+        setExpanded((prev) => new Set(prev).add(toId));
+    };
+
+    // ---- add / edit a field (saved straight away; Save keeps it on this visa) ----
+    const [draft, setDraft] = useState<FieldDraft | null>(null);
+
+    const onFieldSaved = (saved: ConfigField) => {
+        if (draft?.mode === 'add') {
+            // New: switched on at the end of its section (Save keeps it on)
+            update(sections.map((section) =>
+                section.id === draft.sectionId
+                    ? { ...section, enabled: true, fields: [...section.fields, saved] }
+                    : section,
+            ));
+            setExpanded((prev) => new Set(prev).add(draft.sectionId));
+            setMessage({ type: 'success', text: `“${saved.field_name}” added. Click Save to keep it on this visa.` });
+        } else {
+            // Edited: same field, wherever it is listed; keep this visa's choices
+            setSections((prev) => prev.map((section) => ({
+                ...section,
+                fields: section.fields.map((f) =>
+                    f.id === saved.id ? { ...f, field_name: saved.field_name, field_type: saved.field_type, options: saved.options } : f,
+                ),
+            })));
+            setMessage({ type: 'success', text: `“${saved.field_name}” updated.` });
+        }
+        setDraft(null);
+    };
+
+    const sectionName = (id: number) => sections.find((s) => s.id === id)?.section_name ?? '';
 
     // ---- drag and drop (handle-initiated, native HTML5) ----
     const startDrag = (item: DragItem) => (e: React.DragEvent) => {
@@ -301,6 +359,13 @@ export default function VisaFieldConfig({ visaUid, visaName, countryLabel, initi
                                             <button type="button" className="btn btn-outline-secondary btn-sm py-0" onClick={() => setSectionFields(section.id, false)}>
                                                 Clear
                                             </button>
+                                            <button
+                                                type="button"
+                                                className="btn btn-primary btn-sm py-0 ms-auto"
+                                                onClick={() => setDraft({ mode: 'add', sectionId: section.id })}
+                                            >
+                                                <i className="fa fa-plus me-1"></i>Add Field
+                                            </button>
                                         </div>
 
                                         <ul className="list-unstyled mb-0">
@@ -330,7 +395,39 @@ export default function VisaFieldConfig({ visaUid, visaName, countryLabel, initi
                                                                 onChange={(e) => toggleField(section.id, field.id, e.target.checked)}
                                                             />
                                                             {field.field_name}
+                                                            <span className="badge bg-light text-muted border fw-normal">
+                                                                {fieldTypes[field.field_type] ?? field.field_type}
+                                                                {CHOICE_TYPES.includes(field.field_type) && field.options.length > 0 && ` · ${field.options.length}`}
+                                                            </span>
+                                                            {field.home_section_id !== section.id && (
+                                                                <span className="badge bg-info bg-opacity-10 text-info fw-normal" title="Moved for this visa only">
+                                                                    from {sectionName(field.home_section_id)}
+                                                                </span>
+                                                            )}
                                                         </label>
+                                                        <select
+                                                            className="form-select form-select-sm"
+                                                            style={{ width: 230 }}
+                                                            value={section.id}
+                                                            onChange={(e) => moveField(section.id, field.id, Number(e.target.value))}
+                                                            title="Move to another section (this visa only)"
+                                                            aria-label={`Move ${field.field_name} to section`}
+                                                        >
+                                                            {sections.map((s) => (
+                                                                <option key={s.id} value={s.id}>
+                                                                    {s.id === section.id ? `✓ ${s.section_name}` : `→ ${s.section_name}`}
+                                                                </option>
+                                                            ))}
+                                                        </select>
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-link btn-sm p-0 text-muted"
+                                                            onClick={() => setDraft({ mode: 'edit', field })}
+                                                            title="Edit name, type and options"
+                                                            aria-label={`Edit ${field.field_name}`}
+                                                        >
+                                                            <i className="fa fa-pen"></i>
+                                                        </button>
                                                         <label
                                                             className="d-flex align-items-center gap-1 mb-0 small text-muted"
                                                             style={{ cursor: field.enabled ? 'pointer' : 'not-allowed' }}
@@ -358,6 +455,117 @@ export default function VisaFieldConfig({ visaUid, visaName, countryLabel, initi
                             </div>
                         );
                     })}
+                </div>
+            </div>
+
+            {draft && (
+                <FieldEditor
+                    visaUid={visaUid}
+                    draft={draft}
+                    sectionName={draft.mode === 'add' ? sectionName(draft.sectionId) : sectionName(draft.field.home_section_id)}
+                    fieldTypes={fieldTypes}
+                    onClose={() => setDraft(null)}
+                    onSaved={onFieldSaved}
+                />
+            )}
+        </div>
+    );
+}
+
+function FieldEditor({ visaUid, draft, sectionName, fieldTypes, onClose, onSaved }: {
+    visaUid: string;
+    draft: FieldDraft;
+    sectionName: string;
+    fieldTypes: Record<string, string>;
+    onClose: () => void;
+    onSaved: (field: ConfigField) => void;
+}) {
+    const editing = draft.mode === 'edit' ? draft.field : null;
+    const [name, setName] = useState(editing?.field_name ?? '');
+    const [type, setType] = useState(editing?.field_type ?? 'text');
+    const [optionsText, setOptionsText] = useState((editing?.options ?? []).join('\n'));
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [saving, setSaving] = useState(false);
+    const needsOptions = CHOICE_TYPES.includes(type);
+
+    const save = async () => {
+        setSaving(true);
+        setErrors({});
+        const body = {
+            field_name: name.trim(),
+            field_type: type,
+            options: needsOptions ? optionsText.split('\n').map((o) => o.trim()).filter(Boolean) : [],
+            ...(draft.mode === 'add' && { visa_section_id: draft.sectionId }),
+        };
+        try {
+            const response = draft.mode === 'add'
+                ? await axios.post(`/admin/visa-services/${visaUid}/fields/new`, body)
+                : await axios.put(`/admin/visa-services/${visaUid}/fields/${draft.field.id}/definition`, body);
+            onSaved(response.data.field);
+        } catch (error: any) {
+            const found = error?.response?.data?.errors as Record<string, string[]> | undefined;
+            setErrors(found
+                ? Object.fromEntries(Object.entries(found).map(([key, messages]) => [key.split('.')[0], messages[0]]))
+                : { field_name: 'Could not save the field. Please try again.' });
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    return (
+        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} role="dialog" aria-modal="true" onClick={onClose}>
+            <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title">{draft.mode === 'add' ? `Add Field to ${sectionName}` : 'Edit Field'}</h5>
+                        <button type="button" className="btn-close" onClick={onClose} aria-label="Close"></button>
+                    </div>
+                    <div className="modal-body">
+                        <div className="mb-3">
+                            <label className="form-label">Field Name</label>
+                            <input
+                                type="text"
+                                className={`form-control ${errors.field_name ? 'is-invalid' : ''}`}
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="e.g. Previous Name"
+                                autoFocus
+                            />
+                            {errors.field_name && <div className="invalid-feedback d-block">{errors.field_name}</div>}
+                        </div>
+                        <div className="mb-3">
+                            <label className="form-label">Field Type</label>
+                            <select className={`form-select ${errors.field_type ? 'is-invalid' : ''}`} value={type} onChange={(e) => setType(e.target.value)}>
+                                {Object.entries(fieldTypes).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                            </select>
+                            {errors.field_type && <div className="invalid-feedback d-block">{errors.field_type}</div>}
+                        </div>
+                        {needsOptions && (
+                            <div className="mb-3">
+                                <label className="form-label">Options <small className="text-muted">(one per line)</small></label>
+                                <textarea
+                                    className={`form-control ${errors.options ? 'is-invalid' : ''}`}
+                                    rows={4}
+                                    value={optionsText}
+                                    onChange={(e) => setOptionsText(e.target.value)}
+                                    placeholder={'Option 1\nOption 2'}
+                                />
+                                {errors.options && <div className="invalid-feedback d-block">{errors.options}</div>}
+                            </div>
+                        )}
+                        {editing && (
+                            <small className="text-muted d-block">
+                                <i className="fa fa-info-circle me-1"></i>
+                                Fields are shared: the new name and type apply to every visa that uses this field.
+                            </small>
+                        )}
+                    </div>
+                    <div className="modal-footer">
+                        <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
+                        <button type="button" className="btn btn-primary" onClick={save} disabled={saving}>
+                            {saving ? 'Saving…' : draft.mode === 'add' ? 'Add Field' : 'Save Field'}
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

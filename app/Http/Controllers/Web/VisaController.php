@@ -41,6 +41,7 @@ class VisaController extends Controller
      */
     public function show(Visa $visa)
     {
+
         return Inertia::render('visas/visa-detail', [
             'visa' => $visa,
             'visas' => $this->visaService->active(),

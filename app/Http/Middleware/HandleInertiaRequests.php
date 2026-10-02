@@ -117,6 +117,9 @@ class HandleInertiaRequests extends Middleware
             // True for an individual staff login (not superadmin, not an
             // agency owner) — used to hide admin-only sidebar links like
             // Leave Requests that a staff member can't act on for themselves.
+            // One-off messages set with ->with('success', ...) on a redirect
+            'flash' => fn () => ['success' => $request->session()->get('success')],
+
             'isStaffSession' => function () {
                 $service = app(\App\Services\AttendanceService::class);
                 $principal = $service->currentPrincipal();

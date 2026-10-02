@@ -20,6 +20,7 @@ createInertiaApp({
         switch (true) {
             case name === 'welcome':
             case name === 'Public/QuotePreview':
+            case name === 'Public/DocumentSign':
                 return null;
             case name === 'home':
             case name === 'AllOffers':
