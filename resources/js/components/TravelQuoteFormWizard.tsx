@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { router } from '@inertiajs/react';
 import toast from 'react-hot-toast';
 import DatePicker from './DatePicker';
@@ -393,10 +393,17 @@ export default function TravelQuoteFormWizard({
         }
     };
 
+    // "Next": a short loader over the step, then the next step from its top
+    const [stepLoading, setStepLoading] = useState(false);
+    const contentRef = useRef<HTMLDivElement>(null);
     const handleNext = () => {
-        if (validateStep(currentStep)) {
-            setCurrentStep(currentStep + 1);
-        }
+        if (stepLoading || !validateStep(currentStep)) return;
+        contentRef.current?.scrollTo({ top: 0 });
+        setStepLoading(true);
+        window.setTimeout(() => {
+            setCurrentStep((step) => step + 1);
+            setStepLoading(false);
+        }, 500);
     };
 
     const handlePrevious = () => {
@@ -656,15 +663,45 @@ export default function TravelQuoteFormWizard({
                     </div>
 
                     {/* Content Area */}
-                    <div style={{
+                    <div ref={contentRef} style={{
                         flex: 1,
-                        overflowY: 'auto',
+                        overflowY: stepLoading ? 'hidden' : 'auto',
                         overflowX: 'hidden',
                         padding: '32px',
                         background: '#f8fafc',
                         position: 'relative',
                         zIndex: 1
                     }}>
+                        {/* Loader while moving to the next step */}
+                        {stepLoading && (
+                            <div
+                                role="status"
+                                aria-live="polite"
+                                style={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    zIndex: 5,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '12px',
+                                    background: 'rgba(248, 250, 252, 0.85)',
+                                }}
+                            >
+                                <span style={{
+                                    width: '40px',
+                                    height: '40px',
+                                    border: '4px solid #ddd6fe',
+                                    borderTopColor: '#6d28d9',
+                                    borderRadius: '50%',
+                                    animation: 'spin 0.8s linear infinite',
+                                }}></span>
+                                <span style={{ fontSize: '14px', fontWeight: 600, color: '#6d28d9' }}>
+                                    Loading {steps.find((s) => s.num === currentStep + 1)?.label ?? 'next step'}…
+                                </span>
+                            </div>
+                        )}
                         {/* Step 1: Basic Information */}
                         {currentStep === 1 && (
                             <div style={{ animation: 'fadeIn 0.3s ease' }}>
@@ -1534,6 +1571,7 @@ export default function TravelQuoteFormWizard({
                             {currentStep < totalSteps && (
                                 <button
                                     onClick={handleNext}
+                                    disabled={stepLoading}
                                     style={{
                                         padding: '10px 16px',
                                         background: 'linear-gradient(135deg, #6d28d9, #7c3aed)',
@@ -1542,10 +1580,24 @@ export default function TravelQuoteFormWizard({
                                         borderRadius: '8px',
                                         fontSize: '13px',
                                         fontWeight: 600,
-                                        cursor: 'pointer'
+                                        cursor: stepLoading ? 'wait' : 'pointer',
+                                        opacity: stepLoading ? 0.85 : 1,
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '8px'
                                     }}
                                 >
-                                    Next →
+                                    {stepLoading && (
+                                        <span style={{
+                                            width: '14px',
+                                            height: '14px',
+                                            border: '2px solid rgba(255,255,255,0.4)',
+                                            borderTopColor: '#ffffff',
+                                            borderRadius: '50%',
+                                            animation: 'spin 0.8s linear infinite',
+                                        }}></span>
+                                    )}
+                                    {stepLoading ? 'Loading…' : 'Next →'}
                                 </button>
                             )}
                             {currentStep === totalSteps && (
