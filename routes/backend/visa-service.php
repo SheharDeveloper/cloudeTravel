@@ -25,7 +25,6 @@ Route::get('visa-services/{visa}/fields', [VisaController::class, 'editFields'])
 Route::put('visa-services/{visa}/fields', [VisaController::class, 'updateFields'])->name('admin.visa-services.fields.update');
 Route::post('visa-services/{visa}/fields/new', [VisaController::class, 'storeField'])->name('admin.visa-services.fields.store');
 Route::put('visa-services/{visa}/fields/{field}/definition', [VisaController::class, 'updateField'])->name('admin.visa-services.fields.definition');
-Route::put('visa-services/{visa}/documents', [VisaController::class, 'updateDocuments'])->name('admin.visa-services.documents.update');
 Route::put('visa-services/{visa}', [VisaController::class, 'update'])->name('admin.visa-services.update');
 Route::patch('visa-services/{visa}/status', [VisaController::class, 'toggleStatus'])->name('admin.visa-services.status');
 Route::delete('visa-services/{visa}', [VisaController::class, 'destroy'])->name('admin.visa-services.destroy');

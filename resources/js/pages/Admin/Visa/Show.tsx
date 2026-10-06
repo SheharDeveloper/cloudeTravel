@@ -2,24 +2,21 @@ import { useState } from 'react';
 import { usePage } from '@inertiajs/react';
 import type { Visa } from '@/services/visaService';
 import VisaFieldConfig, { type ConfigSection } from './VisaFieldConfig';
-import VisaDocumentConfig, { type VisaDocumentRow } from './VisaDocumentConfig';
 
 const TABS = [
     { key: 'overview', label: 'Overview' },
     { key: 'fields', label: 'Assign Field' },
-    { key: 'documents', label: 'Assign Document' },
 ];
 
 type CountryInfo = { id: number; countryName: string; countryCode: string; flag_url?: string } | null | undefined;
 
 export default function VisaShow() {
-    const { visa, currency, canConfigureFields, fieldConfig, fieldTypes, visaDocuments, initialTab } = usePage().props as unknown as {
+    const { visa, currency, canConfigureFields, fieldConfig, fieldTypes, initialTab } = usePage().props as unknown as {
         visa: Visa & { origin_country?: CountryInfo; destination_country?: CountryInfo };
         currency: { symbol: string };
         canConfigureFields: boolean;
         fieldConfig: ConfigSection[];
         fieldTypes: Record<string, string>;
-        visaDocuments: VisaDocumentRow[];
         initialTab?: string;
     };
     const [activeTab, setActiveTab] = useState(initialTab ?? 'overview');
@@ -280,21 +277,6 @@ export default function VisaShow() {
                             icon="fa-solid fa-lock"
                             title="Assign Field"
                             text="Only a Super Admin can configure the application fields for a visa."
-                        />
-                    ))}
-
-                    {activeTab === 'documents' && (canConfigureFields ? (
-                        <VisaDocumentConfig
-                            key={visa.uid}
-                            visaUid={visa.uid}
-                            visaName={displayName}
-                            initial={visaDocuments}
-                        />
-                    ) : (
-                        <EmptyState
-                            icon="fa-solid fa-lock"
-                            title="Assign Document"
-                            text="Only a Super Admin can assign the required documents for a visa."
                         />
                     ))}
                 </div>

@@ -9,15 +9,12 @@ use App\Models\Visa;
 
 /**
  * Prices a visa for the country the applicant lives in: that country's tax
- * (GST / VAT, from Tax Setup) is added and the amounts are converted from the
- * currency visa fees are entered in (config/currency.php) to the applicant's
- * currency. On the Countries page each country's exchange rate is the amount of
- * its currency per 1 unit of the default country's currency, which is the
- * currency the fees are in, so converting is a single multiplication.
+ * (GST / VAT, from Tax Setup) and the agency's commission are added, and the
+ * amounts are converted to the applicant's currency by PriceCalculationService.
  */
 class VisaPricingService
 {
-    public function __construct(protected SettingsService $settingsService)
+    public function __construct(protected PriceCalculationService $priceCalculation)
     {
     }
 
@@ -31,66 +28,23 @@ class VisaPricingService
      */
     public function context(?Country $livingIn, bool $taxEnabled = true, ?AgencyCommission $commission = null): array
     {
-        $baseCode = strtoupper(config('currency.code'));
+        $taxes = $livingIn && $taxEnabled
+            ? TaxSetup::where('country_id', $livingIn->id)
+                ->orderBy('tax_name')
+                ->get(['tax_name', 'amount'])
+                ->map(fn (TaxSetup $tax) => ['name' => $tax->tax_name, 'percent' => (float) $tax->amount])
+                ->all()
+            : [];
 
-        $context = [
+        // Currency, rate and note (base_code, code, symbol, rate, converted, note)
+        return $this->priceCalculation->forCountry($livingIn) + [
             'commission' => $commission
                 ? ['type' => $commission->commission_type, 'value' => $commission->commission_value]
                 : null,
             'living_country' => $livingIn?->countryName,
-            'code' => $baseCode,
-            'symbol' => config('currency.symbol'),
-            'rate' => 1.0,
-            'converted' => false,
-            'base_code' => $baseCode,
             'tax_enabled' => $taxEnabled,
-            'taxes' => [],
-            'note' => null,
+            'taxes' => $taxes,
         ];
-
-        if (!$livingIn) {
-            return $context;
-        }
-
-        if ($taxEnabled) {
-            $context['taxes'] = TaxSetup::where('country_id', $livingIn->id)
-                ->orderBy('tax_name')
-                ->get(['tax_name', 'amount'])
-                ->map(fn (TaxSetup $tax) => ['name' => $tax->tax_name, 'percent' => (float) $tax->amount])
-                ->all();
-        }
-
-        // The default country's own currency is the one the fees are already in.
-        if ($livingIn->id === $this->settingsService->getDefaultTaxCountryId()) {
-            return $context;
-        }
-
-        $target = strtoupper(trim((string) $livingIn->currency_code));
-
-        if ($target === '') {
-            $context['note'] = "No currency is set for {$livingIn->countryName}, so prices are shown in {$baseCode}. The administrator sets it under Countries.";
-
-            return $context;
-        }
-
-        if ($target === $baseCode) {
-            return $context;
-        }
-
-        $rate = (float) $livingIn->exchange_rate;
-
-        if ($rate <= 0) {
-            $context['note'] = "No exchange rate (per 1 {$baseCode}) is set for {$livingIn->countryName}, so prices are shown in {$baseCode}. The administrator sets it under Countries.";
-
-            return $context;
-        }
-
-        $context['rate'] = $rate;
-        $context['code'] = $target;
-        $context['symbol'] = $this->symbolFor($target);
-        $context['converted'] = true;
-
-        return $context;
     }
 
     /**
@@ -114,7 +68,8 @@ class VisaPricingService
             }
             $tax = $service * $taxPercent / 100;
 
-            $convert = fn (float $amount) => round($amount * $context['rate'], 2);
+            // Exact amount × rate, not rounded
+            $convert = fn (float $amount) => $this->priceCalculation->convert($amount, $context);
 
             return [
                 'id' => $row->id,
@@ -127,13 +82,5 @@ class VisaPricingService
                 'total_cost' => $convert($embassy + $service + $tax),
             ];
         })->all();
-    }
-
-    /** "Indian Rupee (₹)" in config/currency.php -> "₹"; the code if unlisted. */
-    private function symbolFor(string $code): string
-    {
-        $label = config("currency.list.{$code}", '');
-
-        return preg_match('/\((.+)\)$/u', $label, $match) ? $match[1] : $code;
     }
 }

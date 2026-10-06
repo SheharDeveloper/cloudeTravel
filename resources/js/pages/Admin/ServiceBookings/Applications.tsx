@@ -21,6 +21,9 @@ interface ApplicationRow {
     status: string;
     booking_uid: string;
     invoice_number: string;
+    sent_at: string | null;
+    // Agency Applications (superadmin) only
+    agency?: string | null;
 }
 
 interface Props {
@@ -31,6 +34,8 @@ interface Props {
         links: { url: string | null; label: string; active: boolean }[];
     };
     filters: { service: string; status: string; search: string };
+    // The superadmin's Agency Applications: applications agencies sent to the admin
+    adminList?: boolean;
 }
 
 /**
@@ -39,27 +44,29 @@ interface Props {
  * Laid out like the Clients list.
  */
 export default function VisaApplications() {
-    const { applications, filters } = usePage().props as unknown as Props;
+    const { applications, filters, adminList = false } = usePage().props as unknown as Props;
     const [search, setSearch] = useState(filters.search);
+    const title = adminList ? 'Agency Applications' : 'Visa Applications';
 
     const submitSearch = (e: React.FormEvent) => {
         e.preventDefault();
+        const query = search.trim() ? { search: search.trim() } : {};
         router.get(
-            '/admin/service-bookings',
-            { service: 'visa', status: 'not_pending', ...(search.trim() && { search: search.trim() }) },
+            adminList ? '/admin/agency-applications' : '/admin/service-bookings',
+            adminList ? query : { service: 'visa', status: 'not_pending', ...query },
             { preserveState: true, replace: true },
         );
     };
 
     return (
         <ProtectedRoute>
-            <Head title="Visa Applications" />
+            <Head title={title} />
 
             <div className="page-title d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <nav aria-label="breadcrumb">
                     <ol className="breadcrumb">
                         <li><h1>Visa Management</h1></li>
-                        <li className="breadcrumb-item active">Visa Applications</li>
+                        <li className="breadcrumb-item active">{title}</li>
                     </ol>
                 </nav>
             </div>
@@ -93,11 +100,13 @@ export default function VisaApplications() {
                                                 <tr>
                                                     <th>Sr. No.</th>
                                                     <th>Application Number</th>
+                                                    {adminList && <th>Agency</th>}
                                                     <th>Client Details</th>
                                                     <th>Visa</th>
                                                     <th>Visa To</th>
                                                     <th>Total</th>
                                                     <th>Booking Date</th>
+                                                    {adminList && <th>Sent On</th>}
                                                     <th>Document Submit</th>
                                                     <th>Application Status</th>
                                                     <th>Update Status</th>
@@ -108,7 +117,13 @@ export default function VisaApplications() {
                                                 {applications.data.map((a, index) => (
                                                     <tr key={a.uid}>
                                                         <td><small className="text-muted">{(applications.from ?? 1) + index}</small></td>
-                                                        <td><small className="text-muted">{a.application_number}</small></td>
+                                                        <td>
+                                                            <small className="text-muted">{a.application_number}</small>
+                                                            {!adminList && a.sent_at && (
+                                                                <><br /><span className="badge bg-info mt-1"><i className="fa fa-paper-plane me-1"></i>Sent to Admin</span></>
+                                                            )}
+                                                        </td>
+                                                        {adminList && <td><strong>{a.agency ?? 'N/A'}</strong></td>}
                                                         <td>
                                                             <strong>{a.name}</strong>
                                                             {a.email && <><br /><small>{a.email}</small></>}
@@ -121,6 +136,7 @@ export default function VisaApplications() {
                                                         <td><small>{a.origin ?? 'N/A'} To {a.destination ?? 'N/A'}</small></td>
                                                         <td><small>{a.currency_symbol}{a.amount.toFixed(2)}</small></td>
                                                         <td><small className="text-muted">{formatDate(a.booked_on)}</small></td>
+                                                        {adminList && <td><small className="text-muted">{formatDate(a.sent_at)}</small></td>}
                                                         <td><span className={`badge ${statusBadge(a.document_status)} text-capitalize`}>{a.document_status}</span></td>
                                                         <td><span className={`badge ${statusBadge(a.status)} text-capitalize`}>{a.status}</span></td>
                                                         <td>
@@ -168,7 +184,9 @@ export default function VisaApplications() {
                                     <p className="text-muted mt-3">
                                         {filters.search
                                             ? 'No applications found'
-                                            : 'No visa applications yet. A booking\'s applications show here once its invoice has been signed.'}
+                                            : adminList
+                                                ? 'No agency has sent an application yet.'
+                                                : 'No visa applications yet. A booking\'s applications show here once its invoice has been signed.'}
                                     </p>
                                 </div>
                             )}

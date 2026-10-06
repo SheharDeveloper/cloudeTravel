@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Country;
 use App\Services\CountryService;
+use App\Services\ExchangeRateService;
 use App\Services\SettingsService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,32 +14,37 @@ class CountryController extends Controller
 {
     protected CountryService $countryService;
     protected SettingsService $settingsService;
+    protected ExchangeRateService $exchangeRateService;
 
-    public function __construct(CountryService $countryService, SettingsService $settingsService)
+    public function __construct(CountryService $countryService, SettingsService $settingsService, ExchangeRateService $exchangeRateService)
     {
         $this->countryService = $countryService;
         $this->settingsService = $settingsService;
+        $this->exchangeRateService = $exchangeRateService;
     }
 
-    public function index(Request $request)
+    /** The default country, and today's exchange rates against its currency (from the API). */
+    public function index()
     {
-        $search = (string) ($request->get('search') ?? '');
-        $countries = $this->countryService->search($search, 15);
+        $base = $this->exchangeRateService->displayBase();
+        try {
+            $rates = $this->exchangeRateService->list($base);
+            $ratesError = null;
+        } catch (\Throwable $e) {
+            report($e);
+            $rates = [];
+            $ratesError = 'The exchange rates could not be fetched right now. Try Refresh Rates later.';
+        }
 
         return Inertia::render('Admin/Country/Index', [
-            'countries' => [
-                'data' => $countries->items(),
-                'current_page' => $countries->currentPage(),
-                'last_page' => $countries->lastPage(),
-                'per_page' => $countries->perPage(),
-                'total' => $countries->total(),
-            ],
-            'filters' => [
-                'search' => $search,
-            ],
-            // Full unpaginated list, for the Default Country dropdown.
+            // Full list, for the Default Country dropdown.
             'allCountries' => $this->countryService->all(),
             'defaultCountryId' => $this->settingsService->getDefaultTaxCountryId(),
+            'rateBase' => $base,
+            'rates' => $rates,
+            'ratesError' => $ratesError,
+            // The exact API call the list comes from
+            'ratesSource' => $this->exchangeRateService->url($base),
         ]);
     }
 
@@ -53,13 +59,20 @@ class CountryController extends Controller
         return back()->with('success', 'Default country updated successfully');
     }
 
+    /** "Refresh Rates": fetches today's rates again instead of the cached ones. */
+    public function refreshRates()
+    {
+        $this->exchangeRateService->refresh();
+
+        return back()->with('success', 'Exchange rates updated');
+    }
+
     public function store(Request $request)
     {
         $validated = $request->validate([
             'countryCode' => 'required|string|max:10|unique:countries,countryCode',
             'countryName' => 'required|string|max:255',
             'currency_code' => 'nullable|string|max:10',
-            'exchange_rate' => 'nullable|numeric|min:0',
         ]);
 
         $this->countryService->create($validated);
@@ -73,7 +86,6 @@ class CountryController extends Controller
             'countryCode' => 'required|string|max:10|unique:countries,countryCode,' . $country->id,
             'countryName' => 'required|string|max:255',
             'currency_code' => 'nullable|string|max:10',
-            'exchange_rate' => 'nullable|numeric|min:0',
         ]);
 
         $this->countryService->update($country, $validated);

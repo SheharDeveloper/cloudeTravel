@@ -4,19 +4,22 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\TravelQuote;
+use App\Services\CountryService;
 use App\Services\TravelQuote\TravelQuoteService;
 use Illuminate\Http\Request;
 
 class TravelQuoteController extends Controller
 {
     protected $travelQuoteService;
+    protected CountryService $countryService;
 
     /**
      * Constructor - Inject TravelQuoteService
      */
-    public function __construct(TravelQuoteService $travelQuoteService)
+    public function __construct(TravelQuoteService $travelQuoteService, CountryService $countryService)
     {
         $this->travelQuoteService = $travelQuoteService;
+        $this->countryService = $countryService;
     }
 
     /**
@@ -32,6 +35,8 @@ class TravelQuoteController extends Controller
             'travelQuotes' => $travelQuotes,
             'currencySymbol' => $currencySymbol,
             'currencyCode' => $currencyCode,
+            // The country boxes (hotel, flight route, visa) list these, with flags
+            'countries' => $this->countryService->all(),
         ]);
     }
 

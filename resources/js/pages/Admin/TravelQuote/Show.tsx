@@ -475,9 +475,6 @@ export default function TravelQuoteShow({ travelQuote, feedback }: { travelQuote
                                 <div className="col-md-6">
                                     <InfoField icon="🍽️" label="Meal Plan" value={travelQuote.half_board || 'N/A'} />
                                 </div>
-                                <div className="col-md-6">
-                                    <InfoField icon="⭐" label="Package" value={travelQuote.all_inclusive || 'N/A'} />
-                                </div>
                                 {travelQuote.start && (
                                     <div className="col-md-6">
                                         <InfoField icon="✈️" label="Departure" value={formatDate(travelQuote.start)} />

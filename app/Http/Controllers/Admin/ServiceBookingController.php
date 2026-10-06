@@ -3,11 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\BookingApplication;
 use App\Models\ServiceBooking;
 use App\Services\ApplicationFormService;
 use App\Services\ContactInfoService;
 use App\Services\DocumentSignService;
+use App\Services\VisaApplicationService;
+use App\Services\ApplicationDocumentService;
 use App\Services\VisaRequirementsService;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -24,6 +25,8 @@ class ServiceBookingController extends Controller
         protected VisaRequirementsService $requirementsService,
         protected DocumentSignService $signService,
         protected ApplicationFormService $formService,
+        protected VisaApplicationService $applicationService,
+        protected ApplicationDocumentService $documentService,
     ) {
     }
 
@@ -69,71 +72,45 @@ class ServiceBookingController extends Controller
 
     private function visaApplications(array $filters)
     {
-        $search = $filters['search'];
-        // "CLDACI00102" (the application number) is application #102
-        $searchId = preg_match('/^CLDACI0*(\d+)$/i', $search, $m) ? (int) $m[1] : null;
-
-        $applications = BookingApplication::query()
-            ->whereHas('booking', fn ($b) => $b
-                ->whereIn('id', $this->owned()->select('id'))
-                ->where('service', 'visa')
-                ->where('status', '!=', 'pending'))
-            ->with('booking:id,uid,invoice_number,client_id,currency_symbol,details,created_at,status', 'booking.client:id,name,email,phone')
-            ->when($search !== '', function ($q) use ($search, $searchId) {
-                $q->where(function ($q) use ($search, $searchId) {
-                    $q->where('first_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%")
-                        ->orWhere('passport_number', 'like', "%{$search}%")
-                        ->orWhereHas('booking', fn ($b) => $b->where('invoice_number', 'like', "%{$search}%"))
-                        ->when($searchId, fn ($q) => $q->orWhere('id', $searchId));
-                });
-            })
-            ->latest('id')
-            ->paginate(15)
-            ->withQueryString()
-            ->through(function (BookingApplication $a) {
-                $booking = $a->booking;
-                $d = $booking->details ?? [];
-
-                return [
-                    'uid' => $a->uid,
-                    'application_number' => $a->application_number,
-                    'name' => trim("{$a->first_name} {$a->last_name}"),
-                    'relation' => $a->relation,
-                    // The applicant's own contact details, else the booking client's
-                    'email' => $a->email ?: $booking->client?->email,
-                    'phone' => $a->phone ?: $booking->client?->phone,
-                    'visa_name' => $d['visa_name'] ?? null,
-                    'visa_type' => $d['visa_type'] ?? null,
-                    'origin' => $d['origin'] ?? null,
-                    'destination' => $d['destination'] ?? null,
-                    'amount' => $a->amount,
-                    'currency_symbol' => $booking->currency_symbol,
-                    'booked_on' => $booking->created_at?->toIso8601String(),
-                    'document_status' => 'pending',
-                    'status' => $a->status,
-                    'booking_uid' => $booking->uid,
-                    'invoice_number' => $booking->invoice_number,
-                ];
-            });
-
         return Inertia::render('Admin/ServiceBookings/Applications', [
-            'applications' => $applications,
+            'applications' => $this->applicationService->visaApplications($filters['search']),
             'filters' => $filters,
         ]);
     }
 
+    /** Superadmin: every visa application agencies have sent to the admin. */
+    public function agencyApplications(Request $request)
+    {
+        abort_unless($this->applicationService->isSuperadmin(), 403);
+        $search = trim((string) $request->query('search', ''));
+
+        return Inertia::render('Admin/ServiceBookings/Applications', [
+            'applications' => $this->applicationService->agencyApplications($search),
+            'filters' => ['service' => 'visa', 'status' => 'sent', 'search' => $search],
+            'adminList' => true,
+        ]);
+    }
+
+    /** "Send to Admin": an agency hands its submitted application to the superadmin. */
+    public function sendToAdmin(string $uid)
+    {
+        $application = $this->applicationService->sendToAdmin(
+            $this->applicationService->findOwned($uid),
+            \Illuminate\Support\Facades\Auth::guard('agency')->user() ?? \Illuminate\Support\Facades\Auth::guard('web')->user(),
+        );
+
+        return back()->with('success', "Application {$application->application_number} sent to the admin.");
+    }
+
     /**
      * One application ("View Application"): the applicant, their booking's
-     * payment summary, and the others travelling on the same booking.
+     * payment summary, and the others travelling on the same booking. The
+     * superadmin can also open applications agencies have sent to the admin.
      */
     public function showApplication(string $uid)
     {
-        $application = BookingApplication::where('uid', $uid)
-            ->whereHas('booking', fn ($b) => $b->whereIn('id', $this->owned()->select('id')))
-            ->with('booking.client:id,name,email,phone', 'booking.applications', 'booking.signature')
-            ->firstOrFail();
+        $application = $this->applicationService->findViewable($uid);
+        $application->load('booking.client:id,name,email,phone', 'booking.applications', 'booking.signature', 'booking.owner');
         $booking = $application->booking;
         $d = $booking->details ?? [];
 
@@ -175,6 +152,14 @@ class ServiceBookingController extends Controller
             ],
             // "Fill Application": the visa's configured sections and fields, and the answers so far
             'form' => $this->formService->formFor($application),
+            // Send to Admin: what the viewer may do, and when it was sent
+            'access' => $this->applicationService->access($application),
+            'sent' => $this->applicationService->sentInfo($application),
+            // Visa Updation Log Data: changes made to the submitted form
+            'logs' => $this->applicationService->logs($application),
+            // Upload Document: the requested documents and their files; the superadmin requests them
+            'documents' => $this->documentService->forApplication($application),
+            'canRequestDocuments' => $this->applicationService->isSuperadmin(),
             // Everyone else on the same booking
             'members' => $booking->applications
                 ->reject(fn ($a) => $a->id === $application->id)
@@ -194,7 +179,7 @@ class ServiceBookingController extends Controller
     /** "Fill Application" file field: stores the file privately and returns the field's answer (JSON). */
     public function uploadFormFile(Request $request, string $uid)
     {
-        $application = $this->ownedApplication($uid);
+        $application = $this->applicationService->findViewable($uid);
         $request->validate([
             'file' => 'required|file|max:10240|mimes:pdf,jpg,jpeg,png,webp,doc,docx',
         ], [
@@ -208,7 +193,7 @@ class ServiceBookingController extends Controller
     /** Opens a file uploaded to this application's form. */
     public function downloadFormFile(Request $request, string $uid)
     {
-        $application = $this->ownedApplication($uid);
+        $application = $this->applicationService->findViewable($uid);
         $path = (string) $request->query('path', '');
         abort_unless($this->formService->ownsFile($application, $path), 404);
 
@@ -217,19 +202,10 @@ class ServiceBookingController extends Controller
         return \Illuminate\Support\Facades\Storage::disk('local')->response($path, basename($name));
     }
 
-    private function ownedApplication(string $uid): BookingApplication
-    {
-        return BookingApplication::where('uid', $uid)
-            ->whereHas('booking', fn ($b) => $b->whereIn('id', $this->owned()->select('id')))
-            ->firstOrFail();
-    }
-
     /** "Fill Application": save as a draft, or submit (required fields checked). */
     public function saveApplicationForm(Request $request, string $uid)
     {
-        $application = BookingApplication::where('uid', $uid)
-            ->whereHas('booking', fn ($b) => $b->whereIn('id', $this->owned()->select('id')))
-            ->firstOrFail();
+        $application = $this->applicationService->findViewable($uid);
 
         $validated = $request->validate([
             'answers' => 'present|array',
@@ -242,7 +218,7 @@ class ServiceBookingController extends Controller
 
         $submit = (bool) ($validated['submit'] ?? false);
         $actor = \Illuminate\Support\Facades\Auth::guard('agency')->user() ?? \Illuminate\Support\Facades\Auth::guard('web')->user();
-        $this->formService->save($application, $validated['answers'], $submit, $actor);
+        $this->applicationService->saveForm($application, $validated['answers'], $submit, $actor);
 
         if (! empty($validated['quiet'])) {
             return back();

@@ -3,13 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\UpdateVisaDocumentsRequest;
 use App\Http\Requests\UpdateVisaFieldsRequest;
 use App\Models\Visa;
 use App\Models\VisaField;
 use App\Models\VisaSection;
 use App\Services\CountryService;
-use App\Services\VisaDocumentService;
 use App\Services\VisaFieldConfigService;
 use App\Services\VisaRequirementsService;
 use App\Services\VisaService;
@@ -28,7 +26,6 @@ class VisaController extends Controller
         protected CountryService $countryService,
         protected VisaServiceCategoryService $categoryService,
         protected VisaFieldConfigService $fieldConfigService,
-        protected VisaDocumentService $documentService,
         protected VisaRequirementsService $requirementsService,
     ) {
     }
@@ -213,13 +210,6 @@ class VisaController extends Controller
         ];
     }
 
-    public function updateDocuments(UpdateVisaDocumentsRequest $request, Visa $visa)
-    {
-        $this->documentService->sync($visa, $request->validated('documents'));
-
-        return back()->with('success', 'Visa documents updated successfully');
-    }
-
     public function edit(Visa $visa)
     {
         return Inertia::render('Admin/Visa/Edit', [
@@ -280,7 +270,6 @@ class VisaController extends Controller
             'canConfigureFields' => $canConfigure,
             'fieldTypes' => VisaField::TYPES,
             'fieldConfig' => $canConfigure ? $this->fieldConfigService->configuration($visa) : [],
-            'visaDocuments' => $canConfigure ? $this->documentService->forVisa($visa) : [],
         ];
     }
 

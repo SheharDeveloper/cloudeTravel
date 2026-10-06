@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, router } from '@inertiajs/react';
 import VisaDescription from '@/components/VisaDescription';
+import { exactMoney } from '@/lib/money';
 
 interface Country {
     id: number;
@@ -297,7 +298,8 @@ export default function VisaResultView({ countries, filters, visas, pricing, con
         return `/admin/visa-search/apply?${params.toString()}`;
     };
 
-    const money = (value: number) => `${pricing.symbol}${value.toFixed(2)}`;
+    // Exact converted price, not rounded
+    const money = (value: number) => exactMoney(pricing.symbol, value);
     const taxLabel = pricing.taxes.map((tax) => `${tax.name} ${tax.percent}%`).join(' + ');
     const columns = ['Type of visa', 'Validity', 'Processing', 'Embassy fee', 'Service fee', ...(taxLabel ? [taxLabel] : []), 'Total cost'];
 
@@ -491,7 +493,7 @@ export default function VisaResultView({ countries, filters, visas, pricing, con
                             </div>
                         )}
 
-                        {/* Only a problem is worth saying: prices fell back to the base currency */}
+                        {/* Prices fell back to the base currency */}
                         {pricing.note && <div style={{ fontSize: 11, color: '#b45309', marginTop: 8 }}>{pricing.note}</div>}
 
                         {!hideGetStarted && (

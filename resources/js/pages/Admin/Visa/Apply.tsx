@@ -3,6 +3,7 @@ import { Head, router, usePage } from '@inertiajs/react';
 import toast, { Toaster } from 'react-hot-toast';
 import { ProtectedRoute } from '@/lib/ProtectedRoute';
 import DatePicker from '@/components/DatePicker';
+import { exactMoney } from '@/lib/money';
 
 interface PricedRow {
     id?: number;
@@ -292,9 +293,10 @@ export default function VisaApply() {
         return index === -1 ? undefined : errors[`passengers.${index}.${field}`];
     };
 
-    const money = (value: number) => `${pricing.symbol}${value.toFixed(2)}`;
+    // Exact converted price, not rounded
+    const money = (value: number) => exactMoney(pricing.symbol, value);
     // When prices are converted, the fee as entered (base currency) is shown underneath.
-    const baseMoney = (value: number) => `${pricing.base_code} ${(value / pricing.rate).toFixed(2)}`;
+    const baseMoney = (value: number) => exactMoney(`${pricing.base_code} `, Number((value / pricing.rate).toPrecision(12)));
     const taxLabel = pricing.taxes.map((tax) => `${tax.name} ${tax.percent}%`).join(' + ') || 'Tax';
     const visaName = visa.name || visa.title;
 

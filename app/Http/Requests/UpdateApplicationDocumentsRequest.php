@@ -4,7 +4,8 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateVisaDocumentsRequest extends FormRequest
+/** The superadmin's list of documents requested for one application. */
+class UpdateApplicationDocumentsRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -26,7 +27,7 @@ class UpdateVisaDocumentsRequest extends FormRequest
     {
         return [
             'documents.*.name.required' => 'Every document needs a name.',
-            'documents.*.name.distinct' => 'Each document name can only be added once.',
+            'documents.*.name.distinct' => 'Each document name can only be requested once.',
         ];
     }
 }

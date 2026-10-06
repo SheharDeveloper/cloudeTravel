@@ -67,11 +67,6 @@ class Visa extends Model
         return $this->hasMany(VisaSectionAssignment::class);
     }
 
-    public function documents()
-    {
-        return $this->hasMany(VisaDocument::class);
-    }
-
     public function fieldAssignments()
     {
         return $this->hasMany(VisaFieldAssignment::class);

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\ApplicationForm;
+use App\Models\ApplicationFormLog;
 use App\Models\BookingApplication;
 use App\Models\Client;
 use App\Models\Visa;
@@ -49,9 +50,13 @@ class ApplicationFormService
      * Saves the answers. With $submit the required fields must be filled,
      * and the form is marked submitted.
      *
+     * Once the form has been submitted, every changed field is written to the
+     * Visa Updation Log (old and new value) as $logRole (agency | admin). The
+     * fields logged by this save are on the returned form's "newLogs" relation.
+     *
      * @param  array<int|string, mixed>  $answers  visa field id => value
      */
-    public function save(BookingApplication $application, array $answers, bool $submit, ?object $actor): ApplicationForm
+    public function save(BookingApplication $application, array $answers, bool $submit, ?object $actor, string $logRole = ApplicationFormLog::ROLE_AGENCY): ApplicationForm
     {
         $application->loadMissing('booking');
         $visa = $this->visaOf($application);
@@ -99,8 +104,27 @@ class ApplicationFormService
             }
         }
 
-        return DB::transaction(function () use ($application, $visa, $fields, $values, $submit, $actor) {
+        return DB::transaction(function () use ($application, $visa, $fields, $values, $submit, $actor, $logRole) {
             $form = $application->form()->firstOrCreate([], ['visa_id' => $visa->id]);
+
+            // Changes to a submitted form go to the Visa Updation Log
+            $logs = collect();
+            if ($form->status === ApplicationForm::STATUS_SUBMITTED) {
+                $old = $form->answers()->whereNotNull('visa_field_id')->pluck('value', 'visa_field_id');
+                $logs = $fields->filter(fn ($field) => ($old[$field['id']] ?? null) !== $values[$field['id']])
+                    ->map(fn ($field) => $application->formLogs()->create([
+                        'visa_field_id' => $field['id'],
+                        'section_name' => $field['section_name'],
+                        'field_name' => $field['name'],
+                        'field_slug' => $field['slug'],
+                        'old_value' => $this->displayValue($field['input'], $old[$field['id']] ?? null),
+                        'new_value' => $this->displayValue($field['input'], $values[$field['id']]),
+                        'changed_by_role' => $logRole,
+                        'changed_by_type' => $actor ? get_class($actor) : null,
+                        'changed_by_id' => $actor?->id,
+                    ]))
+                    ->values();
+            }
 
             $form->answers()->delete();
             $form->answers()->createMany($fields->values()->map(fn ($field, $order) => [
@@ -121,8 +145,28 @@ class ApplicationFormService
                 'updated_by_id' => $actor?->id,
             ]);
 
-            return $form->refresh();
+            return $form->refresh()->setRelation('newLogs', $logs);
         });
+    }
+
+    /** An answer as the log shows it: "Yes: Riya, Aman" for children, "A, B" for checkboxes, the file's name. */
+    private function displayValue(string $input, ?string $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        return match ($input) {
+            'children' => (function () use ($value) {
+                $data = json_decode($value, true) ?? [];
+                $names = collect($data['children'] ?? [])->pluck('name')->filter()->implode(', ');
+
+                return ($data['has'] ?? '') === 'yes' ? 'Yes' . ($names !== '' ? ": {$names}" : '') : 'No';
+            })(),
+            'checkbox' => implode(', ', json_decode($value, true) ?? []),
+            'file' => json_decode($value, true)['name'] ?? $value,
+            default => $value,
+        };
     }
 
     /**

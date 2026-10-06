@@ -19,8 +19,9 @@ const getSuperadminMenuItems = (companyName: string): MenuItem[] => [
     { type: 'link', icon: 'fa-solid fa-tags', label: 'Visa Type', href: '/admin/visa-types', permission: 'visa.view' },
     { type: 'link', icon: 'fa-solid fa-passport', label: 'Visas', href: '/admin/visa-services', permission: 'visa.view' },
     { type: 'link', icon: 'fa-solid fa-file-invoice-dollar', label: 'Tax Setup', href: '/admin/tax-setups' },
-    { type: 'link', icon: 'fa-solid fa-file-signature', label: 'Visa Applications', href: '/admin/service-bookings?service=visa&status=not_pending', permission: 'visa.view' },
-    { type: 'link', icon: 'fa-solid fa-hourglass-half', label: 'Pending Applications', href: '/admin/service-bookings?service=visa&status=pending', permission: 'visa.view' },
+    // The superadmin works on the visa applications agencies send ("Send to Admin");
+    // Visa / Pending Applications are the agencies' own lists
+    { type: 'link', icon: 'fa-solid fa-inbox', label: 'Visa Applications', href: '/admin/agency-applications', permission: 'visa.view' },
 
     { type: 'title', label: 'OPERATIONS' },
 

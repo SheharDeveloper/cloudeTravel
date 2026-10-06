@@ -769,30 +769,7 @@ export default function TravelQuoteFormWizard({
                                             <option value="Yes with breakfast">Yes with breakfast</option>
                                             <option value="Yes with lunch">Yes with lunch</option>
                                             <option value="Yes with dinner">Yes with dinner</option>
-                                        </select>
-                                    </div>
-
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '13px', fontWeight: 600, color: '#374151', marginBottom: '8px' }}>All Inclusive</label>
-                                        <select
-                                            name="all_inclusive"
-                                            value={formData.all_inclusive}
-                                            onChange={handleFormChange}
-                                            style={{
-                                                width: '100%',
-                                                padding: '11px 12px',
-                                                border: '2px solid #e5e7eb',
-                                                borderRadius: '10px',
-                                                fontSize: '14px',
-                                                fontFamily: 'inherit'
-                                            }}
-                                        >
-                                            <option value="">Select option</option>
-                                            <option value="Yes">Yes</option>
-                                            <option value="No">No</option>
-                                            <option value="Yes with activities">Yes with activities</option>
-                                            <option value="Yes with transfers">Yes with transfers</option>
-                                            <option value="Yes with everything">Yes with everything</option>
+                                            <option value="All Inclusive">All Inclusive</option>
                                         </select>
                                     </div>
                                 </div>

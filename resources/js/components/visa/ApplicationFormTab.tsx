@@ -52,7 +52,30 @@ const formatDateTime = (value: string | null) =>
  * the next step); 3 Verify Application shows everything to check before
  * submitting. Moving on saves a draft quietly, so nothing is lost.
  */
-export default function ApplicationFormTab({ applicationUid, form }: { applicationUid: string; form: ApplicationFormData }) {
+export default function ApplicationFormTab({ applicationUid, form, canEdit = true, canSend = false, sent = null }: {
+    applicationUid: string;
+    form: ApplicationFormData;
+    // false: the review only
+    canEdit?: boolean;
+    // An agency's own application, not yet sent (or changed since): "Send / Resend to Admin" after submitting
+    canSend?: boolean;
+    // updated_at: the agency changed the application after sending it, so it has to be resent
+    sent?: { at: string; agency: string | null; updated_at?: string | null } | null;
+}) {
+    const resend = !!sent;
+    // "Send to Admin": confirm, then hand the application to the superadmin
+    const [confirmSend, setConfirmSend] = useState(false);
+    const [sending, setSending] = useState(false);
+    const sendToAdmin = () => {
+        setSending(true);
+        router.post(`/admin/visa-applications/${applicationUid}/send-to-admin`, {}, {
+            preserveScroll: true,
+            onFinish: () => {
+                setSending(false);
+                setConfirmSend(false);
+            },
+        });
+    };
     const errors = usePage().props.errors as Record<string, string>;
     // Messages shown under fields when Next / Submit finds them empty
     const [fieldErrors, setFieldErrors] = useState<Record<number, string>>({});
@@ -70,7 +93,7 @@ export default function ApplicationFormTab({ applicationUid, form }: { applicati
     }, [form.sections]);
     // A submitted form opens on its review (Verify Application); a new or draft one at the start
     const reviewIndex = stops.length - 1;
-    const [position, setPosition] = useState(() => (form.status === 'submitted' ? reviewIndex : 0));
+    const [position, setPosition] = useState(() => (form.status === 'submitted' || !canEdit ? reviewIndex : 0));
     // Set by "Edit" on the review: Next saves that one section and returns to the review
     const [editingFromReview, setEditingFromReview] = useState(false);
     const current = stops[position];
@@ -180,6 +203,21 @@ export default function ApplicationFormTab({ applicationUid, form }: { applicati
         <div ref={topRef} style={{ scrollMarginTop: 90 }}>
             <style>{STYLES}</style>
 
+            {sent && (
+                <div className={`alert ${sent.updated_at ? 'alert-warning' : 'alert-info'} d-flex align-items-center gap-2 mb-4`}>
+                    <i className={`fa ${sent.updated_at ? 'fa-exclamation-triangle' : 'fa-paper-plane'}`}></i>
+                    <span>
+                        Sent to the admin on <strong>{formatDateTime(sent.at)}</strong>
+                        {sent.agency && <> by <strong>{sent.agency}</strong></>}.
+                        {sent.updated_at && (
+                            canSend
+                                ? <> You updated it on <strong>{formatDateTime(sent.updated_at)}</strong> — resend it to the admin.</>
+                                : <> The agency updated it on <strong>{formatDateTime(sent.updated_at)}</strong> and has not resent it yet.</>
+                        )}
+                    </span>
+                </div>
+            )}
+
             {/* Status + stepper */}
             <div className="card mb-4" style={{ height: 'auto' }}>
                 <div className="card-body" style={{ padding: '18px 20px' }}>
@@ -200,7 +238,7 @@ export default function ApplicationFormTab({ applicationUid, form }: { applicati
                                                 setEditingFromReview(false);
                                                 goTo(firstStop);
                                             }}
-                                            disabled={firstStop === -1}
+                                            disabled={firstStop === -1 || !canEdit}
                                         >
                                             <span className="af-circle">{state === 'done' ? <i className="fa fa-check"></i> : step}</span>
                                             <span className="af-label">{label}</span>
@@ -299,16 +337,18 @@ export default function ApplicationFormTab({ applicationUid, form }: { applicati
                         <div key={section!.id} className="card mb-4" style={{ height: 'auto' }}>
                             <div className="card-header d-flex justify-content-between align-items-center" style={{ padding: '12px 20px' }}>
                                 <h6 className="card-title mb-0">{section!.name}</h6>
-                                <button
-                                    type="button"
-                                    className="btn btn-outline-primary btn-sm"
-                                    onClick={() => {
-                                        setEditingFromReview(true);
-                                        goTo(stops.findIndex((s) => s.section?.id === section!.id));
-                                    }}
-                                >
-                                    <i className="fa fa-edit me-2"></i>Edit
-                                </button>
+                                {canEdit && (
+                                    <button
+                                        type="button"
+                                        className="btn btn-outline-primary btn-sm"
+                                        onClick={() => {
+                                            setEditingFromReview(true);
+                                            goTo(stops.findIndex((s) => s.section?.id === section!.id));
+                                        }}
+                                    >
+                                        <i className="fa fa-edit me-2"></i>Edit
+                                    </button>
+                                )}
                             </div>
                             <div className="card-body" style={{ padding: '18px 20px' }}>
                                 <div className="row">
@@ -341,23 +381,63 @@ export default function ApplicationFormTab({ applicationUid, form }: { applicati
                         </div>
                     ))}
 
-                    <div className="card mb-4" style={{ height: 'auto' }}>
-                        <div className="card-body d-flex justify-content-between align-items-center flex-wrap gap-2" style={{ padding: '14px 20px' }}>
-                            <div className="d-flex gap-2">
-                                <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => goTo(position - 1)}>
-                                    <i className="fa fa-arrow-left me-2"></i>Back
-                                </button>
-                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => persist(false, false)} disabled={saving !== null}>
-                                    <i className="fa fa-save me-2"></i>{saving === 'draft' ? 'Saving…' : 'Save Draft'}
+                    {canEdit && (
+                        <div className="card mb-4" style={{ height: 'auto' }}>
+                            <div className="card-body d-flex justify-content-between align-items-center flex-wrap gap-2" style={{ padding: '14px 20px' }}>
+                                <div className="d-flex gap-2">
+                                    <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => goTo(position - 1)}>
+                                        <i className="fa fa-arrow-left me-2"></i>Back
+                                    </button>
+                                    <button type="button" className="btn btn-outline-primary btn-sm" onClick={() => persist(false, false)} disabled={saving !== null}>
+                                        <i className="fa fa-save me-2"></i>{saving === 'draft' ? 'Saving…' : 'Save Draft'}
+                                    </button>
+                                </div>
+                                <div className="d-flex gap-2">
+                                    <button type="button" className="btn btn-primary btn-sm" onClick={submit} disabled={saving !== null || sending}>
+                                        <i className="fa fa-paper-plane me-2"></i>
+                                        {saving === 'submit' ? 'Submitting…' : form.status === 'submitted' ? 'Update Submission' : 'Submit Application'}
+                                    </button>
+                                    {/* After submitting, the agency hands the application to the admin (again, after changing it) */}
+                                    {canSend && form.status === 'submitted' && (
+                                        <button type="button" className="btn btn-success btn-sm" onClick={() => setConfirmSend(true)} disabled={saving !== null || sending}>
+                                            <i className="fa fa-share-square me-2"></i>{sending ? 'Sending…' : resend ? 'Resend to Admin' : 'Send to Admin'}
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </>
+            )}
+
+            {confirmSend && (
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} role="dialog" aria-modal="true" onClick={() => setConfirmSend(false)}>
+                    <div className="modal-dialog modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">{resend ? 'Resend to Admin' : 'Send to Admin'}</h5>
+                                <button type="button" className="btn-close" onClick={() => setConfirmSend(false)} aria-label="Close"></button>
+                            </div>
+                            <div className="modal-body">
+                                <p className="mb-2">
+                                    {resend
+                                        ? 'Are you sure you want to resend the updated application to the admin?'
+                                        : 'Are you sure you want to send this application to the admin?'}
+                                </p>
+                                <small className="text-muted">
+                                    <i className="fa fa-info-circle me-1"></i>
+                                    If you change the application after sending it, it has to be resent.
+                                </small>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={() => setConfirmSend(false)}>Cancel</button>
+                                <button type="button" className="btn btn-success" onClick={sendToAdmin} disabled={sending}>
+                                    <i className="fa fa-share-square me-2"></i>{sending ? 'Sending…' : resend ? 'Yes, Resend' : 'Yes, Send'}
                                 </button>
                             </div>
-                            <button type="button" className="btn btn-primary btn-sm" onClick={submit} disabled={saving !== null}>
-                                <i className="fa fa-paper-plane me-2"></i>
-                                {saving === 'submit' ? 'Submitting…' : form.status === 'submitted' ? 'Update Submission' : 'Submit Application'}
-                            </button>
                         </div>
                     </div>
-                </>
+                </div>
             )}
         </div>
     );

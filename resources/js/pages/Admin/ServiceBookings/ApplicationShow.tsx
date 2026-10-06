@@ -3,6 +3,7 @@ import { Head, router, usePage } from '@inertiajs/react';
 import toast, { Toaster } from 'react-hot-toast';
 import { ProtectedRoute } from '@/lib/ProtectedRoute';
 import ApplicationFormTab, { type ApplicationFormData } from '@/components/visa/ApplicationFormTab';
+import ApplicationDocumentsTab, { type ApplicationDocumentItem } from '@/components/visa/ApplicationDocumentsTab';
 import { statusBadge } from './Index';
 
 interface Props {
@@ -43,6 +44,23 @@ interface Props {
     };
     members: { uid: string; application_number: string; name: string; relation: string; passport_number: string | null; nationality: string | null; status: string }[];
     form: ApplicationFormData;
+    // Send to Admin
+    access: { can_edit: boolean; can_send: boolean; admin_view: boolean };
+    sent: { at: string; agency: string | null; updated_at: string | null } | null;
+    // Visa Updation Log Data, newest first
+    // Upload Document: requested by the superadmin, uploaded by the agency
+    documents: ApplicationDocumentItem[];
+    canRequestDocuments: boolean;
+    logs: {
+        id: number;
+        application_number: string;
+        field_name: string;
+        section_name: string | null;
+        old_value: string | null;
+        new_value: string | null;
+        role: 'agency' | 'admin';
+        created_at: string;
+    }[];
     flash?: { success?: string | null };
 }
 
@@ -66,7 +84,7 @@ const formatDate = (date: string | null, withTime = false) =>
 
 /** "View Application": one applicant of a visa booking. Laid out like the Agency Details page. */
 export default function VisaApplicationShow() {
-    const { application, booking, members, form, flash } = usePage().props as unknown as Props;
+    const { application, booking, members, form, flash, access, sent, logs, documents, canRequestDocuments } = usePage().props as unknown as Props;
     const [activeTab, setActiveTab] = useState('overview');
 
     // "Application form saved / submitted" after saving
@@ -111,7 +129,11 @@ export default function VisaApplicationShow() {
                 <nav aria-label="breadcrumb">
                     <ol className="breadcrumb">
                         <li><h1>Application Details</h1></li>
-                        <li className="breadcrumb-item"><a href="/admin/service-bookings?service=visa&status=not_pending">Visa Applications</a></li>
+                        <li className="breadcrumb-item">
+                            {access.admin_view
+                                ? <a href="/admin/agency-applications">Agency Applications</a>
+                                : <a href="/admin/service-bookings?service=visa&status=not_pending">Visa Applications</a>}
+                        </li>
                         <li className="breadcrumb-item active">{application.application_number}</li>
                     </ol>
                 </nav>
@@ -162,6 +184,16 @@ export default function VisaApplicationShow() {
                                 <span className={`badge ${statusBadge(booking.status)} text-capitalize`}>
                                     {booking.status === 'signed' ? 'Invoice Signed' : booking.status}
                                 </span>
+                                {sent && (
+                                    <span className="badge bg-info ms-2">
+                                        <i className="fa fa-paper-plane me-1"></i>Sent to Admin
+                                    </span>
+                                )}
+                                {sent?.updated_at && (
+                                    <span className="badge bg-warning text-dark ms-2">
+                                        <i className="fa fa-redo me-1"></i>Updated — Resend Pending
+                                    </span>
+                                )}
                             </div>
                             <small className="text-muted d-block">Submitted on</small>
                             <strong>{formatDate(booking.created_at, true)}</strong>
@@ -184,12 +216,19 @@ export default function VisaApplicationShow() {
                             </li>
                         ))}
                     </ul>
-                    <button
-                        onClick={() => router.visit(`/admin/service-bookings/${booking.uid}`)}
-                        className="btn btn-primary btn-sm me-3"
-                    >
-                        <i className="fa fa-file-invoice me-2"></i>Booking {booking.invoice_number}
-                    </button>
+                    {/* The booking page belongs to the agency; the superadmin sees the agency instead */}
+                    {access.admin_view ? (
+                        <span className="badge bg-primary bg-opacity-10 text-primary me-3">
+                            <i className="fa fa-building me-1"></i>{sent?.agency ?? 'Agency'}
+                        </span>
+                    ) : (
+                        <button
+                            onClick={() => router.visit(`/admin/service-bookings/${booking.uid}`)}
+                            className="btn btn-primary btn-sm me-3"
+                        >
+                            <i className="fa fa-file-invoice me-2"></i>Booking {booking.invoice_number}
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -303,7 +342,70 @@ export default function VisaApplicationShow() {
                         </div>
                     </>
                 ) : activeTab === 'fill' ? (
-                    <ApplicationFormTab applicationUid={application.uid} form={form} />
+                    <ApplicationFormTab
+                        applicationUid={application.uid}
+                        form={form}
+                        canEdit={access.can_edit}
+                        canSend={access.can_send}
+                        sent={sent}
+                    />
+                ) : activeTab === 'upload' ? (
+                    <ApplicationDocumentsTab
+                        applicationUid={application.uid}
+                        documents={documents}
+                        canRequest={canRequestDocuments}
+                    />
+                ) : activeTab === 'log' ? (
+                    <div className="card" style={{ height: 'auto' }}>
+                        <div className="card-header">
+                            <h6 className="card-title mb-0">Visa Application Log</h6>
+                        </div>
+                        <div className="card-body p-0">
+                            <div className="table-responsive">
+                                <table className="table table-bordered mb-0 align-middle">
+                                    <thead className="table-light">
+                                        <tr>
+                                            <th style={{ width: 80 }}>Sr. No.</th>
+                                            <th>Application Number</th>
+                                            <th>New Value</th>
+                                            <th>Old Value</th>
+                                            <th>Field Name</th>
+                                            <th>Type</th>
+                                            <th>Date</th>
+                                            <th>Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {logs.length === 0 ? (
+                                            <tr>
+                                                <td colSpan={8} className="text-center text-muted py-5">
+                                                    <i className="fas fa-history d-block mb-2" style={{ fontSize: 36, color: '#ccc' }}></i>
+                                                    No changes yet. Updates to the submitted application form appear here.
+                                                </td>
+                                            </tr>
+                                        ) : logs.map((log, i) => (
+                                            <tr key={log.id}>
+                                                <td>{i + 1}</td>
+                                                <td>{log.application_number}</td>
+                                                <td style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{log.new_value ?? <span className="text-muted">—</span>}</td>
+                                                <td style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{log.old_value ?? <span className="text-muted">—</span>}</td>
+                                                <td>{log.field_name}</td>
+                                                <td>
+                                                    <span className={`badge ${log.role === 'admin' ? 'bg-primary' : 'bg-info'}`}>
+                                                        {log.role === 'admin' ? 'Superadmin' : 'Agency'}
+                                                    </span>
+                                                </td>
+                                                <td className="text-nowrap">{new Date(log.created_at).toLocaleDateString('en-GB')}</td>
+                                                <td className="text-nowrap">
+                                                    {new Date(log.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 ) : (
                     <div className="row">
                         <div className="col-lg-12">

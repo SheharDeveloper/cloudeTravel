@@ -500,25 +500,7 @@ export default function TravelQuoteFormModal({
                                                         <option value="Yes with breakfast">Yes with breakfast</option>
                                                         <option value="Yes with lunch">Yes with lunch</option>
                                                         <option value="Yes with dinner">Yes with dinner</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div className="col-md-4">
-                                                <div className="mb-0">
-                                                    <label className="form-label fw-bold">All Inclusive</label>
-                                                    <select
-                                                        className="form-select form-select-lg"
-                                                        name="all_inclusive"
-                                                        value={formData.all_inclusive}
-                                                        onChange={handleChange}
-                                                        disabled={isSubmitting}
-                                                    >
-                                                        <option value="">Select option</option>
-                                                        <option value="Yes">Yes</option>
-                                                        <option value="No">No</option>
-                                                        <option value="Yes with activities">Yes with activities</option>
-                                                        <option value="Yes with transfers">Yes with transfers</option>
-                                                        <option value="Yes with everything">Yes with everything</option>
+                                                        <option value="All Inclusive">All Inclusive</option>
                                                     </select>
                                                 </div>
                                             </div>
