@@ -38,7 +38,63 @@ interface Flight {
     visaType: string;
     country: string;
     journeyType: 'outbound' | 'inbound';
+    // Round trip: the outbound and inbound flights of one pair share this
+    pairId?: string;
 }
+
+type TripType = 'one_way' | 'round_trip';
+
+const newFlight = (journeyType: 'outbound' | 'inbound', pairId?: string): Flight => ({
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    airline: '',
+    flightNumber: '',
+    route: '',
+    departure: '',
+    arrival: '',
+    duration: '',
+    cabin: '',
+    price: '',
+    visaType: '',
+    country: '',
+    journeyType,
+    pairId,
+});
+
+/** Round trip: each outbound flight with the inbound flight of its pair. */
+const pairFlights = (flights: Flight[]): { pairId: string; outbound?: Flight; inbound?: Flight }[] => {
+    const pairs = new Map<string, { pairId: string; outbound?: Flight; inbound?: Flight }>();
+    flights.forEach((f) => {
+        const key = f.pairId ?? f.id;
+        const pair = pairs.get(key) ?? { pairId: key };
+        pair[f.journeyType] = f;
+        pairs.set(key, pair);
+    });
+    return [...pairs.values()];
+};
+
+/**
+ * Quotes saved before One Way / Round Trip have no pairs: the n-th outbound
+ * flight is paired with the n-th inbound one.
+ */
+const withPairs = (flights: Flight[]): Flight[] => {
+    if (flights.every((f) => f.pairId)) return flights;
+    const outbound = flights.filter((f) => f.journeyType === 'outbound');
+    const inbound = flights.filter((f) => f.journeyType === 'inbound');
+    const count = Math.max(outbound.length, inbound.length);
+    const paired: Flight[] = [];
+    for (let i = 0; i < count; i++) {
+        const pairId = `pair-${i}-${Date.now()}`;
+        // A round trip has one price (kept on the outbound flight): both old prices added together
+        const price = (parseFloat(outbound[i]?.price ?? '') || 0) + (parseFloat(inbound[i]?.price ?? '') || 0);
+        const priceText = outbound[i]?.price || inbound[i]?.price ? String(price) : '';
+        paired.push(outbound[i] ? { ...outbound[i], pairId, price: priceText } : { ...newFlight('outbound', pairId), price: priceText });
+        paired.push(inbound[i] ? { ...inbound[i], pairId, price: '' } : newFlight('inbound', pairId));
+    }
+    return paired;
+};
+
+/** Where a flight lands: "Heathrow, United Kingdom" from "Delhi, India → Heathrow, United Kingdom". */
+const arrivalOf = (route: string): string => (route.split('→')[1] ?? '').trim();
 
 interface Visa {
     id: string;
@@ -92,6 +148,7 @@ export default function TravelQuoteFormWizard({
 
     const [hotels, setHotels] = useState<Hotel[]>([]);
     const [flights, setFlights] = useState<Flight[]>([]);
+    const [tripType, setTripType] = useState<TripType>('one_way');
     const [visas, setVisas] = useState<Visa[]>([]);
     const [transports, setTransports] = useState<Transport[]>([]);
     const [images, setImages] = useState<File[]>([]);
@@ -150,7 +207,7 @@ export default function TravelQuoteFormWizard({
             }
 
             if (initialData.flight_details) {
-                setFlights(initialData.flight_details.map((f: any) => ({
+                const loaded: Flight[] = initialData.flight_details.map((f: any) => ({
                     id: Math.random().toString(),
                     airline: f.airline || '',
                     flightNumber: f.flightNumber || '',
@@ -162,8 +219,13 @@ export default function TravelQuoteFormWizard({
                     price: f.price || '',
                     visaType: f.visaType || '',
                     country: f.country || '',
-                    journeyType: f.journeyType || 'outbound'
-                })));
+                    journeyType: f.journeyType || 'outbound',
+                    pairId: f.pairId || undefined
+                }));
+                // Any inbound flight: the quote is a round trip
+                const roundTrip = loaded.some((f) => f.journeyType === 'inbound');
+                setTripType(roundTrip ? 'round_trip' : 'one_way');
+                setFlights(roundTrip ? withPairs(loaded) : loaded);
             }
 
             if (initialData.visa_details) {
@@ -215,6 +277,7 @@ export default function TravelQuoteFormWizard({
             });
             setHotels([]);
             setFlights([]);
+            setTripType('one_way');
             setVisas([]);
             setTransports([]);
             setImages([]);
@@ -317,29 +380,69 @@ export default function TravelQuoteFormWizard({
         setHotels(hotels.filter(h => h.id !== id));
     };
 
+    // One Way: single (outbound) flights. Round Trip: an outbound + inbound pair each time.
     const addFlight = () => {
-        setFlights([...flights, {
-            id: Date.now().toString(),
-            airline: '',
-            flightNumber: '',
-            route: '',
-            departure: '',
-            arrival: '',
-            duration: '',
-            cabin: '',
-            price: '',
-            visaType: '',
-            country: '',
-            journeyType: 'outbound'
-        }]);
+        if (tripType === 'round_trip') {
+            const pairId = `pair-${Date.now()}`;
+            setFlights([...flights, newFlight('outbound', pairId), newFlight('inbound', pairId)]);
+        } else {
+            setFlights([...flights, newFlight('outbound')]);
+        }
     };
 
     const updateFlight = (id: string, field: string, value: string) => {
         setFlights(flights.map(f => f.id === id ? { ...f, [field]: value } : f));
     };
 
+    // Round trip: deleting removes the whole pair
     const removeFlight = (id: string) => {
-        setFlights(flights.filter(f => f.id !== id));
+        const flight = flights.find((f) => f.id === id);
+        setFlights(tripType === 'round_trip' && flight?.pairId
+            ? flights.filter((f) => f.pairId !== flight.pairId)
+            : flights.filter((f) => f.id !== id));
+    };
+
+    // One flight's fields (the same for one way, outbound and inbound); a round trip's price is shown once, for the pair
+    const renderFlightFields = (flight: Flight, showPrice = true) => (
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <input type="text" placeholder="Airline" value={flight.airline} onChange={(e) => updateFlight(flight.id, 'airline', e.target.value)} style={{ padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }} />
+            <input type="text" placeholder="Flight Number" value={flight.flightNumber} onChange={(e) => updateFlight(flight.id, 'flightNumber', e.target.value)} style={{ padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }} />
+            <div style={{ gridColumn: '1 / -1' }}>
+                <RouteSelector
+                    value={flight.route}
+                    onChange={(route) => updateFlight(flight.id, 'route', route)}
+                />
+            </div>
+            <input type="time" placeholder="Departure Time" value={flight.departure} onChange={(e) => updateFlight(flight.id, 'departure', e.target.value)} style={{ padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }} />
+            <input type="time" placeholder="Arrival Time" value={flight.arrival} onChange={(e) => updateFlight(flight.id, 'arrival', e.target.value)} style={{ padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }} />
+            {showPrice && (
+                <input type="number" placeholder="Price" value={flight.price} onChange={(e) => updateFlight(flight.id, 'price', e.target.value)} style={{ padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px', gridColumn: '1 / -1' }} />
+            )}
+        </div>
+    );
+
+    // Transport pickup suggestions: the airports the flights land at
+    const arrivalAirports = [...new Set(flights.map((f) => arrivalOf(f.route)).filter(Boolean))];
+    // Transport drop-off suggestions: the quote's hotels, with their city ("Hotel Name, City")
+    const hotelNames = [...new Set(hotels
+        .filter((h) => (h.name || h.displayName).trim() !== '')
+        .map((h) => [(h.name || h.displayName).trim(), h.location.trim()].filter(Boolean).join(', ')))];
+
+    const changeTripType = (next: TripType) => {
+        if (next === tripType) return;
+        if (next === 'one_way') {
+            // Only the outbound flights stay
+            const inboundWithData = flights.some((f) => f.journeyType === 'inbound' && (f.airline || f.flightNumber || f.route || f.price));
+            if (inboundWithData && !window.confirm('Switching to One Way removes the inbound (return) flights. Continue?')) return;
+            setFlights(flights.filter((f) => f.journeyType === 'outbound').map((f) => ({ ...f, pairId: undefined })));
+        } else {
+            // Every flight gets a return flight to fill in
+            setFlights(flights.flatMap((f) => {
+                const pairId = `pair-${f.id}`;
+                return [{ ...f, journeyType: 'outbound' as const, pairId }, newFlight('inbound', pairId)];
+            }));
+        }
+        setTripType(next);
     };
 
     const addVisa = () => {
@@ -464,7 +567,8 @@ export default function TravelQuoteFormWizard({
                     departure: f.departure,
                     arrival: f.arrival,
                     price: f.price,
-                    journeyType: f.journeyType
+                    journeyType: f.journeyType,
+                    ...(tripType === 'round_trip' && f.pairId ? { pairId: f.pairId } : {})
                 }))));
             }
 
@@ -897,8 +1001,33 @@ export default function TravelQuoteFormWizard({
                                             cursor: 'pointer'
                                         }}
                                     >
-                                        + Add Flight
+                                        {tripType === 'round_trip' ? '+ Add Round Trip' : '+ Add Flight'}
                                     </button>
+                                </div>
+
+                                {/* One Way / Round Trip */}
+                                <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', background: '#f3f4f6', padding: '4px', borderRadius: '10px', maxWidth: '360px' }}>
+                                    {([['one_way', '➡️ One Way'], ['round_trip', '🔁 Round Trip']] as [TripType, string][]).map(([type, label]) => (
+                                        <button
+                                            key={type}
+                                            type="button"
+                                            onClick={() => changeTripType(type)}
+                                            style={{
+                                                flex: 1,
+                                                padding: '8px 12px',
+                                                background: tripType === type ? '#6d28d9' : 'transparent',
+                                                color: tripType === type ? '#ffffff' : '#374151',
+                                                border: 'none',
+                                                borderRadius: '8px',
+                                                fontSize: '13px',
+                                                fontWeight: 600,
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s'
+                                            }}
+                                        >
+                                            {label}
+                                        </button>
+                                    ))}
                                 </div>
 
                                 {flights.length === 0 ? (
@@ -909,69 +1038,53 @@ export default function TravelQuoteFormWizard({
                                         borderRadius: '12px',
                                         color: '#6b7280'
                                     }}>
-                                        <p style={{ margin: 0, fontSize: '14px' }}>No flights added yet. Click "Add Flight" to get started.</p>
+                                        <p style={{ margin: 0, fontSize: '14px' }}>
+                                            No flights added yet. Click "{tripType === 'round_trip' ? 'Add Round Trip' : 'Add Flight'}" to get started.
+                                        </p>
+                                    </div>
+                                ) : tripType === 'round_trip' ? (
+                                    /* Round Trip: each outbound flight next to its inbound (return) flight */
+                                    <div style={{ display: 'grid', gap: '16px' }}>
+                                        {pairFlights(flights).map((pair, index) => (
+                                            <div key={pair.pairId} style={{ background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '16px' }}>
+                                                <div style={{ fontSize: '13px', fontWeight: 700, color: '#6d28d9', marginBottom: '12px' }}>🔁 Round Trip {index + 1}</div>
+                                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '12px' }}>
+                                                    {(['outbound', 'inbound'] as const).map((journey) => {
+                                                        const flight = pair[journey];
+                                                        return flight ? (
+                                                            <div key={journey} style={{ border: '1px solid #ede9fe', borderRadius: '10px', padding: '12px', background: '#faf8ff' }}>
+                                                                <div style={{ display: 'inline-block', padding: '4px 10px', background: '#6d28d9', color: '#ffffff', borderRadius: '6px', fontSize: '12px', fontWeight: 600, marginBottom: '10px' }}>
+                                                                    {journey === 'outbound' ? '📤 Outbound' : '📥 Inbound'}
+                                                                </div>
+                                                                {renderFlightFields(flight, false)}
+                                                            </div>
+                                                        ) : null;
+                                                    })}
+                                                </div>
+                                                {/* One price for the whole round trip */}
+                                                {pair.outbound && (
+                                                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#374151', marginBottom: '6px' }}>Round Trip Price</label>
+                                                )}
+                                                {pair.outbound && (
+                                                    <input
+                                                        type="number"
+                                                        placeholder="Round Trip Price"
+                                                        value={pair.outbound.price}
+                                                        onChange={(e) => updateFlight(pair.outbound!.id, 'price', e.target.value)}
+                                                        style={{ width: '100%', padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px', marginBottom: '12px', boxSizing: 'border-box' }}
+                                                    />
+                                                )}
+                                                <button onClick={() => removeFlight((pair.outbound ?? pair.inbound)!.id)} style={{ padding: '8px 10px', background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', width: '100%' }}>Delete Round Trip</button>
+                                            </div>
+                                        ))}
                                     </div>
                                 ) : (
+                                    /* One Way: one flight per card */
                                     <div style={{ display: 'grid', gap: '16px' }}>
                                         {flights.map((flight) => (
                                             <div key={flight.id} style={{ background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '16px' }}>
-                                                {/* Journey Type Badge */}
-                                                <div style={{ marginBottom: '12px' }}>
-                                                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: '#374151', marginBottom: '6px' }}>Journey Type</label>
-                                                    <div style={{ display: 'flex', gap: '8px' }}>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => updateFlight(flight.id, 'journeyType', 'outbound')}
-                                                            style={{
-                                                                flex: 1,
-                                                                padding: '8px 12px',
-                                                                background: flight.journeyType === 'outbound' ? '#6d28d9' : '#f3f4f6',
-                                                                color: flight.journeyType === 'outbound' ? '#ffffff' : '#374151',
-                                                                border: 'none',
-                                                                borderRadius: '6px',
-                                                                fontSize: '12px',
-                                                                fontWeight: 600,
-                                                                cursor: 'pointer',
-                                                                transition: 'all 0.2s'
-                                                            }}
-                                                        >
-                                                            📤 Outbound
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => updateFlight(flight.id, 'journeyType', 'inbound')}
-                                                            style={{
-                                                                flex: 1,
-                                                                padding: '8px 12px',
-                                                                background: flight.journeyType === 'inbound' ? '#6d28d9' : '#f3f4f6',
-                                                                color: flight.journeyType === 'inbound' ? '#ffffff' : '#374151',
-                                                                border: 'none',
-                                                                borderRadius: '6px',
-                                                                fontSize: '12px',
-                                                                fontWeight: 600,
-                                                                cursor: 'pointer',
-                                                                transition: 'all 0.2s'
-                                                            }}
-                                                        >
-                                                            📥 Inbound
-                                                        </button>
-                                                    </div>
-                                                </div>
-
-                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '12px' }}>
-                                                    <input type="text" placeholder="Airline" value={flight.airline} onChange={(e) => updateFlight(flight.id, 'airline', e.target.value)} style={{ padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }} />
-                                                    <input type="text" placeholder="Flight Number" value={flight.flightNumber} onChange={(e) => updateFlight(flight.id, 'flightNumber', e.target.value)} style={{ padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }} />
-                                                    <div style={{ gridColumn: '1 / -1' }}>
-                                                        <RouteSelector
-                                                            value={flight.route}
-                                                            onChange={(route) => updateFlight(flight.id, 'route', route)}
-                                                        />
-                                                    </div>
-                                                    <input type="time" placeholder="Departure Time" value={flight.departure} onChange={(e) => updateFlight(flight.id, 'departure', e.target.value)} style={{ padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }} />
-                                                    <input type="time" placeholder="Arrival Time" value={flight.arrival} onChange={(e) => updateFlight(flight.id, 'arrival', e.target.value)} style={{ padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }} />
-                                                    <input type="number" placeholder="Price" value={flight.price} onChange={(e) => updateFlight(flight.id, 'price', e.target.value)} style={{ padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }} />
-                                                    <button onClick={() => removeFlight(flight.id)} style={{ padding: '8px 10px', background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', gridColumn: '1 / -1' }}>Delete</button>
-                                                </div>
+                                                {renderFlightFields(flight)}
+                                                <button onClick={() => removeFlight(flight.id)} style={{ padding: '8px 10px', background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', width: '100%', marginTop: '12px' }}>Delete</button>
                                             </div>
                                         ))}
                                     </div>
@@ -1160,9 +1273,11 @@ export default function TravelQuoteFormWizard({
                                                             fontSize: '13px'
                                                         }}
                                                     />
+                                                    {/* Pickup: pick an airport the flights land at, or type a place */}
                                                     <input
                                                         type="text"
-                                                        placeholder="Pickup Location"
+                                                        placeholder={arrivalAirports.length ? 'Pickup Location (choose an airport)' : 'Pickup Location'}
+                                                        list={`pickup-airports-${transport.id}`}
                                                         value={transport.pickup}
                                                         onChange={(e) => updateTransport(transport.id, 'pickup', e.target.value)}
                                                         style={{
@@ -1172,9 +1287,21 @@ export default function TravelQuoteFormWizard({
                                                             fontSize: '13px'
                                                         }}
                                                     />
+                                                    <datalist id={`pickup-airports-${transport.id}`}>
+                                                        {arrivalAirports.map((airport) => (
+                                                            <option key={airport} value={airport}>✈️ Airport</option>
+                                                        ))}
+                                                    </datalist>
+                                                    {/* Drop-off: pick one of the quote's hotels, or type a place */}
+                                                    <datalist id={`dropoff-hotels-${transport.id}`}>
+                                                        {hotelNames.map((hotel) => (
+                                                            <option key={hotel} value={hotel}>🏨 Hotel</option>
+                                                        ))}
+                                                    </datalist>
                                                     <input
                                                         type="text"
-                                                        placeholder="Drop-off Location"
+                                                        placeholder={hotelNames.length ? 'Drop-off Location (choose a hotel)' : 'Drop-off Location'}
+                                                        list={`dropoff-hotels-${transport.id}`}
                                                         value={transport.dropoff}
                                                         onChange={(e) => updateTransport(transport.id, 'dropoff', e.target.value)}
                                                         style={{

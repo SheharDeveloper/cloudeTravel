@@ -149,6 +149,7 @@ class ServiceBookingController extends Controller
                 'destination' => $d['destination'] ?? null,
                 'taxes' => $d['taxes'] ?? [],
                 'client_name' => $booking->client?->name,
+                'client_email' => $booking->client?->email,
             ],
             // "Fill Application": the visa's configured sections and fields, and the answers so far
             'form' => $this->formService->formFor($application),

@@ -4,6 +4,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { ProtectedRoute } from '@/lib/ProtectedRoute';
 import ApplicationFormTab, { type ApplicationFormData } from '@/components/visa/ApplicationFormTab';
 import ApplicationDocumentsTab, { type ApplicationDocumentItem } from '@/components/visa/ApplicationDocumentsTab';
+import SendEmailTab from '@/components/visa/SendEmailTab';
 import { statusBadge } from './Index';
 
 interface Props {
@@ -41,6 +42,7 @@ interface Props {
         destination: string | null;
         taxes: { name: string; percent: number }[];
         client_name: string | null;
+        client_email: string | null;
     };
     members: { uid: string; application_number: string; name: string; relation: string; passport_number: string | null; nationality: string | null; status: string }[];
     form: ApplicationFormData;
@@ -348,6 +350,12 @@ export default function VisaApplicationShow() {
                         canEdit={access.can_edit}
                         canSend={access.can_send}
                         sent={sent}
+                    />
+                ) : activeTab === 'email' ? (
+                    <SendEmailTab
+                        to={booking.client_email || application.email}
+                        clientName={booking.client_name}
+                        applicationNumber={application.application_number}
                     />
                 ) : activeTab === 'upload' ? (
                     <ApplicationDocumentsTab
