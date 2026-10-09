@@ -552,7 +552,21 @@ export default function VisaWizard({
 
                             <div className="small fw-bold mb-1"><i className="fa-regular fa-file-lines text-primary me-2"></i>Description</div>
                             <div className="text-muted small vw-clamp">
-                                {formData.description.replace(/<[^>]+>/g, '').trim() || 'No description added yet.'}
+                                {formData?.description ? (
+                                    <div
+                                        className="description-preview"
+                                        style={{
+                                            display: '-webkit-box',
+                                            WebkitLineClamp: 2, // Controls the line limit (e.g., 2 or 3 lines)
+                                            WebkitBoxOrient: 'vertical',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                        }}
+                                        dangerouslySetInnerHTML={{ __html: formData.description }}
+                                    />
+                                ) : (
+                                    <span>No description added yet.</span>
+                                )}
                             </div>
                         </div>
                     </div>

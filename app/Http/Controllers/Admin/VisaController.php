@@ -189,8 +189,17 @@ class VisaController extends Controller
             'field_type' => ['required', \Illuminate\Validation\Rule::in(array_keys(VisaField::TYPES))],
             'options' => ['nullable', 'array', 'max:100', \Illuminate\Validation\Rule::requiredIf(fn () => in_array($request->input('field_type'), VisaField::CHOICE_TYPES, true))],
             'options.*' => 'nullable|string|max:255',
+            // Yes / No: the follow-up section the chosen answer opens
+            'follow_up' => 'nullable|array',
+            'follow_up.show_when' => 'nullable|in:Yes,No',
+            'follow_up.fields' => 'nullable|array|max:20',
+            'follow_up.fields.*.name' => 'required|string|max:255|distinct:ignore_case',
+            'follow_up.fields.*.type' => ['required', \Illuminate\Validation\Rule::in(array_keys(VisaField::FOLLOW_UP_TYPES))],
+            'follow_up.fields.*.required' => 'nullable|boolean',
         ] + ($withSection ? ['visa_section_id' => 'required|integer|exists:visa_sections,id'] : []), [
             'options.required' => 'Add at least one option for this field type.',
+            'follow_up.fields.*.name.required' => 'Every follow-up field needs a name.',
+            'follow_up.fields.*.name.distinct' => 'Each follow-up field name can only be used once.',
         ], [
             'field_name' => 'field name',
             'field_type' => 'field type',
@@ -203,7 +212,8 @@ class VisaController extends Controller
             'id' => $field->id,
             'field_name' => $field->field_name,
             'field_type' => $field->field_type,
-            'options' => $field->options ?? [],
+            'options' => $this->fieldConfigService->choicesOf($field),
+            'follow_up' => $this->fieldConfigService->followUpOf($field),
             'home_section_id' => $field->visa_section_id,
             'enabled' => $enabled,
             'required' => false,
@@ -269,6 +279,8 @@ class VisaController extends Controller
             'currency' => config('currency'),
             'canConfigureFields' => $canConfigure,
             'fieldTypes' => VisaField::TYPES,
+            // The types a Yes / No field's follow-up fields can have
+            'followUpTypes' => VisaField::FOLLOW_UP_TYPES,
             'fieldConfig' => $canConfigure ? $this->fieldConfigService->configuration($visa) : [],
         ];
     }

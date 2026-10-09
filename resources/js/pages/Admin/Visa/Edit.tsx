@@ -18,6 +18,7 @@ interface Category {
 }
 
 export default function VisaEdit() {
+
     const { visa, visaTypes, countries, categories, currency } = usePage().props as unknown as {
         visa: Visa;
         visaTypes: VisaType[];

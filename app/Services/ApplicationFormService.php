@@ -6,6 +6,7 @@ use App\Models\ApplicationForm;
 use App\Models\ApplicationFormLog;
 use App\Models\BookingApplication;
 use App\Models\Client;
+use App\Models\Country;
 use App\Models\Visa;
 use App\Models\VisaField;
 use Illuminate\Support\Facades\DB;
@@ -36,6 +37,10 @@ class ApplicationFormService
             ? $form->answers->whereNotNull('visa_field_id')->mapWithKeys(fn ($a) => [$a->visa_field_id => (string) $a->value])->all()
             : $this->prefill($application, $sections);
 
+        // Country fields (and country fields in a Yes / No follow-up) pick from Country Management
+        $hasCountry = collect($sections)->flatMap(fn ($s) => $s['fields'])->contains(fn ($f) => $f['input'] === 'country'
+            || collect($f['follow_up']['fields'] ?? [])->contains('type', 'country'));
+
         return [
             'sections' => $sections,
             'answers' => (object) $answers,
@@ -43,6 +48,15 @@ class ApplicationFormService
             'submitted_at' => $form?->submitted_at?->toIso8601String(),
             'updated_at' => $form?->updated_at?->toIso8601String(),
             'visa_configured' => (bool) $visa,
+            // Flags by plain path: asset() would point at the agency's own files on an agency domain
+            'countries' => $hasCountry
+                ? Country::orderBy('countryName')->get(['id', 'countryName', 'countryCode'])->map(fn (Country $c) => [
+                    'id' => $c->id,
+                    'countryName' => $c->countryName,
+                    'countryCode' => $c->countryCode,
+                    'flag_url' => '/assets/flags/64x48/' . strtolower((string) $c->countryCode) . '.png',
+                ])->all()
+                : [],
         ];
     }
 
@@ -77,10 +91,28 @@ class ApplicationFormService
                     'children' => $this->cleanChildren($v),
                     'checkbox' => $this->cleanCheckboxes($v, $field['options'] ?? []),
                     'select', 'radio' => in_array($v, $field['options'] ?? [], true) ? $v : null,
+                    'country' => $this->cleanCountry($v),
+                    'yesno_details' => $this->cleanYesNoDetails($v, $field['follow_up']),
                     'file' => $this->cleanFile($v, $application),
                     default => mb_substr($v, 0, 5000),
                 },
         ]);
+
+        // The follow-up section a Yes / No answer opened: its required fields must be filled
+        $followUpErrors = $fields->filter(fn ($field) => $field['input'] === 'yesno_details' && $values[$field['id']] !== null)
+            ->mapWithKeys(function ($field) use ($values) {
+                $data = json_decode($values[$field['id']], true);
+                if (($data['answer'] ?? null) !== $field['follow_up']['show_when']) {
+                    return [];
+                }
+                $missing = collect($field['follow_up']['fields'])
+                    ->first(fn ($f) => $f['required'] && trim((string) ($data['details'][$f['name']] ?? '')) === '');
+
+                return $missing ? ["answers.{$field['id']}" => "{$missing['name']} is required."] : [];
+            });
+        if ($submit && $followUpErrors->isNotEmpty()) {
+            throw ValidationException::withMessages($followUpErrors->all());
+        }
 
         // "Yes" to children needs every child's name
         $childErrors = $fields->filter(fn ($field) => $field['input'] === 'children' && $values[$field['id']] !== null)
@@ -165,6 +197,13 @@ class ApplicationFormService
             })(),
             'checkbox' => implode(', ', json_decode($value, true) ?? []),
             'file' => json_decode($value, true)['name'] ?? $value,
+            // "Yes — Reason: Work trip; Date: 2026-11-01"
+            'yesno_details' => (function () use ($value) {
+                $data = json_decode($value, true) ?? ['answer' => $value];
+                $details = collect($data['details'] ?? [])->map(fn ($v, $k) => "{$k}: {$v}")->implode('; ');
+
+                return ($data['answer'] ?? '') . ($details !== '' ? " — {$details}" : '');
+            })(),
             default => $value,
         };
     }
@@ -193,6 +232,46 @@ class ApplicationFormService
             : [];
 
         return json_encode(['has' => $data['has'], 'children' => $children], JSON_UNESCAPED_UNICODE);
+    }
+
+    /** A country answer: one of the countries in Country Management (its name). */
+    private function cleanCountry(string $value): ?string
+    {
+        return Country::where('countryName', $value)->value('countryName');
+    }
+
+    /**
+     * A Yes / No answer with a follow-up section, kept to its shape:
+     * {"answer": "Yes"|"No", "details": {"Reason": "…", …}}. The details are
+     * kept only when the answer opens the section. A plain "Yes" / "No"
+     * (saved before the field had a follow-up) is read as the answer.
+     */
+    private function cleanYesNoDetails(string $value, array $followUp): ?string
+    {
+        $data = json_decode($value, true);
+        if (! is_array($data)) {
+            $data = ['answer' => $value];
+        }
+        $answer = in_array($data['answer'] ?? null, ['Yes', 'No'], true) ? $data['answer'] : null;
+        if (! $answer) {
+            return null;
+        }
+
+        $details = [];
+        if ($answer === $followUp['show_when']) {
+            foreach ($followUp['fields'] as $f) {
+                $v = trim((string) ($data['details'][$f['name']] ?? ''));
+                if ($v === '') {
+                    continue;
+                }
+                $v = $f['type'] === 'country' ? $this->cleanCountry($v) : mb_substr($v, 0, 5000);
+                if ($v !== null) {
+                    $details[$f['name']] = $v;
+                }
+            }
+        }
+
+        return json_encode(['answer' => $answer, 'details' => (object) $details], JSON_UNESCAPED_UNICODE);
     }
 
     /** Checkboxes: a JSON list of the ticked options, only real options kept. */
@@ -269,7 +348,7 @@ class ApplicationFormService
                         'name' => $field['field_name'],
                         'slug' => $slugs[$field['id']] ?? Str::slug($field['field_name'], '_'),
                         'required' => $field['required'],
-                    ] + $this->inputFor($field['field_name'], $field['field_type'] ?? 'text', $field['options'] ?? []))
+                    ] + $this->inputFor($field['field_name'], $field['field_type'] ?? 'text', $field['options'] ?? [], $field['follow_up'] ?? null))
                     ->values()
                     ->all(),
             ])
@@ -293,13 +372,16 @@ class ApplicationFormService
      * "text" fields are read from their name (dates, emails, phones, long
      * answers, a few fixed choices, and "… Section" sub-headings).
      */
-    private function inputFor(string $name, string $type, array $options = []): array
+    private function inputFor(string $name, string $type, array $options = [], ?array $followUp = null): array
     {
         if ($type !== 'text' && $type !== '') {
             return match ($type) {
                 'select', 'radio', 'checkbox' => ['input' => $type, 'options' => array_values($options)],
-                'yesno' => ['input' => 'radio', 'options' => ['Yes', 'No']],
-                default => ['input' => $type], // textarea, number, email, tel, date, file
+                // Yes / No; with a follow-up section, the chosen answer opens more fields (e.g. "Reason")
+                'yesno' => $followUp
+                    ? ['input' => 'yesno_details', 'options' => ['Yes', 'No'], 'follow_up' => $followUp]
+                    : ['input' => 'radio', 'options' => ['Yes', 'No']],
+                default => ['input' => $type], // textarea, number, email, tel, date, country, file
             };
         }
 

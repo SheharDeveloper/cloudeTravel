@@ -39,7 +39,8 @@ class VisaFieldConfigService
                         'id' => $field->id,
                         'field_name' => $field->field_name,
                         'field_type' => $field->field_type ?: 'text',
-                        'options' => $field->options ?? [],
+                        'options' => $this->choicesOf($field),
+                        'follow_up' => $this->followUpOf($field),
                         // The section the field belongs to, before any move for this visa
                         'home_section_id' => $field->visa_section_id,
                         'enabled' => (bool) $fieldAssignment?->is_enabled,
@@ -111,7 +112,7 @@ class VisaFieldConfigService
      * A new field in a section (Assign Field → Add Field). Fields are shared
      * by every visa; it starts switched on only where it was added.
      *
-     * @param  array{field_name: string, field_type: string, options?: array<int, string>}  $data
+     * @param  array{field_name: string, field_type: string, options?: array<int, string>, follow_up?: ?array}  $data
      */
     public function createField(VisaSection $section, array $data): VisaField
     {
@@ -120,7 +121,7 @@ class VisaFieldConfigService
             'field_name' => $data['field_name'],
             'slug' => $this->uniqueSlug($section->id, $data['field_name']),
             'field_type' => $data['field_type'],
-            'options' => $this->cleanOptions($data['field_type'], $data['options'] ?? []),
+            'options' => $this->cleanOptions($data['field_type'], $data['options'] ?? [], $data['follow_up'] ?? null),
             'status' => true,
         ]);
     }
@@ -131,15 +132,50 @@ class VisaFieldConfigService
         $field->update([
             'field_name' => $data['field_name'],
             'field_type' => $data['field_type'],
-            'options' => $this->cleanOptions($data['field_type'], $data['options'] ?? []),
+            'options' => $this->cleanOptions($data['field_type'], $data['options'] ?? [], $data['follow_up'] ?? null),
         ]);
 
         return $field;
     }
 
-    /** The answer shape a field type needs (choices only for dropdown / radio / checkboxes). */
-    private function cleanOptions(string $type, array $options): ?array
+    /** A dropdown / radio / checkbox field's choices (none for other types). */
+    public function choicesOf(VisaField $field): array
     {
+        return in_array($field->field_type, VisaField::CHOICE_TYPES, true) ? array_values($field->options ?? []) : [];
+    }
+
+    /**
+     * A Yes / No field's follow-up section: which answer opens it and its
+     * fields — ['show_when' => 'Yes', 'fields' => [['name', 'type', 'required'], …]] — or null.
+     */
+    public function followUpOf(VisaField $field): ?array
+    {
+        $options = $field->options ?? [];
+
+        return $field->field_type === 'yesno' && ! empty($options['fields']) ? $options : null;
+    }
+
+    /**
+     * What a field type stores in options: the choices for dropdown / radio /
+     * checkboxes, the follow-up section for Yes / No, nothing otherwise.
+     */
+    private function cleanOptions(string $type, array $options, ?array $followUp = null): ?array
+    {
+        if ($type === 'yesno') {
+            $fields = collect($followUp['fields'] ?? [])
+                ->map(fn ($f) => [
+                    'name' => trim((string) ($f['name'] ?? '')),
+                    'type' => array_key_exists($f['type'] ?? '', VisaField::FOLLOW_UP_TYPES) ? $f['type'] : 'text',
+                    'required' => (bool) ($f['required'] ?? false),
+                ])
+                ->filter(fn ($f) => $f['name'] !== '')
+                ->unique(fn ($f) => mb_strtolower($f['name']))
+                ->values()
+                ->all();
+
+            return $fields ? ['show_when' => ($followUp['show_when'] ?? 'Yes') === 'No' ? 'No' : 'Yes', 'fields' => $fields] : null;
+        }
+
         if (! in_array($type, VisaField::CHOICE_TYPES, true)) {
             return null;
         }

@@ -2,14 +2,27 @@ import { useMemo, useRef, useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import DatePicker from '@/components/DatePicker';
+import CountrySelect from '@/components/CountrySelect';
 
 export interface FormField {
     id: number;
     name: string;
     slug: string;
     required: boolean;
-    input: string; // text | textarea | date | email | tel | select | heading | (a field type set on the field)
+    input: string; // text | textarea | date | email | tel | select | country | yesno_details | heading | (a field type set on the field)
     options?: string[];
+    // yesno_details: the answer that opens the follow-up section, and its fields
+    follow_up?: {
+        show_when: 'Yes' | 'No';
+        fields: { name: string; type: string; required: boolean }[];
+    };
+}
+
+interface CountryOption {
+    id: number;
+    countryName: string;
+    countryCode: string;
+    flag_url?: string;
 }
 
 export interface FormSection {
@@ -26,6 +39,8 @@ export interface ApplicationFormData {
     submitted_at: string | null;
     updated_at: string | null;
     visa_configured: boolean;
+    // For country fields (empty when the form has none)
+    countries?: CountryOption[];
 }
 
 // Four fields to a row on wide screens, two on tablets, one on phones
@@ -103,7 +118,15 @@ export default function ApplicationFormTab({ applicationUid, form, canEdit = tru
     const filled = (f: FormField) =>
         f.input === 'children' ? childrenComplete(answers[f.id])
             : f.input === 'checkbox' ? parseList(answers[f.id]).length > 0
-                : (answers[f.id] ?? '').trim() !== '';
+                : f.input === 'yesno_details' ? parseYesNo(answers[f.id]).answer !== ''
+                    : (answers[f.id] ?? '').trim() !== '';
+    // A Yes / No follow-up section left with a required field empty: that field's name
+    const missingDetail = (f: FormField): string | null => {
+        if (f.input !== 'yesno_details' || !f.follow_up) return null;
+        const data = parseYesNo(answers[f.id]);
+        if (data.answer !== f.follow_up.show_when) return null;
+        return f.follow_up.fields.find((d) => d.required && (data.details[d.name] ?? '').trim() === '')?.name ?? null;
+    };
     const allFields = form.sections.flatMap(fieldsOf);
     const required = allFields.filter((f) => f.required);
 
@@ -138,7 +161,7 @@ export default function ApplicationFormTab({ applicationUid, form, canEdit = tru
         const missing = fields.filter((f) =>
             f.input === 'children'
                 ? (f.required && !filled(f)) || parseChildren(answers[f.id]).has === 'yes' && !filled(f)
-                : f.required && !filled(f),
+                : (f.required && !filled(f)) || missingDetail(f) !== null,
         );
         setFieldErrors((prev) => ({
             ...prev,
@@ -146,7 +169,9 @@ export default function ApplicationFormTab({ applicationUid, form, canEdit = tru
                 f.id,
                 f.input === 'children' && parseChildren(answers[f.id]).has === 'yes'
                     ? 'Enter the name of each child, or choose No.'
-                    : `${f.name} is required.`,
+                    : filled(f) && missingDetail(f)
+                        ? `${missingDetail(f)} is required.`
+                        : `${f.name} is required.`,
             ])),
         }));
         return missing;
@@ -292,6 +317,7 @@ export default function ApplicationFormTab({ applicationUid, form, canEdit = tru
                                 <FieldInput
                                     key={field.id}
                                     applicationUid={applicationUid}
+                                    countries={form.countries ?? []}
                                     field={field}
                                     value={answers[field.id] ?? ''}
                                     error={fieldErrors[field.id] ?? errors[`answers.${field.id}`]}
@@ -358,7 +384,7 @@ export default function ApplicationFormTab({ applicationUid, form, canEdit = tru
                                                 <h6 className="text-primary border-bottom pb-2 mb-0">{field.name.replace(/\s*section$/i, '')}</h6>
                                             </div>
                                         ) : (
-                                            <div key={field.id} className={`${field.input === 'children' ? 'col-12' : FIELD_COL} mb-3`}>
+                                            <div key={field.id} className={`${field.input === 'children' || (field.input === 'yesno_details' && Object.keys(parseYesNo(answers[field.id]).details).length) ? 'col-12' : FIELD_COL} mb-3`}>
                                                 <label className="text-muted small">
                                                     {field.input === 'children' ? 'Children' : field.name}
                                                     {field.required && <span className="text-danger"> *</span>}
@@ -366,6 +392,8 @@ export default function ApplicationFormTab({ applicationUid, form, canEdit = tru
                                                 <div className={`fw-semibold mb-0 ${filled(field) ? '' : 'text-muted'}`} style={{ whiteSpace: 'pre-line' }}>
                                                     {field.input === 'children' && parseChildren(answers[field.id]).has
                                                         ? <ChildrenSummary value={answers[field.id]} />
+                                                        : field.input === 'yesno_details' && filled(field)
+                                                            ? <YesNoSummary field={field} value={answers[field.id]} />
                                                         : filled(field)
                                                             ? field.input === 'date' ? formatDate(answers[field.id])
                                                                 : field.input === 'checkbox' ? parseList(answers[field.id]).join(', ')
@@ -443,7 +471,12 @@ export default function ApplicationFormTab({ applicationUid, form, canEdit = tru
     );
 }
 
-function FieldInput({ applicationUid, field, value, error, onChange }: { applicationUid: string; field: FormField; value: string; error?: string; onChange: (value: string) => void }) {
+function FieldInput({ applicationUid, countries, field, value, error, onChange }: { applicationUid: string; countries: CountryOption[]; field: FormField; value: string; error?: string; onChange: (value: string) => void }) {
+    // Yes / No that opens a follow-up section (e.g. "Reason") on the chosen answer
+    if (field.input === 'yesno_details') {
+        return <YesNoDetailsInput field={field} countries={countries} value={value} error={error} onChange={onChange} />;
+    }
+
     // "Father Section", "Mother Section"…: a sub-heading inside the card
     if (field.input === 'heading') {
         return (
@@ -516,6 +549,8 @@ function FieldInput({ applicationUid, field, value, error, onChange }: { applica
                         );
                     })}
                 </div>
+            ) : field.input === 'country' ? (
+                <CountrySelect id={id} value={value} onChange={onChange} countries={countries} placeholder="Select country" regularSize invalid={!!error} />
             ) : field.input === 'file' ? (
                 <FileInput applicationUid={applicationUid} id={id} value={value} invalid={!!error} onChange={onChange} />
             ) : field.input === 'select' ? (
@@ -535,6 +570,132 @@ function FieldInput({ applicationUid, field, value, error, onChange }: { applica
             )}
             {error && <div className="invalid-feedback d-block">{error}</div>}
         </div>
+    );
+}
+
+// ─── Yes / No with a follow-up section ────────────────────────────────────────
+
+type YesNoAnswer = { answer: string; details: Record<string, string> };
+
+/** {"answer": "Yes", "details": {"Reason": "…"}}; a plain "Yes" / "No" (saved earlier) is the answer alone */
+function parseYesNo(value: string | undefined): YesNoAnswer {
+    if (!value) return { answer: '', details: {} };
+    try {
+        const data = JSON.parse(value);
+        if (data && typeof data === 'object') {
+            return { answer: typeof data.answer === 'string' ? data.answer : '', details: data.details && typeof data.details === 'object' ? data.details : {} };
+        }
+    } catch {
+        // not JSON
+    }
+    return { answer: value === 'Yes' || value === 'No' ? value : '', details: {} };
+}
+
+function YesNoDetailsInput({ field, countries, value, error, onChange }: {
+    field: FormField;
+    countries: CountryOption[];
+    value: string;
+    error?: string;
+    onChange: (value: string) => void;
+}) {
+    const data = parseYesNo(value);
+    const followUp = field.follow_up!;
+    const open = data.answer === followUp.show_when;
+    const id = `field-${field.id}`;
+    const save = (next: YesNoAnswer) => onChange(next.answer ? JSON.stringify(next) : '');
+    const setDetail = (name: string, v: string) => save({ ...data, details: { ...data.details, [name]: v } });
+
+    return (
+        <>
+            <div className={`${FIELD_COL} mb-3`}>
+                <label className="text-muted small mb-1">
+                    {field.name}
+                    {field.required && <span className="text-danger"> *</span>}
+                </label>
+                <div className="d-flex flex-wrap gap-3 pt-1">
+                    {['Yes', 'No'].map((option) => (
+                        <div key={option} className="form-check mb-0">
+                            <input
+                                className={`form-check-input ${error && !data.answer ? 'is-invalid' : ''}`}
+                                type="radio"
+                                id={`${id}-${option}`}
+                                name={id}
+                                checked={data.answer === option}
+                                // Changing the answer keeps what was typed, in case it is changed back
+                                onChange={() => save({ ...data, answer: option })}
+                            />
+                            <label className="form-check-label" htmlFor={`${id}-${option}`}>{option}</label>
+                        </div>
+                    ))}
+                </div>
+                {error && !open && <div className="invalid-feedback d-block">{error}</div>}
+            </div>
+
+            {open && (
+                <div className="col-12 mb-3">
+                    <div className="border rounded p-3" style={{ background: '#f8f9fc', borderLeft: '3px solid #6d28d9' }}>
+                        <div className="small fw-semibold text-primary mb-2">
+                            <i className="fa fa-level-up-alt fa-rotate-90 me-2"></i>{field.name}: {followUp.show_when} — more details
+                        </div>
+                        <div className="row">
+                            {followUp.fields.map((detail) => {
+                                const detailId = `${id}-${detail.name.replace(/\W+/g, '-')}`;
+                                const detailValue = data.details[detail.name] ?? '';
+                                const invalid = !!error && detail.required && detailValue.trim() === '';
+                                const cls = `form-control ${invalid ? 'is-invalid' : ''}`;
+                                return (
+                                    <div key={detail.name} className={`${detail.type === 'textarea' ? 'col-12 col-md-6' : FIELD_COL} mb-2`}>
+                                        <label htmlFor={detailId} className="text-muted small mb-1">
+                                            {detail.name}
+                                            {detail.required && <span className="text-danger"> *</span>}
+                                        </label>
+                                        {detail.type === 'date' ? (
+                                            <DatePicker value={detailValue} onChange={(v) => setDetail(detail.name, v)} autoSelect={true} inputStyle={invalid ? { borderColor: '#dc3545' } : undefined} />
+                                        ) : detail.type === 'textarea' ? (
+                                            <textarea id={detailId} className={cls} rows={2} value={detailValue} onChange={(e) => setDetail(detail.name, e.target.value)} />
+                                        ) : detail.type === 'country' ? (
+                                            <CountrySelect id={detailId} value={detailValue} onChange={(v) => setDetail(detail.name, v)} countries={countries} placeholder="Select country" regularSize invalid={invalid} />
+                                        ) : (
+                                            <input
+                                                id={detailId}
+                                                type={['email', 'tel', 'number'].includes(detail.type) ? detail.type : 'text'}
+                                                className={cls}
+                                                value={detailValue}
+                                                onChange={(e) => setDetail(detail.name, e.target.value)}
+                                            />
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        {error && <div className="invalid-feedback d-block">{error}</div>}
+                    </div>
+                </div>
+            )}
+        </>
+    );
+}
+
+/** On the review: "Yes" and, under it, each follow-up answer */
+function YesNoSummary({ field, value }: { field: FormField; value: string }) {
+    const data = parseYesNo(value);
+    const shown = data.answer === field.follow_up?.show_when
+        ? (field.follow_up?.fields ?? []).filter((d) => (data.details[d.name] ?? '') !== '')
+        : [];
+    return (
+        <>
+            <div>{data.answer}</div>
+            {shown.length > 0 && (
+                <div className="row mt-1">
+                    {shown.map((d) => (
+                        <div key={d.name} className={`${FIELD_COL} mt-1`}>
+                            <div className="text-muted small fw-normal">{d.name}</div>
+                            <div>{d.type === 'date' ? formatDate(data.details[d.name]) : data.details[d.name]}</div>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </>
     );
 }
 

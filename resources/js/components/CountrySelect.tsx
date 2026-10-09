@@ -14,6 +14,12 @@ interface CountrySelectProps {
     onChange: (value: string) => void;
     placeholder?: string;
     style?: React.CSSProperties;
+    // The list to pick from; defaults to the page's `countries` prop
+    countries?: CountryOption[];
+    // Use the same size as Bootstrap's other form inputs
+    regularSize?: boolean;
+    invalid?: boolean;
+    id?: string;
 }
 
 /**
@@ -21,8 +27,9 @@ interface CountrySelectProps {
  * lists the countries from Country Management (the page's `countries` prop).
  * Stores the country's name.
  */
-export default function CountrySelect({ value, onChange, placeholder = 'Select Country', style = {} }: CountrySelectProps) {
-    const countries = ((usePage().props as { countries?: CountryOption[] }).countries ?? []);
+export default function CountrySelect({ value, onChange, placeholder = 'Select Country', style = {}, countries: list, regularSize = false, invalid = false, id }: CountrySelectProps) {
+    const pageCountries = (usePage().props as { countries?: CountryOption[] }).countries;
+    const countries = list ?? pageCountries ?? [];
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState('');
     const containerRef = useRef<HTMLDivElement>(null);
@@ -67,8 +74,9 @@ export default function CountrySelect({ value, onChange, placeholder = 'Select C
                 />
             )}
             <input
+                id={id}
                 type="text"
-                className="form-control"
+                className={`form-control ${invalid ? 'is-invalid' : ''}`}
                 placeholder={placeholder}
                 // A name saved before (not in the list) still shows as typed
                 value={open ? search : (selected?.countryName || value || '')}
@@ -77,9 +85,7 @@ export default function CountrySelect({ value, onChange, placeholder = 'Select C
                 autoComplete="off"
                 // Same size as the travel quote form's other inputs
                 style={{
-                    padding: '8px 10px',
-                    fontSize: 13,
-                    borderRadius: 8,
+                    ...(regularSize ? {} : { padding: '8px 10px', fontSize: 13, borderRadius: 8 }),
                     ...style,
                     ...(!open && selected?.flag_url ? { paddingLeft: 42 } : {}),
                 }}

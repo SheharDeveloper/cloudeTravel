@@ -22,11 +22,28 @@ class VisaField extends Model
         'radio' => 'Radio Buttons',
         'checkbox' => 'Checkboxes',
         'yesno' => 'Yes / No',
+        'country' => 'Country',
         'file' => 'File Upload',
     ];
 
     /** Types that need a list of options. */
     public const CHOICE_TYPES = ['select', 'radio', 'checkbox'];
+
+    /**
+     * A Yes / No field can open a follow-up section (e.g. "Reason") when it is
+     * answered Yes — or No. Its options then hold
+     * ['show_when' => 'Yes'|'No', 'fields' => [['name', 'type', 'required'], …]];
+     * these are the types the follow-up fields can have.
+     */
+    public const FOLLOW_UP_TYPES = [
+        'text' => 'Text',
+        'textarea' => 'Long Text',
+        'number' => 'Number',
+        'email' => 'Email',
+        'tel' => 'Phone',
+        'date' => 'Date',
+        'country' => 'Country',
+    ];
 
     public function section()
     {

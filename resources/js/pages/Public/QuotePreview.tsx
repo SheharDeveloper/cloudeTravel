@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { router } from '@inertiajs/react';
 import toast from 'react-hot-toast';
 
@@ -24,7 +24,57 @@ interface TravelQuote {
     show_hotel_name?: boolean;
     show_individual_price?: boolean;
     expiry_date?: string;
+    // Travellers, and the price per person × travellers (when priced per person)
+    per_person_pricing?: boolean;
+    adults?: number;
+    children?: number;
+    infants?: number;
+    price_summary?: {
+        price_per_person?: string | number;
+        total_persons?: number;
+        subtotal?: string | number;
+    } | null;
 }
+
+const SECTION_TITLE: React.CSSProperties = { display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 700, color: '#1e6fe0', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '10px' };
+const TILE: React.CSSProperties = { padding: '12px', background: '#f4f6f9', borderRadius: '10px' };
+const money = (value: unknown) => `£${(Number(value) || 0).toFixed(2)}`;
+const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? '' : word === 'Child' ? 'ren' : 's'}`;
+
+/**
+ * Layout by screen size. Phone: one column, like an email. Desktop (900px+):
+ * a wide card — trip details on the left, price and Accept / Reject in a
+ * column on the right that stays in view, hotels and flights as tiles.
+ */
+const STYLES = `
+.qp-page { padding: 40px 16px; }
+.qp-card { width: 100%; max-width: 420px; }
+.qp-hero { height: 150px; }
+.qp-grid { display: grid; gap: 12px; }
+.qp-side-inner { padding-bottom: 2px; }
+@media (max-width: 480px) {
+    .qp-page { padding: 16px 10px; }
+}
+@media (min-width: 900px) {
+    .qp-card.qp-wide { max-width: 1120px; }
+    .qp-wide .qp-body { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 8px; align-items: start; padding: 0 12px 12px; }
+    .qp-wide .qp-hero { height: 300px; }
+    /* Tiles side by side; a lone tile takes the full width */
+    .qp-wide .qp-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+    .qp-wide .qp-side { position: sticky; top: 20px; }
+    .qp-wide .qp-side-inner { background: #fbfcfe; border: 1px solid #e7ebf0; border-radius: 14px; padding-top: 4px; }
+}
+`;
+
+/** Consecutive flights of the same journey (outbound / inbound), in their saved order. */
+const journeyGroups = (flights: any[]): { journeyType: string; flights: any[] }[] =>
+    flights.reduce((groups: { journeyType: string; flights: any[] }[], flight) => {
+        const type = flight.journeyType === 'inbound' ? 'inbound' : 'outbound';
+        const last = groups[groups.length - 1];
+        if (last && last.journeyType === type) last.flights.push(flight);
+        else groups.push({ journeyType: type, flights: [flight] });
+        return groups;
+    }, []);
 
 const formatDate = (dateString: string | null) => {
     if (!dateString) return 'N/A';
@@ -180,23 +230,31 @@ export default function QuotePreview({ travelQuote, hasPreviousFeedback, feedbac
         setPhoneNumber('');
     };
 
+    // Per-person pricing: everyone travelling, and the price for one person
+    const travellers = Number(travelQuote.price_summary?.total_persons)
+        || ((Number(travelQuote.adults) || 0) + (Number(travelQuote.children) || 0) + (Number(travelQuote.infants) || 0))
+        || 1;
+    const pricePerPerson = Number(travelQuote.price_summary?.price_per_person)
+        || (((Number(travelQuote.total_price) || 0) - (Number(travelQuote.tax) || 0) + (Number(travelQuote.discount) || 0)) / travellers);
+
     const getFirstHotelImage = () => {
         return travelQuote.image_urls?.[0] || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80';
     };
 
     return (
-        <div style={{
+        <div className="qp-page" style={{
             margin: 0,
-            padding: '40px 16px',
             background: '#eef1f5',
             minHeight: '100vh',
             fontFamily: "'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
             display: 'flex',
             justifyContent: 'center',
-            alignItems: 'flex-start'
+            alignItems: 'flex-start',
+            boxSizing: 'border-box'
         }}>
-            <div style={{
-                width: '380px',
+            <style>{STYLES}</style>
+            {/* The full quote gets the wide desktop layout; the expired / answered notice stays narrow */}
+            <div className={`qp-card ${!isExpired && !hasPreviousFeedback ? 'qp-wide' : ''}`} style={{
                 background: '#ffffff',
                 borderRadius: '16px',
                 overflow: 'hidden',
@@ -219,14 +277,14 @@ export default function QuotePreview({ travelQuote, hasPreviousFeedback, feedbac
 
                 {/* Show Content Only if Quote NOT Expired AND NO Previous Feedback */}
                 {!isExpired && !hasPreviousFeedback ? (
-                <>
+                <div className="qp-body">
+                <div className="qp-main">
                 {/* Hero Image */}
-                <div style={{
+                <div className="qp-hero" style={{
                     position: 'relative',
                     margin: '0 12px',
                     borderRadius: '14px',
-                    overflow: 'hidden',
-                    height: '150px'
+                    overflow: 'hidden'
                 }}>
                     <img src={getFirstHotelImage()} alt="Hotel" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
                     <div style={{
@@ -272,8 +330,9 @@ export default function QuotePreview({ travelQuote, hasPreviousFeedback, feedbac
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 700, color: '#1e6fe0', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '10px' }}>
                             🏨 Hotels
                         </div>
+                        <div className="qp-grid" style={{ marginBottom: '12px' }}>
                         {travelQuote.hotel_details.map((hotel: any, idx: number) => (
-                            <div key={idx} style={{ marginBottom: '12px', padding: '12px', background: '#f4f6f9', borderRadius: '10px' }}>
+                            <div key={idx} style={{ padding: '12px', background: '#f4f6f9', borderRadius: '10px' }}>
                                 <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a2233', marginBottom: '4px' }}>
                                     {travelQuote.show_hotel_name ? `${hotel.name} - ${hotel.displayName}` : hotel.displayName}
                                 </div>
@@ -287,6 +346,7 @@ export default function QuotePreview({ travelQuote, hasPreviousFeedback, feedbac
                                 )}
                             </div>
                         ))}
+                        </div>
                     </div>
                 )}
 
@@ -296,14 +356,15 @@ export default function QuotePreview({ travelQuote, hasPreviousFeedback, feedbac
                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', fontWeight: 700, color: '#1e6fe0', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '10px' }}>
                             ✈️ Flights
                         </div>
-                        {travelQuote.flight_details.map((flight: any, idx: number) => (
-                            <div key={idx} style={{ marginBottom: '12px' }}>
-                                {/* Journey Type Header */}
-                                {(idx === 0 || travelQuote.flight_details[idx - 1]?.journeyType !== flight.journeyType) && (
-                                    <div style={{ textAlign: 'center', fontSize: '11.5px', fontWeight: 700, color: '#1e6fe0', letterSpacing: '0.3px', margin: '12px 0 8px', position: 'relative' }}>
-                                        {flight.journeyType === 'outbound' ? '📤 OUTBOUND JOURNEY' : '📥 INBOUND JOURNEY'}
-                                    </div>
-                                )}
+                        {/* One heading per run of outbound / inbound flights, then their tiles */}
+                        {journeyGroups(travelQuote.flight_details).map((group, groupIdx) => (
+                        <Fragment key={groupIdx}>
+                        <div style={{ textAlign: 'center', fontSize: '11.5px', fontWeight: 700, color: '#1e6fe0', letterSpacing: '0.3px', margin: '12px 0 8px', position: 'relative' }}>
+                            {group.journeyType === 'outbound' ? '📤 OUTBOUND JOURNEY' : '📥 INBOUND JOURNEY'}
+                        </div>
+                        <div className="qp-grid" style={{ marginBottom: '12px' }}>
+                        {group.flights.map((flight: any, idx: number) => (
+                            <Fragment key={idx}>
                                 <div style={{ padding: '12px', background: '#f4f6f9', borderRadius: '10px' }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
                                         <div style={{ width: '32px', height: '32px', minWidth: '32px', borderRadius: '9px', background: '#ffffff', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1e6fe0', fontSize: '15px' }}>✈</div>
@@ -320,11 +381,60 @@ export default function QuotePreview({ travelQuote, hasPreviousFeedback, feedbac
                                         </div>
                                     )}
                                 </div>
-                            </div>
+                            </Fragment>
+                        ))}
+                        </div>
+                        </Fragment>
                         ))}
                     </div>
                 )}
+                {/* Visa Section */}
+                {Array.isArray(travelQuote.visa_details) && travelQuote.visa_details.length > 0 && (
+                    <div style={{ padding: '16px 18px 4px' }}>
+                        <div style={SECTION_TITLE}>🛂 Visa</div>
+                        <div className="qp-grid" style={{ marginBottom: '12px' }}>
+                            {travelQuote.visa_details.map((visa: any, idx: number) => (
+                                <div key={idx} style={TILE}>
+                                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a2233', marginBottom: '4px' }}>
+                                        {visa.country || 'Visa'}{visa.type && ` - ${visa.type}`}
+                                    </div>
+                                    {visa.duration && <div style={{ fontSize: '12px', color: '#5b6472', marginBottom: '2px' }}>🗓️ {visa.duration}</div>}
+                                    {visa.processingTime && <div style={{ fontSize: '12px', color: '#5b6472', marginBottom: '2px' }}>⏱️ {visa.processingTime}</div>}
+                                    {travelQuote.show_individual_price && visa.cost && (
+                                        <div style={{ fontSize: '12px', fontWeight: 600, color: '#1e6fe0', marginTop: '4px' }}>{money(visa.cost)}</div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
 
+                {/* Transport Section */}
+                {Array.isArray(travelQuote.travel_details) && travelQuote.travel_details.length > 0 && (
+                    <div style={{ padding: '16px 18px 4px' }}>
+                        <div style={SECTION_TITLE}>🚗 Transport</div>
+                        <div className="qp-grid" style={{ marginBottom: '12px' }}>
+                            {travelQuote.travel_details.map((transport: any, idx: number) => (
+                                <div key={idx} style={TILE}>
+                                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a2233', marginBottom: '4px' }}>{transport.vehicleType || 'Transfer'}</div>
+                                    {(transport.pickup || transport.dropoff) && (
+                                        <div style={{ fontSize: '12px', color: '#5b6472', marginBottom: '2px' }}>
+                                            📍 {transport.pickup || '—'} → {transport.dropoff || '—'}
+                                        </div>
+                                    )}
+                                    {travelQuote.show_individual_price && transport.price && (
+                                        <div style={{ fontSize: '12px', fontWeight: 600, color: '#1e6fe0', marginTop: '4px' }}>{money(transport.price)}</div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+                </div>
+
+                {/* Right column on desktop: price, notes and Accept / Reject */}
+                <div className="qp-side">
+                <div className="qp-side-inner">
                 {/* Price Summary */}
                 <div style={{
                     margin: '14px 18px 16px',
@@ -341,6 +451,30 @@ export default function QuotePreview({ travelQuote, hasPreviousFeedback, feedbac
                         marginBottom: '8px'
                     }}>Price Summary</div>
                     <div style={{ fontSize: '12px', color: '#5b6472', lineHeight: 1.8 }}>
+                        {/* Travellers, and price per person × travellers */}
+                        {travelQuote.per_person_pricing && (
+                            <>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', marginBottom: '4px' }}>
+                                    <span>Travellers:</span>
+                                    <span style={{ fontWeight: 600, textAlign: 'right' }}>
+                                        {[
+                                            plural(Number(travelQuote.adults) || 0, 'Adult'),
+                                            Number(travelQuote.children) > 0 ? plural(Number(travelQuote.children), 'Child') : null,
+                                            Number(travelQuote.infants) > 0 ? plural(Number(travelQuote.infants), 'Infant') : null,
+                                        ].filter(Boolean).join(' · ')}
+                                        {' '}({travellers} {travellers === 1 ? 'person' : 'persons'})
+                                    </span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', marginBottom: '4px' }}>
+                                    <span>Price per person:</span>
+                                    <span style={{ fontWeight: 600 }}>{money(pricePerPerson)}</span>
+                                </div>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', marginBottom: '4px' }}>
+                                    <span>{money(pricePerPerson)} × {travellers}:</span>
+                                    <span style={{ fontWeight: 600 }}>{money(pricePerPerson * travellers)}</span>
+                                </div>
+                            </>
+                        )}
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                             <span>Subtotal:</span>
                             <span style={{ fontWeight: 600 }}>£{((Number(travelQuote.total_price) || 0) - (Number(travelQuote.tax) || 0) + (Number(travelQuote.discount) || 0)).toFixed(2)}</span>
@@ -374,7 +508,52 @@ export default function QuotePreview({ travelQuote, hasPreviousFeedback, feedbac
                     • Prices are subject to availability<br/>
                     • Terms & Conditions apply
                 </div>
-                </>
+
+                {/* Action Buttons */}
+                <div style={{ display: 'flex', gap: '10px', padding: '4px 18px 18px' }}>
+                    <button
+                        onClick={handleReject}
+                        style={{
+                            flex: 1,
+                            padding: '13px 0',
+                            borderRadius: '12px',
+                            border: '1.5px solid #e7ebf0',
+                            fontSize: '14px',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            background: '#fff',
+                            color: '#5b6472',
+                            transition: 'all 0.15s ease'
+                        }}
+                        onMouseOver={(e) => { e.currentTarget.style.borderColor = '#d33'; e.currentTarget.style.color = '#d33'; }}
+                        onMouseOut={(e) => { e.currentTarget.style.borderColor = '#e7ebf0'; e.currentTarget.style.color = '#5b6472'; }}
+                    >
+                        Reject
+                    </button>
+                    <button
+                        onClick={handleAccept}
+                        style={{
+                            flex: 1,
+                            padding: '13px 0',
+                            borderRadius: '12px',
+                            border: 'none',
+                            fontSize: '14px',
+                            fontWeight: 700,
+                            cursor: 'pointer',
+                            background: 'linear-gradient(135deg, #1e6fe0, #0f4fb0)',
+                            color: '#fff',
+                            boxShadow: '0 6px 16px rgba(30,111,224,0.35)',
+                            transition: 'transform 0.15s ease'
+                        }}
+                        onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.97)'; }}
+                        onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+                    >
+                        Accept
+                    </button>
+                </div>
+                </div>
+                </div>
+                </div>
                 ) : (
                 // Show Contact Information if Quote IS Expired OR Has Previous Feedback
                 <div style={{ paddingTop: '0' }}>
@@ -458,54 +637,6 @@ export default function QuotePreview({ travelQuote, hasPreviousFeedback, feedbac
                             </div>
                         </div>
                     </div>
-                </div>
-                )}
-
-                
-
-
-                {/* Action Buttons - Show only if quote is NOT expired AND NO previous feedback */}
-                {!isExpired && !hasPreviousFeedback && (
-                <div style={{ display: 'flex', gap: '10px', padding: '4px 18px 18px' }}>
-                    <button
-                        onClick={handleReject}
-                        style={{
-                            flex: 1,
-                            padding: '13px 0',
-                            borderRadius: '12px',
-                            border: '1.5px solid #e7ebf0',
-                            fontSize: '14px',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            background: '#fff',
-                            color: '#5b6472',
-                            transition: 'all 0.15s ease'
-                        }}
-                        onMouseOver={(e) => { e.currentTarget.style.borderColor = '#d33'; e.currentTarget.style.color = '#d33'; }}
-                        onMouseOut={(e) => { e.currentTarget.style.borderColor = '#e7ebf0'; e.currentTarget.style.color = '#5b6472'; }}
-                    >
-                        Reject
-                    </button>
-                    <button
-                        onClick={handleAccept}
-                        style={{
-                            flex: 1,
-                            padding: '13px 0',
-                            borderRadius: '12px',
-                            border: 'none',
-                            fontSize: '14px',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                            background: 'linear-gradient(135deg, #1e6fe0, #0f4fb0)',
-                            color: '#fff',
-                            boxShadow: '0 6px 16px rgba(30,111,224,0.35)',
-                            transition: 'transform 0.15s ease'
-                        }}
-                        onMouseDown={(e) => { e.currentTarget.style.transform = 'scale(0.97)'; }}
-                        onMouseUp={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
-                    >
-                        Accept
-                    </button>
                 </div>
                 )}
             </div>

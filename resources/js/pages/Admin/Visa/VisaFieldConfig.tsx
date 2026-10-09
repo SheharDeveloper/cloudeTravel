@@ -7,6 +7,8 @@ export interface ConfigField {
     field_name: string;
     field_type: string;
     options: string[];
+    // Yes / No: the follow-up section the chosen answer opens (e.g. "Reason")
+    follow_up?: FollowUp | null;
     // The field's own section; it's "moved" for this visa when listed elsewhere
     home_section_id: number;
     enabled: boolean;
@@ -15,6 +17,17 @@ export interface ConfigField {
 
 // Types whose answers come from a list of options
 const CHOICE_TYPES = ['select', 'radio', 'checkbox'];
+
+export interface FollowUpField {
+    name: string;
+    type: string;
+    required: boolean;
+}
+
+export interface FollowUp {
+    show_when: 'Yes' | 'No';
+    fields: FollowUpField[];
+}
 
 /** The Add / Edit field popup: name, type and (for choice types) options. */
 type FieldDraft = { mode: 'add'; sectionId: number } | { mode: 'edit'; field: ConfigField };
@@ -32,6 +45,7 @@ interface Props {
     countryLabel: string;
     initial: ConfigSection[];
     fieldTypes: Record<string, string>;
+    followUpTypes: Record<string, string>;
 }
 
 type DragItem = { kind: 'section'; id: number } | { kind: 'field'; sectionId: number; id: number };
@@ -47,7 +61,7 @@ const moveBefore = <T extends { id: number }>(list: T[], dragId: number, targetI
     return rest;
 };
 
-export default function VisaFieldConfig({ visaUid, visaName, countryLabel, initial, fieldTypes }: Props) {
+export default function VisaFieldConfig({ visaUid, visaName, countryLabel, initial, fieldTypes, followUpTypes }: Props) {
     const [sections, setSections] = useState<ConfigSection[]>(initial);
     const [expanded, setExpanded] = useState<Set<number>>(new Set());
     const [search, setSearch] = useState('');
@@ -139,7 +153,7 @@ export default function VisaFieldConfig({ visaUid, visaName, countryLabel, initi
             setSections((prev) => prev.map((section) => ({
                 ...section,
                 fields: section.fields.map((f) =>
-                    f.id === saved.id ? { ...f, field_name: saved.field_name, field_type: saved.field_type, options: saved.options } : f,
+                    f.id === saved.id ? { ...f, field_name: saved.field_name, field_type: saved.field_type, options: saved.options, follow_up: saved.follow_up } : f,
                 ),
             })));
             setMessage({ type: 'success', text: `“${saved.field_name}” updated.` });
@@ -399,6 +413,11 @@ export default function VisaFieldConfig({ visaUid, visaName, countryLabel, initi
                                                                 {fieldTypes[field.field_type] ?? field.field_type}
                                                                 {CHOICE_TYPES.includes(field.field_type) && field.options.length > 0 && ` · ${field.options.length}`}
                                                             </span>
+                                                            {field.follow_up && (
+                                                                <span className="badge bg-warning bg-opacity-10 text-warning-emphasis border fw-normal" title={`On "${field.follow_up.show_when}": ${field.follow_up.fields.map((f) => f.name).join(', ')}`}>
+                                                                    {field.follow_up.show_when} → {field.follow_up.fields.length} more field{field.follow_up.fields.length === 1 ? '' : 's'}
+                                                                </span>
+                                                            )}
                                                             {field.home_section_id !== section.id && (
                                                                 <span className="badge bg-info bg-opacity-10 text-info fw-normal" title="Moved for this visa only">
                                                                     from {sectionName(field.home_section_id)}
@@ -464,6 +483,7 @@ export default function VisaFieldConfig({ visaUid, visaName, countryLabel, initi
                     draft={draft}
                     sectionName={draft.mode === 'add' ? sectionName(draft.sectionId) : sectionName(draft.field.home_section_id)}
                     fieldTypes={fieldTypes}
+                    followUpTypes={followUpTypes}
                     onClose={() => setDraft(null)}
                     onSaved={onFieldSaved}
                 />
@@ -472,11 +492,12 @@ export default function VisaFieldConfig({ visaUid, visaName, countryLabel, initi
     );
 }
 
-function FieldEditor({ visaUid, draft, sectionName, fieldTypes, onClose, onSaved }: {
+function FieldEditor({ visaUid, draft, sectionName, fieldTypes, followUpTypes, onClose, onSaved }: {
     visaUid: string;
     draft: FieldDraft;
     sectionName: string;
     fieldTypes: Record<string, string>;
+    followUpTypes: Record<string, string>;
     onClose: () => void;
     onSaved: (field: ConfigField) => void;
 }) {
@@ -488,6 +509,15 @@ function FieldEditor({ visaUid, draft, sectionName, fieldTypes, onClose, onSaved
     const [saving, setSaving] = useState(false);
     const needsOptions = CHOICE_TYPES.includes(type);
 
+    // Yes / No: "Ask for more details" opens a follow-up section on the chosen answer
+    const [askMore, setAskMore] = useState(!!editing?.follow_up);
+    const [showWhen, setShowWhen] = useState<'Yes' | 'No'>(editing?.follow_up?.show_when ?? 'Yes');
+    const [followFields, setFollowFields] = useState<FollowUpField[]>(
+        editing?.follow_up?.fields?.length ? editing.follow_up.fields : [{ name: 'Reason', type: 'textarea', required: true }],
+    );
+    const patchFollow = (index: number, patch: Partial<FollowUpField>) =>
+        setFollowFields((list) => list.map((f, i) => (i === index ? { ...f, ...patch } : f)));
+
     const save = async () => {
         setSaving(true);
         setErrors({});
@@ -495,6 +525,9 @@ function FieldEditor({ visaUid, draft, sectionName, fieldTypes, onClose, onSaved
             field_name: name.trim(),
             field_type: type,
             options: needsOptions ? optionsText.split('\n').map((o) => o.trim()).filter(Boolean) : [],
+            follow_up: type === 'yesno' && askMore
+                ? { show_when: showWhen, fields: followFields.map((f) => ({ ...f, name: f.name.trim() })) }
+                : null,
             ...(draft.mode === 'add' && { visa_section_id: draft.sectionId }),
         };
         try {
@@ -551,6 +584,81 @@ function FieldEditor({ visaUid, draft, sectionName, fieldTypes, onClose, onSaved
                                     placeholder={'Option 1\nOption 2'}
                                 />
                                 {errors.options && <div className="invalid-feedback d-block">{errors.options}</div>}
+                            </div>
+                        )}
+                        {type === 'country' && (
+                            <small className="text-muted d-block mb-3">
+                                <i className="fa fa-globe me-1"></i>
+                                The applicant picks from the country list (Countries), with flags.
+                            </small>
+                        )}
+                        {type === 'yesno' && (
+                            <div className="mb-3 border rounded p-3" style={{ background: '#f8f9fc' }}>
+                                <div className="form-check form-switch mb-0">
+                                    <input
+                                        className="form-check-input"
+                                        type="checkbox"
+                                        id="follow-up-switch"
+                                        checked={askMore}
+                                        onChange={(e) => setAskMore(e.target.checked)}
+                                    />
+                                    <label className="form-check-label fw-semibold" htmlFor="follow-up-switch">Ask for more details (e.g. a reason)</label>
+                                </div>
+                                {askMore && (
+                                    <>
+                                        <div className="d-flex align-items-center gap-2 mt-3 mb-3 small">
+                                            <span>Show these fields when the answer is</span>
+                                            <select className="form-select form-select-sm" style={{ width: 110 }} value={showWhen} onChange={(e) => setShowWhen(e.target.value as 'Yes' | 'No')}>
+                                                <option value="Yes">Yes</option>
+                                                <option value="No">No</option>
+                                            </select>
+                                        </div>
+                                        <div className="d-flex flex-column gap-2">
+                                            {followFields.map((f, index) => (
+                                                <div key={index} className="d-flex gap-2 align-items-center">
+                                                    <input
+                                                        type="text"
+                                                        className={`form-control form-control-sm ${errors.follow_up && !f.name.trim() ? 'is-invalid' : ''}`}
+                                                        placeholder="Field name, e.g. Reason"
+                                                        value={f.name}
+                                                        maxLength={255}
+                                                        onChange={(e) => patchFollow(index, { name: e.target.value })}
+                                                    />
+                                                    <select className="form-select form-select-sm" style={{ width: 160, flexShrink: 0 }} value={f.type} onChange={(e) => patchFollow(index, { type: e.target.value })}>
+                                                        {Object.entries(followUpTypes).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                                                    </select>
+                                                    <label className="d-flex align-items-center gap-1 mb-0 small text-muted text-nowrap">
+                                                        <input
+                                                            type="checkbox"
+                                                            className="form-check-input mt-0"
+                                                            checked={f.required}
+                                                            onChange={(e) => patchFollow(index, { required: e.target.checked })}
+                                                        />
+                                                        Required
+                                                    </label>
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-outline-danger btn-sm"
+                                                        onClick={() => setFollowFields((list) => list.filter((_, i) => i !== index))}
+                                                        disabled={followFields.length === 1}
+                                                        title="Remove field"
+                                                    >
+                                                        <i className="fa fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className="btn btn-link btn-sm px-0 mt-2"
+                                            onClick={() => setFollowFields((list) => [...list, { name: '', type: 'text', required: false }])}
+                                            disabled={followFields.length >= 20}
+                                        >
+                                            <i className="fa fa-plus me-1"></i>Add another field
+                                        </button>
+                                        {errors.follow_up && <div className="invalid-feedback d-block">{errors.follow_up}</div>}
+                                    </>
+                                )}
                             </div>
                         )}
                         {editing && (

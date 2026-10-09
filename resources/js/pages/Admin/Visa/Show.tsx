@@ -11,12 +11,13 @@ const TABS = [
 type CountryInfo = { id: number; countryName: string; countryCode: string; flag_url?: string } | null | undefined;
 
 export default function VisaShow() {
-    const { visa, currency, canConfigureFields, fieldConfig, fieldTypes, initialTab } = usePage().props as unknown as {
+    const { visa, currency, canConfigureFields, fieldConfig, fieldTypes, followUpTypes, initialTab } = usePage().props as unknown as {
         visa: Visa & { origin_country?: CountryInfo; destination_country?: CountryInfo };
         currency: { symbol: string };
         canConfigureFields: boolean;
         fieldConfig: ConfigSection[];
         fieldTypes: Record<string, string>;
+        followUpTypes: Record<string, string>;
         initialTab?: string;
     };
     const [activeTab, setActiveTab] = useState(initialTab ?? 'overview');
@@ -271,6 +272,7 @@ export default function VisaShow() {
                             countryLabel={[visa.origin_country?.countryName, visa.destination_country?.countryName].filter(Boolean).join(' → ') || 'N/A'}
                             initial={fieldConfig}
                             fieldTypes={fieldTypes}
+                            followUpTypes={followUpTypes}
                         />
                     ) : (
                         <EmptyState
