@@ -5,7 +5,8 @@ import { ProtectedRoute } from '@/lib/ProtectedRoute';
 import ApplicationFormTab, { type ApplicationFormData } from '@/components/visa/ApplicationFormTab';
 import ApplicationDocumentsTab, { type ApplicationDocumentItem } from '@/components/visa/ApplicationDocumentsTab';
 import SendEmailTab from '@/components/visa/SendEmailTab';
-import { statusBadge } from './Index';
+import ProcessingTab from '@/components/visa/ProcessingTab';
+import { statusBadge, statusLabel } from './Index';
 
 interface Props {
     application: {
@@ -53,6 +54,10 @@ interface Props {
     // Upload Document: requested by the superadmin, uploaded by the agency
     documents: ApplicationDocumentItem[];
     canRequestDocuments: boolean;
+    // The superadmin also gets the "Form" and "Processing" tabs
+    isSuperadmin: boolean;
+    // Processing: the statuses the superadmin can set (value => label)
+    statuses: Record<string, string>;
     logs: {
         id: number;
         application_number: string;
@@ -60,6 +65,8 @@ interface Props {
         section_name: string | null;
         old_value: string | null;
         new_value: string | null;
+        // A note with a status change (the reason, for Rejected)
+        comment: string | null;
         role: 'agency' | 'admin';
         created_at: string;
     }[];
@@ -74,6 +81,9 @@ const TABS = [
     { id: 'email', label: 'Send Email', icon: 'fas fa-envelope' },
     { id: 'conversation', label: 'Conversation', icon: 'fas fa-comments' },
     { id: 'log', label: 'Visa Updation Log Data', icon: 'fas fa-history' },
+    // Superadmin only
+    { id: 'form', label: 'Form', icon: 'fas fa-file-alt', superadminOnly: true },
+    { id: 'processing', label: 'Processing', icon: 'fas fa-cogs', superadminOnly: true },
 ];
 
 const formatDate = (date: string | null, withTime = false) =>
@@ -86,8 +96,10 @@ const formatDate = (date: string | null, withTime = false) =>
 
 /** "View Application": one applicant of a visa booking. Laid out like the Agency Details page. */
 export default function VisaApplicationShow() {
-    const { application, booking, members, form, flash, access, sent, logs, documents, canRequestDocuments } = usePage().props as unknown as Props;
+    const { application, booking, members, form, flash, access, sent, logs, documents, canRequestDocuments, isSuperadmin, statuses } = usePage().props as unknown as Props;
     const [activeTab, setActiveTab] = useState('overview');
+    // "Form" and "Processing" are for the superadmin only
+    const visibleTabs = TABS.filter((tab) => !tab.superadminOnly || isSuperadmin);
 
     // "Application form saved / submitted" after saving
     useEffect(() => {
@@ -206,7 +218,7 @@ export default function VisaApplicationShow() {
                 {/* Tabs Navigation */}
                 <div className="card-footer py-0 d-flex flex-wrap justify-content-between align-items-center">
                     <ul className="nav nav-underline gap-3 nav-scroll px-3 px-sm-0" role="tablist">
-                        {TABS.map((tab) => (
+                        {visibleTabs.map((tab) => (
                             <li key={tab.id} className="nav-item" role="presentation">
                                 <button
                                     className={`nav-link py-3 px-1 border-3 ${activeTab === tab.id ? 'active' : ''}`}
@@ -320,7 +332,7 @@ export default function VisaApplicationShow() {
                                                                 <td className="text-muted small">{m.application_number}</td>
                                                                 <td className="fw-semibold">{m.name}</td>
                                                                 <td className="text-capitalize">{m.relation}</td>
-                                                                <td><span className={`badge ${statusBadge(m.status)} text-capitalize`}>{m.status}</span></td>
+                                                                <td><span className={`badge ${statusBadge(m.status)} text-capitalize`}>{statusLabel(m.status)}</span></td>
                                                                 <td>
                                                                     <a href={`/admin/visa-applications/${m.uid}`} className="btn btn-sm btn-primary" title="View Application">
                                                                         <i className="fa fa-eye"></i>
@@ -363,6 +375,14 @@ export default function VisaApplicationShow() {
                         documents={documents}
                         canRequest={canRequestDocuments}
                     />
+                ) : activeTab === 'processing' && isSuperadmin ? (
+                    /* Superadmin: change the application's status */
+                    <ProcessingTab
+                        applicationUid={application.uid}
+                        status={application.status}
+                        statuses={statuses}
+                        history={logs.filter((log) => log.field_name === 'Application Status')}
+                    />
                 ) : activeTab === 'log' ? (
                     <div className="card" style={{ height: 'auto' }}>
                         <div className="card-header">
@@ -395,7 +415,14 @@ export default function VisaApplicationShow() {
                                             <tr key={log.id}>
                                                 <td>{i + 1}</td>
                                                 <td>{log.application_number}</td>
-                                                <td style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{log.new_value ?? <span className="text-muted">—</span>}</td>
+                                                <td style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                                                    {log.new_value ?? <span className="text-muted">—</span>}
+                                                    {log.comment && (
+                                                        <small className={`d-block mt-1 ${log.new_value === 'Rejected' ? 'text-danger' : 'text-muted'}`}>
+                                                            <i className="fa fa-comment-dots me-1"></i>{log.comment}
+                                                        </small>
+                                                    )}
+                                                </td>
                                                 <td style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{log.old_value ?? <span className="text-muted">—</span>}</td>
                                                 <td>{log.field_name}</td>
                                                 <td>

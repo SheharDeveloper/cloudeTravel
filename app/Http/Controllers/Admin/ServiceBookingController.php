@@ -102,6 +102,28 @@ class ServiceBookingController extends Controller
         return back()->with('success', "Application {$application->application_number} sent to the admin.");
     }
 
+    /** Processing (superadmin): changes the application's status — In Process, Update Done, Approved… */
+    public function updateApplicationStatus(Request $request, string $uid)
+    {
+        abort_unless($this->applicationService->isSuperadmin(), 403);
+        $validated = $request->validate([
+            'status' => ['required', \Illuminate\Validation\Rule::in(array_keys(VisaApplicationService::STATUSES))],
+            // Required for Rejected: the reason
+            'comment' => 'required_if:status,rejected|nullable|string|max:2000',
+        ], [
+            'comment.required_if' => 'Enter the reason for rejecting the application.',
+        ]);
+
+        $application = $this->applicationService->changeStatus(
+            $this->applicationService->findViewable($uid),
+            $validated['status'],
+            \Illuminate\Support\Facades\Auth::guard('web')->user(),
+            $validated['comment'] ?? null,
+        );
+
+        return back()->with('success', 'Application status changed to ' . VisaApplicationService::STATUSES[$application->status] . '.');
+    }
+
     /**
      * One application ("View Application"): the applicant, their booking's
      * payment summary, and the others travelling on the same booking. The
@@ -161,6 +183,10 @@ class ServiceBookingController extends Controller
             // Upload Document: the requested documents and their files; the superadmin requests them
             'documents' => $this->documentService->forApplication($application),
             'canRequestDocuments' => $this->applicationService->isSuperadmin(),
+            // The "Form" and "Processing" tabs are for the superadmin only
+            'isSuperadmin' => $this->applicationService->isSuperadmin(),
+            // Processing: the statuses the superadmin can choose from
+            'statuses' => VisaApplicationService::STATUSES,
             // Everyone else on the same booking
             'members' => $booking->applications
                 ->reject(fn ($a) => $a->id === $application->id)

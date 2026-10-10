@@ -3,7 +3,7 @@ import { Head, router, usePage } from '@inertiajs/react';
 import toast, { Toaster } from 'react-hot-toast';
 import { ProtectedRoute } from '@/lib/ProtectedRoute';
 import RichTextEditor from '@/components/RichTextEditor';
-import { formatDate, statusBadge } from './Index';
+import { formatDate, statusBadge, statusLabel } from './Index';
 
 const REMARK_MAX = 500;
 // Formatting the server keeps: see ServiceBookingController::REMARK_TAGS
@@ -211,7 +211,7 @@ export default function ServiceBookingShow() {
                                             Application {index + 1}: {a.first_name} {a.last_name}{' '}
                                             <span className="text-muted fw-normal text-capitalize">({a.relation})</span>
                                         </strong>
-                                        <span className={`badge ${statusBadge(a.status)} text-capitalize`}>{a.status}</span>
+                                        <span className={`badge ${statusBadge(a.status)} text-capitalize`}>{statusLabel(a.status)}</span>
                                     </div>
                                     <div className="row g-2 small">
                                         <Detail label="Passport Number" value={a.passport_number} />

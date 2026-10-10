@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import { ProtectedRoute } from '@/lib/ProtectedRoute';
-import { formatDate, statusBadge } from './Index';
+import { formatDate, statusBadge, statusLabel } from './Index';
 
 interface ApplicationRow {
     uid: string;
@@ -17,8 +17,14 @@ interface ApplicationRow {
     amount: number;
     currency_symbol: string;
     booked_on: string | null;
-    document_status: string;
+    // "submitted" when every requested document is uploaded, otherwise "pending"
+    document_status: 'submitted' | 'pending';
+    documents_requested: number;
+    documents_uploaded: number;
     status: string;
+    // The latest status comment (the reason, when rejected), and when the status last changed
+    status_comment: string | null;
+    status_updated_at: string | null;
     booking_uid: string;
     invoice_number: string;
     sent_at: string | null;
@@ -109,7 +115,7 @@ export default function VisaApplications() {
                                                     {adminList && <th>Sent On</th>}
                                                     <th>Document Submit</th>
                                                     <th>Application Status</th>
-                                                    <th>Update Status</th>
+                                                    {/* <th>Update Status</th> */}
                                                     <th>Actions</th>
                                                 </tr>
                                             </thead>
@@ -137,12 +143,34 @@ export default function VisaApplications() {
                                                         <td><small>{a.currency_symbol}{a.amount.toFixed(2)}</small></td>
                                                         <td><small className="text-muted">{formatDate(a.booked_on)}</small></td>
                                                         {adminList && <td><small className="text-muted">{formatDate(a.sent_at)}</small></td>}
-                                                        <td><span className={`badge ${statusBadge(a.document_status)} text-capitalize`}>{a.document_status}</span></td>
-                                                        <td><span className={`badge ${statusBadge(a.status)} text-capitalize`}>{a.status}</span></td>
                                                         <td>
+                                                            {a.document_status === 'submitted' ? (
+                                                                <span className="badge bg-success"><i className="fa fa-check-circle me-1"></i>Submitted</span>
+                                                            ) : (
+                                                                <span className="badge bg-warning text-dark"><i className="fa fa-clock me-1"></i>Pending</span>
+                                                            )}
+                                                            {/* How many of the requested documents are uploaded */}
+                                                            {a.documents_requested > 0 && (
+                                                                <small className="d-block text-muted mt-1">{a.documents_uploaded}/{a.documents_requested} uploaded</small>
+                                                            )}
+                                                        </td>
+                                                        {/* <td><span className={`badge ${statusBadge(a.status)} text-capitalize`}>{statusLabel(a.status)}</span></td> */}
+                                                        <td style={{ maxWidth: 220 }}>
                                                             <span className={`badge ${statusBadge(a.status)} text-capitalize`}>
-                                                                <i className="fa fa-clock me-1"></i>{a.status}
+                                                                <i className="fa fa-clock me-1"></i>{statusLabel(a.status)}
                                                             </span>
+                                                            {/* The latest comment; for a rejection, the reason */}
+                                                            {a.status_comment && (
+                                                                <small
+                                                                    className={`d-block mt-1 ${a.status === 'rejected' ? 'text-danger' : 'text-muted'}`}
+                                                                    title={a.status_comment}
+                                                                    style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+                                                                >
+                                                                    <i className="fa fa-comment-dots me-1"></i>
+                                                                    {a.status === 'rejected' && 'Reason: '}{a.status_comment}
+                                                                </small>
+                                                            )}
+                                                            {a.status_updated_at && <small className="d-block text-muted">{formatDate(a.status_updated_at)}</small>}
                                                         </td>
                                                         <td>
                                                             <div className="d-flex gap-2">

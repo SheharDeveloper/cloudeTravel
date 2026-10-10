@@ -10,6 +10,7 @@ use App\Models\ServiceBooking;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -121,6 +122,47 @@ class VisaApplicationService
         return $form;
     }
 
+    /** The statuses the superadmin can set on an application (Processing). */
+    public const STATUSES = [
+        'submitted' => 'Submitted',
+        'in_process' => 'In Process',
+        'update_done' => 'Update Done',
+        'approved' => 'Approved',
+        'rejected' => 'Rejected',
+    ];
+
+    /**
+     * Processing: the superadmin moves the application to another status,
+     * with a comment (required for Rejected: the reason). The change is
+     * recorded in the Visa Updation Log (old → new status, and the comment).
+     */
+    public function changeStatus(BookingApplication $application, string $status, ?object $actor, ?string $comment = null): BookingApplication
+    {
+        $old = $application->status;
+        $comment = trim((string) $comment) ?: null;
+        if ($status === 'rejected' && ! $comment) {
+            throw ValidationException::withMessages(['comment' => 'Enter the reason for rejecting the application.']);
+        }
+        if ($old === $status && ! $comment) {
+            return $application;
+        }
+
+        DB::transaction(function () use ($application, $status, $old, $actor, $comment) {
+            $application->update(['status' => $status]);
+            $application->formLogs()->create([
+                'field_name' => 'Application Status',
+                'old_value' => self::STATUSES[$old] ?? ucfirst(str_replace('_', ' ', (string) $old)),
+                'new_value' => self::STATUSES[$status],
+                'comment' => $comment,
+                'changed_by_role' => ApplicationFormLog::ROLE_ADMIN,
+                'changed_by_type' => $actor ? get_class($actor) : null,
+                'changed_by_id' => $actor?->id,
+            ]);
+        });
+
+        return $application;
+    }
+
     /** Visa Updation Log Data: every logged change to the form, newest first. */
     public function logs(BookingApplication $application): array
     {
@@ -131,6 +173,7 @@ class VisaApplicationService
             'section_name' => $log->section_name,
             'old_value' => $log->old_value,
             'new_value' => $log->new_value,
+            'comment' => $log->comment,
             'role' => $log->changed_by_role,
             'created_at' => $log->created_at?->toIso8601String(),
         ])->all();
@@ -206,6 +249,13 @@ class VisaApplicationService
 
         return $query
             ->with('booking:id,uid,invoice_number,client_id,owner_type,owner_id,currency_symbol,details,created_at,status', 'booking.client:id,name,email,phone', 'booking.owner')
+            // Status changes (Processing), newest first: for the latest comment
+            ->with(['formLogs' => fn ($l) => $l->where('field_name', 'Application Status')])
+            // Document Status: how many documents were requested, and how many are uploaded
+            ->withCount([
+                'documents as documents_requested',
+                'documents as documents_uploaded' => fn ($d) => $d->whereNotNull('file_path'),
+            ])
             ->when($search !== '', function (Builder $q) use ($search, $searchId) {
                 $q->where(function (Builder $q) use ($search, $searchId) {
                     $q->where('first_name', 'like', "%{$search}%")
@@ -239,7 +289,13 @@ class VisaApplicationService
             'amount' => $a->amount,
             'currency_symbol' => $booking->currency_symbol,
             'booked_on' => $booking->created_at?->toIso8601String(),
-            'document_status' => 'pending',
+            // "submitted" once every requested document is uploaded, otherwise "pending"
+            'document_status' => $a->documents_requested > 0 && $a->documents_uploaded >= $a->documents_requested ? 'submitted' : 'pending',
+            'documents_requested' => (int) $a->documents_requested,
+            'documents_uploaded' => (int) $a->documents_uploaded,
+            // The latest status comment (the reason, when rejected) and when the status last changed
+            'status_comment' => $a->formLogs->first()?->comment,
+            'status_updated_at' => $a->formLogs->first()?->created_at?->toIso8601String(),
             'status' => $a->status,
             'booking_uid' => $booking->uid,
             'invoice_number' => $booking->invoice_number,

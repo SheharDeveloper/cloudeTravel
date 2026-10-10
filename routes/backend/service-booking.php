@@ -10,6 +10,7 @@ Route::get('service-bookings/{uid}', [ServiceBookingController::class, 'show'])-
 // Superadmin: applications agencies have sent to the admin
 Route::get('agency-applications', [ServiceBookingController::class, 'agencyApplications'])->name('admin.agency-applications.index');
 Route::get('visa-applications/{uid}', [ServiceBookingController::class, 'showApplication'])->name('admin.visa-applications.show');
+Route::put('visa-applications/{uid}/status', [ServiceBookingController::class, 'updateApplicationStatus'])->name('admin.visa-applications.status');
 Route::post('visa-applications/{uid}/send-to-admin', [ServiceBookingController::class, 'sendToAdmin'])->name('admin.visa-applications.send');
 Route::put('visa-applications/{uid}/form', [ServiceBookingController::class, 'saveApplicationForm'])->name('admin.visa-applications.form');
 Route::post('visa-applications/{uid}/form/files', [ServiceBookingController::class, 'uploadFormFile'])->name('admin.visa-applications.form.upload');

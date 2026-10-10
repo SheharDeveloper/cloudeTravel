@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { router } from '@inertiajs/react';
+import { router, usePoll } from '@inertiajs/react';
 
 export interface ApplicationDocumentItem {
     id: number;
@@ -47,6 +47,20 @@ export default function ApplicationDocumentsTab({ applicationUid, documents, can
     canRequest: boolean;
 }) {
     const base = `/admin/visa-applications/${applicationUid}/documents`;
+
+    // Refresh: fetch the latest requests and uploads (the other side may have changed them),
+    // and again by itself every 30 seconds while this tab is open
+    const [refreshing, setRefreshing] = useState(false);
+    const [refreshedAt, setRefreshedAt] = useState(() => new Date());
+    const refresh = () => {
+        setRefreshing(true);
+        router.reload({
+            only: ['documents'],
+            onSuccess: () => setRefreshedAt(new Date()),
+            onFinish: () => setRefreshing(false),
+        });
+    };
+    usePoll(30000, { only: ['documents'], onSuccess: () => setRefreshedAt(new Date()) });
     const uploaded = documents.filter((d) => d.file).length;
     const approved = documents.filter((d) => d.review?.status === 'approved').length;
     const rejected = documents.filter((d) => d.review?.status === 'rejected').length;
@@ -63,6 +77,7 @@ export default function ApplicationDocumentsTab({ applicationUid, documents, can
                             {canRequest ? 'Documents requested from the agency for this application' : 'Upload the documents requested for this application'}
                         </div>
                     </div>
+                    <div className="d-flex gap-2 flex-wrap align-items-center">
                     {documents.length > 0 && (
                         <div className="d-flex gap-2 flex-wrap">
                             <span className={`badge ${uploaded === documents.length ? 'bg-info' : 'bg-warning text-dark'}`}>
@@ -74,6 +89,17 @@ export default function ApplicationDocumentsTab({ applicationUid, documents, can
                             {rejected > 0 && <span className="badge bg-danger">{rejected} rejected</span>}
                         </div>
                     )}
+                        <button
+                            type="button"
+                            className="btn btn-outline-primary btn-sm"
+                            onClick={refresh}
+                            disabled={refreshing}
+                            title={`Last updated ${refreshedAt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })} · refreshes every 30 seconds`}
+                        >
+                            <i className={`fa fa-sync-alt me-1 ${refreshing ? 'fa-spin' : ''}`}></i>
+                            {refreshing ? 'Refreshing…' : 'Refresh'}
+                        </button>
+                    </div>
                 </div>
                 <div className="card-body p-0">
                     {documents.length === 0 ? (

@@ -14,7 +14,7 @@ class ApplicationFormLog extends Model
 
     protected $fillable = [
         'booking_application_id', 'visa_field_id', 'section_name', 'field_name', 'field_slug',
-        'old_value', 'new_value', 'changed_by_role', 'changed_by_type', 'changed_by_id',
+        'old_value', 'new_value', 'comment', 'changed_by_role', 'changed_by_type', 'changed_by_id',
     ];
 
     public function application()

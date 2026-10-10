@@ -24,6 +24,8 @@ return new class extends Migration
             $table->string('field_slug')->nullable();
             $table->text('old_value')->nullable();
             $table->text('new_value')->nullable();
+            // A note with the change, e.g. the reason an application was rejected
+            $table->text('comment')->nullable();
             $table->string('changed_by_role'); // agency | admin
             $table->string('changed_by_type')->nullable();
             $table->unsignedBigInteger('changed_by_id')->nullable();

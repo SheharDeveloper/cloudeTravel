@@ -55,7 +55,21 @@ const pageTitle = (filters: Props['filters']) => {
 };
 
 export const statusBadge = (status: string) =>
-    ({ pending: 'bg-warning', signed: 'bg-success', confirmed: 'bg-success', cancelled: 'bg-danger' } as Record<string, string>)[status] ?? 'bg-secondary';
+    ({
+        pending: 'bg-warning',
+        signed: 'bg-success',
+        confirmed: 'bg-success',
+        cancelled: 'bg-danger',
+        // Visa application statuses (Processing)
+        submitted: 'bg-info',
+        in_process: 'bg-primary',
+        update_done: 'bg-secondary',
+        approved: 'bg-success',
+        rejected: 'bg-danger',
+    } as Record<string, string>)[status] ?? 'bg-secondary';
+
+/** "update_done" → "update done" (shown capitalised by the badge) */
+export const statusLabel = (status: string) => status.replace(/_/g, ' ');
 
 export const formatDate = (date: string | null) =>
     date ? new Date(date).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
