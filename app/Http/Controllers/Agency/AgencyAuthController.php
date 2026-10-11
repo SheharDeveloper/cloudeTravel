@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Agency;
 use App\Http\Controllers\Controller;
 use App\Models\Agency;
 use App\Models\Domain;
+use App\Services\ClientPortalService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\ValidationException;
@@ -61,10 +62,11 @@ class AgencyAuthController extends Controller
         ]);
     }
 
-    public function showClientLogin(Request $request)
+    public function showClientLogin(Request $request, ClientPortalService $portal)
     {
-        if (Auth::guard('agency')->check()) {
-            return redirect()->intended('/dashboard');
+        // A client already signed in on this domain goes to their profile
+        if ($portal->currentClient($request)) {
+            return redirect()->route('client.profile');
         }
 
         $agency = $this->resolveAgency($request);
@@ -84,9 +86,24 @@ class AgencyAuthController extends Controller
         return $this->attemptLogin($request);
     }
 
-    public function clientLogin(Request $request)
+    /** Client Login: one of this domain's agency's clients signs in and sees their profile. */
+    public function clientLogin(Request $request, ClientPortalService $portal)
     {
-        return $this->attemptLogin($request);
+        $agency = $this->resolveAgency($request);
+
+        if (!$agency) {
+            return redirect()->route('login');
+        }
+
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required|string',
+        ]);
+
+        $portal->login($agency, $credentials['email'], $credentials['password'], $request->boolean('remember'));
+        $request->session()->regenerate();
+
+        return redirect()->route('client.profile');
     }
 
     /**

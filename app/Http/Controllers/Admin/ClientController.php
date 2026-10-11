@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ClientFolder;
 use App\Models\Communication;
 use App\Services\AttendanceService;
+use App\Services\ClientPortalService;
 use App\Services\ClientService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -15,11 +16,13 @@ class ClientController extends Controller
 {
     protected ClientService $clientService;
     protected AttendanceService $attendanceService;
+    protected ClientPortalService $portal;
 
-    public function __construct(ClientService $clientService, AttendanceService $attendanceService)
+    public function __construct(ClientService $clientService, AttendanceService $attendanceService, ClientPortalService $portal)
     {
         $this->clientService = $clientService;
         $this->attendanceService = $attendanceService;
+        $this->portal = $portal;
     }
 
     /**
@@ -92,7 +95,45 @@ class ClientController extends Controller
 
         return Inertia::render('Admin/Client/Show', [
             'client' => $client,
+            // Client Login: whether the client can sign in, and where
+            'clientLogin' => $this->portal->loginInfo($client),
         ]);
+    }
+
+    /** Client Login: set or change the password the client signs in with. */
+    public function updateLogin(Request $request, $uid)
+    {
+        $client = $this->clientService->findByUid($uid);
+        if (! $client->email) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['password' => 'Add an email address to the client first: they sign in with it.']);
+        }
+        $validated = $request->validate([
+            'password' => 'required|string|min:8|max:100|confirmed',
+        ]);
+
+        $this->portal->setPassword($client, $validated['password']);
+
+        return back()->with('success', 'Client login saved. The client can now sign in with their email and this password.');
+    }
+
+    /** Client Login: back to the default password, the client's email. */
+    public function resetLogin($uid)
+    {
+        $client = $this->clientService->findByUid($uid);
+        if (! $client->email) {
+            throw \Illuminate\Validation\ValidationException::withMessages(['password' => 'Add an email address to the client first: they sign in with it.']);
+        }
+        $this->portal->resetToDefault($client);
+
+        return back()->with('success', 'Password reset: the client signs in with their email address as the password.');
+    }
+
+    /** Client Login: remove the password, so the client can no longer sign in. */
+    public function removeLogin($uid)
+    {
+        $this->portal->setPassword($this->clientService->findByUid($uid), null);
+
+        return back()->with('success', 'Client login turned off.');
     }
 
     /**

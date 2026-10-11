@@ -29,7 +29,186 @@ const TABS = [
     { key: 'family', label: 'Family Details' },
     { key: 'documents', label: 'Documents' },
     { key: 'call-history', label: 'Call History' },
+    { key: 'client-login', label: 'Client Login' },
 ];
+
+interface ClientLoginInfo {
+    enabled: boolean;
+    // Still the default password: the client's email address
+    default_password: boolean;
+    has_email: boolean;
+    last_login_at: string | null;
+    agency_owned: boolean;
+    login_url: string | null;
+}
+
+/**
+ * Client Login: the agency sets a password so the client can sign in on the
+ * agency's own domain (email + password) and see their profile.
+ */
+function ClientLoginCard({ clientUid, email, login }: { clientUid: string; email: string | null; login: ClientLoginInfo }) {
+    const [password, setPassword] = useState('');
+    const [confirm, setConfirm] = useState('');
+    const [show, setShow] = useState(false);
+    const [saving, setSaving] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [confirmOff, setConfirmOff] = useState(false);
+    const [copied, setCopied] = useState(false);
+
+    const save = () => {
+        setSaving(true);
+        setErrors({});
+        router.put(`/admin/clients/${clientUid}/login`, { password, password_confirmation: confirm }, {
+            preserveScroll: true,
+            onSuccess: () => { setPassword(''); setConfirm(''); },
+            onError: (errs) => setErrors(errs as Record<string, string>),
+            onFinish: () => setSaving(false),
+        });
+    };
+
+    const resetToDefault = () => {
+        setSaving(true);
+        setErrors({});
+        router.post(`/admin/clients/${clientUid}/login/reset`, {}, {
+            preserveScroll: true,
+            onError: (errs) => setErrors(errs as Record<string, string>),
+            onFinish: () => setSaving(false),
+        });
+    };
+
+    const turnOff = () => {
+        setSaving(true);
+        router.delete(`/admin/clients/${clientUid}/login`, {
+            preserveScroll: true,
+            onFinish: () => { setSaving(false); setConfirmOff(false); },
+        });
+    };
+
+    const copyLink = () => {
+        if (!login.login_url) return;
+        navigator.clipboard?.writeText(login.login_url).then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1500);
+        });
+    };
+
+    return (
+        <div className="card h-auto">
+            <div className="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <div>
+                    <h6 className="card-title mb-1">Client Login</h6>
+                    <div className="small text-muted">Let the client sign in on your website and see their profile</div>
+                </div>
+                {login.enabled
+                    ? <span className="badge bg-success"><i className="fa fa-check-circle me-1"></i>Login on</span>
+                    : <span className="badge bg-secondary">Login off</span>}
+            </div>
+            <div className="card-body">
+                {!login.agency_owned ? (
+                    <div className="alert alert-info mb-0">
+                        <i className="fa fa-info-circle me-2"></i>
+                        Clients sign in on their agency's website. This client belongs to the superadmin, which has no client login page.
+                    </div>
+                ) : (
+                    <>
+                        <div className="row g-3 mb-3">
+                            <div className="col-md-6">
+                                <small className="text-muted d-block">Signs in with (email)</small>
+                                <strong>{email || <span className="text-danger">No email — add one first (Edit)</span>}</strong>
+                            </div>
+                            <div className="col-md-6">
+                                <small className="text-muted d-block">Last signed in</small>
+                                <strong>{login.last_login_at ? new Date(login.last_login_at).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Never'}</strong>
+                            </div>
+                            {login.login_url && (
+                                <div className="col-12">
+                                    <small className="text-muted d-block mb-1">Client login page</small>
+                                    <div className="input-group">
+                                        <input type="text" className="form-control" value={login.login_url} readOnly />
+                                        <button type="button" className="btn btn-outline-secondary" onClick={copyLink}>
+                                            <i className={`fa ${copied ? 'fa-check' : 'fa-copy'} me-1`}></i>{copied ? 'Copied' : 'Copy'}
+                                        </button>
+                                        <a className="btn btn-outline-primary" href={login.login_url} target="_blank" rel="noreferrer">
+                                            <i className="fa fa-external-link-alt"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Which password the client signs in with now */}
+                        {login.enabled && (
+                            login.default_password ? (
+                                <div className="alert alert-info py-2 d-flex align-items-center gap-2 flex-wrap">
+                                    <i className="fa fa-key"></i>
+                                    <span>Default password: the client's email address (<strong>{email}</strong>). You can change it below.</span>
+                                </div>
+                            ) : (
+                                <div className="alert alert-light border py-2 d-flex align-items-center gap-2 flex-wrap">
+                                    <i className="fa fa-lock"></i>
+                                    <span>A custom password is set.</span>
+                                    <button type="button" className="btn btn-outline-primary btn-sm ms-auto" onClick={resetToDefault} disabled={saving || !email}>
+                                        <i className="fa fa-undo me-1"></i>Reset to default (email)
+                                    </button>
+                                </div>
+                            )
+                        )}
+
+                        <h6 className="mb-2">{login.enabled ? 'Change password' : 'Set a password to turn login on'}</h6>
+                        <div className="row g-2 align-items-start">
+                            <div className="col-md-5">
+                                <input
+                                    type={show ? 'text' : 'password'}
+                                    className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                                    placeholder="New password (8+ characters)"
+                                    value={password}
+                                    autoComplete="new-password"
+                                    onChange={(e) => setPassword(e.target.value)}
+                                />
+                                {errors.password && <div className="invalid-feedback d-block">{errors.password}</div>}
+                            </div>
+                            <div className="col-md-5">
+                                <input
+                                    type={show ? 'text' : 'password'}
+                                    className="form-control"
+                                    placeholder="Confirm password"
+                                    value={confirm}
+                                    autoComplete="new-password"
+                                    onChange={(e) => setConfirm(e.target.value)}
+                                />
+                            </div>
+                            <div className="col-md-2 d-grid">
+                                <button type="button" className="btn btn-primary" onClick={save} disabled={saving || !password || !email}>
+                                    {saving ? 'Saving…' : 'Save'}
+                                </button>
+                            </div>
+                        </div>
+                        <label className="d-flex align-items-center gap-2 mt-2 small text-muted" style={{ cursor: 'pointer' }}>
+                            <input type="checkbox" className="form-check-input mt-0" checked={show} onChange={(e) => setShow(e.target.checked)} />
+                            Show password
+                        </label>
+
+                        {login.enabled && (
+                            <div className="border-top pt-3 mt-3 d-flex align-items-center gap-2 flex-wrap">
+                                {confirmOff ? (
+                                    <>
+                                        <span className="small">Turn off login? The client won't be able to sign in.</span>
+                                        <button type="button" className="btn btn-danger btn-sm" onClick={turnOff} disabled={saving}>Yes, turn off</button>
+                                        <button type="button" className="btn btn-outline-secondary btn-sm" onClick={() => setConfirmOff(false)}>Cancel</button>
+                                    </>
+                                ) : (
+                                    <button type="button" className="btn btn-outline-danger btn-sm" onClick={() => setConfirmOff(true)}>
+                                        <i className="fa fa-ban me-1"></i>Turn off login
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
+        </div>
+    );
+}
 
 const formatDocType = (type: string) => {
     if (!type) return 'Other';
@@ -739,7 +918,7 @@ function CallHistoryTable({ clientUid, communications }: { clientUid: string; co
 }
 
 export default function ClientShow() {
-    const { client } = usePage().props as any;
+    const { client, clientLogin } = usePage().props as any;
     const [activeTab, setActiveTab] = useState('overview');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -997,6 +1176,10 @@ export default function ClientShow() {
                                 )}
                             </div>
                         </div>
+                    )}
+
+                    {activeTab === 'client-login' && clientLogin && (
+                        <ClientLoginCard clientUid={client.uid} email={client.email} login={clientLogin} />
                     )}
 
                     {activeTab === 'family' && (

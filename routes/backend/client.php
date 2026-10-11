@@ -10,6 +10,10 @@ Route::get('clients/{uid}', [\App\Http\Controllers\Admin\ClientController::class
 Route::get('clients/{uid}/edit', [\App\Http\Controllers\Admin\ClientController::class, 'edit'])->name('admin.client.edit');
 Route::put('clients/{uid}', [\App\Http\Controllers\Admin\ClientController::class, 'update'])->name('admin.client.update');
 Route::delete('clients/{uid}', [\App\Http\Controllers\Admin\ClientController::class, 'destroy'])->name('admin.client.destroy');
+// Client Login: the password a client signs in with on the agency's domain
+Route::put('clients/{uid}/login', [\App\Http\Controllers\Admin\ClientController::class, 'updateLogin'])->name('admin.client.login.update');
+Route::post('clients/{uid}/login/reset', [\App\Http\Controllers\Admin\ClientController::class, 'resetLogin'])->name('admin.client.login.reset');
+Route::delete('clients/{uid}/login', [\App\Http\Controllers\Admin\ClientController::class, 'removeLogin'])->name('admin.client.login.destroy');
 Route::post('clients/{uid}/toggle-status', [\App\Http\Controllers\Admin\ClientController::class, 'toggleStatus'])->name('admin.client.toggle-status');
 Route::post('clients/validate-step', [\App\Http\Controllers\Admin\ClientController::class, 'validateFormStep'])->name('admin.client.validate-step');
 Route::post('clients/{uid}/documents', [\App\Http\Controllers\Admin\ClientController::class, 'storeDocument'])->name('admin.client.documents.store');

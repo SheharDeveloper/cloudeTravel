@@ -196,10 +196,13 @@ class VisaController extends Controller
             'follow_up.fields.*.name' => 'required|string|max:255|distinct:ignore_case',
             'follow_up.fields.*.type' => ['required', \Illuminate\Validation\Rule::in(array_keys(VisaField::FOLLOW_UP_TYPES))],
             'follow_up.fields.*.required' => 'nullable|boolean',
+            // Declaration: the text the applicant accepts
+            'declaration_text' => 'required_if:field_type,declaration|nullable|string|max:5000',
         ] + ($withSection ? ['visa_section_id' => 'required|integer|exists:visa_sections,id'] : []), [
             'options.required' => 'Add at least one option for this field type.',
             'follow_up.fields.*.name.required' => 'Every follow-up field needs a name.',
             'follow_up.fields.*.name.distinct' => 'Each follow-up field name can only be used once.',
+            'declaration_text.required_if' => 'Write the declaration the applicant has to accept.',
         ], [
             'field_name' => 'field name',
             'field_type' => 'field type',
@@ -214,6 +217,7 @@ class VisaController extends Controller
             'field_type' => $field->field_type,
             'options' => $this->fieldConfigService->choicesOf($field),
             'follow_up' => $this->fieldConfigService->followUpOf($field),
+            'declaration' => $this->fieldConfigService->declarationOf($field),
             'home_section_id' => $field->visa_section_id,
             'enabled' => $enabled,
             'required' => false,

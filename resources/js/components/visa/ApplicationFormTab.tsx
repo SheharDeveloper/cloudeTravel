@@ -11,6 +11,8 @@ export interface FormField {
     required: boolean;
     input: string; // text | textarea | date | email | tel | select | country | yesno_details | heading | (a field type set on the field)
     options?: string[];
+    // declaration: the text the applicant accepts with a tick
+    text?: string;
     // yesno_details: the answer that opens the follow-up section, and its fields
     follow_up?: {
         show_when: 'Yes' | 'No';
@@ -384,7 +386,7 @@ export default function ApplicationFormTab({ applicationUid, form, canEdit = tru
                                                 <h6 className="text-primary border-bottom pb-2 mb-0">{field.name.replace(/\s*section$/i, '')}</h6>
                                             </div>
                                         ) : (
-                                            <div key={field.id} className={`${field.input === 'children' || (field.input === 'yesno_details' && Object.keys(parseYesNo(answers[field.id]).details).length) ? 'col-12' : FIELD_COL} mb-3`}>
+                                            <div key={field.id} className={`${field.input === 'children' || field.input === 'declaration' || (field.input === 'yesno_details' && Object.keys(parseYesNo(answers[field.id]).details).length) ? 'col-12' : FIELD_COL} mb-3`}>
                                                 <label className="text-muted small">
                                                     {field.input === 'children' ? 'Children' : field.name}
                                                     {field.required && <span className="text-danger"> *</span>}
@@ -394,6 +396,13 @@ export default function ApplicationFormTab({ applicationUid, form, canEdit = tru
                                                         ? <ChildrenSummary value={answers[field.id]} />
                                                         : field.input === 'yesno_details' && filled(field)
                                                             ? <YesNoSummary field={field} value={answers[field.id]} />
+                                                        : field.input === 'declaration' && filled(field)
+                                                            ? (
+                                                                <>
+                                                                    <div className="fw-normal text-muted small mb-1" style={{ whiteSpace: 'pre-line' }}>{field.text}</div>
+                                                                    <span className="text-success"><i className="fa fa-check-circle me-1"></i>Accepted</span>
+                                                                </>
+                                                            )
                                                         : filled(field)
                                                             ? field.input === 'date' ? formatDate(answers[field.id])
                                                                 : field.input === 'checkbox' ? parseList(answers[field.id]).join(', ')
@@ -472,6 +481,33 @@ export default function ApplicationFormTab({ applicationUid, form, canEdit = tru
 }
 
 function FieldInput({ applicationUid, countries, field, value, error, onChange }: { applicationUid: string; countries: CountryOption[]; field: FormField; value: string; error?: string; onChange: (value: string) => void }) {
+    // Declaration: its text and an "I accept" tick, across the whole row
+    if (field.input === 'declaration') {
+        const id = `field-${field.id}`;
+        return (
+            <div className="col-12 mb-3">
+                <div className={`border rounded p-3 ${error ? 'border-danger' : ''}`} style={{ background: '#f8f9fc' }}>
+                    <div className="small fw-semibold text-primary mb-2">
+                        <i className="fa fa-file-signature me-2"></i>{field.name}
+                        {field.required && <span className="text-danger"> *</span>}
+                    </div>
+                    <p className="mb-3" style={{ whiteSpace: 'pre-line', fontSize: 14 }}>{field.text}</p>
+                    <div className="form-check mb-0">
+                        <input
+                            id={id}
+                            type="checkbox"
+                            className={`form-check-input ${error ? 'is-invalid' : ''}`}
+                            checked={value === 'accepted'}
+                            onChange={(e) => onChange(e.target.checked ? 'accepted' : '')}
+                        />
+                        <label className="form-check-label fw-semibold" htmlFor={id}>I accept this declaration</label>
+                    </div>
+                    {error && <div className="invalid-feedback d-block">{error.replace(/ is required\.$/, '')} — please tick "I accept" to continue.</div>}
+                </div>
+            </div>
+        );
+    }
+
     // Yes / No that opens a follow-up section (e.g. "Reason") on the chosen answer
     if (field.input === 'yesno_details') {
         return <YesNoDetailsInput field={field} countries={countries} value={value} error={error} onChange={onChange} />;
@@ -653,6 +689,22 @@ function YesNoDetailsInput({ field, countries, value, error, onChange }: {
                                             <DatePicker value={detailValue} onChange={(v) => setDetail(detail.name, v)} autoSelect={true} inputStyle={invalid ? { borderColor: '#dc3545' } : undefined} />
                                         ) : detail.type === 'textarea' ? (
                                             <textarea id={detailId} className={cls} rows={2} value={detailValue} onChange={(e) => setDetail(detail.name, e.target.value)} />
+                                        ) : detail.type === 'yesno' ? (
+                                            <div className="d-flex flex-wrap gap-3 pt-1" id={detailId}>
+                                                {['Yes', 'No'].map((option) => (
+                                                    <div key={option} className="form-check mb-0">
+                                                        <input
+                                                            className={`form-check-input ${invalid ? 'is-invalid' : ''}`}
+                                                            type="radio"
+                                                            id={`${detailId}-${option}`}
+                                                            name={detailId}
+                                                            checked={detailValue === option}
+                                                            onChange={() => setDetail(detail.name, option)}
+                                                        />
+                                                        <label className="form-check-label" htmlFor={`${detailId}-${option}`}>{option}</label>
+                                                    </div>
+                                                ))}
+                                            </div>
                                         ) : detail.type === 'country' ? (
                                             <CountrySelect id={detailId} value={detailValue} onChange={(v) => setDetail(detail.name, v)} countries={countries} placeholder="Select country" regularSize invalid={invalid} />
                                         ) : (

@@ -93,6 +93,8 @@ class ApplicationFormService
                     'select', 'radio' => in_array($v, $field['options'] ?? [], true) ? $v : null,
                     'country' => $this->cleanCountry($v),
                     'yesno_details' => $this->cleanYesNoDetails($v, $field['follow_up']),
+                    // Ticked: "accepted"; anything else is not an acceptance
+                    'declaration' => $v === 'accepted' ? 'accepted' : null,
                     'file' => $this->cleanFile($v, $application),
                     default => mb_substr($v, 0, 5000),
                 },
@@ -197,6 +199,7 @@ class ApplicationFormService
             })(),
             'checkbox' => implode(', ', json_decode($value, true) ?? []),
             'file' => json_decode($value, true)['name'] ?? $value,
+            'declaration' => 'Accepted',
             // "Yes — Reason: Work trip; Date: 2026-11-01"
             'yesno_details' => (function () use ($value) {
                 $data = json_decode($value, true) ?? ['answer' => $value];
@@ -264,7 +267,11 @@ class ApplicationFormService
                 if ($v === '') {
                     continue;
                 }
-                $v = $f['type'] === 'country' ? $this->cleanCountry($v) : mb_substr($v, 0, 5000);
+                $v = match ($f['type']) {
+                    'country' => $this->cleanCountry($v),
+                    'yesno' => in_array($v, ['Yes', 'No'], true) ? $v : null,
+                    default => mb_substr($v, 0, 5000),
+                };
                 if ($v !== null) {
                     $details[$f['name']] = $v;
                 }
@@ -348,7 +355,7 @@ class ApplicationFormService
                         'name' => $field['field_name'],
                         'slug' => $slugs[$field['id']] ?? Str::slug($field['field_name'], '_'),
                         'required' => $field['required'],
-                    ] + $this->inputFor($field['field_name'], $field['field_type'] ?? 'text', $field['options'] ?? [], $field['follow_up'] ?? null))
+                    ] + $this->inputFor($field['field_name'], $field['field_type'] ?? 'text', $field['options'] ?? [], $field['follow_up'] ?? null, $field['declaration'] ?? null))
                     ->values()
                     ->all(),
             ])
@@ -372,10 +379,12 @@ class ApplicationFormService
      * "text" fields are read from their name (dates, emails, phones, long
      * answers, a few fixed choices, and "… Section" sub-headings).
      */
-    private function inputFor(string $name, string $type, array $options = [], ?array $followUp = null): array
+    private function inputFor(string $name, string $type, array $options = [], ?array $followUp = null, ?string $declaration = null): array
     {
         if ($type !== 'text' && $type !== '') {
             return match ($type) {
+                // The declaration's text, with an "I accept" tick
+                'declaration' => ['input' => 'declaration', 'text' => $declaration ?? ''],
                 'select', 'radio', 'checkbox' => ['input' => $type, 'options' => array_values($options)],
                 // Yes / No; with a follow-up section, the chosen answer opens more fields (e.g. "Reason")
                 'yesno' => $followUp

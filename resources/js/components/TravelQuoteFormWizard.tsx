@@ -23,7 +23,12 @@ interface Hotel {
     location: string;
     address: string;
     startDate: string;
+    // How many rooms are booked at this hotel
+    rooms: string;
 }
+
+// Inputs fill their grid cell and never push past it
+const CELL_INPUT: React.CSSProperties = { width: '100%', minWidth: 0, boxSizing: 'border-box', padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' };
 
 interface Flight {
     id: string;
@@ -144,6 +149,10 @@ export default function TravelQuoteFormWizard({
         include_logo: false,
         discount: 0,
         tax: 0,
+        // What the customer's preview shows of the price
+        show_only_total: false,
+        show_discount: true,
+        show_tax: true,
     });
 
     const [hotels, setHotels] = useState<Hotel[]>([]);
@@ -188,8 +197,12 @@ export default function TravelQuoteFormWizard({
                 infants: initialData.infants || 0,
                 include_terms: !!initialData.include_terms,
                 include_logo: !!initialData.include_logo,
-                discount: initialData.discount || 0,
-                tax: initialData.tax || 0,
+                // Discount and tax are kept in the saved price summary
+                discount: Number(initialData.price_summary?.discount ?? initialData.discount) || 0,
+                tax: Number(initialData.price_summary?.tax_percent ?? initialData.tax) || 0,
+                show_only_total: !!initialData.price_summary?.show_only_total,
+                show_discount: initialData.price_summary?.show_discount ?? true,
+                show_tax: initialData.price_summary?.show_tax ?? true,
             });
 
             if (initialData.hotel_details) {
@@ -202,7 +215,8 @@ export default function TravelQuoteFormWizard({
                     description: h.description || '',
                     location: h.location || '',
                     address: h.address || '',
-                    startDate: h.startDate || ''
+                    startDate: h.startDate || '',
+                    rooms: h.rooms ? String(h.rooms) : ''
                 })));
             }
 
@@ -274,6 +288,9 @@ export default function TravelQuoteFormWizard({
                 include_logo: false,
                 discount: 0,
                 tax: 0,
+                show_only_total: false,
+                show_discount: true,
+                show_tax: true,
             });
             setHotels([]);
             setFlights([]);
@@ -368,7 +385,8 @@ export default function TravelQuoteFormWizard({
             description: '',
             location: '',
             address: '',
-            startDate: ''
+            startDate: '',
+            rooms: ''
         }]);
     };
 
@@ -404,19 +422,20 @@ export default function TravelQuoteFormWizard({
 
     // One flight's fields (the same for one way, outbound and inbound); a round trip's price is shown once, for the pair
     const renderFlightFields = (flight: Flight, showPrice = true) => (
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <input type="text" placeholder="Airline" value={flight.airline} onChange={(e) => updateFlight(flight.id, 'airline', e.target.value)} style={{ padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }} />
-            <input type="text" placeholder="Flight Number" value={flight.flightNumber} onChange={(e) => updateFlight(flight.id, 'flightNumber', e.target.value)} style={{ padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }} />
-            <div style={{ gridColumn: '1 / -1' }}>
+        // minmax(0, 1fr): columns may shrink, so the fields stay inside a half-width (round trip) box
+        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px' }}>
+            <input type="text" placeholder="Airline" value={flight.airline} onChange={(e) => updateFlight(flight.id, 'airline', e.target.value)} style={CELL_INPUT} />
+            <input type="text" placeholder="Flight Number" value={flight.flightNumber} onChange={(e) => updateFlight(flight.id, 'flightNumber', e.target.value)} style={CELL_INPUT} />
+            <div style={{ gridColumn: '1 / -1', minWidth: 0 }}>
                 <RouteSelector
                     value={flight.route}
                     onChange={(route) => updateFlight(flight.id, 'route', route)}
                 />
             </div>
-            <input type="time" placeholder="Departure Time" value={flight.departure} onChange={(e) => updateFlight(flight.id, 'departure', e.target.value)} style={{ padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }} />
-            <input type="time" placeholder="Arrival Time" value={flight.arrival} onChange={(e) => updateFlight(flight.id, 'arrival', e.target.value)} style={{ padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }} />
+            <input type="time" placeholder="Departure Time" title="Departure time" value={flight.departure} onChange={(e) => updateFlight(flight.id, 'departure', e.target.value)} style={CELL_INPUT} />
+            <input type="time" placeholder="Arrival Time" title="Arrival time" value={flight.arrival} onChange={(e) => updateFlight(flight.id, 'arrival', e.target.value)} style={CELL_INPUT} />
             {showPrice && (
-                <input type="number" placeholder="Price" value={flight.price} onChange={(e) => updateFlight(flight.id, 'price', e.target.value)} style={{ padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px', gridColumn: '1 / -1' }} />
+                <input type="number" placeholder="Price" value={flight.price} onChange={(e) => updateFlight(flight.id, 'price', e.target.value)} style={{ ...CELL_INPUT, gridColumn: '1 / -1' }} />
             )}
         </div>
     );
@@ -542,7 +561,11 @@ export default function TravelQuoteFormWizard({
                 discount: formData.discount,
                 tax_percent: formData.tax,
                 tax_amount: taxAmount.toFixed(2),
-                final_total: finalTotal.toFixed(2)
+                final_total: finalTotal.toFixed(2),
+                // What the preview shows: only the total, and/or the discount and tax lines
+                show_only_total: formData.show_only_total,
+                show_discount: formData.show_discount,
+                show_tax: formData.show_tax
             };
             formDataToSubmit.append('price_summary', JSON.stringify(priceSummary));
             formDataToSubmit.append('total_price', finalTotal.toString());
@@ -555,7 +578,8 @@ export default function TravelQuoteFormWizard({
                     price: h.price,
                     location: h.location,
                     address: h.address,
-                    description: h.description
+                    description: h.description,
+                    rooms: Number(h.rooms) || null
                 }))));
             }
 
@@ -973,6 +997,8 @@ export default function TravelQuoteFormWizard({
                                                         placeholder="Select Country"
                                                     />
                                                     <input type="text" placeholder="Location/City" value={hotel.location} onChange={(e) => updateHotel(hotel.id, 'location', e.target.value)} style={{ padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px' }} />
+                                                    {/* How many rooms are booked at this hotel */}
+                                                    <input type="number" min="1" placeholder="Total Rooms" value={hotel.rooms} onChange={(e) => updateHotel(hotel.id, 'rooms', e.target.value)} style={CELL_INPUT} />
                                                 </div>
                                                 <textarea placeholder="Description" value={hotel.description} onChange={(e) => updateHotel(hotel.id, 'description', e.target.value)} style={{ width: '100%', padding: '8px 10px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '13px', fontFamily: 'inherit', minHeight: '60px', resize: 'vertical', marginBottom: '12px' }} />
                                                 <button onClick={() => removeHotel(hotel.id)} style={{ padding: '8px 10px', background: '#fee2e2', color: '#dc2626', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', width: '100%' }}>Delete</button>
@@ -1532,6 +1558,22 @@ export default function TravelQuoteFormWizard({
                                         <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
                                             <input type="checkbox" name="per_person_pricing" checked={formData.per_person_pricing} onChange={handleFormChange} style={{ marginRight: '8px', width: '16px', height: '16px', cursor: 'pointer' }} />
                                             <span style={{ fontSize: '13px', color: '#374151' }}>Price is Single Person</span>
+                                        </label>
+
+                                        {/* What the customer's preview shows of the price */}
+                                        <div style={{ borderTop: '1px solid #f1f1f4', paddingTop: '12px', fontSize: '12px', fontWeight: 600, color: '#6b7280' }}>Price shown in the preview</div>
+                                        <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                                            <input type="checkbox" name="show_only_total" checked={formData.show_only_total} onChange={handleFormChange} style={{ marginRight: '8px', width: '16px', height: '16px', cursor: 'pointer' }} />
+                                            <span style={{ fontSize: '13px', color: '#374151' }}>Display Only Total <small style={{ color: '#9ca3af' }}>(no travellers / per-person breakdown)</small></span>
+                                        </label>
+                                        {/* Discount and tax lines are chosen on their own, with or without "only total" */}
+                                        <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                                            <input type="checkbox" name="show_discount" checked={formData.show_discount} onChange={handleFormChange} style={{ marginRight: '8px', width: '16px', height: '16px', cursor: 'pointer' }} />
+                                            <span style={{ fontSize: '13px', color: '#374151' }}>Show Discount</span>
+                                        </label>
+                                        <label style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
+                                            <input type="checkbox" name="show_tax" checked={formData.show_tax} onChange={handleFormChange} style={{ marginRight: '8px', width: '16px', height: '16px', cursor: 'pointer' }} />
+                                            <span style={{ fontSize: '13px', color: '#374151' }}>Show Tax</span>
                                         </label>
                                     </div>
                                 </div>

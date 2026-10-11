@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Agency\AgencyAuthController;
+use App\Http\Controllers\Client\ClientPortalController;
+use App\Http\Middleware\EnsureClientOnOwnDomain;
 use Illuminate\Support\Facades\Route;
 
 // Agency authentication (agency resolved from the registered domain).
@@ -15,3 +17,12 @@ Route::post('agency/client-login', [AgencyAuthController::class, 'clientLogin'])
 Route::post('agency/logout', [AgencyAuthController::class, 'logout'])
     ->middleware('auth:agency')
     ->name('agency.logout');
+
+// The signed-in client's pages — only on the domain of the client's own agency
+Route::middleware(EnsureClientOnOwnDomain::class)->prefix('client')->group(function () {
+    Route::get('profile', [ClientPortalController::class, 'profile'])->name('client.profile');
+    Route::get('bookings', [ClientPortalController::class, 'bookings'])->name('client.bookings');
+    Route::get('invoices', [ClientPortalController::class, 'invoices'])->name('client.invoices');
+    Route::get('invoices/{uid}', [ClientPortalController::class, 'invoice'])->name('client.invoices.show');
+    Route::post('logout', [ClientPortalController::class, 'logout'])->name('client.logout');
+});

@@ -24,6 +24,8 @@ class VisaField extends Model
         'yesno' => 'Yes / No',
         'country' => 'Country',
         'file' => 'File Upload',
+        // A declaration the applicant accepts with a tick (its text is in options['text'])
+        'declaration' => 'Declaration (Accept)',
     ];
 
     /** Types that need a list of options. */
@@ -43,6 +45,7 @@ class VisaField extends Model
         'tel' => 'Phone',
         'date' => 'Date',
         'country' => 'Country',
+        'yesno' => 'Yes / No',
     ];
 
     public function section()

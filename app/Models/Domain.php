@@ -17,7 +17,7 @@ class Domain extends Model
      */
     public const RESERVED_PATH_SLUGS = [
         'about-us', 'admin', 'agency', 'all-offers', 'api', 'assets', 'attendance',
-        'build', 'confirm-password', 'contact-us', 'dashboard', 'email', 'favicon.ico',
+        'build', 'client', 'confirm-password', 'contact-us', 'dashboard', 'email', 'favicon.ico',
         'flights', 'forgot-password', 'horizon', 'hotels', 'login', 'logout',
         'offers', 'other-services', 'packages', 'password', 'profile', 'profile-upload',
         'quote', 'register', 'reset-password', 'robots.txt', 'sanctum', 'search',

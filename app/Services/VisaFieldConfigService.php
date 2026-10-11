@@ -41,6 +41,7 @@ class VisaFieldConfigService
                         'field_type' => $field->field_type ?: 'text',
                         'options' => $this->choicesOf($field),
                         'follow_up' => $this->followUpOf($field),
+                        'declaration' => $this->declarationOf($field),
                         // The section the field belongs to, before any move for this visa
                         'home_section_id' => $field->visa_section_id,
                         'enabled' => (bool) $fieldAssignment?->is_enabled,
@@ -121,7 +122,7 @@ class VisaFieldConfigService
             'field_name' => $data['field_name'],
             'slug' => $this->uniqueSlug($section->id, $data['field_name']),
             'field_type' => $data['field_type'],
-            'options' => $this->cleanOptions($data['field_type'], $data['options'] ?? [], $data['follow_up'] ?? null),
+            'options' => $this->cleanOptions($data['field_type'], $data['options'] ?? [], $data['follow_up'] ?? null, $data['declaration_text'] ?? null),
             'status' => true,
         ]);
     }
@@ -132,10 +133,16 @@ class VisaFieldConfigService
         $field->update([
             'field_name' => $data['field_name'],
             'field_type' => $data['field_type'],
-            'options' => $this->cleanOptions($data['field_type'], $data['options'] ?? [], $data['follow_up'] ?? null),
+            'options' => $this->cleanOptions($data['field_type'], $data['options'] ?? [], $data['follow_up'] ?? null, $data['declaration_text'] ?? null),
         ]);
 
         return $field;
+    }
+
+    /** A Declaration field's text (what the applicant accepts), or null. */
+    public function declarationOf(VisaField $field): ?string
+    {
+        return $field->field_type === 'declaration' ? (($field->options ?? [])['text'] ?? null) : null;
     }
 
     /** A dropdown / radio / checkbox field's choices (none for other types). */
@@ -159,8 +166,14 @@ class VisaFieldConfigService
      * What a field type stores in options: the choices for dropdown / radio /
      * checkboxes, the follow-up section for Yes / No, nothing otherwise.
      */
-    private function cleanOptions(string $type, array $options, ?array $followUp = null): ?array
+    private function cleanOptions(string $type, array $options, ?array $followUp = null, ?string $declarationText = null): ?array
     {
+        if ($type === 'declaration') {
+            $text = trim((string) $declarationText);
+
+            return $text !== '' ? ['text' => $text] : null;
+        }
+
         if ($type === 'yesno') {
             $fields = collect($followUp['fields'] ?? [])
                 ->map(fn ($f) => [

@@ -9,6 +9,8 @@ export interface ConfigField {
     options: string[];
     // Yes / No: the follow-up section the chosen answer opens (e.g. "Reason")
     follow_up?: FollowUp | null;
+    // Declaration: the text the applicant accepts with a tick
+    declaration?: string | null;
     // The field's own section; it's "moved" for this visa when listed elsewhere
     home_section_id: number;
     enabled: boolean;
@@ -153,7 +155,7 @@ export default function VisaFieldConfig({ visaUid, visaName, countryLabel, initi
             setSections((prev) => prev.map((section) => ({
                 ...section,
                 fields: section.fields.map((f) =>
-                    f.id === saved.id ? { ...f, field_name: saved.field_name, field_type: saved.field_type, options: saved.options, follow_up: saved.follow_up } : f,
+                    f.id === saved.id ? { ...f, field_name: saved.field_name, field_type: saved.field_type, options: saved.options, follow_up: saved.follow_up, declaration: saved.declaration } : f,
                 ),
             })));
             setMessage({ type: 'success', text: `“${saved.field_name}” updated.` });
@@ -515,6 +517,10 @@ function FieldEditor({ visaUid, draft, sectionName, fieldTypes, followUpTypes, o
     const [followFields, setFollowFields] = useState<FollowUpField[]>(
         editing?.follow_up?.fields?.length ? editing.follow_up.fields : [{ name: 'Reason', type: 'textarea', required: true }],
     );
+    // Declaration: what the applicant accepts
+    const [declarationText, setDeclarationText] = useState(
+        editing?.declaration ?? 'I hereby declare that the information given in this application is true and correct to the best of my knowledge.',
+    );
     const patchFollow = (index: number, patch: Partial<FollowUpField>) =>
         setFollowFields((list) => list.map((f, i) => (i === index ? { ...f, ...patch } : f)));
 
@@ -528,6 +534,7 @@ function FieldEditor({ visaUid, draft, sectionName, fieldTypes, followUpTypes, o
             follow_up: type === 'yesno' && askMore
                 ? { show_when: showWhen, fields: followFields.map((f) => ({ ...f, name: f.name.trim() })) }
                 : null,
+            declaration_text: type === 'declaration' ? declarationText.trim() : null,
             ...(draft.mode === 'add' && { visa_section_id: draft.sectionId }),
         };
         try {
@@ -584,6 +591,24 @@ function FieldEditor({ visaUid, draft, sectionName, fieldTypes, followUpTypes, o
                                     placeholder={'Option 1\nOption 2'}
                                 />
                                 {errors.options && <div className="invalid-feedback d-block">{errors.options}</div>}
+                            </div>
+                        )}
+                        {type === 'declaration' && (
+                            <div className="mb-3">
+                                <label className="form-label">Declaration text</label>
+                                <textarea
+                                    className={`form-control ${errors.declaration_text ? 'is-invalid' : ''}`}
+                                    rows={4}
+                                    maxLength={5000}
+                                    value={declarationText}
+                                    onChange={(e) => setDeclarationText(e.target.value)}
+                                    placeholder="I hereby declare that…"
+                                />
+                                {errors.declaration_text && <div className="invalid-feedback d-block">{errors.declaration_text}</div>}
+                                <small className="text-muted d-block mt-1">
+                                    <i className="fa fa-info-circle me-1"></i>
+                                    The applicant reads this and ticks "I accept". Mark the field Required so the form can't be submitted without it.
+                                </small>
                             </div>
                         )}
                         {type === 'country' && (

@@ -47,6 +47,12 @@ return [
             'driver' => 'session',
             'provider' => 'agency_users',
         ],
+
+        // A client signed in on their agency's domain (Client Login)
+        'client' => [
+            'driver' => 'session',
+            'provider' => 'clients',
+        ],
     ],
 
     /*
@@ -75,6 +81,11 @@ return [
         'agency_users' => [
             'driver' => 'eloquent',
             'model' => App\Models\AgencyUser::class,
+        ],
+
+        'clients' => [
+            'driver' => 'eloquent',
+            'model' => App\Models\Client::class,
         ],
 
         // 'users' => [

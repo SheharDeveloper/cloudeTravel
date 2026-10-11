@@ -33,6 +33,14 @@ interface TravelQuote {
         price_per_person?: string | number;
         total_persons?: number;
         subtotal?: string | number;
+        discount?: string | number;
+        tax_percent?: string | number;
+        tax_amount?: string | number;
+        final_total?: string | number;
+        // What the preview shows of the price (set on the quote's Settings)
+        show_only_total?: boolean;
+        show_discount?: boolean;
+        show_tax?: boolean;
     } | null;
 }
 
@@ -234,8 +242,19 @@ export default function QuotePreview({ travelQuote, hasPreviousFeedback, feedbac
     const travellers = Number(travelQuote.price_summary?.total_persons)
         || ((Number(travelQuote.adults) || 0) + (Number(travelQuote.children) || 0) + (Number(travelQuote.infants) || 0))
         || 1;
-    const pricePerPerson = Number(travelQuote.price_summary?.price_per_person)
-        || (((Number(travelQuote.total_price) || 0) - (Number(travelQuote.tax) || 0) + (Number(travelQuote.discount) || 0)) / travellers);
+    // Price lines, from the saved price summary (older quotes: the quote's own tax / discount)
+    const summary = travelQuote.price_summary ?? {};
+    const discount = Number(summary.discount ?? travelQuote.discount) || 0;
+    const taxAmount = Number(summary.tax_amount ?? travelQuote.tax) || 0;
+    const taxPercent = Number(summary.tax_percent) || 0;
+    const grandTotal = Number(travelQuote.total_price) || 0;
+    const subtotal = Number(summary.subtotal) || (grandTotal - taxAmount + discount);
+    const pricePerPerson = Number(summary.price_per_person) || (subtotal / travellers);
+    // "Only total" hides the travellers / per-person / subtotal lines; the discount
+    // and tax lines follow their own options either way
+    const onlyTotal = summary.show_only_total === true;
+    const showDiscount = summary.show_discount !== false && discount > 0;
+    const showTax = summary.show_tax !== false && taxAmount > 0;
 
     const getFirstHotelImage = () => {
         return travelQuote.image_urls?.[0] || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=600&q=80';
@@ -339,6 +358,11 @@ export default function QuotePreview({ travelQuote, hasPreviousFeedback, feedbac
                                 <div style={{ fontSize: '12px', color: '#5b6472', marginBottom: '2px' }}>
                                     {hotel.location && `📍 ${hotel.location}`}{hotel.address && `, ${hotel.address}`}
                                 </div>
+                                {Number(hotel.rooms) > 0 && (
+                                    <div style={{ fontSize: '12px', color: '#5b6472', marginBottom: '2px' }}>
+                                        🛏️ {hotel.rooms} {Number(hotel.rooms) === 1 ? 'room' : 'rooms'}
+                                    </div>
+                                )}
                                 {travelQuote.show_individual_price && hotel.price && (
                                     <div style={{ fontSize: '12px', fontWeight: 600, color: '#1e6fe0', marginTop: '4px' }}>
                                         £{Number(hotel.price).toFixed(2)}
@@ -452,7 +476,7 @@ export default function QuotePreview({ travelQuote, hasPreviousFeedback, feedbac
                     }}>Price Summary</div>
                     <div style={{ fontSize: '12px', color: '#5b6472', lineHeight: 1.8 }}>
                         {/* Travellers, and price per person × travellers */}
-                        {travelQuote.per_person_pricing && (
+                        {!onlyTotal && travelQuote.per_person_pricing && (
                             <>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', marginBottom: '4px' }}>
                                     <span>Travellers:</span>
@@ -475,25 +499,28 @@ export default function QuotePreview({ travelQuote, hasPreviousFeedback, feedbac
                                 </div>
                             </>
                         )}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                            <span>Subtotal:</span>
-                            <span style={{ fontWeight: 600 }}>£{((Number(travelQuote.total_price) || 0) - (Number(travelQuote.tax) || 0) + (Number(travelQuote.discount) || 0)).toFixed(2)}</span>
-                        </div>
-                        {Number(travelQuote.tax) > 0 && (
+                        {/* The amount before discount and tax: "Subtotal", or with "only total" the "Total Amount" on top */}
+                        {(!onlyTotal || showDiscount || showTax) && (
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                <span>Tax:</span>
-                                <span style={{ fontWeight: 600 }}>£{(Number(travelQuote.tax) || 0).toFixed(2)}</span>
+                                <span>{onlyTotal ? 'Total Amount:' : 'Subtotal:'}</span>
+                                <span style={{ fontWeight: 600 }}>{money(subtotal)}</span>
                             </div>
                         )}
-                        {Number(travelQuote.discount) > 0 && (
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                        {showDiscount && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                                 <span>Discount:</span>
-                                <span style={{ fontWeight: 600 }}>-£{(Number(travelQuote.discount) || 0).toFixed(2)}</span>
+                                <span style={{ fontWeight: 600, color: '#059669' }}>-{money(discount)}</span>
                             </div>
                         )}
-                        <div style={{ borderTop: '1px solid #e7ebf0', paddingTop: '8px', display: 'flex', justifyContent: 'space-between' }}>
-                            <span style={{ fontWeight: 700 }}>Grand Total:</span>
-                            <span style={{ fontWeight: 700, color: '#1e6fe0', fontSize: '14px' }}>£{(Number(travelQuote.total_price) || 0).toFixed(2)}</span>
+                        {showTax && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                                <span>Tax{taxPercent > 0 ? ` (${taxPercent}%)` : ''}:</span>
+                                <span style={{ fontWeight: 600 }}>{money(taxAmount)}</span>
+                            </div>
+                        )}
+                        <div style={{ borderTop: onlyTotal && !showDiscount && !showTax ? 'none' : '1px solid #e7ebf0', paddingTop: onlyTotal && !showDiscount && !showTax ? 0 : '8px', display: 'flex', justifyContent: 'space-between' }}>
+                            <span style={{ fontWeight: 700 }}>{onlyTotal ? 'Total Price:' : 'Grand Total:'}</span>
+                            <span style={{ fontWeight: 700, color: '#1e6fe0', fontSize: '14px' }}>{money(grandTotal)}</span>
                         </div>
                     </div>
                 </div>

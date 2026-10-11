@@ -60,6 +60,8 @@ createInertiaApp({
             case name === 'ProfileOverview':
             case name === 'ProfileEditDetails':
             case name.startsWith('agency/'):
+            // The signed-in client's pages (My Profile…) draw their own header
+            case name.startsWith('Client/'):
                 return null;
             // Frontend service pages use LandingLayout
             case name.startsWith('frontend/'):
