@@ -25,6 +25,48 @@ class ClientPortalController extends Controller
         ]);
     }
 
+    /** Profile Settings: edit the profile and change the password, on one page */
+    public function settings(Request $request)
+    {
+        return Inertia::render('Client/Settings', $this->layout($request) + [
+            'profile' => $this->portal->profile($this->portal->currentClient($request)),
+        ]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $validated = $request->validate([
+            'first_name' => 'required|string|max:255',
+            'last_name' => 'nullable|string|max:255',
+            'phone' => 'nullable|string|max:20',
+            'nationality' => 'nullable|string|max:100',
+            'gender' => 'nullable|in:male,female,other',
+            'dob' => \App\Services\ClientService::dobRules(), // 18+ only
+            'address' => 'nullable|array',
+            'address.address' => 'nullable|string|max:500',
+            'address.city' => 'nullable|string|max:255',
+            'address.state' => 'nullable|string|max:255',
+            'address.country' => 'nullable|string|max:255',
+            'address.zip_code' => 'nullable|string|max:20',
+        ]);
+
+        $this->portal->updateProfile($this->portal->currentClient($request), $validated);
+
+        return back()->with('success', 'Your profile has been updated.');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $validated = $request->validate([
+            'current_password' => 'required|string',
+            'password' => 'required|string|min:8|max:100|confirmed',
+        ]);
+
+        $this->portal->changePassword($this->portal->currentClient($request), $validated['current_password'], $validated['password']);
+
+        return back()->with('success', 'Your password has been changed.');
+    }
+
     /** My Bookings */
     public function bookings(Request $request)
     {

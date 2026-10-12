@@ -153,6 +153,8 @@ export default function TravelQuoteFormWizard({
         show_only_total: false,
         show_discount: true,
         show_tax: true,
+        // A package price typed in by hand; empty = the sum of the items
+        manual_price: '',
     });
 
     const [hotels, setHotels] = useState<Hotel[]>([]);
@@ -203,6 +205,7 @@ export default function TravelQuoteFormWizard({
                 show_only_total: !!initialData.price_summary?.show_only_total,
                 show_discount: initialData.price_summary?.show_discount ?? true,
                 show_tax: initialData.price_summary?.show_tax ?? true,
+                manual_price: initialData.price_summary?.manual_price != null ? String(initialData.price_summary.manual_price) : '',
             });
 
             if (initialData.hotel_details) {
@@ -291,6 +294,7 @@ export default function TravelQuoteFormWizard({
                 show_only_total: false,
                 show_discount: true,
                 show_tax: true,
+                manual_price: '',
             });
             setHotels([]);
             setFlights([]);
@@ -311,7 +315,10 @@ export default function TravelQuoteFormWizard({
         return total;
     };
 
-    const baseTotal = calculateTotal();
+    // The items' own sum, unless a manual package price was entered
+    const calculatedTotal = calculateTotal();
+    const hasManualPrice = formData.manual_price !== '' && !isNaN(parseFloat(formData.manual_price));
+    const baseTotal = hasManualPrice ? parseFloat(formData.manual_price) : calculatedTotal;
     const totalTravelers = Number(formData.adults || 1) + Number(formData.children || 0) + Number(formData.infants || 0);
     const priceBeforeTax = formData.per_person_pricing ? baseTotal * totalTravelers : baseTotal;
     const taxAmount = (priceBeforeTax * (formData.tax / 100)) || 0;
@@ -440,8 +447,11 @@ export default function TravelQuoteFormWizard({
         </div>
     );
 
-    // Transport pickup suggestions: the airports the flights land at
-    const arrivalAirports = [...new Set(flights.map((f) => arrivalOf(f.route)).filter(Boolean))];
+    // Transport airport suggestions: the airports the flights land at, plus where return flights leave from
+    const arrivalAirports = [...new Set([
+        ...flights.map((f) => arrivalOf(f.route)),
+        ...flights.filter((f) => f.journeyType === 'inbound').map((f) => (f.route.split('→')[0] ?? '').trim()),
+    ].filter(Boolean))];
     // Transport drop-off suggestions: the quote's hotels, with their city ("Hotel Name, City")
     const hotelNames = [...new Set(hotels
         .filter((h) => (h.name || h.displayName).trim() !== '')
@@ -565,7 +575,9 @@ export default function TravelQuoteFormWizard({
                 // What the preview shows: only the total, and/or the discount and tax lines
                 show_only_total: formData.show_only_total,
                 show_discount: formData.show_discount,
-                show_tax: formData.show_tax
+                show_tax: formData.show_tax,
+                // The hand-entered package price (null = calculated from the items)
+                manual_price: hasManualPrice ? parseFloat(formData.manual_price) : null
             };
             formDataToSubmit.append('price_summary', JSON.stringify(priceSummary));
             formDataToSubmit.append('total_price', finalTotal.toString());
@@ -1299,10 +1311,10 @@ export default function TravelQuoteFormWizard({
                                                             fontSize: '13px'
                                                         }}
                                                     />
-                                                    {/* Pickup: pick an airport the flights land at, or type a place */}
+                                                    {/* Pickup: an airport (arrival) or a hotel (going back to the airport), or type a place */}
                                                     <input
                                                         type="text"
-                                                        placeholder={arrivalAirports.length ? 'Pickup Location (choose an airport)' : 'Pickup Location'}
+                                                        placeholder={arrivalAirports.length || hotelNames.length ? 'Pickup Location (choose an airport or hotel)' : 'Pickup Location'}
                                                         list={`pickup-airports-${transport.id}`}
                                                         value={transport.pickup}
                                                         onChange={(e) => updateTransport(transport.id, 'pickup', e.target.value)}
@@ -1317,16 +1329,22 @@ export default function TravelQuoteFormWizard({
                                                         {arrivalAirports.map((airport) => (
                                                             <option key={airport} value={airport}>✈️ Airport</option>
                                                         ))}
-                                                    </datalist>
-                                                    {/* Drop-off: pick one of the quote's hotels, or type a place */}
-                                                    <datalist id={`dropoff-hotels-${transport.id}`}>
                                                         {hotelNames.map((hotel) => (
                                                             <option key={hotel} value={hotel}>🏨 Hotel</option>
                                                         ))}
                                                     </datalist>
+                                                    {/* Drop-off: a hotel (from the airport) or an airport (from the hotel), or type a place */}
+                                                    <datalist id={`dropoff-hotels-${transport.id}`}>
+                                                        {hotelNames.map((hotel) => (
+                                                            <option key={hotel} value={hotel}>🏨 Hotel</option>
+                                                        ))}
+                                                        {arrivalAirports.map((airport) => (
+                                                            <option key={airport} value={airport}>✈️ Airport</option>
+                                                        ))}
+                                                    </datalist>
                                                     <input
                                                         type="text"
-                                                        placeholder={hotelNames.length ? 'Drop-off Location (choose a hotel)' : 'Drop-off Location'}
+                                                        placeholder={arrivalAirports.length || hotelNames.length ? 'Drop-off Location (choose a hotel or airport)' : 'Drop-off Location'}
                                                         list={`dropoff-hotels-${transport.id}`}
                                                         value={transport.dropoff}
                                                         onChange={(e) => updateTransport(transport.id, 'dropoff', e.target.value)}
@@ -1576,6 +1594,46 @@ export default function TravelQuoteFormWizard({
                                             <span style={{ fontSize: '13px', color: '#374151' }}>Show Tax</span>
                                         </label>
                                     </div>
+                                </div>
+
+                                {/* Package price: the items' sum, or a price typed in by hand */}
+                                <div style={{
+                                    background: '#ffffff',
+                                    border: `1px solid ${hasManualPrice ? '#c4b5fd' : '#e5e7eb'}`,
+                                    borderRadius: '12px',
+                                    padding: '20px',
+                                    marginBottom: '16px'
+                                }}>
+                                    <h4 style={{ fontSize: '14px', fontWeight: 700, color: '#1f2937', marginBottom: '4px' }}>
+                                        ✏️ Package Price {formData.per_person_pricing && <small style={{ color: '#9ca3af', fontWeight: 500 }}>(per person)</small>}
+                                    </h4>
+                                    <p style={{ fontSize: '12px', color: '#6b7280', margin: '0 0 12px' }}>
+                                        Calculated from the items: <strong>{currencySymbol}{calculatedTotal.toFixed(2)}</strong>. Enter a price to use it instead — leave empty to use the calculated price.
+                                    </p>
+                                    <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                                        <input
+                                            type="number"
+                                            name="manual_price"
+                                            min="0"
+                                            step="0.01"
+                                            placeholder={calculatedTotal.toFixed(2)}
+                                            value={formData.manual_price}
+                                            onChange={handleFormChange}
+                                            style={{ flex: '1 1 200px', maxWidth: '260px', padding: '10px', border: '1px solid #e5e7eb', borderRadius: '8px', fontSize: '14px', fontWeight: 700 }}
+                                        />
+                                        {hasManualPrice && (
+                                            <button
+                                                type="button"
+                                                onClick={() => setFormData(prev => ({ ...prev, manual_price: '' }))}
+                                                style={{ padding: '10px 14px', background: '#f3f4f6', color: '#374151', border: 'none', borderRadius: '8px', fontSize: '12px', fontWeight: 600, cursor: 'pointer' }}
+                                            >
+                                                Use calculated price
+                                            </button>
+                                        )}
+                                    </div>
+                                    {hasManualPrice && (
+                                        <small style={{ display: 'block', marginTop: '8px', color: '#6d28d9' }}>Manual price in use — discount and tax are applied to it.</small>
+                                    )}
                                 </div>
 
                                 {/* Member Selection - Display only if per_person_pricing is enabled */}

@@ -540,6 +540,23 @@ class ClientService
         ];
     }
 
+    /** Clients must be at least this old. */
+    public const MIN_AGE = 18;
+
+    /** A client's date of birth: optional, but when given the client must be at least 18 years old. */
+    public static function dobRules(): array
+    {
+        return [
+            'nullable',
+            'date',
+            function (string $attribute, mixed $value, \Closure $fail) {
+                if ($value && \Carbon\Carbon::parse($value)->startOfDay()->gt(now()->subYears(self::MIN_AGE)->startOfDay())) {
+                    $fail('The client must be at least ' . self::MIN_AGE . ' years old.');
+                }
+            },
+        ];
+    }
+
     /**
      * Validation rules per wizard step
      */
@@ -552,7 +569,7 @@ class ClientService
             'phone' => 'required|string|max:20',
             'nationality' => 'nullable|string|max:100',
             'gender' => 'nullable|string|in:male,female,other',
-            'dob' => 'nullable|date',
+            'dob' => self::dobRules(), // 18+ only
             'notes' => 'nullable|string|max:2000',
         ];
 

@@ -55,6 +55,9 @@ export default function ClientProfile({ profile }: { profile: Profile }) {
                             {profile.nationality && <span className="badge bg-info bg-opacity-10 text-info">{profile.nationality}</span>}
                         </div>
                     </div>
+                    <a href="/client/settings" className="btn btn-primary btn-sm">
+                        <i className="fa fa-user-cog me-1"></i>Profile Settings
+                    </a>
                     {profile.last_login_at && (
                         <div className="text-end">
                             <small className="text-muted d-block">Last signed in</small>
@@ -128,7 +131,9 @@ export default function ClientProfile({ profile }: { profile: Profile }) {
                 </div>
             </div>
 
-            <p className="text-muted text-center small">To change any of these details, please contact {profile.agency ?? 'your agency'}.</p>
+            <p className="text-muted text-center small">
+                Use Profile Settings to update your details or change your password. To change your email or passport, please contact {profile.agency ?? 'your agency'}.
+            </p>
         </ClientLayout>
     );
 }

@@ -23,7 +23,7 @@ use Illuminate\Validation\ValidationException;
  *   a new upload goes back to waiting for review.
  * Files are private (local disk), one per request; uploading again replaces it.
  * A copy also goes into the booking client's Documents, in a folder named
- * after the visa.
+ * after the visa and the application number ("Trasit Visa - CLDACI00008").
  */
 class ApplicationDocumentService
 {
@@ -164,9 +164,8 @@ class ApplicationDocumentService
 
         // The client's documents belong to the client's owner (the agency, or the superadmin)
         $owner = ['owner_type' => $client->owner_type, 'owner_id' => $client->owner_id];
-        $folderName = trim((string) ($application->booking->details['visa_name'] ?? '')) ?: 'Visa Documents';
         $folder = ClientFolder::firstOrCreate(
-            ['client_id' => $client->id, 'parent_id' => null, 'name' => $folderName],
+            ['client_id' => $client->id, 'parent_id' => null, 'name' => $this->clientFolderName($application)],
             $owner,
         );
 
@@ -219,6 +218,42 @@ class ApplicationDocumentService
     private function find(BookingApplication $application, int $documentId): ApplicationDocument
     {
         return $application->documents()->whereKey($documentId)->firstOrFail();
+    }
+
+    /** The client folder an application's documents go in: the visa and the application number ("Trasit Visa - CLDACI00008"). */
+    public function clientFolderName(BookingApplication $application): string
+    {
+        $application->loadMissing('booking');
+        $visa = trim((string) ($application->booking->details['visa_name'] ?? '')) ?: 'Visa Documents';
+
+        return "{$visa} - {$application->application_number}";
+    }
+
+    /**
+     * Moves copies already in a client's Documents into the folder of their
+     * application (visa and application number). Returns how many moved.
+     */
+    public function moveCopiesToApplicationFolders(): int
+    {
+        $moved = 0;
+        ApplicationDocument::whereNotNull('client_document_id')->with('application.booking.client')->get()
+            ->each(function (ApplicationDocument $document) use (&$moved) {
+                $copy = ClientDocument::find($document->client_document_id);
+                $client = $document->application->booking->client;
+                if (! $copy || ! $client) {
+                    return;
+                }
+                $folder = ClientFolder::firstOrCreate(
+                    ['client_id' => $client->id, 'parent_id' => null, 'name' => $this->clientFolderName($document->application)],
+                    ['owner_type' => $client->owner_type, 'owner_id' => $client->owner_id],
+                );
+                if ($copy->folder_id !== $folder->id) {
+                    $copy->update(['folder_id' => $folder->id]);
+                    $moved++;
+                }
+            });
+
+        return $moved;
     }
 
     /** Deletes the uploaded file, and its copy in the client's Documents. */

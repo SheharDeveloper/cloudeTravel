@@ -588,7 +588,7 @@ export default function QuotePreview({ travelQuote, hasPreviousFeedback, feedbac
                     <div style={{ padding: '16px 18px' }}>
                         <div style={{ fontSize: '14px', fontWeight: 700, color: hasPreviousFeedback ? '#0369a1' : '#991b1b', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span style={{ fontSize: '24px' }}>{hasPreviousFeedback ? '✓' : '⏰'}</span>
-                            {hasPreviousFeedback ? 'Feedback Received' : 'Quote Expired'}
+                            {hasPreviousFeedback ? 'Quotation Received' : 'Quote Expired'}
                         </div>
                         <p style={{ fontSize: '12px', color: '#5b6472', lineHeight: 1.6, marginBottom: '16px' }}>
                             {hasPreviousFeedback

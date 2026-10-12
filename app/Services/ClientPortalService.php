@@ -8,6 +8,7 @@ use App\Models\Domain;
 use App\Models\ServiceBooking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
@@ -140,6 +141,51 @@ class ClientPortalService
     public function findBooking(Client $client, string $uid): ServiceBooking
     {
         return $this->ownBookings($client)->where('uid', $uid)->firstOrFail();
+    }
+
+    /**
+     * Change Password: the client confirms the current password and sets a
+     * new one (it is no longer the default — their email).
+     *
+     * @throws ValidationException
+     */
+    public function changePassword(Client $client, string $current, string $new): void
+    {
+        if (! Hash::check($current, (string) $client->password)) {
+            throw ValidationException::withMessages(['current_password' => 'The current password is not correct.']);
+        }
+        if (Hash::check($new, (string) $client->password)) {
+            throw ValidationException::withMessages(['password' => 'Choose a password different from the current one.']);
+        }
+
+        $client->forceFill(['password' => $new])->save(); // hashed by the model
+    }
+
+    /**
+     * Edit Profile: the client updates their own details and address. The
+     * email stays as it is — the client signs in with it (the agency changes it).
+     *
+     * @param  array{first_name: string, last_name?: ?string, phone?: ?string, nationality?: ?string, gender?: ?string, dob?: ?string, address?: ?array}  $data
+     */
+    public function updateProfile(Client $client, array $data): void
+    {
+        DB::transaction(function () use ($client, $data) {
+            $client->update([
+                'first_name' => $data['first_name'],
+                'last_name' => $data['last_name'] ?? null,
+                'name' => trim($data['first_name'] . ' ' . ($data['last_name'] ?? '')),
+                'phone' => $data['phone'] ?? null,
+                'nationality' => $data['nationality'] ?? null,
+                'gender' => $data['gender'] ?? null,
+                'dob' => $data['dob'] ?? null,
+            ]);
+
+            $address = collect($data['address'] ?? [])->only(['address', 'city', 'state', 'country', 'zip_code'])
+                ->map(fn ($v) => ($v = trim((string) $v)) === '' ? null : $v);
+            if ($address->filter()->isNotEmpty() || $client->address) {
+                $client->address()->updateOrCreate([], $address->all());
+            }
+        });
     }
 
     /** What the client sees on My Profile. */

@@ -21,6 +21,10 @@ Route::post('agency/logout', [AgencyAuthController::class, 'logout'])
 // The signed-in client's pages — only on the domain of the client's own agency
 Route::middleware(EnsureClientOnOwnDomain::class)->prefix('client')->group(function () {
     Route::get('profile', [ClientPortalController::class, 'profile'])->name('client.profile');
+    // Profile Settings: edit the profile and change the password, on one page
+    Route::get('settings', [ClientPortalController::class, 'settings'])->name('client.settings');
+    Route::put('profile', [ClientPortalController::class, 'updateProfile'])->name('client.profile.update');
+    Route::put('password', [ClientPortalController::class, 'updatePassword'])->name('client.password.update');
     Route::get('bookings', [ClientPortalController::class, 'bookings'])->name('client.bookings');
     Route::get('invoices', [ClientPortalController::class, 'invoices'])->name('client.invoices');
     Route::get('invoices/{uid}', [ClientPortalController::class, 'invoice'])->name('client.invoices.show');

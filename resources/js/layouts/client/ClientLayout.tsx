@@ -9,9 +9,10 @@ export interface PortalInfo {
 }
 
 const MENU = [
-    { href: '/client/profile', label: 'My Profile', icon: 'fa fa-user' },
-    { href: '/client/bookings', label: 'My Bookings', icon: 'fa fa-suitcase-rolling' },
-    { href: '/client/invoices', label: 'Invoices', icon: 'fa fa-file-invoice' },
+    { href: '/client/profile', label: 'My Profile', icon: 'fa fa-user', exact: true },
+    { href: '/client/bookings', label: 'My Bookings', icon: 'fa fa-suitcase-rolling', exact: false },
+    { href: '/client/invoices', label: 'Invoices', icon: 'fa fa-file-invoice', exact: false },
+    { href: '/client/settings', label: 'Profile Settings', icon: 'fa fa-user-cog', exact: false },
 ];
 
 // Below this width the sidebar slides over the page (hidden until the menu button)
@@ -43,7 +44,7 @@ function applyBodyAttrs() {
  * bar), with the agency's logo and name, and the client's own menu.
  */
 export default function ClientLayout({ title, children }: { title: string; children: React.ReactNode }) {
-    const { portal } = usePage().props as unknown as { portal: PortalInfo };
+    const { portal, flash } = usePage().props as unknown as { portal: PortalInfo; flash?: { success?: string | null } };
     const url = usePage().url;
     // The hamburger folds the sidebar (the theme's "menu-toggle")
     const [folded, setFolded] = useState(false);
@@ -118,7 +119,8 @@ export default function ClientLayout({ title, children }: { title: string; child
                         <ul className="metismenu" id="menu">
                             <li className="menu-title">MY ACCOUNT</li>
                             {MENU.map((item) => {
-                                const active = url.startsWith(item.href);
+                                const path = url.split('?')[0];
+                                const active = item.exact ? path === item.href : path.startsWith(item.href);
                                 return (
                                     <li key={item.href} className={active ? 'mm-active' : ''}>
                                         <a href={item.href} className={active ? 'client-active' : ''} onClick={() => setFolded(false)}>
@@ -143,6 +145,12 @@ export default function ClientLayout({ title, children }: { title: string; child
                                 </ol>
                             </nav>
                         </div>
+                        {/* "Your profile has been updated." etc. */}
+                        {flash?.success && (
+                            <div className="alert alert-success d-flex align-items-center gap-2">
+                                <i className="fa fa-check-circle"></i>{flash.success}
+                            </div>
+                        )}
                         {children}
                     </div>
                 </div>

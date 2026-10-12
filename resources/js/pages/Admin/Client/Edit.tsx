@@ -3,6 +3,7 @@ import { router, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import DatePicker from '@/components/DatePicker';
 import { isExpiringSoon } from '@/lib/utils';
+import { MIN_CLIENT_AGE, clientAgeError, latestBirthDate } from '@/lib/age';
 
 type FamilyMember = {
     name: string; relation: string; dob: string; passport_number: string;
@@ -140,6 +141,12 @@ export default function ClientEdit() {
     };
 
     const handleNext = async () => {
+        // Clients must be 18 or older (checked again on the server)
+        const ageError = clientAgeError(data.dob);
+        if (ageError) {
+            setErrors({ dob: ageError });
+            return;
+        }
         setProcessing(true);
         setErrors({});
 
@@ -175,6 +182,11 @@ export default function ClientEdit() {
 
     const submit = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        const ageError = clientAgeError(data.dob);
+        if (ageError) {
+            setErrors({ dob: ageError });
+            return;
+        }
         setProcessing(true);
         setErrors({});
 
@@ -323,11 +335,19 @@ export default function ClientEdit() {
                                             <DatePicker
                                                 label="Date of Birth"
                                                 value={data.dob}
-                                                onChange={(date) => { set({ dob: date }); clearError('dob'); }}
-                                                maxDate={new Date().toISOString().split('T')[0]}
+                                                onChange={(date) => {
+                                                    set({ dob: date });
+                                                    // 18+ only: say so straight away
+                                                    const ageError = clientAgeError(date);
+                                                    if (ageError) setErrors((prev) => ({ ...prev, dob: ageError }));
+                                                    else clearError('dob');
+                                                }}
+                                                maxDate={latestBirthDate()}
                                                 autoSelect={true}
                                             />
-                                            {errors.dob && <div className="invalid-feedback d-block">{errors.dob}</div>}
+                                            {errors.dob
+                                                ? <div className="invalid-feedback d-block">{errors.dob}</div>
+                                                : <small className="text-muted">The client must be at least {MIN_CLIENT_AGE} years old.</small>}
                                         </div>
 
                                         <div className="col-12 mb-4">
