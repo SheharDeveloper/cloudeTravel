@@ -1,80 +1,180 @@
+import { useState } from 'react';
+import { router } from '@inertiajs/react';
 import ClientLayout from '@/layouts/client/ClientLayout';
 import { formatDate, statusBadge, statusLabel } from '@/pages/Admin/ServiceBookings/Index';
 
-interface Booking {
+interface ApplicationRow {
     uid: string;
-    invoice_number: string;
-    service: string;
+    application_number: string;
+    name: string;
+    email: string | null;
+    phone: string | null;
     visa_name: string | null;
     visa_type: string | null;
     origin: string | null;
     destination: string | null;
-    service_date: string | null;
-    passengers: number;
+    amount: number;
     currency_symbol: string;
-    total_amount: number;
-    status: string;
     booked_on: string | null;
-    travellers: { name: string; application_number: string; status: string }[];
+    // "submitted" when every requested document is uploaded, otherwise "pending"
+    document_status: 'submitted' | 'pending';
+    documents_requested: number;
+    documents_uploaded: number;
+    status: string;
+    // The latest status comment (the reason, when rejected), and when the status last changed
+    status_comment: string | null;
+    status_updated_at: string | null;
 }
 
-/** My Bookings: the client's bookings with this agency, newest first. */
-export default function ClientBookings({ bookings }: { bookings: Booking[] }) {
+interface Props {
+    applications: {
+        data: ApplicationRow[];
+        from: number | null;
+        last_page: number;
+        links: { url: string | null; label: string; active: boolean }[];
+    };
+    filters: { search: string };
+}
+
+/**
+ * My Bookings: the client's visa applications (one per traveller), laid out
+ * like the agency's Visa Applications. View opens the application to fill
+ * the form and upload the requested documents.
+ */
+export default function ClientBookings({ applications, filters }: Props) {
+    const [search, setSearch] = useState(filters.search);
+
+    const submitSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        router.get('/client/bookings', search.trim() ? { search: search.trim() } : {}, { preserveState: true, replace: true });
+    };
+
     return (
         <ClientLayout title="My Bookings">
-            <div className="card h-auto">
-                <div className="card-header d-flex justify-content-between align-items-center">
-                    <h6 className="card-title mb-0">Bookings</h6>
-                    <span className="badge bg-primary">{bookings.length}</span>
-                </div>
-                <div className="card-body p-0">
-                    {bookings.length === 0 ? (
-                        <div className="text-center text-muted py-5">
-                            <i className="fa fa-suitcase-rolling" style={{ fontSize: 40, color: '#ccc' }}></i>
-                            <p className="mt-3 mb-0">You have no bookings yet.</p>
-                        </div>
-                    ) : (
-                        <div className="table-responsive">
-                            <table className="table table-hover align-middle mb-0">
-                                <thead className="table-light">
-                                    <tr>
-                                        <th>Invoice</th>
-                                        <th>Booking</th>
-                                        <th>Travel Date</th>
-                                        <th>Travellers</th>
-                                        <th className="text-end">Total</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {bookings.map((b) => (
-                                        <tr key={b.uid}>
-                                            <td>
-                                                <strong>{b.invoice_number}</strong>
-                                                <small className="d-block text-muted">Booked {formatDate(b.booked_on)}</small>
-                                            </td>
-                                            <td>
-                                                <div className="fw-semibold text-capitalize">{b.visa_name ?? b.service}</div>
-                                                {b.visa_type && <small className="d-block text-muted">{b.visa_type}</small>}
-                                                {(b.origin || b.destination) && <small className="d-block text-muted">{b.origin ?? '—'} → {b.destination ?? '—'}</small>}
-                                            </td>
-                                            <td>{formatDate(b.service_date)}</td>
-                                            <td>
-                                                {b.travellers.length === 0 ? `${b.passengers}` : b.travellers.map((t) => (
-                                                    <div key={t.application_number} className="d-flex align-items-center gap-2 mb-1">
-                                                        <span>{t.name}</span>
-                                                        <span className={`badge ${statusBadge(t.status)} text-capitalize`} style={{ fontSize: 10 }}>{statusLabel(t.status)}</span>
-                                                    </div>
+            <div className="row">
+                <div className="col-md-12">
+                    <div className="card h-auto">
+                        <div className="card-body">
+                            <form className="row mb-3 d-flex justify-content-between align-items-center" onSubmit={submitSearch}>
+                                <div className="col-md-8">
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        placeholder="Search by application number, name, email, passport or invoice..."
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                    />
+                                </div>
+                                <div className="col-md-4 text-end">
+                                    <button type="submit" className="btn btn-primary">
+                                        <i className="fa fa-search"></i> Search
+                                    </button>
+                                </div>
+                            </form>
+
+                            {applications.data.length > 0 ? (
+                                <>
+                                    <div className="table-responsive">
+                                        <table className="table table-hover">
+                                            <thead className="table-light">
+                                                <tr>
+                                                    <th>Sr. No.</th>
+                                                    <th>Application Number</th>
+                                                    <th>Client Details</th>
+                                                    <th>Visa</th>
+                                                    <th>Visa To</th>
+                                                    <th>Total</th>
+                                                    <th>Booking Date</th>
+                                                    <th>Document Submit</th>
+                                                    <th>Application Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {applications.data.map((a, index) => (
+                                                    <tr key={a.uid}>
+                                                        <td><small className="text-muted">{(applications.from ?? 1) + index}</small></td>
+                                                        <td><small className="text-muted">{a.application_number}</small></td>
+                                                        <td>
+                                                            <strong>{a.name}</strong>
+                                                            {a.email && <><br /><small>{a.email}</small></>}
+                                                            {a.phone && <><br /><small>{a.phone}</small></>}
+                                                        </td>
+                                                        <td>
+                                                            <small>{a.visa_name ?? 'N/A'}</small>
+                                                            {a.visa_type && <><br /><small className="text-muted">{a.visa_type}</small></>}
+                                                        </td>
+                                                        <td><small>{a.origin ?? 'N/A'} To {a.destination ?? 'N/A'}</small></td>
+                                                        <td><small>{a.currency_symbol}{a.amount.toFixed(2)}</small></td>
+                                                        <td><small className="text-muted">{formatDate(a.booked_on)}</small></td>
+                                                        <td>
+                                                            {a.document_status === 'submitted' ? (
+                                                                <span className="badge bg-success"><i className="fa fa-check-circle me-1"></i>Submitted</span>
+                                                            ) : (
+                                                                <span className="badge bg-warning text-dark"><i className="fa fa-clock me-1"></i>Pending</span>
+                                                            )}
+                                                            {/* How many of the requested documents are uploaded */}
+                                                            {a.documents_requested > 0 && (
+                                                                <small className="d-block text-muted mt-1">{a.documents_uploaded}/{a.documents_requested} uploaded</small>
+                                                            )}
+                                                        </td>
+                                                        <td style={{ maxWidth: 220 }}>
+                                                            <span className={`badge ${statusBadge(a.status)} text-capitalize`}>
+                                                                <i className="fa fa-clock me-1"></i>{statusLabel(a.status)}
+                                                            </span>
+                                                            {/* The latest comment; for a rejection, the reason */}
+                                                            {a.status_comment && (
+                                                                <small
+                                                                    className={`d-block mt-1 ${a.status === 'rejected' ? 'text-danger' : 'text-muted'}`}
+                                                                    title={a.status_comment}
+                                                                    style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}
+                                                                >
+                                                                    <i className="fa fa-comment-dots me-1"></i>
+                                                                    {a.status === 'rejected' && 'Reason: '}{a.status_comment}
+                                                                </small>
+                                                            )}
+                                                            {a.status_updated_at && <small className="d-block text-muted">{formatDate(a.status_updated_at)}</small>}
+                                                        </td>
+                                                        <td>
+                                                            <a href={`/client/applications/${a.uid}`} className="btn btn-sm btn-primary" title="View Application">
+                                                                <i className="fa fa-eye"></i>
+                                                            </a>
+                                                        </td>
+                                                    </tr>
                                                 ))}
-                                            </td>
-                                            <td className="text-end fw-semibold">{b.currency_symbol}{Number(b.total_amount).toFixed(2)}</td>
-                                            <td><span className={`badge ${statusBadge(b.status)} text-capitalize`}>{b.status === 'signed' ? 'Invoice Signed' : statusLabel(b.status)}</span></td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                    {applications.last_page > 1 && (
+                                        <nav>
+                                            <ul className="pagination justify-content-end">
+                                                {applications.links.map((link, i) => (
+                                                    <li key={i} className={`page-item ${link.active ? 'active' : ''} ${link.url ? '' : 'disabled'}`}>
+                                                        <button
+                                                            type="button"
+                                                            className="page-link"
+                                                            onClick={() => link.url && router.visit(link.url, { preserveState: true })}
+                                                            dangerouslySetInnerHTML={{ __html: link.label }}
+                                                        />
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </nav>
+                                    )}
+                                </>
+                            ) : (
+                                <div className="text-center py-5">
+                                    <i className="fas fa-passport" style={{ fontSize: '48px', color: '#ccc' }}></i>
+                                    <p className="text-muted mt-3">
+                                        {filters.search
+                                            ? 'No applications found'
+                                            : 'No visa applications yet. Your applications show here once your invoice has been signed.'}
+                                    </p>
+                                </div>
+                            )}
                         </div>
-                    )}
+                    </div>
                 </div>
             </div>
         </ClientLayout>

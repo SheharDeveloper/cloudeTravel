@@ -11,7 +11,7 @@ export interface ApplicationDocumentItem {
         size: number | null;
         mime_type: string | null;
         uploaded_at: string | null;
-        uploaded_by: 'agency' | 'admin' | null;
+        uploaded_by: 'agency' | 'admin' | 'client' | null;
     } | null;
     // The superadmin's review of the file; null while waiting for review
     review: {
@@ -40,13 +40,15 @@ const formatDateTime = (date: string | null) =>
  * the agency uploads a file for each; the superadmin sees the files (and can
  * upload too), then approves each one or rejects it with the reason.
  */
-export default function ApplicationDocumentsTab({ applicationUid, documents, canRequest }: {
+export default function ApplicationDocumentsTab({ applicationUid, documents, canRequest, baseUrl = '/admin/visa-applications' }: {
     applicationUid: string;
     documents: ApplicationDocumentItem[];
     // Superadmin: can request / change the documents
     canRequest: boolean;
+    // Where the application's routes live: the admin side, or the client portal
+    baseUrl?: string;
 }) {
-    const base = `/admin/visa-applications/${applicationUid}/documents`;
+    const base = `${baseUrl}/${applicationUid}/documents`;
 
     // Refresh: fetch the latest requests and uploads (the other side may have changed them),
     // and again by itself every 30 seconds while this tab is open
@@ -231,7 +233,7 @@ function DocumentRow({ index, doc, base, canReview }: { index: number; doc: Appl
                         <small className="d-block text-muted">
                             {formatSize(doc.file.size)}
                             {doc.file.uploaded_at && <> · {formatDateTime(doc.file.uploaded_at)}</>}
-                            {doc.file.uploaded_by && <> · by {doc.file.uploaded_by === 'admin' ? 'Superadmin' : 'Agency'}</>}
+                            {doc.file.uploaded_by && <> · by {doc.file.uploaded_by === 'admin' ? 'Superadmin' : doc.file.uploaded_by === 'client' ? 'Client' : 'Agency'}</>}
                         </small>
                     </>
                 ) : (

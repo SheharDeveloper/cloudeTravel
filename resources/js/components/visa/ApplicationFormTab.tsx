@@ -69,8 +69,10 @@ const formatDateTime = (value: string | null) =>
  * the next step); 3 Verify Application shows everything to check before
  * submitting. Moving on saves a draft quietly, so nothing is lost.
  */
-export default function ApplicationFormTab({ applicationUid, form, canEdit = true, canSend = false, sent = null }: {
+export default function ApplicationFormTab({ applicationUid, form, canEdit = true, canSend = false, sent = null, baseUrl = '/admin/visa-applications' }: {
     applicationUid: string;
+    // Where the application's form routes live: the admin side, or the client portal
+    baseUrl?: string;
     form: ApplicationFormData;
     // false: the review only
     canEdit?: boolean;
@@ -80,12 +82,13 @@ export default function ApplicationFormTab({ applicationUid, form, canEdit = tru
     sent?: { at: string; agency: string | null; updated_at?: string | null } | null;
 }) {
     const resend = !!sent;
+    const appUrl = `${baseUrl}/${applicationUid}`;
     // "Send to Admin": confirm, then hand the application to the superadmin
     const [confirmSend, setConfirmSend] = useState(false);
     const [sending, setSending] = useState(false);
     const sendToAdmin = () => {
         setSending(true);
-        router.post(`/admin/visa-applications/${applicationUid}/send-to-admin`, {}, {
+        router.post(`${appUrl}/send-to-admin`, {}, {
             preserveScroll: true,
             onFinish: () => {
                 setSending(false);
@@ -140,7 +143,7 @@ export default function ApplicationFormTab({ applicationUid, form, canEdit = tru
     const persist = (submit: boolean, quiet: boolean, onSuccess?: () => void) => {
         if (!quiet) setSaving(submit ? 'submit' : 'draft');
         router.put(
-            `/admin/visa-applications/${applicationUid}/form`,
+            `${appUrl}/form`,
             { answers, submit, quiet },
             {
                 preserveScroll: true,
@@ -318,7 +321,7 @@ export default function ApplicationFormTab({ applicationUid, form, canEdit = tru
                             {current.section.fields.map((field) => (
                                 <FieldInput
                                     key={field.id}
-                                    applicationUid={applicationUid}
+                                    appUrl={appUrl}
                                     countries={form.countries ?? []}
                                     field={field}
                                     value={answers[field.id] ?? ''}
@@ -406,7 +409,7 @@ export default function ApplicationFormTab({ applicationUid, form, canEdit = tru
                                                         : filled(field)
                                                             ? field.input === 'date' ? formatDate(answers[field.id])
                                                                 : field.input === 'checkbox' ? parseList(answers[field.id]).join(', ')
-                                                                    : field.input === 'file' ? <FileLink applicationUid={applicationUid} value={answers[field.id]} />
+                                                                    : field.input === 'file' ? <FileLink appUrl={appUrl} value={answers[field.id]} />
                                                                         : answers[field.id]
                                                             : (field.required ? <span className="text-danger">Required — not filled</span> : 'N/A')}
                                                 </div>
@@ -480,7 +483,7 @@ export default function ApplicationFormTab({ applicationUid, form, canEdit = tru
     );
 }
 
-function FieldInput({ applicationUid, countries, field, value, error, onChange }: { applicationUid: string; countries: CountryOption[]; field: FormField; value: string; error?: string; onChange: (value: string) => void }) {
+function FieldInput({ appUrl, countries, field, value, error, onChange }: { appUrl: string; countries: CountryOption[]; field: FormField; value: string; error?: string; onChange: (value: string) => void }) {
     // Declaration: its text and an "I accept" tick, across the whole row
     if (field.input === 'declaration') {
         const id = `field-${field.id}`;
@@ -588,7 +591,7 @@ function FieldInput({ applicationUid, countries, field, value, error, onChange }
             ) : field.input === 'country' ? (
                 <CountrySelect id={id} value={value} onChange={onChange} countries={countries} placeholder="Select country" regularSize invalid={!!error} />
             ) : field.input === 'file' ? (
-                <FileInput applicationUid={applicationUid} id={id} value={value} invalid={!!error} onChange={onChange} />
+                <FileInput appUrl={appUrl} id={id} value={value} invalid={!!error} onChange={onChange} />
             ) : field.input === 'select' ? (
                 <select id={id} className={`form-select ${error ? 'is-invalid' : ''}`} value={value} onChange={(e) => onChange(e.target.value)}>
                     <option value="">Select</option>
@@ -773,10 +776,10 @@ function parseFile(value: string | undefined): { path: string; name: string } | 
     }
 }
 
-function FileLink({ applicationUid, value }: { applicationUid: string; value: string }) {
+function FileLink({ appUrl, value }: { appUrl: string; value: string }) {
     const file = parseFile(value);
     if (!file) return <>N/A</>;
-    const href = `/admin/visa-applications/${applicationUid}/form/file?path=${encodeURIComponent(file.path)}&name=${encodeURIComponent(file.name)}`;
+    const href = `${appUrl}/form/file?path=${encodeURIComponent(file.path)}&name=${encodeURIComponent(file.name)}`;
     return (
         <a href={href} target="_blank" rel="noreferrer">
             <i className="fa fa-paperclip me-1"></i>{file.name}
@@ -784,8 +787,8 @@ function FileLink({ applicationUid, value }: { applicationUid: string; value: st
     );
 }
 
-function FileInput({ applicationUid, id, value, invalid, onChange }: {
-    applicationUid: string; id: string; value: string; invalid: boolean; onChange: (value: string) => void;
+function FileInput({ appUrl, id, value, invalid, onChange }: {
+    appUrl: string; id: string; value: string; invalid: boolean; onChange: (value: string) => void;
 }) {
     const [uploading, setUploading] = useState(false);
     const [uploadError, setUploadError] = useState<string | null>(null);
@@ -799,7 +802,7 @@ function FileInput({ applicationUid, id, value, invalid, onChange }: {
         const body = new FormData();
         body.append('file', picked);
         try {
-            const response = await axios.post(`/admin/visa-applications/${applicationUid}/form/files`, body);
+            const response = await axios.post(`${appUrl}/form/files`, body);
             onChange(response.data.value);
         } catch (error: any) {
             setUploadError(error?.response?.data?.errors?.file?.[0] ?? 'The file could not be uploaded.');
@@ -813,7 +816,7 @@ function FileInput({ applicationUid, id, value, invalid, onChange }: {
         <div>
             {file ? (
                 <div className={`d-flex align-items-center justify-content-between gap-2 form-control ${invalid ? 'is-invalid' : ''}`} style={{ minHeight: 42 }}>
-                    <span className="text-truncate"><FileLink applicationUid={applicationUid} value={value} /></span>
+                    <span className="text-truncate"><FileLink appUrl={appUrl} value={value} /></span>
                     <span className="d-flex gap-2 flex-shrink-0">
                         <button type="button" className="btn btn-link btn-sm p-0" onClick={() => inputRef.current?.click()} disabled={uploading}>Replace</button>
                         <button type="button" className="btn btn-link btn-sm p-0 text-danger" onClick={() => onChange('')}>Remove</button>

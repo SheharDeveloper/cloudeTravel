@@ -45,6 +45,8 @@ class ServiceBookingController extends Controller
         }
 
         $bookings = $this->owned()
+            // Quote invoices live on their quote's Invoice tab, not in this list
+            ->where('service', '!=', \App\Services\TravelQuote\QuoteInvoiceService::SERVICE)
             ->with('client:id,uid,name,email')
             ->withCount('applications')
             ->when($filters['service'] !== '', fn ($q) => $q->where('service', $filters['service']))
@@ -132,52 +134,21 @@ class ServiceBookingController extends Controller
     public function showApplication(string $uid)
     {
         $application = $this->applicationService->findViewable($uid);
-        $application->load('booking.client:id,name,email,phone', 'booking.applications', 'booking.signature', 'booking.owner');
-        $booking = $application->booking;
-        $d = $booking->details ?? [];
+        $application->load('booking.owner');
 
-        return Inertia::render('Admin/ServiceBookings/ApplicationShow', [
-            'application' => [
-                'uid' => $application->uid,
-                'application_number' => $application->application_number,
-                'first_name' => $application->first_name,
-                'last_name' => $application->last_name,
-                'relation' => $application->relation,
-                'email' => $application->email ?: $booking->client?->email,
-                'phone' => $application->phone ?: $booking->client?->phone,
-                'passport_number' => $application->passport_number,
-                'nationality' => $application->nationality,
-                'status' => $application->status,
-                'amount' => $application->amount,
-            ],
-            'booking' => [
-                'uid' => $booking->uid,
-                'invoice_number' => $booking->invoice_number,
-                'status' => $booking->status,
-                'created_at' => $booking->created_at?->toIso8601String(),
-                'signed_at' => $booking->signature?->signed_at?->toIso8601String(),
-                'service_date' => $booking->service_date?->toDateString(),
-                'passengers' => $booking->passengers,
-                'currency_symbol' => $booking->currency_symbol,
-                'base_amount' => $booking->base_amount,
-                'service_fee' => $booking->service_fee,
-                'tax_amount' => $booking->tax_amount,
-                'total_amount' => $booking->total_amount,
-                'visa_name' => $d['visa_name'] ?? null,
-                'visa_type' => $d['visa_type'] ?? null,
-                'validity' => $d['validity'] ?? null,
-                'processing_time' => $d['processing_time'] ?? null,
-                'origin' => $d['origin'] ?? null,
-                'destination' => $d['destination'] ?? null,
-                'taxes' => $d['taxes'] ?? [],
-                'client_name' => $booking->client?->name,
-                'client_email' => $booking->client?->email,
-            ],
+        // The applicant, the booking and the others on it (application / booking / members)
+        return Inertia::render('Admin/ServiceBookings/ApplicationShow', $this->applicationService->details($application) + [
             // "Fill Application": the visa's configured sections and fields, and the answers so far
             'form' => $this->formService->formFor($application),
             // Send to Admin: what the viewer may do, and when it was sent
             'access' => $this->applicationService->access($application),
             'sent' => $this->applicationService->sentInfo($application),
+            // Share Application (the agency's own application): the link and the email that opens it
+            'share' => $this->applicationService->isOwner($application) ? [
+                'url' => app(\App\Services\SharedApplicationService::class)->shareUrl($application),
+                'email' => app(\App\Services\SharedApplicationService::class)->email($application),
+                'email_otp' => app(\App\Services\SharedApplicationService::class)->emailOtpEnabled(),
+            ] : null,
             // Visa Updation Log Data: changes made to the submitted form
             'logs' => $this->applicationService->logs($application),
             // Upload Document: the requested documents and their files; the superadmin requests them
@@ -187,19 +158,6 @@ class ServiceBookingController extends Controller
             'isSuperadmin' => $this->applicationService->isSuperadmin(),
             // Processing: the statuses the superadmin can choose from
             'statuses' => VisaApplicationService::STATUSES,
-            // Everyone else on the same booking
-            'members' => $booking->applications
-                ->reject(fn ($a) => $a->id === $application->id)
-                ->map(fn ($a) => [
-                    'uid' => $a->uid,
-                    'application_number' => $a->application_number,
-                    'name' => trim("{$a->first_name} {$a->last_name}"),
-                    'relation' => $a->relation,
-                    'passport_number' => $a->passport_number,
-                    'nationality' => $a->nationality,
-                    'status' => $a->status,
-                ])
-                ->values(),
         ]);
     }
 
@@ -278,6 +236,14 @@ class ServiceBookingController extends Controller
                 'invoice_url' => route('documents.invoice', $signature->signing_token),
             ] : null,
         ]);
+    }
+
+    /** The booking's invoice (printable), before or after it's signed. */
+    public function invoice(string $uid)
+    {
+        $booking = $this->owned()->where('uid', $uid)->firstOrFail();
+
+        return view('documents.invoice', $this->signService->invoiceData($booking));
     }
 
     /** "Generate Doc Sign": creates the signing request and emails the link to the client. */

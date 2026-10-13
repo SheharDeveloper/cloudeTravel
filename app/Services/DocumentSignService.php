@@ -138,10 +138,15 @@ class DocumentSignService
         $count = max($booking->passengers, 1);
         $brand = $this->branding($booking);
 
-        // "To": the client and their address, else the lead passenger
+        // "To": the client and their address, else the customer who accepted
+        // the quote (a quote invoice), else the lead passenger
         $lead = $booking->applications->firstWhere('relation', 'self') ?? $booking->applications->first();
         $address = $booking->client?->address;
-        $to = [
+        $customer = ! $booking->client ? ($d['customer'] ?? null) : null;
+        $to = $customer ? [
+            'name' => (string) ($customer['name'] ?? ''),
+            'lines' => array_values(array_filter([$customer['email'] ?? null, $customer['phone'] ?? null])),
+        ] : [
             'name' => $booking->client?->name ?? trim(($lead?->first_name ?? '') . ' ' . ($lead?->last_name ?? '')),
             'lines' => array_values(array_filter([
                 $address?->address, $address?->city, $address?->state, $address?->zip_code, $address?->country ?? $booking->client?->nationality,

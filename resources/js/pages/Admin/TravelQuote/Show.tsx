@@ -288,8 +288,30 @@ interface Feedback {
     created_at: string;
 }
 
-export default function TravelQuoteShow({ travelQuote, feedback }: { travelQuote: TravelQuote; feedback: Feedback[] }) {
+/** A customer who accepted this quote, and their invoice once generated. */
+interface QuoteInvoice {
+    feedback_id: number;
+    name: string;
+    email: string;
+    phone: string | null;
+    accepted_at: string;
+    invoice: { uid: string; invoice_number: string; total: string; created_at: string; invoice_url: string } | null;
+}
+
+export default function TravelQuoteShow({ travelQuote, feedback, invoices = [] }: { travelQuote: TravelQuote; feedback: Feedback[]; invoices?: QuoteInvoice[] }) {
     const [activeTab, setActiveTab] = useState('overview');
+    const [invoiceIndex, setInvoiceIndex] = useState(0);
+    const accepted = invoices[invoiceIndex] ?? invoices[0];
+    const [generating, setGenerating] = useState(false);
+    const generateInvoice = (feedbackId: number) => {
+        setGenerating(true);
+        router.post(`/admin/travel-quote/${travelQuote.uid}/feedback/${feedbackId}/invoice`, {}, {
+            preserveScroll: true,
+            preserveState: true,
+            only: ['invoices'],
+            onFinish: () => setGenerating(false),
+        });
+    };
     const [copied, setCopied] = useState(false);
     const [feedbackList, setFeedbackList] = useState<Feedback[]>(feedback || []);
     const [editingId, setEditingId] = useState<number | null>(null);
@@ -442,6 +464,13 @@ export default function TravelQuoteShow({ travelQuote, feedback }: { travelQuote
                             style={{ fontWeight: activeTab === 'responses' ? 600 : 500, cursor: 'pointer', borderBottom: activeTab === 'responses' ? '2px solid #0d6efd' : 'none', whiteSpace: 'nowrap', fontSize: '16px' }}
                         >
                             Responses
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('invoice')}
+                            className={`py-3 px-0 border-0 bg-transparent ${activeTab === 'invoice' ? 'text-primary border-bottom border-primary border-2' : 'text-muted'}`}
+                            style={{ fontWeight: activeTab === 'invoice' ? 600 : 500, cursor: 'pointer', borderBottom: activeTab === 'invoice' ? '2px solid #0d6efd' : 'none', whiteSpace: 'nowrap', fontSize: '16px' }}
+                        >
+                            🧾 Invoice
                         </button>
                     </div>
                 </div>
@@ -688,6 +717,65 @@ export default function TravelQuoteShow({ travelQuote, feedback }: { travelQuote
                             <div className="text-center py-4">
                                 <i className="fa fa-inbox text-muted" style={{ fontSize: '32px', marginBottom: '1rem', display: 'block', opacity: 0.5 }}></i>
                                 <p className="text-muted mb-0">No responses yet. Customer responses will appear here once they interact with this quote.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+            {/* Invoice Tab: "Generate Invoice" for the customer who accepted, then the invoice itself */}
+            {activeTab === 'invoice' && (
+                <div className="card">
+                    <div className="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                        <h5 className="card-title mb-0">🧾 Invoice</h5>
+                        {accepted?.invoice && (
+                            <a href={accepted.invoice.invoice_url} target="_blank" rel="noreferrer" className="btn btn-sm btn-primary">
+                                <i className="fa fa-print me-1"></i> Open / Print
+                            </a>
+                        )}
+                    </div>
+                    <div className="card-body">
+                        {accepted ? (
+                            <>
+                                {/* More than one customer accepted: pick whose invoice */}
+                                {invoices.length > 1 && (
+                                    <div className="d-flex gap-2 flex-wrap mb-3">
+                                        {invoices.map((row, idx) => (
+                                            <button
+                                                key={row.feedback_id}
+                                                type="button"
+                                                className={`btn btn-sm ${idx === invoiceIndex ? 'btn-primary' : 'btn-outline-secondary'}`}
+                                                onClick={() => setInvoiceIndex(idx)}
+                                            >
+                                                {row.name}{row.invoice ? ` · ${row.invoice.invoice_number}` : ''}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {accepted.invoice ? (
+                                    <iframe
+                                        key={accepted.invoice.uid}
+                                        src={accepted.invoice.invoice_url}
+                                        title={`Invoice ${accepted.invoice.invoice_number}`}
+                                        style={{ width: '100%', height: '80vh', border: '1px solid #E5E7EB', borderRadius: '8px', background: '#fff' }}
+                                    />
+                                ) : (
+                                    <div className="text-center py-5">
+                                        <i className="fa fa-file-invoice text-primary" style={{ fontSize: '36px', marginBottom: '1rem', display: 'block' }}></i>
+                                        <p className="mb-1"><strong>{accepted.name}</strong> accepted this quote on {formatDate(accepted.accepted_at)}.</p>
+                                        <p className="text-muted small mb-3">{accepted.email}{accepted.phone ? ` · ${accepted.phone}` : ''}</p>
+                                        <button type="button" className="btn btn-primary" onClick={() => generateInvoice(accepted.feedback_id)} disabled={generating}>
+                                            <i className={`fa ${generating ? 'fa-spinner fa-spin' : 'fa-file-invoice'} me-2`}></i>
+                                            {generating ? 'Generating…' : 'Generate Invoice'}
+                                        </button>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="text-center py-4">
+                                <i className="fa fa-file-invoice text-muted" style={{ fontSize: '32px', marginBottom: '1rem', display: 'block', opacity: 0.5 }}></i>
+                                <p className="text-muted mb-0">No customer has accepted this quote yet. Once they accept, you can generate their invoice here.</p>
                             </div>
                         )}
                     </div>

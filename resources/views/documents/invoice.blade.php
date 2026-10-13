@@ -297,11 +297,13 @@
                     <td style="border: none; font-weight: bold; white-space:nowrap; padding:0px 6px;line-height:19px"><span style="font-weight:bold">:</span></td>
                     <td style="border: none; width:60px; white-space:nowrap;line-height:19px">{{ $booking->invoice_number }}</td>
                 </tr>
+                @if(!empty($clientId))
                 <tr>
                     <td style="border: none; font-weight: bold; width:60px; white-space:nowrap;line-height:19px">Client ID</td>
                     <td style="border: none; font-weight: bold; white-space:nowrap; padding:0px 6px;line-height:19px"><span style="font-weight:bold">:</span></td>
-                    <td style="border: none; width:60px; white-space:nowrap;line-height:19px">{{ $clientId ?? '' }}</td>
+                    <td style="border: none; width:60px; white-space:nowrap;line-height:19px">{{ $clientId }}</td>
                 </tr>
+                @endif
             </table>
         </div>
     </div>
@@ -354,6 +356,158 @@
 </div>
 
 
+    @if($booking->service === 'package')
+    @php
+        // An accepted travel quote (see QuoteInvoiceService): its items, then the price lines
+        $manual = ($details['manual_price'] ?? null) !== null;
+        $perPersonPricing = !empty($details['per_person_pricing']);
+        $amountHead = $perPersonPricing ? 'AMOUNT (PER PERSON)' : 'AMOUNT';
+        $itemAmount = fn ($value) => (!$manual && is_numeric($value) && (float) $value > 0)
+            ? $currency . number_format((float) $value, 2)
+            : 'INCLUDED';
+        $hotels = $details['hotels'] ?? [];
+        $flights = $details['flights'] ?? [];
+        $visas = $details['visas'] ?? [];
+        $transports = $details['transports'] ?? [];
+        $stay = trim(
+            (!empty($details['check_in_date']) ? \Carbon\Carbon::parse($details['check_in_date'])->format('d M Y') : '') . ' - ' .
+            (!empty($details['checkout_date']) ? \Carbon\Carbon::parse($details['checkout_date'])->format('d M Y') : ''),
+            ' -'
+        );
+        $travellerParts = array_filter([
+            ($details['adults'] ?? 0) ? $details['adults'] . ' ADULT' . ($details['adults'] > 1 ? 'S' : '') : null,
+            ($details['children'] ?? 0) ? $details['children'] . ' CHILD' . ($details['children'] > 1 ? 'REN' : '') : null,
+            ($details['infants'] ?? 0) ? $details['infants'] . ' INFANT' . ($details['infants'] > 1 ? 'S' : '') : null,
+        ]);
+        $discount = (float) ($details['discount'] ?? 0);
+        $taxPercent = (float) ($details['tax_percent'] ?? 0);
+    @endphp
+
+    <div class="section-header">TRAVEL PACKAGE</div>
+    <table class="table">
+        <tbody>
+            <tr>
+                <td style="padding:6px 10px"><strong>PACKAGE</strong></td>
+                <td style="padding:6px 10px">{{ strtoupper($details['title'] ?? 'Travel Package') }}</td>
+                <td style="padding:6px 10px"><strong>TRAVEL DATES</strong></td>
+                <td style="padding:6px 10px">{{ strtoupper($stay ?: 'N/A') }}@if(!empty($details['nights'])) ({{ $details['nights'] }} NIGHTS)@endif</td>
+            </tr>
+            <tr>
+                <td style="padding:6px 10px"><strong>TRAVELLERS</strong></td>
+                <td style="padding:6px 10px">{{ $travellerParts ? implode(', ', $travellerParts) : $booking->passengers }}</td>
+                <td style="padding:6px 10px"><strong>LEAD NAME</strong></td>
+                <td style="padding:6px 10px">{{ strtoupper($to['name']) }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    @if(count($hotels))
+    <div class="section-header">HOTELS</div>
+    <table class="table">
+        <thead>
+            <tr><th>HOTEL</th><th>LOCATION</th><th>ROOMS</th><th>BOARD</th><th>{{ $amountHead }}</th></tr>
+        </thead>
+        <tbody>
+            @foreach($hotels as $hotel)
+                <tr>
+                    <td>{{ strtoupper(($hotel['name'] ?? '') ?: ($hotel['displayName'] ?? '')) }}@if(!empty($hotel['stars']))<br><small>{{ $hotel['stars'] }} STAR</small>@endif</td>
+                    <td>{{ strtoupper(implode(', ', array_filter([$hotel['location'] ?? null, $hotel['address'] ?? null]))) }}</td>
+                    <td>{{ $hotel['rooms'] ?? '-' }}</td>
+                    <td>{{ strtoupper($details['board'] ?? '-') ?: '-' }}</td>
+                    <td>{{ $itemAmount($hotel['price'] ?? null) }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+    @endif
+
+    @if(count($flights))
+    <div class="section-header">FLIGHTS</div>
+    <table class="table">
+        <thead>
+            <tr><th>AIRLINE</th><th>FLIGHT NO</th><th>ROUTE</th><th>DEPARTURE / ARRIVAL</th><th>JOURNEY</th><th>{{ $amountHead }}</th></tr>
+        </thead>
+        <tbody>
+            @foreach($flights as $flight)
+                <tr>
+                    <td>{{ strtoupper($flight['airline'] ?? '') }}</td>
+                    <td>{{ strtoupper($flight['flightNumber'] ?? '') }}</td>
+                    <td>{{ strtoupper($flight['route'] ?? '') }}</td>
+                    <td>{{ $flight['departure'] ?? '-' }} / {{ $flight['arrival'] ?? '-' }}</td>
+                    <td>{{ ($flight['journeyType'] ?? '') === 'inbound' ? 'RETURN' : 'OUTBOUND' }}</td>
+                    <td>{{ $itemAmount($flight['price'] ?? null) }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+    @endif
+
+    @if(count($visas))
+    <div class="section-header">VISA SERVICES</div>
+    <table class="table">
+        <thead>
+            <tr><th>COUNTRY</th><th>VISA TYPE</th><th>DURATION</th><th>{{ $amountHead }}</th></tr>
+        </thead>
+        <tbody>
+            @foreach($visas as $visa)
+                <tr>
+                    <td>{{ strtoupper($visa['country'] ?? '') }}</td>
+                    <td>{{ strtoupper($visa['type'] ?? '') }}</td>
+                    <td>{{ strtoupper($visa['duration'] ?? '') }}</td>
+                    <td>{{ $itemAmount($visa['cost'] ?? null) }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+    @endif
+
+    @if(count($transports))
+    <div class="section-header">TRANSPORT</div>
+    <table class="table">
+        <thead>
+            <tr><th>VEHICLE</th><th>PICKUP</th><th>DROP-OFF</th><th>{{ $amountHead }}</th></tr>
+        </thead>
+        <tbody>
+            @foreach($transports as $transport)
+                <tr>
+                    <td>{{ strtoupper($transport['vehicleType'] ?? '') }}</td>
+                    <td>{{ strtoupper($transport['pickup'] ?? '') }}</td>
+                    <td>{{ strtoupper($transport['dropoff'] ?? '') }}</td>
+                    <td>{{ $itemAmount($transport['price'] ?? null) }}</td>
+                </tr>
+            @endforeach
+        </tbody>
+    </table>
+    @endif
+
+    {{-- Price lines: the package price, then discount and tax --}}
+    <table class="paymenttable table" style="margin-left:auto">
+        <tbody>
+            @if($perPersonPricing)
+                <tr>
+                    <td style="padding:6px 10px"><strong>PRICE PER PERSON</strong></td>
+                    <td style="padding:6px 10px; text-align:right">{{ $currency }}{{ number_format((float) ($details['price_per_person'] ?? 0), 2) }} × {{ $booking->passengers }}</td>
+                </tr>
+            @endif
+            <tr>
+                <td style="padding:6px 10px"><strong>PACKAGE PRICE</strong></td>
+                <td style="padding:6px 10px; text-align:right">{{ $currency }}{{ number_format((float) $booking->base_amount, 2) }}</td>
+            </tr>
+            @if($discount > 0)
+                <tr>
+                    <td style="padding:6px 10px"><strong>DISCOUNT</strong></td>
+                    <td style="padding:6px 10px; text-align:right">- {{ $currency }}{{ number_format($discount, 2) }}</td>
+                </tr>
+            @endif
+            @if($booking->tax_amount > 0)
+                <tr>
+                    <td style="padding:6px 10px"><strong>TAX{{ $taxPercent > 0 ? ' (' . rtrim(rtrim(number_format($taxPercent, 2), '0'), '.') . '%)' : '' }}</strong></td>
+                    <td style="padding:6px 10px; text-align:right">{{ $currency }}{{ number_format((float) $booking->tax_amount, 2) }}</td>
+                </tr>
+            @endif
+        </tbody>
+    </table>
+    @else
     <div class="section-header">VISA SERVICES</div>
 
     <table class="table">
@@ -394,6 +548,7 @@
             @endforeach
         </tbody>
     </table>
+    @endif
 
     <h5 style="text-align: right; margin-top: 15px;"><strong>Total: <span class="text-light-blue">{{ $currency }}{{ number_format($price, 2) }}</span></strong></h5>
 

@@ -42,6 +42,14 @@ Route::post('/documents/sign/{token}', [\App\Http\Controllers\DocumentSignContro
     ->name('documents.sign.submit');
 Route::get('/documents/invoice/{token}', [\App\Http\Controllers\DocumentSignController::class, 'invoice'])->name('documents.invoice');
 
+// Share Application: the signed link, then email + OTP, then fill the form (no login)
+Route::get('/shared-application/{uid}', [\App\Http\Controllers\SharedApplicationController::class, 'show'])->middleware('signed')->name('application.share');
+Route::post('/shared-application/{uid}/otp', [\App\Http\Controllers\SharedApplicationController::class, 'sendOtp'])->middleware('throttle:5,1')->name('application.share.otp');
+Route::post('/shared-application/{uid}/verify', [\App\Http\Controllers\SharedApplicationController::class, 'verify'])->middleware('throttle:10,1')->name('application.share.verify');
+Route::put('/shared-application/{uid}/form', [\App\Http\Controllers\SharedApplicationController::class, 'saveForm'])->name('application.share.form');
+Route::post('/shared-application/{uid}/form/files', [\App\Http\Controllers\SharedApplicationController::class, 'uploadFormFile'])->name('application.share.form.upload');
+Route::get('/shared-application/{uid}/form/file', [\App\Http\Controllers\SharedApplicationController::class, 'formFile'])->name('application.share.form.file');
+
 // Search
 Route::match(['get', 'post'], '/search/flight', [SearchController::class, 'flightSearch'])->name('search.flight');
 Route::match(['get', 'post'], '/search/hotel', [SearchController::class, 'hotelSearch'])->name('search.hotel');

@@ -6,6 +6,7 @@ use App\Models\Agency;
 use App\Models\ApplicationForm;
 use App\Models\ApplicationFormLog;
 use App\Models\BookingApplication;
+use App\Models\Client;
 use App\Models\ServiceBooking;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -52,6 +53,14 @@ class VisaApplicationService
                     $q->orWhereNotNull('sent_to_admin_at');
                 }
             })
+            ->firstOrFail();
+    }
+
+    /** One of the client's own applications (client portal): a visa booking of theirs, past pending. */
+    public function findForClient(Client $client, string $uid): BookingApplication
+    {
+        return BookingApplication::where('uid', $uid)
+            ->whereHas('booking', fn ($b) => $b->whereIn('id', $this->clientBookings($client)->select('id')))
             ->firstOrFail();
     }
 
@@ -107,15 +116,18 @@ class VisaApplicationService
      * submitted form are logged; when the agency changes an application it
      * already sent, it has to be resent to the admin.
      */
-    public function saveForm(BookingApplication $application, array $answers, bool $submit, ?object $actor): ApplicationForm
+    public function saveForm(BookingApplication $application, array $answers, bool $submit, ?object $actor, ?string $role = null): ApplicationForm
     {
-        $role = $this->isOwner($application) && ! $this->isSuperadmin()
+        // The client portal passes its own role; otherwise the agency or the admin
+        $role ??= $this->isOwner($application) && ! $this->isSuperadmin()
             ? ApplicationFormLog::ROLE_AGENCY
             : ApplicationFormLog::ROLE_ADMIN;
 
         $form = $this->formService->save($application, $answers, $submit, $actor, $role);
 
-        if ($role === ApplicationFormLog::ROLE_AGENCY && $application->sent_to_admin_at && $form->newLogs->isNotEmpty()) {
+        // A change by the agency's side (the agency or its client) means it has to be resent
+        $agencySide = in_array($role, [ApplicationFormLog::ROLE_AGENCY, ApplicationFormLog::ROLE_CLIENT], true);
+        if ($agencySide && $application->sent_to_admin_at && $form->newLogs->isNotEmpty()) {
             $application->update(['updated_after_send_at' => now()]);
         }
 
@@ -226,6 +238,83 @@ class VisaApplicationService
             ->through(fn (BookingApplication $a) => $this->row($a));
     }
 
+    /** Client portal "My Bookings": the client's own applications, laid out like Visa Applications. */
+    public function clientApplications(Client $client, string $search): LengthAwarePaginator
+    {
+        return $this->search(
+            BookingApplication::query()->whereHas('booking', fn ($b) => $b->whereIn('id', $this->clientBookings($client)->select('id'))),
+            $search,
+        )
+            ->latest('id')
+            ->paginate(15)
+            ->withQueryString()
+            ->through(fn (BookingApplication $a) => $this->row($a));
+    }
+
+    /**
+     * "View Application": the applicant, their booking and everyone else on
+     * it — for the agency / superadmin page and the client portal alike.
+     */
+    public function details(BookingApplication $application): array
+    {
+        $application->loadMissing('booking.client:id,name,email,phone', 'booking.applications', 'booking.signature');
+        $booking = $application->booking;
+        $d = $booking->details ?? [];
+
+        return [
+            'application' => [
+                'uid' => $application->uid,
+                'application_number' => $application->application_number,
+                'first_name' => $application->first_name,
+                'last_name' => $application->last_name,
+                'relation' => $application->relation,
+                'email' => $application->email ?: $booking->client?->email,
+                'phone' => $application->phone ?: $booking->client?->phone,
+                'passport_number' => $application->passport_number,
+                'nationality' => $application->nationality,
+                'status' => $application->status,
+                'amount' => $application->amount,
+            ],
+            'booking' => [
+                'uid' => $booking->uid,
+                'invoice_number' => $booking->invoice_number,
+                'status' => $booking->status,
+                'created_at' => $booking->created_at?->toIso8601String(),
+                'signed_at' => $booking->signature?->signed_at?->toIso8601String(),
+                'service_date' => $booking->service_date?->toDateString(),
+                'passengers' => $booking->passengers,
+                'currency_symbol' => $booking->currency_symbol,
+                'base_amount' => $booking->base_amount,
+                'service_fee' => $booking->service_fee,
+                'tax_amount' => $booking->tax_amount,
+                'total_amount' => $booking->total_amount,
+                'visa_name' => $d['visa_name'] ?? null,
+                'visa_type' => $d['visa_type'] ?? null,
+                'validity' => $d['validity'] ?? null,
+                'processing_time' => $d['processing_time'] ?? null,
+                'origin' => $d['origin'] ?? null,
+                'destination' => $d['destination'] ?? null,
+                'taxes' => $d['taxes'] ?? [],
+                'client_name' => $booking->client?->name,
+                'client_email' => $booking->client?->email,
+            ],
+            // Everyone else on the same booking
+            'members' => $booking->applications
+                ->reject(fn ($a) => $a->id === $application->id)
+                ->map(fn ($a) => [
+                    'uid' => $a->uid,
+                    'application_number' => $a->application_number,
+                    'name' => trim("{$a->first_name} {$a->last_name}"),
+                    'relation' => $a->relation,
+                    'passport_number' => $a->passport_number,
+                    'nationality' => $a->nationality,
+                    'status' => $a->status,
+                ])
+                ->values()
+                ->all(),
+        ];
+    }
+
     /** Agency Applications (superadmin): every visa application an agency has sent to the admin, newest first. */
     public function agencyApplications(string $search): LengthAwarePaginator
     {
@@ -301,6 +390,16 @@ class VisaApplicationService
             'invoice_number' => $booking->invoice_number,
             'sent_at' => $a->sent_to_admin_at?->toIso8601String(),
         ];
+    }
+
+    /** The client's visa bookings with their agency, past pending (as on the agency's Visa Applications). */
+    private function clientBookings(Client $client): Builder
+    {
+        return ServiceBooking::where('client_id', $client->id)
+            ->where('owner_type', $client->owner_type)
+            ->where('owner_id', $client->owner_id)
+            ->where('service', 'visa')
+            ->where('status', '!=', 'pending');
     }
 
     /** The current agency's (or superadmin's) own bookings. */

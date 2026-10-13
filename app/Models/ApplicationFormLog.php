@@ -11,6 +11,8 @@ class ApplicationFormLog extends Model
 
     public const ROLE_AGENCY = 'agency';
     public const ROLE_ADMIN = 'admin';
+    // The booking's client, filling the form from the client portal
+    public const ROLE_CLIENT = 'client';
 
     protected $fillable = [
         'booking_application_id', 'visa_field_id', 'section_name', 'field_name', 'field_slug',

@@ -169,7 +169,7 @@ export default function ServiceBookingShow() {
                     <div className="card mb-4" style={{ height: 'auto' }}>
                         <div className="card-header d-flex justify-content-between align-items-center">
                             <h6 className="card-title mb-0">
-                                {booking.service === 'visa' ? `${d.destination ?? ''} Visa` : booking.service}
+                                {booking.service === 'visa' ? `${d.destination ?? ''} Visa` : booking.service === 'package' ? (d.title ?? 'Travel Package') : booking.service}
                             </h6>
                             <span className={`badge ${statusBadge(booking.status)} text-capitalize`}>{booking.status}</span>
                         </div>
@@ -189,11 +189,30 @@ export default function ServiceBookingShow() {
                                         {d.living_in && <Detail label="Living In" value={d.living_in} />}
                                     </>
                                 )}
+                                {/* An accepted travel quote */}
+                                {booking.service === 'package' && (
+                                    <>
+                                        <Detail label="Travel Dates" value={`${formatDate(d.check_in_date ?? null)} – ${formatDate(d.checkout_date ?? null)}`} />
+                                        <Detail label="Nights" value={d.nights != null ? String(d.nights) : null} />
+                                        <Detail label="Travellers" value={String(booking.passengers)} />
+                                        <Detail label="Accepted On" value={formatDate(d.accepted_at ?? null)} />
+                                        <Detail
+                                            label="Package"
+                                            value={[
+                                                d.hotels?.length && `${d.hotels.length} hotel(s)`,
+                                                d.flights?.length && `${d.flights.length} flight(s)`,
+                                                d.visas?.length && `${d.visas.length} visa(s)`,
+                                                d.transports?.length && `${d.transports.length} transport`,
+                                            ].filter(Boolean).join(' · ') || null}
+                                        />
+                                    </>
+                                )}
                                 <Detail label="Client" value={booking.client ? `${booking.client.name} (${booking.client.email})` : '—'} />
                             </div>
                         </div>
                     </div>
 
+                    {booking.service !== 'package' && (
                     <div className="card mb-4" style={{ height: 'auto' }}>
                         <div className="card-header">
                             <h6 className="card-title mb-0">Applications ({booking.applications.length})</h6>
@@ -224,6 +243,7 @@ export default function ServiceBookingShow() {
                             ))}
                         </div>
                     </div>
+                    )}
                 </div>
 
                 <div className="col-lg-4">
@@ -232,14 +252,26 @@ export default function ServiceBookingShow() {
                             <i className="fa-regular fa-money-bill-1"></i> Payment Summary
                         </div>
                         <div className="sb-pay-body">
-                            {/* One person's fees, then everyone else as "Additional Members" */}
-                            <PayRow label={booking.service === 'visa' ? 'Visa Fee' : 'Base Amount'} value={money(perPerson.base)} />
-                            <PayRow label="Service Fee" value={money(perPerson.service)} />
-                            {perPerson.tax > 0 && <PayRow label={taxLabel} value={money(perPerson.tax)} />}
-                            {additional > 0 && (
+                            {booking.service === 'package' ? (
                                 <>
-                                    <hr />
-                                    <PayRow label={`Additional Members (1 + ${additional})`} value={money(perPerson.total * additional)} />
+                                    {/* An accepted quote: its package price, then discount and tax */}
+                                    {d.per_person_pricing && <PayRow label={`Price Per Person × ${booking.passengers}`} value={money(Number(d.price_per_person) || 0)} />}
+                                    <PayRow label="Package Price" value={money(booking.base_amount)} />
+                                    {Number(d.discount) > 0 && <PayRow label="Discount" value={`- ${money(Number(d.discount))}`} />}
+                                    {booking.tax_amount > 0 && <PayRow label={Number(d.tax_percent) > 0 ? `Tax (${d.tax_percent}%)` : 'Tax'} value={money(booking.tax_amount)} />}
+                                </>
+                            ) : (
+                                <>
+                                    {/* One person's fees, then everyone else as "Additional Members" */}
+                                    <PayRow label={booking.service === 'visa' ? 'Visa Fee' : 'Base Amount'} value={money(perPerson.base)} />
+                                    <PayRow label="Service Fee" value={money(perPerson.service)} />
+                                    {perPerson.tax > 0 && <PayRow label={taxLabel} value={money(perPerson.tax)} />}
+                                    {additional > 0 && (
+                                        <>
+                                            <hr />
+                                            <PayRow label={`Additional Members (1 + ${additional})`} value={money(perPerson.total * additional)} />
+                                        </>
+                                    )}
                                 </>
                             )}
                             <hr />
@@ -282,9 +314,13 @@ export default function ServiceBookingShow() {
                                     <i className="fa-regular fa-circle-check"></i> Copy URL
                                 </button>
                             )}
-                            {docSign?.status === 'signed' && (
+                            {docSign?.status === 'signed' ? (
                                 <a href={docSign.invoice_url} target="_blank" rel="noreferrer" className="sb-pay-btn">
                                     <i className="fa-regular fa-file-lines"></i> View Signed Invoice
+                                </a>
+                            ) : (
+                                <a href={`/admin/service-bookings/${booking.uid}/invoice`} target="_blank" rel="noreferrer" className="sb-pay-btn">
+                                    <i className="fa-regular fa-file-lines"></i> View Invoice
                                 </a>
                             )}
                             <button type="button" className="sb-pay-btn" onClick={openRemark}>

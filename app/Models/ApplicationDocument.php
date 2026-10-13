@@ -9,6 +9,8 @@ class ApplicationDocument extends Model
 {
     public const ROLE_AGENCY = 'agency';
     public const ROLE_ADMIN = 'admin';
+    // The booking's client, uploading from the client portal
+    public const ROLE_CLIENT = 'client';
 
     // The superadmin's review of the uploaded file (null: waiting for review)
     public const REVIEW_APPROVED = 'approved';

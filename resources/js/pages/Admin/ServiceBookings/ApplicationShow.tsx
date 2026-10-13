@@ -47,18 +47,20 @@ interface Props {
     };
     members: { uid: string; application_number: string; name: string; relation: string; passport_number: string | null; nationality: string | null; status: string }[];
     form: ApplicationFormData;
-    // Send to Admin
-    access: { can_edit: boolean; can_send: boolean; admin_view: boolean };
-    sent: { at: string; agency: string | null; updated_at: string | null } | null;
+    // Send to Admin (not on the client portal)
+    access?: { can_edit: boolean; can_send: boolean; admin_view: boolean };
+    sent?: { at: string; agency: string | null; updated_at: string | null } | null;
+    // Share Application: a link the applicant opens with their email + OTP (agency's own applications)
+    share?: { url: string; email: string | null; email_otp: boolean } | null;
     // Visa Updation Log Data, newest first
     // Upload Document: requested by the superadmin, uploaded by the agency
     documents: ApplicationDocumentItem[];
-    canRequestDocuments: boolean;
+    canRequestDocuments?: boolean;
     // The superadmin also gets the "Form" and "Processing" tabs
-    isSuperadmin: boolean;
+    isSuperadmin?: boolean;
     // Processing: the statuses the superadmin can set (value => label)
-    statuses: Record<string, string>;
-    logs: {
+    statuses?: Record<string, string>;
+    logs?: {
         id: number;
         application_number: string;
         field_name: string;
@@ -67,7 +69,7 @@ interface Props {
         new_value: string | null;
         // A note with a status change (the reason, for Rejected)
         comment: string | null;
-        role: 'agency' | 'admin';
+        role: 'agency' | 'admin' | 'client';
         created_at: string;
     }[];
     flash?: { success?: string | null };
@@ -78,13 +80,70 @@ const TABS = [
     { id: 'overview', label: 'Payment Receipt', icon: 'fas fa-receipt' },
     { id: 'fill', label: 'Fill Application', icon: 'fas fa-file-signature' },
     { id: 'upload', label: 'Upload Document', icon: 'fas fa-file-upload' },
-    { id: 'email', label: 'Send Email', icon: 'fas fa-envelope' },
+    { id: 'email', label: 'Send Email', icon: 'fas fa-envelope', notForClient: true },
     { id: 'conversation', label: 'Conversation', icon: 'fas fa-comments' },
-    { id: 'log', label: 'Visa Updation Log Data', icon: 'fas fa-history' },
+    { id: 'log', label: 'Visa Updation Log Data', icon: 'fas fa-history', notForClient: true },
     // Superadmin only
     { id: 'form', label: 'Form', icon: 'fas fa-file-alt', superadminOnly: true },
     { id: 'processing', label: 'Processing', icon: 'fas fa-cogs', superadminOnly: true },
 ];
+
+/** Where the page is shown: the agency / superadmin side, or the client portal. */
+export type ApplicationPortal = 'admin' | 'client';
+
+/**
+ * Share Application: a link the applicant opens to fill the form without
+ * logging in — they confirm the application's email with an OTP.
+ */
+function ShareApplicationCard({ share }: { share: { url: string; email: string | null; email_otp: boolean } }) {
+    const [copied, setCopied] = useState(false);
+
+    const copy = async () => {
+        try {
+            await navigator.clipboard.writeText(share.url);
+            setCopied(true);
+            window.setTimeout(() => setCopied(false), 2000);
+        } catch {
+            // Clipboard blocked (e.g. not https): show it so it can be copied by hand
+            window.prompt('Copy the application link:', share.url);
+        }
+    };
+
+    return (
+        <div className="card h-auto mb-4">
+            <div className="card-body py-3">
+                <div className="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                    <div style={{ minWidth: 0, flex: '1 1 320px' }}>
+                        <h6 className="mb-1"><i className="fa fa-share-alt me-2 text-primary"></i>Share Application</h6>
+                        {share.email ? (
+                            <small className="text-muted d-block">
+                                The applicant opens this link and verifies <strong>{share.email}</strong> with an OTP
+                                {share.email_otp ? ' (emailed to them)' : ''}, then fills the application — no login needed.
+                            </small>
+                        ) : (
+                            <small className="text-danger d-block">
+                                Add an email to the applicant (or the booking's client) — the link opens with that email and an OTP.
+                            </small>
+                        )}
+                    </div>
+                    {share.email && (
+                        <div className="d-flex gap-2 flex-shrink-0">
+                            <button type="button" className="btn btn-primary btn-sm" onClick={copy}>
+                                <i className={`fa ${copied ? 'fa-check' : 'fa-copy'} me-2`}></i>{copied ? 'Copied' : 'Copy Link'}
+                            </button>
+                            <a href={share.url} target="_blank" rel="noreferrer" className="btn btn-outline-primary btn-sm">
+                                <i className="fa fa-external-link-alt me-2"></i>Open
+                            </a>
+                        </div>
+                    )}
+                </div>
+                {share.email && (
+                    <input type="text" className="form-control form-control-sm mt-2" value={share.url} readOnly onFocus={(e) => e.target.select()} />
+                )}
+            </div>
+        </div>
+    );
+}
 
 const formatDate = (date: string | null, withTime = false) =>
     date
@@ -96,15 +155,57 @@ const formatDate = (date: string | null, withTime = false) =>
 
 /** "View Application": one applicant of a visa booking. Laid out like the Agency Details page. */
 export default function VisaApplicationShow() {
-    const { application, booking, members, form, flash, access, sent, logs, documents, canRequestDocuments, isSuperadmin, statuses } = usePage().props as unknown as Props;
-    const [activeTab, setActiveTab] = useState('overview');
-    // "Form" and "Processing" are for the superadmin only
-    const visibleTabs = TABS.filter((tab) => !tab.superadminOnly || isSuperadmin);
+    const { application, access } = usePage().props as unknown as Props;
 
-    // "Application form saved / submitted" after saving
+    return (
+        <ProtectedRoute>
+            <Head title={`Application ${application.application_number}`} />
+
+            <div className="page-title">
+                <nav aria-label="breadcrumb">
+                    <ol className="breadcrumb">
+                        <li><h1>Application Details</h1></li>
+                        <li className="breadcrumb-item">
+                            {access?.admin_view
+                                ? <a href="/admin/agency-applications">Agency Applications</a>
+                                : <a href="/admin/service-bookings?service=visa&status=not_pending">Visa Applications</a>}
+                        </li>
+                        <li className="breadcrumb-item active">{application.application_number}</li>
+                    </ol>
+                </nav>
+            </div>
+
+            <ApplicationView portal="admin" />
+
+            <Toaster position="top-right" />
+        </ProtectedRoute>
+    );
+}
+
+/**
+ * The application's header, tabs and tab content — shared by the agency /
+ * superadmin page and the client portal. The client gets no Send to Admin,
+ * Send Email or log, and fills the form / uploads documents itself.
+ */
+export function ApplicationView({ portal }: { portal: ApplicationPortal }) {
+    const { application, booking, members, form, flash, documents, statuses = {} } = usePage().props as unknown as Props;
+    const isClient = portal === 'client';
+    const props = usePage().props as unknown as Props;
+    // The client portal never sends to the admin or reads the log
+    const access = isClient ? { can_edit: true, can_send: false, admin_view: false } : props.access!;
+    const sent = isClient ? null : (props.sent ?? null);
+    const logs = props.logs ?? [];
+    const isSuperadmin = !isClient && !!props.isSuperadmin;
+    const canRequestDocuments = !isClient && !!props.canRequestDocuments;
+    const baseUrl = isClient ? '/client/applications' : '/admin/visa-applications';
+    const [activeTab, setActiveTab] = useState('overview');
+    // "Form" and "Processing" are for the superadmin only; the client sees no Send Email or log
+    const visibleTabs = TABS.filter((tab) => (!tab.superadminOnly || isSuperadmin) && !(isClient && tab.notForClient));
+
+    // "Application form saved / submitted" after saving (the client portal shows its own message)
     useEffect(() => {
-        if (flash?.success) toast.success(flash.success, { id: `${flash.success}-${form.updated_at}` });
-    }, [flash?.success, form.updated_at]);
+        if (flash?.success && !isClient) toast.success(flash.success, { id: `${flash.success}-${form.updated_at}` });
+    }, [flash?.success, form.updated_at, isClient]);
 
     const fullName = `${application.first_name} ${application.last_name ?? ''}`.trim();
     const money = (value: number) => `${booking.currency_symbol}${value.toFixed(2)}`;
@@ -136,23 +237,7 @@ export default function VisaApplicationShow() {
     );
 
     return (
-        <ProtectedRoute>
-            <Head title={`Application ${application.application_number}`} />
-
-            <div className="page-title">
-                <nav aria-label="breadcrumb">
-                    <ol className="breadcrumb">
-                        <li><h1>Application Details</h1></li>
-                        <li className="breadcrumb-item">
-                            {access.admin_view
-                                ? <a href="/admin/agency-applications">Agency Applications</a>
-                                : <a href="/admin/service-bookings?service=visa&status=not_pending">Visa Applications</a>}
-                        </li>
-                        <li className="breadcrumb-item active">{application.application_number}</li>
-                    </ol>
-                </nav>
-            </div>
-
+        <>
             {/* Header Card */}
             <div className="card border-top-0 border-start-0 border-end-0 rounded-0 h-auto mb-4">
                 <div className="card-body py-4">
@@ -230,8 +315,12 @@ export default function VisaApplicationShow() {
                             </li>
                         ))}
                     </ul>
-                    {/* The booking page belongs to the agency; the superadmin sees the agency instead */}
-                    {access.admin_view ? (
+                    {/* The booking page belongs to the agency; the superadmin sees the agency instead; the client gets the invoice */}
+                    {isClient ? (
+                        <a href={`/client/invoices/${booking.uid}`} target="_blank" rel="noreferrer" className="btn btn-primary btn-sm me-3">
+                            <i className="fa fa-file-invoice me-2"></i>Invoice {booking.invoice_number}
+                        </a>
+                    ) : access.admin_view ? (
                         <span className="badge bg-primary bg-opacity-10 text-primary me-3">
                             <i className="fa fa-building me-1"></i>{sent?.agency ?? 'Agency'}
                         </span>
@@ -334,7 +423,7 @@ export default function VisaApplicationShow() {
                                                                 <td className="text-capitalize">{m.relation}</td>
                                                                 <td><span className={`badge ${statusBadge(m.status)} text-capitalize`}>{statusLabel(m.status)}</span></td>
                                                                 <td>
-                                                                    <a href={`/admin/visa-applications/${m.uid}`} className="btn btn-sm btn-primary" title="View Application">
+                                                                    <a href={`${baseUrl}/${m.uid}`} className="btn btn-sm btn-primary" title="View Application">
                                                                         <i className="fa fa-eye"></i>
                                                                     </a>
                                                                 </td>
@@ -356,13 +445,17 @@ export default function VisaApplicationShow() {
                         </div>
                     </>
                 ) : activeTab === 'fill' ? (
-                    <ApplicationFormTab
-                        applicationUid={application.uid}
-                        form={form}
-                        canEdit={access.can_edit}
-                        canSend={access.can_send}
-                        sent={sent}
-                    />
+                    <>
+                        {!isClient && props.share && <ShareApplicationCard share={props.share} />}
+                        <ApplicationFormTab
+                            applicationUid={application.uid}
+                            form={form}
+                            canEdit={access.can_edit}
+                            canSend={access.can_send}
+                            sent={sent}
+                            baseUrl={baseUrl}
+                        />
+                    </>
                 ) : activeTab === 'email' ? (
                     <SendEmailTab
                         to={booking.client_email || application.email}
@@ -374,6 +467,7 @@ export default function VisaApplicationShow() {
                         applicationUid={application.uid}
                         documents={documents}
                         canRequest={canRequestDocuments}
+                        baseUrl={baseUrl}
                     />
                 ) : activeTab === 'processing' && isSuperadmin ? (
                     /* Superadmin: change the application's status */
@@ -426,8 +520,8 @@ export default function VisaApplicationShow() {
                                                 <td style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{log.old_value ?? <span className="text-muted">—</span>}</td>
                                                 <td>{log.field_name}</td>
                                                 <td>
-                                                    <span className={`badge ${log.role === 'admin' ? 'bg-primary' : 'bg-info'}`}>
-                                                        {log.role === 'admin' ? 'Superadmin' : 'Agency'}
+                                                    <span className={`badge ${log.role === 'admin' ? 'bg-primary' : log.role === 'client' ? 'bg-secondary' : 'bg-info'}`}>
+                                                        {log.role === 'admin' ? 'Superadmin' : log.role === 'client' ? 'Client' : 'Agency'}
                                                     </span>
                                                 </td>
                                                 <td className="text-nowrap">{new Date(log.created_at).toLocaleDateString('en-GB')}</td>
@@ -459,8 +553,6 @@ export default function VisaApplicationShow() {
                     </div>
                 )}
             </div>
-
-            <Toaster position="top-right" />
-        </ProtectedRoute>
+        </>
     );
 }

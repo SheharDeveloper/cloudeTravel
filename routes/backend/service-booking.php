@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Route;
 // Bookings made from the admin side (visa, flight…), with invoice numbers
 Route::get('service-bookings', [ServiceBookingController::class, 'index'])->name('admin.service-bookings.index');
 Route::get('service-bookings/{uid}', [ServiceBookingController::class, 'show'])->name('admin.service-bookings.show');
+Route::get('service-bookings/{uid}/invoice', [ServiceBookingController::class, 'invoice'])->name('admin.service-bookings.invoice');
 // Superadmin: applications agencies have sent to the admin
 Route::get('agency-applications', [ServiceBookingController::class, 'agencyApplications'])->name('admin.agency-applications.index');
 Route::get('visa-applications/{uid}', [ServiceBookingController::class, 'showApplication'])->name('admin.visa-applications.show');

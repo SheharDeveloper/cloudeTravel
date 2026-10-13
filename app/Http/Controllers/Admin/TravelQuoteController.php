@@ -113,7 +113,18 @@ class TravelQuoteController extends Controller
         return inertia('Admin/TravelQuote/Show', [
             'travelQuote' => $quote,
             'feedback' => $feedback,
+            // Invoice tab: the customers who accepted, and their invoices once generated
+            'invoices' => app(\App\Services\TravelQuote\QuoteInvoiceService::class)->invoicesFor($quote),
         ]);
+    }
+
+    /** Invoice tab → "Generate Invoice" for a customer who accepted this quote. */
+    public function generateInvoice(TravelQuote $travelQuote, int $feedback)
+    {
+        $response = $travelQuote->feedback()->where('status', 'accept')->whereNotNull('email')->findOrFail($feedback);
+        $invoice = app(\App\Services\TravelQuote\QuoteInvoiceService::class)->generate($travelQuote, $response);
+
+        return back()->with('success', "Invoice {$invoice->invoice_number} generated.");
     }
 
     /**

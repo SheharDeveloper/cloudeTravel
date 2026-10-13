@@ -26,6 +26,13 @@ Route::middleware(EnsureClientOnOwnDomain::class)->prefix('client')->group(funct
     Route::put('profile', [ClientPortalController::class, 'updateProfile'])->name('client.profile.update');
     Route::put('password', [ClientPortalController::class, 'updatePassword'])->name('client.password.update');
     Route::get('bookings', [ClientPortalController::class, 'bookings'])->name('client.bookings');
+    // View Application: fill the form and upload the requested documents
+    Route::get('applications/{uid}', [ClientPortalController::class, 'application'])->name('client.applications.show');
+    Route::put('applications/{uid}/form', [ClientPortalController::class, 'saveApplicationForm'])->name('client.applications.form');
+    Route::post('applications/{uid}/form/files', [ClientPortalController::class, 'uploadApplicationFormFile'])->name('client.applications.form.upload');
+    Route::get('applications/{uid}/form/file', [ClientPortalController::class, 'applicationFormFile'])->name('client.applications.form.file');
+    Route::post('applications/{uid}/documents/{document}/upload', [ClientPortalController::class, 'uploadApplicationDocument'])->whereNumber('document')->name('client.applications.documents.upload');
+    Route::get('applications/{uid}/documents/{document}/file', [ClientPortalController::class, 'applicationDocumentFile'])->whereNumber('document')->name('client.applications.documents.file');
     Route::get('invoices', [ClientPortalController::class, 'invoices'])->name('client.invoices');
     Route::get('invoices/{uid}', [ClientPortalController::class, 'invoice'])->name('client.invoices.show');
     Route::post('logout', [ClientPortalController::class, 'logout'])->name('client.logout');

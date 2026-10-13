@@ -21,6 +21,7 @@ createInertiaApp({
             case name === 'welcome':
             case name === 'Public/QuotePreview':
             case name === 'Public/DocumentSign':
+            case name === 'Public/SharedApplication':
                 return null;
             case name === 'home':
             case name === 'AllOffers':
