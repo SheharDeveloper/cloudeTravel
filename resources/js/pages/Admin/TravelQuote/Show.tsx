@@ -288,29 +288,82 @@ interface Feedback {
     created_at: string;
 }
 
-/** A customer who accepted this quote, and their invoice once generated. */
+/** The "To" part of the invoice: who it's for and their address (the invoice form). */
+type InvoiceCustomer = { name: string; email: string; phone: string; address: string; city: string; state: string; zip_code: string; country: string };
+
+interface QuoteInvoiceItem {
+    uid: string;
+    invoice_number: string;
+    status: string;
+    total: string;
+    created_at: string;
+    customer: Record<keyof InvoiceCustomer, string | null>;
+    invoice_url: string;
+}
+
+/** A customer who responded to this quote: their live invoice (once generated) and any rejected ones. */
 interface QuoteInvoice {
     feedback_id: number;
+    response_status: 'accept' | 'reject';
     name: string;
     email: string;
     phone: string | null;
     accepted_at: string;
-    invoice: { uid: string; invoice_number: string; total: string; created_at: string; invoice_url: string } | null;
+    invoice: QuoteInvoiceItem | null;
+    rejected_invoices: QuoteInvoiceItem[];
 }
+
+const CUSTOMER_FIELDS: { key: keyof InvoiceCustomer; label: string; col: string; required?: boolean; type?: string }[] = [
+    { key: 'name', label: 'Full Name', col: 'col-md-6', required: true },
+    { key: 'email', label: 'Email', col: 'col-md-6', required: true, type: 'email' },
+    { key: 'phone', label: 'Phone', col: 'col-md-6' },
+    { key: 'country', label: 'Country', col: 'col-md-6' },
+    { key: 'address', label: 'Address', col: 'col-12' },
+    { key: 'city', label: 'City', col: 'col-md-4' },
+    { key: 'state', label: 'State', col: 'col-md-4' },
+    { key: 'zip_code', label: 'Zip Code', col: 'col-md-4' },
+];
 
 export default function TravelQuoteShow({ travelQuote, feedback, invoices = [] }: { travelQuote: TravelQuote; feedback: Feedback[]; invoices?: QuoteInvoice[] }) {
     const [activeTab, setActiveTab] = useState('overview');
     const [invoiceIndex, setInvoiceIndex] = useState(0);
     const accepted = invoices[invoiceIndex] ?? invoices[0];
-    const [generating, setGenerating] = useState(false);
-    const generateInvoice = (feedbackId: number) => {
-        setGenerating(true);
-        router.post(`/admin/travel-quote/${travelQuote.uid}/feedback/${feedbackId}/invoice`, {}, {
+
+    // The invoice form (popup): create a new invoice, or edit the live one's details
+    const [invoiceForm, setInvoiceForm] = useState<{ row: QuoteInvoice; editing: boolean; values: InvoiceCustomer } | null>(null);
+    const [invoiceErrors, setInvoiceErrors] = useState<Record<string, string>>({});
+    const [savingInvoice, setSavingInvoice] = useState(false);
+    const openInvoiceForm = (row: QuoteInvoice) => {
+        // Editing: what's on the invoice; new: the response's details (and the last rejected invoice's address, if any)
+        const from = row.invoice?.customer ?? row.rejected_invoices[0]?.customer;
+        const pick = (key: keyof InvoiceCustomer, fallback: string | null = '') => (from?.[key] ?? fallback ?? '') as string;
+        setInvoiceErrors({});
+        setInvoiceForm({
+            row,
+            editing: !!row.invoice,
+            values: {
+                name: pick('name', row.name), email: pick('email', row.email), phone: pick('phone', row.phone),
+                address: pick('address'), city: pick('city'), state: pick('state'), zip_code: pick('zip_code'), country: pick('country'),
+            },
+        });
+    };
+    const saveInvoice = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!invoiceForm) return;
+        const { row, editing, values } = invoiceForm;
+        const options = {
             preserveScroll: true,
             preserveState: true,
-            only: ['invoices'],
-            onFinish: () => setGenerating(false),
-        });
+            onSuccess: () => setInvoiceForm(null),
+            onError: (errs: Record<string, string>) => setInvoiceErrors(errs),
+            onFinish: () => setSavingInvoice(false),
+        };
+        setSavingInvoice(true);
+        if (editing && row.invoice) {
+            router.put(`/admin/travel-quote/${travelQuote.uid}/invoices/${row.invoice.uid}`, values, options);
+        } else {
+            router.post(`/admin/travel-quote/${travelQuote.uid}/feedback/${row.feedback_id}/invoice`, values, options);
+        }
     };
     const [copied, setCopied] = useState(false);
     const [feedbackList, setFeedbackList] = useState<Feedback[]>(feedback || []);
@@ -465,13 +518,16 @@ export default function TravelQuoteShow({ travelQuote, feedback, invoices = [] }
                         >
                             Responses
                         </button>
-                        <button
-                            onClick={() => setActiveTab('invoice')}
-                            className={`py-3 px-0 border-0 bg-transparent ${activeTab === 'invoice' ? 'text-primary border-bottom border-primary border-2' : 'text-muted'}`}
-                            style={{ fontWeight: activeTab === 'invoice' ? 600 : 500, cursor: 'pointer', borderBottom: activeTab === 'invoice' ? '2px solid #0d6efd' : 'none', whiteSpace: 'nowrap', fontSize: '16px' }}
-                        >
-                            🧾 Invoice
-                        </button>
+                        {/* Only once a customer has responded to the quote */}
+                        {(feedback?.length ?? 0) > 0 && (
+                            <button
+                                onClick={() => setActiveTab('invoice')}
+                                className={`py-3 px-0 border-0 bg-transparent ${activeTab === 'invoice' ? 'text-primary border-bottom border-primary border-2' : 'text-muted'}`}
+                                style={{ fontWeight: activeTab === 'invoice' ? 600 : 500, cursor: 'pointer', borderBottom: activeTab === 'invoice' ? '2px solid #0d6efd' : 'none', whiteSpace: 'nowrap', fontSize: '16px' }}
+                            >
+                                🧾 Invoice
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -691,7 +747,9 @@ export default function TravelQuoteShow({ travelQuote, feedback, invoices = [] }
                                                             }}
                                                         >
                                                             <option value="">Select Status</option>
-                                                            <option value={resp.status}>{resp.status}</option>
+                                                            {/* Reject also rejects the customer's invoice; accept again to generate a new one */}
+                                                            <option value="accept">Accept</option>
+                                                            <option value="reject">Reject</option>
                                                             <option value="inactive">Inactive (Hide)</option>
                                                         </select>
                                                     )}
@@ -728,16 +786,21 @@ export default function TravelQuoteShow({ travelQuote, feedback, invoices = [] }
                 <div className="card">
                     <div className="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
                         <h5 className="card-title mb-0">🧾 Invoice</h5>
-                        {accepted?.invoice && (
-                            <a href={accepted.invoice.invoice_url} target="_blank" rel="noreferrer" className="btn btn-sm btn-primary">
-                                <i className="fa fa-print me-1"></i> Open / Print
-                            </a>
+                        {accepted?.invoice && accepted.response_status === 'accept' && (
+                            <div className="d-flex gap-2">
+                                <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => openInvoiceForm(accepted)}>
+                                    <i className="fa fa-pen me-1"></i> Edit Invoice
+                                </button>
+                                <a href={accepted.invoice.invoice_url} target="_blank" rel="noreferrer" className="btn btn-sm btn-primary">
+                                    <i className="fa fa-print me-1"></i> Open / Print
+                                </a>
+                            </div>
                         )}
                     </div>
                     <div className="card-body">
                         {accepted ? (
                             <>
-                                {/* More than one customer accepted: pick whose invoice */}
+                                {/* More than one customer responded: pick whose invoice */}
                                 {invoices.length > 1 && (
                                     <div className="d-flex gap-2 flex-wrap mb-3">
                                         {invoices.map((row, idx) => (
@@ -748,14 +811,35 @@ export default function TravelQuoteShow({ travelQuote, feedback, invoices = [] }
                                                 onClick={() => setInvoiceIndex(idx)}
                                             >
                                                 {row.name}{row.invoice ? ` · ${row.invoice.invoice_number}` : ''}
+                                                {row.response_status === 'reject' && ' · Rejected'}
                                             </button>
                                         ))}
                                     </div>
                                 )}
 
-                                {accepted.invoice ? (
+                                {/* Invoices rejected before (the response was rejected) */}
+                                {accepted.rejected_invoices.length > 0 && (
+                                    <div className="alert alert-light border d-flex flex-wrap align-items-center gap-2 py-2 small">
+                                        <i className="fa fa-ban text-danger"></i>
+                                        <span>Rejected invoice{accepted.rejected_invoices.length > 1 ? 's' : ''}:</span>
+                                        {accepted.rejected_invoices.map((inv) => (
+                                            <a key={inv.uid} href={inv.invoice_url} target="_blank" rel="noreferrer" className="badge bg-danger text-decoration-none">
+                                                {inv.invoice_number}
+                                            </a>
+                                        ))}
+                                    </div>
+                                )}
+
+                                {accepted.response_status === 'reject' ? (
+                                    /* Rejected: no invoice until the response is accepted again */
+                                    <div className="text-center py-5">
+                                        <i className="fa fa-times-circle text-danger" style={{ fontSize: '36px', marginBottom: '1rem', display: 'block' }}></i>
+                                        <p className="mb-1"><strong>{accepted.name}</strong>'s response is <span className="text-danger fw-semibold">rejected</span>, so the invoice is rejected.</p>
+                                        <p className="text-muted small mb-0">Change the response to Accept (Responses tab) to generate a new invoice.</p>
+                                    </div>
+                                ) : accepted.invoice ? (
                                     <iframe
-                                        key={accepted.invoice.uid}
+                                        key={`${accepted.invoice.uid}-${JSON.stringify(accepted.invoice.customer)}`}
                                         src={accepted.invoice.invoice_url}
                                         title={`Invoice ${accepted.invoice.invoice_number}`}
                                         style={{ width: '100%', height: '80vh', border: '1px solid #E5E7EB', borderRadius: '8px', background: '#fff' }}
@@ -765,9 +849,8 @@ export default function TravelQuoteShow({ travelQuote, feedback, invoices = [] }
                                         <i className="fa fa-file-invoice text-primary" style={{ fontSize: '36px', marginBottom: '1rem', display: 'block' }}></i>
                                         <p className="mb-1"><strong>{accepted.name}</strong> accepted this quote on {formatDate(accepted.accepted_at)}.</p>
                                         <p className="text-muted small mb-3">{accepted.email}{accepted.phone ? ` · ${accepted.phone}` : ''}</p>
-                                        <button type="button" className="btn btn-primary" onClick={() => generateInvoice(accepted.feedback_id)} disabled={generating}>
-                                            <i className={`fa ${generating ? 'fa-spinner fa-spin' : 'fa-file-invoice'} me-2`}></i>
-                                            {generating ? 'Generating…' : 'Generate Invoice'}
+                                        <button type="button" className="btn btn-primary" onClick={() => openInvoiceForm(accepted)}>
+                                            <i className="fa fa-file-invoice me-2"></i>Generate Invoice
                                         </button>
                                     </div>
                                 )}
@@ -778,6 +861,63 @@ export default function TravelQuoteShow({ travelQuote, feedback, invoices = [] }
                                 <p className="text-muted mb-0">No customer has accepted this quote yet. Once they accept, you can generate their invoice here.</p>
                             </div>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {/* The invoice form: everything the invoice shows for the client, editable */}
+            {invoiceForm && (
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onClick={() => !savingInvoice && setInvoiceForm(null)}>
+                    <div className="modal-dialog modal-lg modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
+                        <form className="modal-content" onSubmit={saveInvoice}>
+                            <div className="modal-header">
+                                <h5 className="modal-title">
+                                    {invoiceForm.editing ? `Edit Invoice ${invoiceForm.row.invoice?.invoice_number}` : 'Generate Invoice'}
+                                </h5>
+                                <button type="button" className="btn-close" onClick={() => setInvoiceForm(null)} disabled={savingInvoice}></button>
+                            </div>
+                            <div className="modal-body">
+                                <p className="text-muted small mb-3">
+                                    These details show in the invoice's <strong>To</strong> section. The package, prices and dates come from the quote.
+                                </p>
+                                <div className="row">
+                                    {CUSTOMER_FIELDS.map((field) => (
+                                        <div key={field.key} className={`${field.col} mb-3`}>
+                                            <label className="form-label" htmlFor={`inv-${field.key}`}>
+                                                {field.label}{field.required && <span className="text-danger"> *</span>}
+                                            </label>
+                                            {field.key === 'address' ? (
+                                                <textarea
+                                                    id={`inv-${field.key}`}
+                                                    rows={2}
+                                                    className={`form-control ${invoiceErrors[field.key] ? 'is-invalid' : ''}`}
+                                                    value={invoiceForm.values[field.key]}
+                                                    onChange={(e) => setInvoiceForm({ ...invoiceForm, values: { ...invoiceForm.values, [field.key]: e.target.value } })}
+                                                />
+                                            ) : (
+                                                <input
+                                                    id={`inv-${field.key}`}
+                                                    type={field.type ?? 'text'}
+                                                    required={field.required}
+                                                    className={`form-control ${invoiceErrors[field.key] ? 'is-invalid' : ''}`}
+                                                    value={invoiceForm.values[field.key]}
+                                                    onChange={(e) => setInvoiceForm({ ...invoiceForm, values: { ...invoiceForm.values, [field.key]: e.target.value } })}
+                                                />
+                                            )}
+                                            {invoiceErrors[field.key] && <div className="invalid-feedback d-block">{invoiceErrors[field.key]}</div>}
+                                        </div>
+                                    ))}
+                                </div>
+                                {invoiceErrors.invoice && <div className="alert alert-danger py-2 mb-0">{invoiceErrors.invoice}</div>}
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={() => setInvoiceForm(null)} disabled={savingInvoice}>Cancel</button>
+                                <button type="submit" className="btn btn-primary" disabled={savingInvoice}>
+                                    <i className={`fa ${savingInvoice ? 'fa-spinner fa-spin' : invoiceForm.editing ? 'fa-save' : 'fa-file-invoice'} me-2`}></i>
+                                    {savingInvoice ? 'Saving…' : invoiceForm.editing ? 'Save Changes' : 'Generate Invoice'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

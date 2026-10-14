@@ -10,6 +10,8 @@ Route::put('travel-quote/{travelQuote:uid}', [\App\Http\Controllers\Admin\Travel
 Route::delete('travel-quote/{travelQuote:uid}', [\App\Http\Controllers\Admin\TravelQuoteController::class, 'destroy'])->name('admin.travel-quote.destroy');
 // Invoice tab: "Generate Invoice" for a customer who accepted the quote
 Route::post('travel-quote/{travelQuote:uid}/feedback/{feedback}/invoice', [\App\Http\Controllers\Admin\TravelQuoteController::class, 'generateInvoice'])->whereNumber('feedback')->name('admin.travel-quote.invoice');
+// Invoice tab: "Edit Invoice" (the customer's details and address)
+Route::put('travel-quote/{travelQuote:uid}/invoices/{invoice}', [\App\Http\Controllers\Admin\TravelQuoteController::class, 'updateInvoice'])->name('admin.travel-quote.invoice.update');
 
 // Travel Quote Feedback Status Update
 Route::put('travel-quote-feedback/{id}/status', [\App\Http\Controllers\Admin\TravelQuoteFeedbackController::class, 'updateStatus'])->name('travel-quote-feedback.update-status');

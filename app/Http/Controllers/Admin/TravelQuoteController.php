@@ -118,13 +118,38 @@ class TravelQuoteController extends Controller
         ]);
     }
 
-    /** Invoice tab → "Generate Invoice" for a customer who accepted this quote. */
-    public function generateInvoice(TravelQuote $travelQuote, int $feedback)
+    /** Invoice tab → "Generate Invoice" for a customer who accepted this quote, with the invoice form's details. */
+    public function generateInvoice(Request $request, TravelQuote $travelQuote, int $feedback)
     {
         $response = $travelQuote->feedback()->where('status', 'accept')->whereNotNull('email')->findOrFail($feedback);
-        $invoice = app(\App\Services\TravelQuote\QuoteInvoiceService::class)->generate($travelQuote, $response);
+        $invoice = app(\App\Services\TravelQuote\QuoteInvoiceService::class)
+            ->generate($travelQuote, $response, $this->validateInvoiceCustomer($request));
 
         return back()->with('success', "Invoice {$invoice->invoice_number} generated.");
+    }
+
+    /** Invoice tab → "Edit Invoice": the customer's name, contact details and address. */
+    public function updateInvoice(Request $request, TravelQuote $travelQuote, string $invoice)
+    {
+        $service = app(\App\Services\TravelQuote\QuoteInvoiceService::class);
+        $booking = $service->updateCustomer($service->findInvoice($travelQuote, $invoice), $this->validateInvoiceCustomer($request));
+
+        return back()->with('success', "Invoice {$booking->invoice_number} updated.");
+    }
+
+    /** The "To" part of the invoice, from the invoice form. */
+    private function validateInvoiceCustomer(Request $request): array
+    {
+        return $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255',
+            'phone' => 'nullable|string|max:30',
+            'address' => 'nullable|string|max:500',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'zip_code' => 'nullable|string|max:20',
+            'country' => 'nullable|string|max:100',
+        ]);
     }
 
     /**

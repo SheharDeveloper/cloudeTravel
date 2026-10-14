@@ -31,6 +31,12 @@ class TravelQuoteFeedbackService
     {
         $feedback = TravelQuoteFeedback::findOrFail($id);
         $feedback->update(['status' => $status]);
+
+        // Rejected: the customer's invoice for this quote is rejected too (accepted again: a new invoice is generated)
+        if ($status === 'reject' && $feedback->email && $feedback->travelQuote) {
+            app(\App\Services\TravelQuote\QuoteInvoiceService::class)->rejectFor($feedback->travelQuote, $feedback->email);
+        }
+
         return $feedback;
     }
 

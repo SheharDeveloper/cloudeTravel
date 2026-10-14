@@ -145,7 +145,12 @@ class DocumentSignService
         $customer = ! $booking->client ? ($d['customer'] ?? null) : null;
         $to = $customer ? [
             'name' => (string) ($customer['name'] ?? ''),
-            'lines' => array_values(array_filter([$customer['email'] ?? null, $customer['phone'] ?? null])),
+            // The address as on a client's invoice, then how to reach them
+            'lines' => array_values(array_filter([
+                $customer['address'] ?? null, $customer['city'] ?? null, $customer['state'] ?? null,
+                $customer['zip_code'] ?? null, $customer['country'] ?? null,
+                $customer['email'] ?? null, $customer['phone'] ?? null,
+            ])),
         ] : [
             'name' => $booking->client?->name ?? trim(($lead?->first_name ?? '') . ' ' . ($lead?->last_name ?? '')),
             'lines' => array_values(array_filter([

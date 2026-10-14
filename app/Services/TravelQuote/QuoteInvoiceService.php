@@ -7,25 +7,41 @@ use App\Models\TravelQuote;
 use App\Models\TravelQuoteFeedback;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
- * "Generate Invoice" on a quote's Invoice tab: an invoice for a customer who
- * accepted the quote, made from the quote and the details they gave when
- * accepting (name, email, phone). It belongs to the quote only — no client
- * record is made. It's kept as a "package" booking so it gets an invoice
- * number and the same printable invoice as every other booking.
+ * The Invoice tab of a quote: an invoice for a customer who accepted the
+ * quote, made from the quote and the customer's details (name, email, phone
+ * and address — filled in, and editable, in the invoice form). It belongs to
+ * the quote only — no client record is made. It's kept as a "package"
+ * booking so it gets an invoice number and the same printable invoice as
+ * every other booking.
+ *
+ * When the customer's response is changed to Reject, their invoice is
+ * rejected; once accepted again, a new invoice is generated.
  */
 class QuoteInvoiceService
 {
     public const SERVICE = 'package';
+    public const STATUS_REJECTED = 'rejected';
 
-    /** The invoice for this accepted response; generated once per quote and customer email. */
-    public function generate(TravelQuote $quote, TravelQuoteFeedback $feedback): ServiceBooking
+    /** What the invoice form edits: the "To" part of the invoice. */
+    public const CUSTOMER_FIELDS = ['name', 'email', 'phone', 'address', 'city', 'state', 'zip_code', 'country'];
+
+    /**
+     * "Generate Invoice" for an accepted response, with the details from the
+     * invoice form. One live invoice per quote and customer email.
+     */
+    public function generate(TravelQuote $quote, TravelQuoteFeedback $feedback, array $customer): ServiceBooking
     {
-        return DB::transaction(function () use ($quote, $feedback) {
-            $existing = $this->invoiceFor($quote, (string) $feedback->email);
+        if ($feedback->status !== 'accept') {
+            throw ValidationException::withMessages(['invoice' => 'Only an accepted response can be invoiced.']);
+        }
+
+        return DB::transaction(function () use ($quote, $feedback, $customer) {
+            $existing = $this->activeInvoice($quote, (string) $feedback->email);
             if ($existing) {
-                return $existing;
+                return $this->updateCustomer($existing, $customer);
             }
 
             // Quotes are made by the superadmin, so the invoice is theirs
@@ -58,12 +74,10 @@ class QuoteInvoiceService
                     'title' => $quote->display_name,
                     'travel_quote_uid' => $quote->uid,
                     'feedback_id' => $feedback->id,
+                    // The response's email: which customer this invoice is for (even if the invoice email is edited)
+                    'response_email' => strtolower((string) $feedback->email),
                     'accepted_at' => $feedback->created_at?->toIso8601String(),
-                    'customer' => [
-                        'name' => $feedback->name,
-                        'email' => $feedback->email,
-                        'phone' => $feedback->phone_number,
-                    ],
+                    'customer' => $this->cleanCustomer($customer),
                     'check_in_date' => $quote->check_in_date?->toDateString(),
                     'checkout_date' => $quote->checkout_date?->toDateString(),
                     'nights' => $quote->night,
@@ -85,46 +99,112 @@ class QuoteInvoiceService
         });
     }
 
+    /** "Edit Invoice": changes the customer's details (name, address…) on a live invoice. */
+    public function updateCustomer(ServiceBooking $invoice, array $customer): ServiceBooking
+    {
+        if ($invoice->status === self::STATUS_REJECTED) {
+            throw ValidationException::withMessages(['invoice' => 'A rejected invoice cannot be changed. Generate a new one.']);
+        }
+
+        $details = $invoice->details ?? [];
+        $details['customer'] = $this->cleanCustomer($customer);
+        $invoice->update(['details' => $details]);
+
+        return $invoice;
+    }
+
+    /** The response was changed to Reject: the customer's live invoice for this quote is rejected. */
+    public function rejectFor(TravelQuote $quote, string $email): void
+    {
+        $this->activeInvoice($quote, $email)?->update(['status' => self::STATUS_REJECTED]);
+    }
+
+    /** An invoice of this quote (by its uid), for "Edit Invoice". */
+    public function findInvoice(TravelQuote $quote, string $uid): ServiceBooking
+    {
+        return ServiceBooking::where('service', self::SERVICE)
+            ->where('details->travel_quote_uid', $quote->uid)
+            ->where('uid', $uid)
+            ->firstOrFail();
+    }
+
     /**
-     * The quote's Invoice tab: every customer who accepted it, each with the
-     * invoice generated for them — or null until "Generate Invoice" is clicked.
+     * The quote's Invoice tab: every customer who responded (their latest
+     * response), with their live invoice — or null until "Generate Invoice"
+     * is clicked — and the invoices rejected before.
      */
     public function invoicesFor(TravelQuote $quote): array
     {
+        $invoices = $this->quoteInvoices($quote);
+
         return $quote->feedback()
-            ->where('status', 'accept')
+            ->whereIn('status', ['accept', 'reject'])
             ->whereNotNull('email')
             ->latest()
+            ->latest('id')
             ->get()
             ->unique(fn (TravelQuoteFeedback $feedback) => strtolower($feedback->email))
-            ->map(function (TravelQuoteFeedback $feedback) use ($quote) {
-                $booking = $this->invoiceFor($quote, $feedback->email);
+            ->map(function (TravelQuoteFeedback $feedback) use ($invoices) {
+                $mine = $invoices->filter(fn (ServiceBooking $b) => $this->responseEmail($b) === strtolower($feedback->email));
+                $live = $mine->first(fn (ServiceBooking $b) => $b->status !== self::STATUS_REJECTED);
 
                 return [
                     'feedback_id' => $feedback->id,
+                    'response_status' => $feedback->status,
                     'name' => $feedback->name,
                     'email' => $feedback->email,
                     'phone' => $feedback->phone_number,
                     'accepted_at' => $feedback->created_at?->toIso8601String(),
-                    'invoice' => $booking ? [
-                        'uid' => $booking->uid,
-                        'invoice_number' => $booking->invoice_number,
-                        'total' => $booking->currency_symbol . number_format($booking->total_amount, 2),
-                        'created_at' => $booking->created_at->toIso8601String(),
-                        'invoice_url' => route('admin.service-bookings.invoice', $booking->uid),
-                    ] : null,
+                    'invoice' => $live ? $this->invoiceRow($live) : null,
+                    'rejected_invoices' => $mine->filter(fn (ServiceBooking $b) => $b->status === self::STATUS_REJECTED)
+                        ->map(fn (ServiceBooking $b) => $this->invoiceRow($b))
+                        ->values()
+                        ->all(),
                 ];
             })
             ->values()
             ->all();
     }
 
-    /** The invoice already generated from this quote for this customer email, if any. */
-    private function invoiceFor(TravelQuote $quote, string $email): ?ServiceBooking
+    private function invoiceRow(ServiceBooking $booking): array
+    {
+        return [
+            'uid' => $booking->uid,
+            'invoice_number' => $booking->invoice_number,
+            'status' => $booking->status,
+            'total' => $booking->currency_symbol . number_format($booking->total_amount, 2),
+            'created_at' => $booking->created_at->toIso8601String(),
+            'customer' => array_merge(array_fill_keys(self::CUSTOMER_FIELDS, ''), $booking->details['customer'] ?? []),
+            'invoice_url' => route('admin.service-bookings.invoice', $booking->uid),
+        ];
+    }
+
+    /** The customer's live (not rejected) invoice from this quote, if any. */
+    private function activeInvoice(TravelQuote $quote, string $email): ?ServiceBooking
+    {
+        return $this->quoteInvoices($quote)
+            ->first(fn (ServiceBooking $b) => $b->status !== self::STATUS_REJECTED && $this->responseEmail($b) === strtolower($email));
+    }
+
+    /** Every invoice made from this quote, newest first. */
+    private function quoteInvoices(TravelQuote $quote)
     {
         return ServiceBooking::where('service', self::SERVICE)
             ->where('details->travel_quote_uid', $quote->uid)
-            ->get()
-            ->first(fn (ServiceBooking $booking) => strcasecmp((string) ($booking->details['customer']['email'] ?? ''), $email) === 0);
+            ->latest('id')
+            ->get();
+    }
+
+    /** Which customer an invoice is for: the response's email (older invoices: the customer's email). */
+    private function responseEmail(ServiceBooking $booking): string
+    {
+        return strtolower((string) ($booking->details['response_email'] ?? $booking->details['customer']['email'] ?? ''));
+    }
+
+    private function cleanCustomer(array $customer): array
+    {
+        return collect(self::CUSTOMER_FIELDS)
+            ->mapWithKeys(fn (string $field) => [$field => trim((string) ($customer[$field] ?? '')) ?: null])
+            ->all();
     }
 }

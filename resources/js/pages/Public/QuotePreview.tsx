@@ -506,21 +506,24 @@ export default function QuotePreview({ travelQuote, hasPreviousFeedback, feedbac
                                 <span style={{ fontWeight: 600 }}>{money(subtotal)}</span>
                             </div>
                         )}
-                        {showDiscount && (
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                                <span>Discount:</span>
-                                <span style={{ fontWeight: 600, color: '#059669' }}>-{money(discount)}</span>
-                            </div>
-                        )}
+                        {/* Tax: a little larger than the other lines */}
                         {showTax && (
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                                <span>Tax{taxPercent > 0 ? ` (${taxPercent}%)` : ''}:</span>
-                                <span style={{ fontWeight: 600 }}>{money(taxAmount)}</span>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '6px 0' }}>
+                                <span style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>Tax{taxPercent > 0 ? ` (${taxPercent}%)` : ''}:</span>
+                                <span style={{ fontSize: '13px', fontWeight: 700, color: '#1f2937' }}>{money(taxAmount)}</span>
                             </div>
                         )}
-                        <div style={{ borderTop: onlyTotal && !showDiscount && !showTax ? 'none' : '1px solid #e7ebf0', paddingTop: onlyTotal && !showDiscount && !showTax ? 0 : '8px', display: 'flex', justifyContent: 'space-between' }}>
-                            <span style={{ fontWeight: 700 }}>{onlyTotal ? 'Total Price:' : 'Grand Total:'}</span>
-                            <span style={{ fontWeight: 700, color: '#1e6fe0', fontSize: '14px' }}>{money(grandTotal)}</span>
+                        {/* Discount: big and green, so the saving stands out — just above the total */}
+                        {showDiscount && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '6px 0', padding: '6px 10px', background: '#ecfdf5', border: '1px solid #a7f3d0', borderRadius: '8px' }}>
+                                <span style={{ fontSize: '13px', fontWeight: 700, color: '#065f46' }}>Discount:</span>
+                                <span style={{ fontSize: '15px', fontWeight: 800, color: '#059669' }}>-{money(discount)}</span>
+                            </div>
+                        )}
+                        {/* Grand total: the biggest line, in its own highlighted box */}
+                        <div style={{ marginTop: onlyTotal && !showDiscount && !showTax ? 0 : '8px', padding: '8px 12px', background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)', border: '1.5px solid #1e6fe0', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '14px', fontWeight: 800, color: '#1f2937' }}>{onlyTotal ? 'Total Price:' : 'Grand Total:'}</span>
+                            <span style={{ fontSize: '19px', fontWeight: 800, color: '#1e6fe0', lineHeight: 1.1 }}>{money(grandTotal)}</span>
                         </div>
                     </div>
                 </div>
