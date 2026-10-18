@@ -37,7 +37,8 @@ export interface PackageFormData {
     duration_days: number;
     travel_export_included: boolean;
     visa_service_included: boolean;
-    status: boolean;
+    // The Active / Inactive select: 1 or 0
+    status: number;
     is_featured: boolean;
 }
 

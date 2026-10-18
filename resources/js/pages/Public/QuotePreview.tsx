@@ -355,12 +355,12 @@ export default function QuotePreview({ travelQuote, hasPreviousFeedback, feedbac
                                 <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a2233', marginBottom: '4px' }}>
                                     {travelQuote.show_hotel_name ? `${hotel.name} - ${hotel.displayName}` : hotel.displayName}
                                 </div>
-                                <div style={{ fontSize: '12px', color: '#5b6472', marginBottom: '2px' }}>
-                                    {hotel.location && `📍 ${hotel.location}`}{hotel.address && `, ${hotel.address}`}
+                                <div style={{ fontSize: '14px', color: '#374151', marginBottom: '2px' }}>
+                                    {hotel.location}{hotel.address && `, ${hotel.address}`}
                                 </div>
                                 {Number(hotel.rooms) > 0 && (
-                                    <div style={{ fontSize: '12px', color: '#5b6472', marginBottom: '2px' }}>
-                                        🛏️ {hotel.rooms} {Number(hotel.rooms) === 1 ? 'room' : 'rooms'}
+                                    <div style={{ fontSize: '14px', color: '#374151', marginBottom: '2px' }}>
+                                        {hotel.rooms} {Number(hotel.rooms) === 1 ? 'room' : 'rooms'}
                                     </div>
                                 )}
                                 {travelQuote.show_individual_price && hotel.price && (
@@ -397,8 +397,8 @@ export default function QuotePreview({ travelQuote, hasPreviousFeedback, feedbac
                                             <div style={{ fontSize: '11px', color: '#8b93a1', marginTop: '2px' }}>Flight #{flight.flightNumber}</div>
                                         </div>
                                     </div>
-                                    <div style={{ fontSize: '12px', color: '#5b6472', marginBottom: '4px' }}>📍 {flight.route}</div>
-                                    <div style={{ fontSize: '12px', color: '#5b6472', marginBottom: '4px' }}>🕐 {flight.departure} → {flight.arrival}</div>
+                                    <div style={{ fontSize: '14px', color: '#374151', marginBottom: '4px' }}>{flight.route}</div>
+                                    <div style={{ fontSize: '14px', color: '#374151', marginBottom: '4px' }}>{flight.departure} → {flight.arrival}</div>
                                     {travelQuote.show_individual_price && flight.price && (
                                         <div style={{ fontSize: '12px', fontWeight: 600, color: '#1e6fe0', marginTop: '6px' }}>
                                             £{Number(flight.price).toFixed(2)}
@@ -422,8 +422,8 @@ export default function QuotePreview({ travelQuote, hasPreviousFeedback, feedbac
                                     <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a2233', marginBottom: '4px' }}>
                                         {visa.country || 'Visa'}{visa.type && ` - ${visa.type}`}
                                     </div>
-                                    {visa.duration && <div style={{ fontSize: '12px', color: '#5b6472', marginBottom: '2px' }}>🗓️ {visa.duration}</div>}
-                                    {visa.processingTime && <div style={{ fontSize: '12px', color: '#5b6472', marginBottom: '2px' }}>⏱️ {visa.processingTime}</div>}
+                                    {visa.duration && <div style={{ fontSize: '14px', color: '#374151', marginBottom: '2px' }}>{visa.duration}</div>}
+                                    {visa.processingTime && <div style={{ fontSize: '14px', color: '#374151', marginBottom: '2px' }}>{visa.processingTime}</div>}
                                     {travelQuote.show_individual_price && visa.cost && (
                                         <div style={{ fontSize: '12px', fontWeight: 600, color: '#1e6fe0', marginTop: '4px' }}>{money(visa.cost)}</div>
                                     )}
@@ -442,8 +442,8 @@ export default function QuotePreview({ travelQuote, hasPreviousFeedback, feedbac
                                 <div key={idx} style={TILE}>
                                     <div style={{ fontSize: '13px', fontWeight: 700, color: '#1a2233', marginBottom: '4px' }}>{transport.vehicleType || 'Transfer'}</div>
                                     {(transport.pickup || transport.dropoff) && (
-                                        <div style={{ fontSize: '12px', color: '#5b6472', marginBottom: '2px' }}>
-                                            📍 {transport.pickup || '—'} → {transport.dropoff || '—'}
+                                        <div style={{ fontSize: '14px', color: '#374151', marginBottom: '2px' }}>
+                                            {transport.pickup || '—'} → {transport.dropoff || '—'}
                                         </div>
                                     )}
                                     {travelQuote.show_individual_price && transport.price && (

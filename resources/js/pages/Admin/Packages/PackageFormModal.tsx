@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
+import { router } from '@inertiajs/react';
 import {
     validatePackageForm,
-    createPackage,
-    updatePackage,
     type Package,
     type PackageFormData,
 } from '@/services/packageService';
@@ -12,7 +11,6 @@ interface PackageFormModalProps {
     package?: Package | null;
     isOpen: boolean;
     onClose: () => void;
-    onSuccess: () => void;
 }
 
 export default function PackageFormModal({
@@ -20,7 +18,6 @@ export default function PackageFormModal({
     package: pkg,
     isOpen,
     onClose,
-    onSuccess,
 }: PackageFormModalProps) {
     const [formData, setFormData] = useState<PackageFormData>({
         name: '',
@@ -79,7 +76,7 @@ export default function PackageFormModal({
                     duration_days: pkg.duration_days,
                     travel_export_included: pkg.travel_export_included,
                     visa_service_included: pkg.visa_service_included,
-                    status: pkg.status,
+                    status: pkg.status ? 1 : 0,
                     is_featured: pkg.is_featured,
                 });
                 setPreview(pkg.image || null);
@@ -150,37 +147,33 @@ export default function PackageFormModal({
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    // Saved with Inertia: multipart (for the image); an edit goes as POST with _method=PUT,
+    // since PHP reads uploaded files only from POST requests
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!validateForm()) {
             return;
         }
 
-        try {
-            setFormLoading(true);
+        const payload = {
+            ...formData,
+            image: formData.image ?? undefined,
+            travel_export_included: formData.travel_export_included ? 1 : 0,
+            visa_service_included: formData.visa_service_included ? 1 : 0,
+            status: Number(formData.status) ? 1 : 0,
+            is_featured: formData.is_featured ? 1 : 0,
+            ...(mode === 'edit' ? { _method: 'put' } : {}),
+        };
 
-            let response;
-            if (mode === 'create') {
-                response = await createPackage(formData);
-            } else {
-                response = await updatePackage(pkg?.id || 0, formData);
-            }
-
-            if (response.ok) {
-                alert(mode === 'create' ? 'Package added successfully!' : 'Package updated successfully!');
-                onClose();
-                onSuccess();
-            } else {
-                const error = await response.json();
-                setErrors({ form: error.message || 'Failed to save package' });
-            }
-        } catch (error) {
-            console.error('Error saving package:', error);
-            setErrors({ form: 'Error saving package. Please try again.' });
-        } finally {
-            setFormLoading(false);
-        }
+        setFormLoading(true);
+        router.post(mode === 'create' ? '/admin/packages' : `/admin/packages/${pkg?.uid}`, payload, {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => onClose(),
+            onError: (errs) => setErrors(errs as Record<string, string>),
+            onFinish: () => setFormLoading(false),
+        });
     };
 
     const handleCloseModal = () => {

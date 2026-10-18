@@ -454,6 +454,7 @@ export function ApplicationView({ portal }: { portal: ApplicationPortal }) {
                             canSend={access.can_send}
                             sent={sent}
                             baseUrl={baseUrl}
+                            allowCopyPaste={isSuperadmin}
                         />
                     </>
                 ) : activeTab === 'email' ? (

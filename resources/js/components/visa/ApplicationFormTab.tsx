@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import DatePicker from '@/components/DatePicker';
@@ -69,10 +69,12 @@ const formatDateTime = (value: string | null) =>
  * the next step); 3 Verify Application shows everything to check before
  * submitting. Moving on saves a draft quietly, so nothing is lost.
  */
-export default function ApplicationFormTab({ applicationUid, form, canEdit = true, canSend = false, sent = null, baseUrl = '/admin/visa-applications' }: {
+export default function ApplicationFormTab({ applicationUid, form, canEdit = true, canSend = false, sent = null, baseUrl = '/admin/visa-applications', allowCopyPaste = false }: {
     applicationUid: string;
     // Where the application's form routes live: the admin side, or the client portal
     baseUrl?: string;
+    // The superadmin can always copy and paste; everyone else can't once the form is submitted
+    allowCopyPaste?: boolean;
     form: ApplicationFormData;
     // false: the review only
     canEdit?: boolean;
@@ -229,8 +231,52 @@ export default function ApplicationFormTab({ applicationUid, form, canEdit = tru
     const stepStops = stops.filter((s) => s.step === current.step && s.section);
     const indexInStep = stepStops.findIndex((s) => s.section?.id === current.section?.id);
 
+    // Submitted: copy, cut and paste are blocked (and text can't be selected) for all but the superadmin
+    const copyLocked = !allowCopyPaste && form.status === 'submitted';
+    const blockClipboard = (e: React.ClipboardEvent) => {
+        if (copyLocked) e.preventDefault();
+    };
+
+    // While locked, across the whole page: no copy / cut / paste, no right-click, and no
+    // shortcuts that open the browser console or view the source (F12, Ctrl+Shift+I/J/C/K, Ctrl+U…)
+    useEffect(() => {
+        if (!copyLocked) return;
+        const stop = (e: Event) => {
+            e.preventDefault();
+            e.stopPropagation();
+        };
+        const onKey = (e: KeyboardEvent) => {
+            const key = e.key.toLowerCase();
+            const ctrl = e.ctrlKey || e.metaKey;
+            const blocked =
+                key === 'f12'
+                || (ctrl && e.shiftKey && ['i', 'j', 'c', 'k'].includes(key))
+                || (e.metaKey && e.altKey && ['i', 'j', 'c'].includes(key))
+                || (ctrl && ['u', 's', 'p', 'c', 'x', 'v', 'a'].includes(key));
+            if (blocked) stop(e);
+        };
+        const events: [string, EventListener][] = [
+            ['keydown', onKey as EventListener],
+            ['contextmenu', stop],
+            ['copy', stop],
+            ['cut', stop],
+            ['paste', stop],
+            ['dragstart', stop],
+        ];
+        events.forEach(([name, handler]) => document.addEventListener(name, handler, true));
+        return () => events.forEach(([name, handler]) => document.removeEventListener(name, handler, true));
+    }, [copyLocked]);
+
     return (
-        <div ref={topRef} style={{ scrollMarginTop: 90 }}>
+        <div
+            ref={topRef}
+            style={{ scrollMarginTop: 90, ...(copyLocked ? { userSelect: 'none', WebkitUserSelect: 'none' } : {}) }}
+            onCopy={blockClipboard}
+            onCut={blockClipboard}
+            onPaste={blockClipboard}
+            onContextMenu={copyLocked ? (e) => e.preventDefault() : undefined}
+            onDragStart={copyLocked ? (e) => e.preventDefault() : undefined}
+        >
             <style>{STYLES}</style>
 
             {sent && (

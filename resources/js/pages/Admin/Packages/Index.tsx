@@ -1,18 +1,14 @@
-import { useState, useEffect } from 'react';
-import MasterLayout from '@/layouts/backend/MasterLayout';
+import { useEffect, useState } from 'react';
+import { router, usePage } from '@inertiajs/react';
+import toast, { Toaster } from 'react-hot-toast';
 import { ProtectedRoute } from '@/lib/ProtectedRoute';
-import {
-    fetchAllPackages,
-    deletePackage,
-    formatDate,
-    type Package,
-} from '@/services/packageService';
+import { formatDate, type Package } from '@/services/packageService';
 import PackageFormModal from './PackageFormModal';
 
 export default function PackageIndex() {
-    // State management
-    const [packages, setPackages] = useState<Package[]>([]);
-    const [loading, setLoading] = useState(true);
+    // The packages come with the page (Inertia); saving or deleting reloads them
+    const { packages, flash } = usePage().props as unknown as { packages: Package[]; flash?: { success?: string | null } };
+    const loading = false;
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage] = useState(10);
@@ -24,22 +20,10 @@ export default function PackageIndex() {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedPackage, setSelectedPackage] = useState<Package | null>(null);
 
-    const loadPackages = async () => {
-        try {
-            setLoading(true);
-            const data = await fetchAllPackages();
-            setPackages(data);
-        } catch (error) {
-            console.error('Error fetching packages:', error);
-            alert('Failed to load packages');
-        } finally {
-            setLoading(false);
-        }
-    };
-
+    // "Package added / updated / deleted"
     useEffect(() => {
-        loadPackages();
-    }, []);
+        if (flash?.success) toast.success(flash.success, { id: flash.success });
+    }, [flash?.success]);
 
     const filteredPackages = packages.filter(pkg =>
         pkg.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -63,22 +47,20 @@ export default function PackageIndex() {
         setShowFormModal(true);
     };
 
-    const handleDelete = async () => {
+    const [deleting, setDeleting] = useState(false);
+    const handleDelete = () => {
         if (!selectedPackage) return;
 
-        try {
-            const response = await deletePackage(selectedPackage.id);
-
-            if (response.ok) {
-                alert('Package deleted successfully');
+        setDeleting(true);
+        router.delete(`/admin/packages/${selectedPackage.uid}`, {
+            preserveScroll: true,
+            onSuccess: () => {
                 setShowDeleteModal(false);
                 setSelectedPackage(null);
-                loadPackages();
-            }
-        } catch (error) {
-            console.error('Error deleting package:', error);
-            alert('Error deleting package');
-        }
+            },
+            onError: () => toast.error('The package could not be deleted.'),
+            onFinish: () => setDeleting(false),
+        });
     };
 
     const handlePrevPage = () => {
@@ -295,7 +277,6 @@ export default function PackageIndex() {
                     package={selectedPackageForForm}
                     isOpen={showFormModal}
                     onClose={() => setShowFormModal(false)}
-                    onSuccess={loadPackages}
                 />
 
                 {/* DELETE CONFIRMATION MODAL */}
@@ -329,14 +310,17 @@ export default function PackageIndex() {
                                         type="button"
                                         className="btn btn-danger"
                                         onClick={handleDelete}
+                                        disabled={deleting}
                                     >
-                                        <i className="fa fa-trash me-2"></i>Delete
+                                        <i className={`fa ${deleting ? 'fa-spinner fa-spin' : 'fa-trash'} me-2`}></i>{deleting ? 'Deleting…' : 'Delete'}
                                     </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 )}
+
+                <Toaster position="top-right" />
         </ProtectedRoute>
     );
 }
