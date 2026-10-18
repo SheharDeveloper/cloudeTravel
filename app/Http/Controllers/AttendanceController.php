@@ -46,6 +46,10 @@ class AttendanceController extends Controller
             'today' => $subject ? $this->attendanceService->todayDetail($subject) : null,
             'canCheckInOut' => $isStaff,
             'history' => $subject ? $this->attendanceService->monthlyHistory($subject, $month)->values() : [],
+            // No staff member picked: the whole team's calendar (who was in, on leave or absent each day)
+            'team' => !$isStaff && !$subject
+                ? $this->attendanceService->teamMonth($staffOptions->load('staffProfile'), $month)
+                : null,
         ]);
     }
 

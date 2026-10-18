@@ -704,6 +704,73 @@ class AttendanceService
     }
 
     /**
+     * The whole team's month, day by day (up to today): who was present
+     * (with their times), on half day, on leave or absent — for the
+     * all-staff calendar. A member counts from their joining date (or when
+     * their account was made); a day with no record after that is Absent.
+     *
+     * @param  Collection<int, User|AgencyUser>  $staffList
+     */
+    public function teamMonth(Collection $staffList, string $month): array
+    {
+        $start = Date::parse($month.'-01')->startOfMonth();
+        $end = $start->copy()->endOfMonth();
+        $today = Date::today();
+        if ($staffList->isEmpty() || $start->greaterThan($today)) {
+            return [];
+        }
+        $lastDay = $today->lessThan($end) ? $today : $end;
+
+        // One query each for the month's attendance and history, for everyone
+        $type = get_class($staffList->first());
+        $ids = $staffList->pluck('id');
+        $inRange = fn ($q) => $q->where('staffable_type', $type)
+            ->whereIn('staffable_id', $ids)
+            ->whereBetween('date', [$start->toDateString(), $lastDay->toDateString()]);
+
+        $attendance = $inRange(Attendance::query())->get()
+            ->keyBy(fn ($a) => $a->staffable_id.'|'.$a->date->toDateString());
+        $events = $inRange(AttendanceHistory::query())->orderBy('occurred_at')->get()
+            ->groupBy(fn ($h) => $h->staffable_id.'|'.$h->date->toDateString());
+
+        $days = [];
+        foreach (\Carbon\CarbonPeriod::create($start, $lastDay) as $date) {
+            $dateStr = $date->toDateString();
+            $day = ['date' => $dateStr, 'total' => 0, 'present' => [], 'half_day' => [], 'leave' => [], 'absent' => []];
+
+            foreach ($staffList as $staff) {
+                $joined = ($staff->staffProfile?->joining_date ?? $staff->created_at)?->copy()->startOfDay();
+                if ($joined && $joined->greaterThan($date)) {
+                    continue; // not on the team yet
+                }
+
+                $key = $staff->id.'|'.$dateStr;
+                $detail = $this->buildDayDetail($dateStr, $attendance->get($key), $events->get($key, collect()));
+                // A leave still waiting for a decision shows with the leaves (marked pending)
+                $bucket = $detail['status'] ?? 'leave';
+                if (! isset($day[$bucket])) {
+                    $bucket = 'absent';
+                }
+
+                $day['total']++;
+                $day[$bucket][] = [
+                    'uid' => $staff->uid,
+                    'name' => $staff->name,
+                    'photo' => $staff->profile_pic ? $staff->profile_image_url : null,
+                    'checked_in_at' => $detail['checked_in_at'],
+                    'checked_out_at' => $detail['checked_out_at'],
+                    'work_type' => $detail['work_type'],
+                    'leave_status' => $detail['status'] === null ? 'pending' : $detail['leave_status'],
+                ];
+            }
+
+            $days[] = $day;
+        }
+
+        return $days;
+    }
+
+    /**
      * Today's detail for the given staff member, in the same shape as a
      * monthlyHistory() entry — or null if nothing recorded yet today.
      */

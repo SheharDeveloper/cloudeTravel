@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
 import AttendanceCalendar, { AttendanceEntry } from '@/components/AttendanceCalendar';
+import TeamAttendanceCalendar, { type TeamDay } from '@/components/TeamAttendanceCalendar';
 
 interface StaffOption {
     uid: string;
@@ -16,10 +17,12 @@ interface PageProps {
     today: AttendanceEntry | null;
     canCheckInOut: boolean;
     history: AttendanceEntry[];
+    // No staff member picked (owner / superadmin): the whole team's month
+    team: TeamDay[] | null;
 }
 
 export default function AttendanceIndex() {
-    const { isStaff, month, staffOptions, selectedUid, subjectName, today, canCheckInOut, history } = usePage().props as unknown as PageProps;
+    const { isStaff, month, staffOptions, selectedUid, subjectName, today, canCheckInOut, history, team } = usePage().props as unknown as PageProps;
     const [checkingOut, setCheckingOut] = useState(false);
     const [staffSearch, setStaffSearch] = useState('');
     const [pickerOpen, setPickerOpen] = useState(false);
@@ -190,6 +193,14 @@ export default function AttendanceIndex() {
                     staffUid={selectedUid}
                     canEdit={!isStaff}
                     onMonthChange={(newMonth) => navigate({ month: newMonth })}
+                />
+            ) : team ? (
+                /* Everyone at once; pick a member (above, or from a day) for their own calendar */
+                <TeamAttendanceCalendar
+                    month={month}
+                    days={team}
+                    onMonthChange={(newMonth) => navigate({ month: newMonth })}
+                    onSelectStaff={(uid) => navigate({ staff: uid })}
                 />
             ) : (
                 <div className="card">
