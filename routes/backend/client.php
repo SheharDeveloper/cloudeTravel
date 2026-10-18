@@ -2,6 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 
+// Client Documents: physical documents received from clients (received, returned, notified)
+Route::get('received-documents', [\App\Http\Controllers\Admin\ReceivedDocumentController::class, 'index'])->name('admin.received-documents.index');
+Route::post('received-documents', [\App\Http\Controllers\Admin\ReceivedDocumentController::class, 'store'])->name('admin.received-documents.store');
+Route::post('received-documents/{uid}/return', [\App\Http\Controllers\Admin\ReceivedDocumentController::class, 'returnDocument'])->name('admin.received-documents.return');
+Route::post('received-documents/{uid}/notify', [\App\Http\Controllers\Admin\ReceivedDocumentController::class, 'notify'])->name('admin.received-documents.notify');
+Route::delete('received-documents/{uid}', [\App\Http\Controllers\Admin\ReceivedDocumentController::class, 'destroy'])->name('admin.received-documents.destroy');
+
 // Client Management
 Route::get('clients', [\App\Http\Controllers\Admin\ClientController::class, 'index'])->name('admin.client.index');
 Route::get('clients/create', [\App\Http\Controllers\Admin\ClientController::class, 'create'])->name('admin.client.create');

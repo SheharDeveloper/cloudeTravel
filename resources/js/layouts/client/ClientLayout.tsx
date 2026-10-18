@@ -12,6 +12,7 @@ const MENU = [
     { href: '/client/profile', label: 'My Profile', icon: 'fa fa-user', exact: true },
     { href: '/client/bookings', label: 'My Bookings', icon: 'fa fa-suitcase-rolling', exact: false },
     { href: '/client/invoices', label: 'Invoices', icon: 'fa fa-file-invoice', exact: false },
+    { href: '/client/documents', label: 'My Documents', icon: 'fa fa-folder-open', exact: false },
     { href: '/client/settings', label: 'Profile Settings', icon: 'fa fa-user-cog', exact: false },
 ];
 

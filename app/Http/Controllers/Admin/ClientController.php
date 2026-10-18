@@ -97,6 +97,8 @@ class ClientController extends Controller
             'client' => $client,
             // Client Login: whether the client can sign in, and where
             'clientLogin' => $this->portal->loginInfo($client),
+            // Client Documents: the documents this client handed over (received / returned)
+            'receivedDocuments' => app(\App\Services\ReceivedDocumentService::class)->listForClient($client),
         ]);
     }
 

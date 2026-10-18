@@ -106,7 +106,12 @@ class DocumentSignService
      */
     public function branding(ServiceBooking $booking): array
     {
-        $owner = $booking->owner;
+        return $this->brandingFor($booking->owner);
+    }
+
+    /** Name, logo and contact details of an agency (or the superadmin, for any other owner). */
+    public function brandingFor(?object $owner): array
+    {
         $contact = $owner
             ? ContactInfo::where('owner_type', get_class($owner))->where('owner_id', $owner->id)->first()
             : null;

@@ -170,6 +170,14 @@ class ClientPortalController extends Controller
         return Storage::disk($documents->disk())->response($file->file_path, $file->file_name);
     }
 
+    /** My Documents: what the agency received from the client, returned or not, with any notice */
+    public function documents(Request $request, \App\Services\ReceivedDocumentService $documents)
+    {
+        return Inertia::render('Client/Documents', $this->layout($request) + [
+            'documents' => $documents->forClient($this->portal->currentClient($request)),
+        ]);
+    }
+
     /** Invoices */
     public function invoices(Request $request, DocumentSignService $signService)
     {

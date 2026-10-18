@@ -34,6 +34,8 @@ Route::middleware(EnsureClientOnOwnDomain::class)->prefix('client')->group(funct
     Route::post('applications/{uid}/documents/{document}/upload', [ClientPortalController::class, 'uploadApplicationDocument'])->whereNumber('document')->name('client.applications.documents.upload');
     Route::get('applications/{uid}/documents/{document}/file', [ClientPortalController::class, 'applicationDocumentFile'])->whereNumber('document')->name('client.applications.documents.file');
     Route::get('invoices', [ClientPortalController::class, 'invoices'])->name('client.invoices');
+    // My Documents: the documents the agency received from the client, and returned
+    Route::get('documents', [ClientPortalController::class, 'documents'])->name('client.documents');
     Route::get('invoices/{uid}', [ClientPortalController::class, 'invoice'])->name('client.invoices.show');
     Route::post('logout', [ClientPortalController::class, 'logout'])->name('client.logout');
 });

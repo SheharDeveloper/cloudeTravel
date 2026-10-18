@@ -6,7 +6,19 @@ import { usePage } from '@inertiajs/react';
 type MenuItem =
     | { type: 'title'; label: string }
     | { type: 'link'; icon: string; label: string; href: string; permission?: string; adminOnly?: boolean }
-    | { type: 'dropdown'; icon: string; label: string; children: { label: string; href: string; soon?: boolean }[] };
+    | { type: 'dropdown'; icon: string; label: string; children: { label: string; href: string; soon?: boolean }[]; permission?: string };
+
+// Clients, with Client Documents (documents received from clients) under it
+const CLIENTS_MENU: MenuItem = {
+    type: 'dropdown',
+    icon: 'fa-solid fa-address-book',
+    label: 'Clients Management',
+    permission: 'client.view',
+    children: [
+        { label: 'All Clients', href: '/admin/clients' },
+        { label: 'Client Documents', href: '/admin/received-documents' },
+    ],
+};
 
 // â”€â”€ Superadmin menu â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const getSuperadminMenuItems = (companyName: string): MenuItem[] => [
@@ -33,7 +45,7 @@ const getSuperadminMenuItems = (companyName: string): MenuItem[] => [
 
     { type: 'link', icon: 'fa-solid fa-building', label: 'Agencies', href: '/admin/agency-b2b', permission: 'agency.view' },
     { type: 'link', icon: 'fa-solid fa-users', label: 'Staff', href: '/admin/staff', permission: 'staff.view' },
-    { type: 'link', icon: 'fa-solid fa-address-book', label: 'Clients', href: '/admin/clients', permission: 'client.view' },
+    CLIENTS_MENU,
     { type: 'link', icon: 'fa-solid fa-user-shield', label: 'Roles & Permissions', href: '/admin/roles', permission: 'role.view' },
 
     { type: 'title', label: 'BOOKINGS & SALES' },
@@ -83,7 +95,7 @@ const getAgencyMenuItems = (agencyName: string, serviceItems: MenuItem[]): MenuI
     { type: 'title', label: 'PEOPLE & ACCESS' },
 
     { type: 'link', icon: 'fa-solid fa-users', label: 'Staff', href: '/admin/staff', permission: 'staff.view' },
-    { type: 'link', icon: 'fa-solid fa-address-book', label: 'Clients', href: '/admin/clients', permission: 'client.view' },
+    CLIENTS_MENU,
     { type: 'link', icon: 'fa-solid fa-user-shield', label: 'Roles & Permissions', href: '/admin/roles', permission: 'role.view' },
 
     { type: 'title', label: 'BOOKINGS & SALES' },
@@ -271,7 +283,8 @@ export default function Sidebar() {
     // authPermissions is null when nobody is signed in; otherwise it is the
     // permission list for the session (agency permissions, or the user's roles).
     const allowed = (item: MenuItem) => {
-        if (item.type !== 'link') return true;
+        if (item.type === 'title') return true;
+        if (item.type === 'dropdown') return !item.permission || !authPermissions || authPermissions.includes(item.permission);
         if (item.adminOnly && isStaffSession) return false;
         return !item.permission || !authPermissions || authPermissions.includes(item.permission);
     };

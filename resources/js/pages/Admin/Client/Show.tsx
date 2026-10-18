@@ -2,6 +2,7 @@ import { router, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import DatePicker from '@/components/DatePicker';
 import AlertBell from '@/components/AlertBell';
+import ReceivedDocumentsPanel from '@/components/ReceivedDocumentsPanel';
 import { isExpiringSoon } from '@/lib/utils';
 import DataTable from 'datatables.net-buttons-bs5';
 import JSZip from 'jszip';
@@ -29,6 +30,7 @@ const TABS = [
     { key: 'family', label: 'Family Details' },
     { key: 'documents', label: 'Documents' },
     { key: 'call-history', label: 'Call History' },
+    { key: 'client-documents', label: 'Client Documents' },
     { key: 'client-login', label: 'Client Login' },
 ];
 
@@ -918,7 +920,7 @@ function CallHistoryTable({ clientUid, communications }: { clientUid: string; co
 }
 
 export default function ClientShow() {
-    const { client, clientLogin } = usePage().props as any;
+    const { client, clientLogin, receivedDocuments } = usePage().props as any;
     const [activeTab, setActiveTab] = useState('overview');
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
@@ -1240,6 +1242,17 @@ export default function ClientShow() {
 
                     {activeTab === 'call-history' && (
                         <CallHistoryTable clientUid={client.uid} communications={communications} />
+                    )}
+
+                    {/* Documents this client handed over: received / returned, with the same actions as Client Documents */}
+                    {activeTab === 'client-documents' && (
+                        <div className="card h-auto">
+                            <ReceivedDocumentsPanel
+                                documents={receivedDocuments ?? []}
+                                fixedClient={{ uid: client.uid, cid: client.cid, name: client.name, phone: client.phone }}
+                                emptyText='No documents from this client yet. Click "Add Document" when they hand one over.'
+                            />
+                        </div>
                     )}
                 </div>
             </div>
