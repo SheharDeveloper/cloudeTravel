@@ -27,6 +27,7 @@ class ServiceBookingController extends Controller
         protected ApplicationFormService $formService,
         protected VisaApplicationService $applicationService,
         protected ApplicationDocumentService $documentService,
+        protected \App\Services\InvoiceService $invoiceService,
     ) {
     }
 
@@ -257,6 +258,19 @@ class ServiceBookingController extends Controller
             : 'Signing link created. There is no email address to send it to, so copy the URL and share it.');
     }
 
+    /** "Regenerate": the link expired — a new link and deadline, emailed to the client. */
+    public function regenerateDocSign(string $uid)
+    {
+        $booking = $this->owned()->with('signature')->where('uid', $uid)->firstOrFail();
+        abort_unless($booking->signature, 404);
+
+        $signature = $this->signService->regenerate($booking->signature);
+
+        return back()->with('success', $signature->signer_email
+            ? "A new signing link was sent to {$signature->signer_email}."
+            : 'A new signing link was created. There is no email address, so copy the URL and share it.');
+    }
+
     /** "Resend Email": the same link again, with a fresh deadline. */
     public function resendDocSign(string $uid)
     {
@@ -284,10 +298,17 @@ class ServiceBookingController extends Controller
 
     public function update(Request $request, string $uid)
     {
-        $booking = $this->owned()->where('uid', $uid)->firstOrFail();
+        $booking = $this->owned()->with('applications')->where('uid', $uid)->firstOrFail();
         abort_unless($booking->service === 'visa', 404);
 
+        // Before the edit: what the invoice said, and what saving must not lose
+        $before = $this->invoiceService->snapshot($booking);
+        $kept = array_intersect_key($booking->details ?? [], array_flip(\App\Services\InvoiceService::KEPT_ON_EDIT));
+
         $booking = $this->requirementsService->storeApplication($request, $booking);
+
+        // After: keep the payments / confirmation / history, and record it as an Edit or an Amendment
+        $this->invoiceService->recordChange($booking->fresh('applications'), $before, $kept, $this->invoiceService->pullChangeMode($uid));
 
         return redirect()->route('admin.service-bookings.show', $booking->uid)
             ->with('success', "Booking {$booking->invoice_number} updated.");

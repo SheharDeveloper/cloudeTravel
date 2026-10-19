@@ -81,6 +81,8 @@ export default function ServiceBookingShow() {
     };
     const generateDocSign = () => signAction('doc-sign');
     const resendDocSign = () => signAction('doc-sign/resend');
+    // The link expired: a new link (the old one stops working) and a fresh deadline
+    const regenerateDocSign = () => signAction('doc-sign/regenerate');
     const copySignUrl = async () => {
         if (!docSign) return;
         try {
@@ -304,12 +306,17 @@ export default function ServiceBookingShow() {
                                     <i className="fa-regular fa-circle-check"></i> {signBusy ? 'Generating…' : 'Generate Doc Sign'}
                                 </button>
                             )}
-                            {docSign && docSign.status !== 'signed' && (
+                            {docSign?.status === 'expired' && (
+                                <button type="button" className="sb-pay-btn" onClick={regenerateDocSign} disabled={signBusy}>
+                                    <i className="fa-solid fa-rotate"></i> {signBusy ? 'Regenerating…' : 'Regenerate Link'}
+                                </button>
+                            )}
+                            {docSign?.status === 'pending' && (
                                 <button type="button" className="sb-pay-btn" onClick={resendDocSign} disabled={signBusy}>
                                     <i className="fa-regular fa-circle-check"></i> {signBusy ? 'Sending…' : 'Resend Email'}
                                 </button>
                             )}
-                            {docSign && (
+                            {docSign && docSign.status !== 'expired' && (
                                 <button type="button" className="sb-pay-btn" onClick={copySignUrl}>
                                     <i className="fa-regular fa-circle-check"></i> Copy URL
                                 </button>

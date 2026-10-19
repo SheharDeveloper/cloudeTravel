@@ -4,6 +4,14 @@ use App\Http\Controllers\Admin\ApplicationDocumentController;
 use App\Http\Controllers\Admin\ServiceBookingController;
 use Illuminate\Support\Facades\Route;
 
+// Invoices: one per booking, from the agency (or superadmin) to its client
+Route::get('invoices', [\App\Http\Controllers\Admin\InvoiceController::class, 'index'])->name('admin.invoices.index');
+Route::get('invoices/export/{format}', [\App\Http\Controllers\Admin\InvoiceController::class, 'export'])->whereIn('format', ['xlsx', 'csv'])->name('admin.invoices.export');
+Route::get('invoices/{uid}', [\App\Http\Controllers\Admin\InvoiceController::class, 'show'])->name('admin.invoices.show');
+Route::get('invoices/{uid}/{mode}', [\App\Http\Controllers\Admin\InvoiceController::class, 'change'])->whereIn('mode', ['edit', 'amend'])->name('admin.invoices.change');
+Route::post('invoices/{uid}/pay', [\App\Http\Controllers\Admin\InvoiceController::class, 'pay'])->name('admin.invoices.pay');
+Route::post('invoices/{uid}/confirm-paper', [\App\Http\Controllers\Admin\InvoiceController::class, 'confirmPaper'])->name('admin.invoices.confirm-paper');
+
 // Bookings made from the admin side (visa, flight…), with invoice numbers
 Route::get('service-bookings', [ServiceBookingController::class, 'index'])->name('admin.service-bookings.index');
 Route::get('service-bookings/{uid}', [ServiceBookingController::class, 'show'])->name('admin.service-bookings.show');
@@ -25,5 +33,6 @@ Route::get('visa-applications/{uid}/documents/{document}/file', [ApplicationDocu
 Route::get('service-bookings/{uid}/edit', [ServiceBookingController::class, 'edit'])->name('admin.service-bookings.edit');
 Route::put('service-bookings/{uid}', [ServiceBookingController::class, 'update'])->name('admin.service-bookings.update');
 Route::post('service-bookings/{uid}/doc-sign', [ServiceBookingController::class, 'generateDocSign'])->name('admin.service-bookings.doc-sign');
+Route::post('service-bookings/{uid}/doc-sign/regenerate', [ServiceBookingController::class, 'regenerateDocSign'])->name('admin.service-bookings.doc-sign.regenerate');
 Route::post('service-bookings/{uid}/doc-sign/resend', [ServiceBookingController::class, 'resendDocSign'])->name('admin.service-bookings.doc-sign.resend');
 Route::put('service-bookings/{uid}/remark', [ServiceBookingController::class, 'updateRemark'])->name('admin.service-bookings.remark');

@@ -8,6 +8,29 @@ type MenuItem =
     | { type: 'link'; icon: string; label: string; href: string; permission?: string; adminOnly?: boolean }
     | { type: 'dropdown'; icon: string; label: string; children: { label: string; href: string; soon?: boolean }[]; permission?: string };
 
+// Invoices, with the invoice reports under it (the reports are coming soon)
+const INVOICES_MENU: MenuItem = {
+    type: 'dropdown',
+    icon: 'fa-solid fa-file-invoice-dollar',
+    label: 'Invoices',
+    children: [
+        { label: 'Invoices', href: '/admin/invoices' },
+        { label: 'Old Invoices', href: '/admin/invoices/old', soon: true },
+        { label: 'Amended Invoices', href: '/admin/invoices/amended', soon: true },
+        { label: 'Canceled Invoices', href: '/admin/invoices/canceled', soon: true },
+        { label: 'Visa Report', href: '/admin/invoices/visa-report', soon: true },
+        { label: 'Expenses Report', href: '/admin/invoices/expenses-report', soon: true },
+        { label: 'Document Movement Report', href: '/admin/invoices/document-movement', soon: true },
+        { label: 'Refunded Invoices', href: '/admin/invoices/refunded', soon: true },
+        { label: 'Paid Invoices Report', href: '/admin/invoices/paid', soon: true },
+        { label: 'UnPaid Invoices Report', href: '/admin/invoices/unpaid', soon: true },
+        { label: 'Summary Report', href: '/admin/invoices/summary', soon: true },
+        { label: 'Invoices Report', href: '/admin/invoices/report', soon: true },
+        { label: 'Issues', href: '/admin/invoices/issues', soon: true },
+        { label: 'VAT', href: '/admin/invoices/vat', soon: true },
+    ],
+};
+
 // Clients, with Client Documents (documents received from clients) under it
 const CLIENTS_MENU: MenuItem = {
     type: 'dropdown',
@@ -52,6 +75,7 @@ const getSuperadminMenuItems = (companyName: string): MenuItem[] => [
 
     { type: 'link', icon: 'fa-solid fa-calendar-check', label: 'Bookings', href: '/admin/bookings', permission: 'booking.view' },
     { type: 'link', icon: 'fa-solid fa-file-invoice', label: 'Service Bookings', href: '/admin/service-bookings' },
+    INVOICES_MENU,
     { type: 'link', icon: 'fa-solid fa-envelope', label: 'Contact Requests', href: '/admin/contact-requests', permission: 'contact-request.view' },
     { type: 'link', icon: 'fa-solid fa-quote-left', label: 'Travel Quotes', href: '/admin/travel-quote', permission: 'travel-quote.view' },
 
@@ -102,6 +126,7 @@ const getAgencyMenuItems = (agencyName: string, serviceItems: MenuItem[]): MenuI
 
     { type: 'link', icon: 'fa-solid fa-calendar-check', label: 'Bookings', href: '/admin/bookings', permission: 'booking.view' },
     { type: 'link', icon: 'fa-solid fa-file-invoice', label: 'Service Bookings', href: '/admin/service-bookings' },
+    INVOICES_MENU,
 
     { type: 'title', label: 'SETTINGS' },
 

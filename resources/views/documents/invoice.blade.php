@@ -263,6 +263,16 @@
     $showVat = $booking->tax_amount > 0;
 
     $price = (float) $booking->total_amount;
+    // The payments recorded with "Pay" (Invoices): one row per method; none yet → cash on the booking date as before
+    $paymentRows = [];
+    if (! empty($details['payment']['paid_on'])) {
+        $paymentRows[] = [$details['payment']['mode'], (float) ($details['payment']['amount'] ?? 0), $details['payment']['paid_on'], null];
+    }
+    foreach ($details['payments'] ?? [] as $p) {
+        foreach ($p['methods'] ?? [] as $mode => $amount) {
+            $paymentRows[] = [$mode, (float) $amount, $p['paid_on'], in_array($mode, ['credit_card', 'debit_card'], true) ? ($p['card_last4'] ?? null) : null];
+        }
+    }
     $paymentMode = 'CASH';
     $terms = config('document_sign.terms');
 @endphp
@@ -507,7 +517,7 @@
             @endif
         </tbody>
     </table>
-    @else
+    @elseif($booking->service === 'visa')
     <div class="section-header">VISA SERVICES</div>
 
     <table class="table">
@@ -563,11 +573,19 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>{{ strtoupper($paymentMode) }}</td>
-                    <td>{{ $currency }} {{ number_format($price, 2) }}</td>
-                    <td>{{ $booking->created_at->format('d-m-Y') }}</td>
-                </tr>
+                @forelse($paymentRows as [$mode, $amount, $paidOn, $last4])
+                    <tr>
+                        <td>{{ strtoupper(str_replace('_', ' ', $mode)) }}@if($last4) (**** {{ $last4 }})@endif</td>
+                        <td>{{ $currency }} {{ number_format($amount, 2) }}</td>
+                        <td>{{ \Carbon\Carbon::parse($paidOn)->format('d-m-Y') }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td>{{ strtoupper($paymentMode) }}</td>
+                        <td>{{ $currency }} {{ number_format($price, 2) }}</td>
+                        <td>{{ $booking->created_at->format('d-m-Y') }}</td>
+                    </tr>
+                @endforelse
             </tbody>
         </table>
     </div>

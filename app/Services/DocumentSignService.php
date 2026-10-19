@@ -59,6 +59,26 @@ class DocumentSignService
         return $signature->refresh();
     }
 
+    /**
+     * "Regenerate": a new signing link (the old one stops working) with a
+     * fresh deadline, emailed to the signer — for a link that has expired.
+     */
+    public function regenerate(BookingSignature $signature): BookingSignature
+    {
+        if ($signature->isSigned()) {
+            throw ValidationException::withMessages(['signature' => 'This document has already been signed.']);
+        }
+
+        $signature->update([
+            'signing_token' => \Illuminate\Support\Str::random(64),
+            'status' => BookingSignature::STATUS_PENDING,
+            'expires_at' => now()->addDays(BookingSignature::VALID_DAYS),
+        ]);
+        $this->sendEmail($signature);
+
+        return $signature->refresh();
+    }
+
     /** The public link the signer opens, on the agency's own site. */
     public function url(BookingSignature $signature): string
     {
