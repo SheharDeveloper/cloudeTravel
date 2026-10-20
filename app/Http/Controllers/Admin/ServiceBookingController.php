@@ -288,10 +288,13 @@ class ServiceBookingController extends Controller
      * "Edit": the visa steps again from the first one (choosing countries),
      * filled in from this booking. Saving updates the same booking.
      */
-    public function edit(string $uid)
+    public function edit(Request $request, string $uid)
     {
         $booking = $this->owned()->where('uid', $uid)->firstOrFail();
         abort_unless($booking->service === 'visa', 404);
+
+        // Every way in sets the mode afresh: an Amendment only when asked for (?mode=amend), else an Edit
+        $this->invoiceService->rememberChangeMode($uid, $request->query('mode') === 'amend' ? 'amend' : 'edit');
 
         return redirect()->route('admin.visa-search', $this->requirementsService->editStartParams($booking));
     }
@@ -301,17 +304,23 @@ class ServiceBookingController extends Controller
         $booking = $this->owned()->with('applications')->where('uid', $uid)->firstOrFail();
         abort_unless($booking->service === 'visa', 404);
 
+        // Edit (anything) or Amendment (only the date, country and visa: the client and applicants stay)
+        $mode = $this->invoiceService->pullChangeMode($uid);
+        if ($mode === 'amend') {
+            $this->requirementsService->lockClientAndApplicants($request, $booking);
+        }
+
         // Before the edit: what the invoice said, and what saving must not lose
         $before = $this->invoiceService->snapshot($booking);
         $kept = array_intersect_key($booking->details ?? [], array_flip(\App\Services\InvoiceService::KEPT_ON_EDIT));
 
-        $booking = $this->requirementsService->storeApplication($request, $booking);
+        $booking = $this->requirementsService->storeApplication($request, $booking, $mode === 'amend');
 
         // After: keep the payments / confirmation / history, and record it as an Edit or an Amendment
-        $this->invoiceService->recordChange($booking->fresh('applications'), $before, $kept, $this->invoiceService->pullChangeMode($uid));
+        $this->invoiceService->recordChange($booking->fresh('applications'), $before, $kept, $mode);
 
         return redirect()->route('admin.service-bookings.show', $booking->uid)
-            ->with('success', "Booking {$booking->invoice_number} updated.");
+            ->with('success', $mode === 'amend' ? "Invoice {$booking->fresh()->invoice_number} amended." : "Booking {$booking->fresh()->invoice_number} updated.");
     }
 
     /**

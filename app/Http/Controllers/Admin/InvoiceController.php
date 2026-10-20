@@ -64,9 +64,7 @@ class InvoiceController extends Controller
     /** Edit / Amendment: remembers which was clicked, then opens the booking's edit screens. */
     public function change(string $uid, string $mode)
     {
-        $this->invoices->rememberChangeMode($uid, $mode);
-
-        return redirect()->route('admin.service-bookings.edit', $uid);
+        return redirect()->route('admin.service-bookings.edit', ['uid' => $uid] + ($mode === 'amend' ? ['mode' => 'amend'] : []));
     }
 
     /** "Pay": records the client's payment. */

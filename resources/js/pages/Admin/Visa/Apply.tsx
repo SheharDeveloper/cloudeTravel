@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { ChangeFlag } from '@/components/EditingBookingBanner';
 import { Head, router, usePage } from '@inertiajs/react';
 import toast, { Toaster } from 'react-hot-toast';
 import { ProtectedRoute } from '@/lib/ProtectedRoute';
@@ -88,6 +89,8 @@ interface Props {
 interface BookingProp {
     uid: string;
     invoice_number: string;
+    // Edit (anything) or Amendment (only the date, country and visa)
+    mode?: 'edit' | 'amend';
     date_of_entry: string | null;
     client: string | null;
     passengers: (PassengerFields & { relation: string; family_member_id: number | null })[];
@@ -413,7 +416,7 @@ export default function VisaApply() {
                                         <span>/</span>
                                         <a href={`/admin/service-bookings/${booking.uid}`}>{booking.invoice_number}</a>
                                         <span>/</span>
-                                        <span className="va-crumb-active">Edit</span>
+                                        <span className="va-crumb-active">{booking.mode === 'amend' ? 'Amendment' : 'Edit'}</span>
                                     </>
                                 ) : (
                                     <>
@@ -430,6 +433,18 @@ export default function VisaApply() {
                         <i className="fa-solid fa-plane"></i>
                     </div>
                 </div>
+
+                {/* Edit or Amendment: which one, and what may change */}
+                {booking && (
+                    <div className={`alert ${booking.mode === 'amend' ? 'alert-warning' : 'alert-info'} d-flex align-items-center gap-2 mb-4`}>
+                        <ChangeFlag mode={booking.mode} />
+                        <span>
+                            {booking.mode === 'amend'
+                                ? <>Amending <strong>{booking.invoice_number}</strong>: you can change the <strong>date of entry, country and visa</strong>. The client and applicants are locked.</>
+                                : <>Editing <strong>{booking.invoice_number}</strong>: everything can be changed.</>}
+                        </span>
+                    </div>
+                )}
 
                 <div className="row g-4">
                     {/* Visa details + client */}
@@ -503,6 +518,13 @@ export default function VisaApply() {
                                 </div>
                             </div>
 
+                            {/* Amendment: the client and passengers can't change (the server keeps them too) */}
+                            <fieldset disabled={booking?.mode === 'amend'} style={booking?.mode === 'amend' ? { opacity: 0.65 } : undefined}>
+                            {booking?.mode === 'amend' && (
+                                <div className="small text-muted mt-3">
+                                    <i className="fa-solid fa-lock me-1"></i>Client and applicants are locked during an amendment.
+                                </div>
+                            )}
                             {/* Client picker only for sessions with the Clients permission */}
                             {canSelectClient && (
                                 <>
@@ -577,8 +599,8 @@ export default function VisaApply() {
                                 </>
                             )}
 
-                            {/* Passengers — each one becomes its own application */}
-                            {(selectedClient || !canSelectClient) && (
+                            {/* Passengers — each one becomes its own application (not shown for an amendment: they stay as booked) */}
+                            {(selectedClient || !canSelectClient) && booking?.mode !== 'amend' && (
                                 <>
                                     <hr className="va-divider" />
 
@@ -687,10 +709,11 @@ export default function VisaApply() {
                                     </div>
                                 </>
                             )}
+                            </fieldset>
 
                             <button type="button" className="va-proceed" onClick={handleProceed} disabled={saving}>
                                 <i className="fa-solid fa-arrow-right"></i>{' '}
-                                {saving ? 'Saving…' : booking ? 'Save Changes' : 'Proceed To Payment'}
+                                {saving ? 'Saving…' : booking ? (booking.mode === 'amend' ? 'Save Amendment' : 'Save Changes') : 'Proceed To Payment'}
                             </button>
                         </div>
                     </div>

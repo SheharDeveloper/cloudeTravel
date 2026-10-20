@@ -235,9 +235,30 @@ class VisaRequirementsService
             'uid' => $booking->uid,
             'invoice_number' => $booking->invoice_number,
             'visa_uid' => $booking->details['visa_uid'] ?? null,
+            // Edit, or Amendment (only the date, country and visa may change)
+            'mode' => $this->changeMode($booking),
             // Same lookup as the Edit redirect (older bookings only stored the name)
             'living_in' => $this->editStartParams($booking)['living_in'] ?? null,
         ] : null;
+    }
+
+    /** "edit" or "amend": which the Invoices page opened (Edit from the booking page is an edit). */
+    public function changeMode(ServiceBooking $booking): string
+    {
+        return session("invoice_change.{$booking->uid}") === 'amend' ? 'amend' : 'edit';
+    }
+
+    /**
+     * An amendment keeps the booking's client and applicants: whatever was
+     * sent for them is replaced with what the booking already has.
+     */
+    public function lockClientAndApplicants(Request $request, ServiceBooking $booking): void
+    {
+        $prefill = $this->bookingPrefill($booking);
+        $request->merge([
+            'client' => $prefill['client'],
+            'passengers' => $prefill['passengers']->all(),
+        ]);
     }
 
     /** Everything the Apply page fills back in from the booking being edited. */
@@ -248,6 +269,7 @@ class VisaRequirementsService
         return [
             'uid' => $booking->uid,
             'invoice_number' => $booking->invoice_number,
+            'mode' => $this->changeMode($booking),
             'date_of_entry' => $booking->service_date?->toDateString(),
             'client' => $booking->client?->uid,
             'passengers' => $booking->applications->map(fn ($a) => [
@@ -270,7 +292,7 @@ class VisaRequirementsService
      * With $existing (the Edit flow) that booking is updated instead, keeping
      * its invoice number, and its applications are replaced.
      */
-    public function storeApplication(Request $request, ?ServiceBooking $existing = null): ServiceBooking
+    public function storeApplication(Request $request, ?ServiceBooking $existing = null, bool $keepApplications = false): ServiceBooking
     {
         // An edited booking may keep a date of entry that's now in the past
         $keepsDate = $existing && $request->input('date_of_entry') === $existing->service_date?->toDateString();
@@ -320,7 +342,7 @@ class VisaRequirementsService
 
         $count = count($validated['passengers']);
 
-        return DB::transaction(function () use ($validated, $existing, $owner, $client, $familyIds, $visa, $cost, $pricing, $from, $to, $livingIn, $count) {
+        return DB::transaction(function () use ($validated, $existing, $owner, $client, $familyIds, $visa, $cost, $pricing, $from, $to, $livingIn, $count, $keepApplications) {
             $attributes = [
                 'client_id' => $client?->id,
                 'service_date' => $validated['date_of_entry'],
@@ -352,6 +374,14 @@ class VisaRequirementsService
                     'taxes' => $pricing['taxes'],
                 ],
             ];
+
+            if ($existing && $keepApplications) {
+                // Amendment: same applicants — their applications (forms, documents) stay; only the price changes
+                $existing->update($attributes);
+                $existing->applications()->update(['amount' => $cost['total_cost']]);
+
+                return $existing;
+            }
 
             if ($existing) {
                 $existing->update($attributes);
