@@ -33,7 +33,14 @@ interface InvoiceRow {
     total_amount: number;
     paid_amount: number;
     pending_amount: number;
-    payment_status: 'paid' | 'partial' | 'unpaid';
+    payment_status: 'paid' | 'partial' | 'unpaid' | 'refunded';
+    // Refund: what was given back and the charges kept (once refunded)
+    refunded: boolean;
+    refund: {
+        paid_amount: number; total_charges: number; refund_amount: number; remarks: string | null; at: string; by?: string | null;
+        mode_label: string; charge_lines: { label: string; amount: number }[]; full: boolean; show_to_client?: boolean;
+    } | null;
+    card_paid_amount: number;
     paid: boolean;
     payment: { mode: string; paid_on: string } | null;
     address: string | null;
@@ -49,7 +56,7 @@ interface InvoiceRow {
 
 type InvoiceChange = { at: string; by: string | null; number_before?: string; changes: { field: string; old: string; new: string }[] };
 
-type Filters = { search: string; service: string; date_type: string; start: string; end: string; per_page: number };
+type Filters = { search: string; service: string; date_type: string; start: string; end: string; per_page: number; scope?: 'invoices' | 'refunded' };
 
 interface Props {
     invoices: {
@@ -66,6 +73,12 @@ interface Props {
     dateTypes: Record<string, string>;
     perPageOptions: number[];
     paymentModes: Record<string, string>;
+    // Refund: the charges kept back (key => label)
+    refundCharges: Record<string, string>;
+    // Create Invoice: the invoice types this session may create (empty: no button)
+    createTypes: Record<string, string>;
+    // What this session may do with invoices
+    can: Record<'list' | 'view' | 'create' | 'edit' | 'amendment' | 'cancel' | 'refund' | 'pay', boolean>;
     flash?: { success?: string | null };
 }
 
@@ -85,7 +98,36 @@ const toQuery = (f: Partial<Filters>) =>
  * (e-signed, or confirmed on a paper print).
  */
 export default function InvoicesIndex() {
-    const { invoices, filters, services, dateTypes, perPageOptions, paymentModes, flash } = usePage().props as unknown as Props;
+    const { invoices, filters, services, dateTypes, perPageOptions, paymentModes, refundCharges, createTypes, can, flash } = usePage().props as unknown as Props;
+    // Refund: confirm first, then the charges and amount
+    const [refundAsk, setRefundAsk] = useState<InvoiceRow | null>(null);
+    const [refunding, setRefunding] = useState<InvoiceRow | null>(null);
+    const [refundDetailsOf, setRefundDetailsOf] = useState<InvoiceRow | null>(null);
+    const toggleRefundDisplay = (inv: InvoiceRow) => {
+        setBusy(`display-${inv.uid}`);
+        router.post(`/admin/invoices/${inv.uid}/refund-display`, { show: !inv.refund?.show_to_client }, {
+            preserveScroll: true,
+            onError: (errs) => toast.error(Object.values(errs)[0] ?? 'Something went wrong'),
+            onFinish: () => setBusy(null),
+        });
+    };
+    const saveRefund = (charges: Record<string, number>, remarks: string, mode: string) => {
+        if (!refunding) return;
+        setBusy(`refund-${refunding.uid}`);
+        router.post(`/admin/invoices/${refunding.uid}/refund`, { charges, remarks, mode }, {
+            preserveScroll: true,
+            onSuccess: () => setRefunding(null),
+            onError: (errs) => toast.error(Object.values(errs)[0] ?? 'Something went wrong'),
+            onFinish: () => setBusy(null),
+        });
+    };
+    // Create Invoice: pick the service type first
+    const [creating, setCreating] = useState(false);
+    const [createType, setCreateType] = useState('');
+    // Invoices, or Refunded Invoices (same page, its own list)
+    const refundedList = filters.scope === 'refunded';
+    const listPath = refundedList ? '/admin/invoices/refunded' : '/admin/invoices';
+    const canCreate = !refundedList && Object.keys(createTypes ?? {}).length > 0;
     const [form, setForm] = useState<Filters>(filters);
     // The open Action menu, pinned to the screen under its button (the table scrolls sideways)
     const [openMenu, setOpenMenu] = useState<string | null>(null);
@@ -152,7 +194,7 @@ export default function InvoicesIndex() {
     const search = (patch: Partial<Filters> = {}) => {
         const next = { ...form, ...patch };
         setForm(next);
-        router.get('/admin/invoices', Object.fromEntries(new URLSearchParams(toQuery(next))), { preserveState: true, replace: true });
+        router.get(listPath, Object.fromEntries(new URLSearchParams(toQuery({ ...next, scope: undefined }))), { preserveState: true, replace: true });
     };
     const clearFilters = () => search({ search: '', service: '', date_type: '', start: '', end: '' });
 
@@ -172,7 +214,7 @@ export default function InvoicesIndex() {
         post(`remind-${inv.uid}`, `/admin/service-bookings/${inv.uid}/${path}`);
     };
 
-    const exportQuery = toQuery({ ...filters, per_page: undefined });
+    const exportQuery = toQuery({ ...filters, per_page: undefined, scope: refundedList ? 'refunded' : undefined });
     const hasFilters = !!(filters.search || filters.service || filters.date_type || filters.start || filters.end);
 
     const menuItem = (label: string, className: string, onClick: () => void, disabled = false) => (
@@ -188,11 +230,22 @@ export default function InvoicesIndex() {
             <div className="page-title d-flex justify-content-between align-items-center flex-wrap gap-2">
                 <nav aria-label="breadcrumb">
                     <ol className="breadcrumb">
-                        <li><h1>Invoice</h1></li>
+                        <li><h1>{refundedList ? 'Refunded Invoices' : 'Invoice'}</h1></li>
                         <li className="breadcrumb-item"><a href="/dashboard">Home</a></li>
-                        <li className="breadcrumb-item active">Invoice</li>
+                        {refundedList && <li className="breadcrumb-item"><a href="/admin/invoices">Invoice</a></li>}
+                        <li className="breadcrumb-item active">{refundedList ? 'Refunded Invoices' : 'Invoice'}</li>
                     </ol>
                 </nav>
+                {canCreate && (
+                    <button
+                        type="button"
+                        className="btn btn-sm text-white"
+                        style={{ background: '#7cc22b' }}
+                        onClick={() => { setCreateType(''); setCreating(true); }}
+                    >
+                        <i className="fa fa-plus me-2"></i>Create Invoice
+                    </button>
+                )}
             </div>
 
             {/* Filters */}
@@ -286,6 +339,17 @@ export default function InvoicesIndex() {
                             {hasFilters ? 'No invoices match the filters.' : 'No invoices yet. Every booking gets an invoice here.'}
                         </div>
                     ) : (
+                        <>
+                        {refundedList ? (
+                            <RefundedInvoicesTable
+                                rows={invoices.data}
+                                canRefund={can.refund}
+                                busy={busy}
+                                onView={(inv) => router.visit(`/admin/invoices/${inv.uid}`)}
+                                onDetails={setRefundDetailsOf}
+                                onToggle={toggleRefundDisplay}
+                            />
+                        ) : (
                         <div className="table-responsive">
                             <style>{`
                                 .inv-table { font-size: 13px; }
@@ -357,8 +421,11 @@ export default function InvoicesIndex() {
                                             <td className="text-nowrap">{fmtDate(inv.return_date)}</td>
                                             <td className="text-nowrap">{fmtDateTime(inv.booking_date)}</td>
                                             <td className="text-nowrap">{inv.total}</td>
-                                            <td className={inv.payment_status === 'paid' ? 'text-success' : inv.payment_status === 'partial' ? 'text-warning' : 'text-danger'}>
-                                                {inv.payment_status === 'paid' ? 'Paid' : inv.payment_status === 'partial' ? 'Partially Paid' : 'Unpaid'}
+                                            <td className={inv.payment_status === 'refunded' ? 'text-primary' : inv.payment_status === 'paid' ? 'text-success' : inv.payment_status === 'partial' ? 'text-warning' : 'text-danger'}>
+                                                {inv.payment_status === 'refunded' ? 'Refunded' : inv.payment_status === 'paid' ? 'Paid' : inv.payment_status === 'partial' ? 'Partially Paid' : 'Unpaid'}
+                                                {inv.refund && (
+                                                    <small className="d-block text-muted">{inv.currency_symbol}{inv.refund.refund_amount.toFixed(2)} back · {fmtDate(inv.refund.at)}</small>
+                                                )}
                                                 {inv.payment_status === 'partial' && (
                                                     <small className="d-block text-muted">{inv.currency_symbol}{inv.paid_amount.toFixed(2)} of {inv.total}</small>
                                                 )}
@@ -389,7 +456,7 @@ export default function InvoicesIndex() {
                                                         style={{ zIndex: 1050, top: menuPos.top, left: menuPos.left, width: 170, maxHeight: 'calc(100vh - 16px)', overflowY: 'auto' }}
                                                         onClick={(e) => e.stopPropagation()}
                                                     >
-                                                        {menuItem('Invoice', 'btn-info', () => router.visit(`/admin/invoices/${inv.uid}`))}
+                                                        {can.view && menuItem('Invoice', 'btn-info', () => router.visit(`/admin/invoices/${inv.uid}`))}
                                                         {inv.signed_url && menuItem('E-Signed Invoice', 'btn-success', () => window.open(inv.signed_url!, '_blank'))}
                                                         {menuItem('Payment Receipt', 'btn-secondary', () => setComingSoon('Payment Receipt'))}
                                                     </div>
@@ -401,16 +468,17 @@ export default function InvoicesIndex() {
                                                         style={{ zIndex: 1050, top: menuPos.top, left: menuPos.left, width: 170, maxHeight: 'calc(100vh - 16px)', overflowY: 'auto' }}
                                                         onClick={(e) => e.stopPropagation()}
                                                     >
-                                                        {menuItem('View', 'btn-info', () => router.visit(`/admin/invoices/${inv.uid}`))}
-                                                        {menuItem(inv.edits.length ? `Edit (${inv.edits.length})` : 'Edit', 'btn-primary', () => editInvoice(inv, 'edit'))}
-                                                        {menuItem(inv.amendments.length ? `Amendment (${inv.amendments.length})` : 'Amendment', 'btn-danger', () => editInvoice(inv, 'amend'))}
-                                                        {menuItem('Cancel', 'btn-danger', () => setComingSoon('Cancel'))}
-                                                        {inv.pending_amount > 0 && !['rejected', 'cancelled'].includes(inv.status) &&
+                                                        {can.view && menuItem('View', 'btn-info', () => router.visit(`/admin/invoices/${inv.uid}`))}
+                                                        {can.edit && !inv.refunded && menuItem(inv.edits.length ? `Edit (${inv.edits.length})` : 'Edit', 'btn-primary', () => editInvoice(inv, 'edit'))}
+                                                        {can.amendment && !inv.refunded && menuItem(inv.amendments.length ? `Amendment (${inv.amendments.length})` : 'Amendment', 'btn-danger', () => editInvoice(inv, 'amend'))}
+                                                        {can.cancel && menuItem('Cancel', 'btn-danger', () => setComingSoon('Cancel'))}
+                                                        {can.pay && !inv.refunded && inv.pending_amount > 0 && !['rejected', 'cancelled'].includes(inv.status) &&
                                                             menuItem('Pay', 'btn-success', () => {
                                                                 setOpenMenu(null);
                                                                 setPaying(inv);
                                                             })}
-                                                        {menuItem('Refund', 'btn-success', () => setComingSoon('Refund'))}
+                                                        {can.refund && !inv.refunded && inv.paid_amount > 0 &&
+                                                            menuItem('Refund', 'btn-success', () => { setOpenMenu(null); setRefundAsk(inv); })}
                                                         {inv.sign !== 'signed' && !['rejected', 'cancelled'].includes(inv.status) &&
                                                             menuItem(
                                                                 inv.sign === 'expired' ? 'Send Reminder (new link)' : 'Send Reminder',
@@ -448,6 +516,8 @@ export default function InvoicesIndex() {
                                 </tbody>
                             </table>
                         </div>
+                        )}
+                        </>
                     )}
                 </div>
             </div>
@@ -522,6 +592,70 @@ export default function InvoicesIndex() {
                     </div>
                 );
             })()}
+
+            {/* Create Invoice: choose the service type */}
+            {creating && (
+                <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onClick={() => setCreating(false)}>
+                    <div className="modal-dialog modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Create Invoice</h5>
+                                <button type="button" className="btn-close" onClick={() => setCreating(false)}></button>
+                            </div>
+                            <div className="modal-body">
+                                <label className="form-label">Service Type</label>
+                                <select className="form-select" value={createType} onChange={(e) => setCreateType(e.target.value)}>
+                                    <option value="">--Select Service--</option>
+                                    {Object.entries(createTypes).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                                </select>
+                                {createType === 'visa' && (
+                                    <div className="alert alert-info small mt-3 mb-0">
+                                        Visa invoices are made from a visa booking: choose the countries and visa, then the client — the invoice is created with the booking.
+                                    </div>
+                                )}
+                                {createType && createType !== 'visa' && (
+                                    <div className="alert alert-warning small mt-3 mb-0">
+                                        <i className="fa fa-clock me-1"></i>The <strong>{createTypes[createType]}</strong> invoice form is coming next.
+                                    </div>
+                                )}
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" onClick={() => setCreating(false)}>Cancel</button>
+                                <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    disabled={createType !== 'visa'}
+                                    onClick={() => router.visit('/admin/visa-search')}
+                                >
+                                    Continue
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Refund Details ("View Now") */}
+            {refundDetailsOf && <RefundDetailsModal invoice={refundDetailsOf} onClose={() => setRefundDetailsOf(null)} />}
+
+            {/* Refund: confirm, then the Refund Invoice form */}
+            {refundAsk && (
+                <RefundConfirm
+                    invoice={refundAsk}
+                    onNo={() => setRefundAsk(null)}
+                    onYes={() => { setRefunding(refundAsk); setRefundAsk(null); }}
+                />
+            )}
+            {refunding && (
+                <RefundInvoiceModal
+                    invoice={refunding}
+                    charges={refundCharges}
+                    modes={paymentModes}
+                    busy={busy !== null}
+                    onClose={() => setRefunding(null)}
+                    onRefund={saveRefund}
+                />
+            )}
 
             {/* Pay Invoice */}
             {paying && (
@@ -728,6 +862,300 @@ function PayInvoiceModal({ invoice, modes, busy, onClose, onPay }: {
                         >
                             {busy ? 'Saving…' : 'Pay'}
                         </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+/** Refund, step 1: are you sure? */
+function RefundConfirm({ invoice, onNo, onYes }: { invoice: InvoiceRow; onNo: () => void; onYes: () => void }) {
+    return (
+        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(15,23,42,0.55)' }} onClick={onNo}>
+            <div className="modal-dialog modal-dialog-centered" style={{ maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
+                <div className="modal-content border-0 shadow-lg" style={{ borderRadius: 14 }}>
+                    <div className="modal-body text-center px-4 pt-4 pb-3">
+                        <div
+                            className="mx-auto mb-3 d-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary"
+                            style={{ width: 64, height: 64, fontSize: 28 }}
+                        >
+                            <i className="fa-solid fa-rotate-left"></i>
+                        </div>
+                        <h5 className="fw-bold mb-2">Refund this invoice?</h5>
+                        <p className="text-muted mb-1">
+                            Invoice <strong className="text-dark">{invoice.invoice_number}</strong> for <strong className="text-dark">{invoice.receiver?.name}</strong>
+                        </p>
+                        <p className="text-muted small mb-0">
+                            Paid so far: <strong className="text-dark">{invoice.currency_symbol}{invoice.paid_amount.toFixed(2)}</strong>.
+                            A refund can't be undone — the invoice becomes <strong>INVR…</strong> and can no longer be paid, edited or amended.
+                        </p>
+                    </div>
+                    <div className="modal-footer border-0 justify-content-center gap-2 pb-4">
+                        <button type="button" className="btn btn-light px-4" onClick={onNo}>No, keep it</button>
+                        <button type="button" className="btn btn-primary px-4" onClick={onYes}>Yes, refund</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+/** Refund, step 2: the charges kept back, the amount to refund, and remarks — in the theme's modal style. */
+function RefundInvoiceModal({ invoice, charges, modes, busy, onClose, onRefund }: {
+    invoice: InvoiceRow;
+    charges: Record<string, string>;
+    modes: Record<string, string>;
+    busy: boolean;
+    onClose: () => void;
+    onRefund: (charges: Record<string, number>, remarks: string, mode: string) => void;
+}) {
+    // How the money goes back to the client
+    const [mode, setMode] = useState(modes.bank_transfer ? 'bank_transfer' : Object.keys(modes)[0]);
+    const symbol = invoice.currency_symbol;
+    const money = (n: number) => `${symbol}${n.toFixed(2)}`;
+    // The credit card charge starts at 1% of what was paid by card
+    const [values, setValues] = useState<Record<string, string>>(() =>
+        Object.fromEntries(Object.keys(charges).map((k) => [k, k === 'credit_charge' ? (invoice.card_paid_amount * 0.01).toFixed(2) : '0.00'])),
+    );
+    const [remarks, setRemarks] = useState('');
+    const [calculated, setCalculated] = useState<number | null>(null);
+
+    const totalCharges = Object.values(values).reduce((sum, v) => sum + (Number(v) || 0), 0);
+    const tooMuch = totalCharges > invoice.paid_amount + 0.005;
+    const calculate = () => setCalculated(Math.max(invoice.paid_amount - totalCharges, 0));
+    // Changing a charge needs a new calculation
+    const setCharge = (key: string, value: string) => {
+        setValues({ ...values, [key]: value });
+        setCalculated(null);
+    };
+
+    return (
+        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onClick={() => !busy && onClose()}>
+            <div className="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title d-flex align-items-center gap-2">
+                            <span
+                                className="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary"
+                                style={{ width: 36, height: 36 }}
+                            >
+                                <i className="fa-solid fa-rotate-left"></i>
+                            </span>
+                            Refund Invoice
+                        </h5>
+                        <button type="button" className="btn-close" onClick={onClose} disabled={busy}></button>
+                    </div>
+                    <div className="modal-body">
+                        {/* The invoice */}
+                        <div className="row g-3 mb-3">
+                            <div className="col-md-6">
+                                <label className="form-label">Invoice No</label>
+                                <input className="form-control" value={invoice.invoice_number} readOnly disabled />
+                            </div>
+                            <div className="col-md-6">
+                                <label className="form-label">Total Paid</label>
+                                <input className="form-control" value={money(invoice.paid_amount)} readOnly disabled />
+                            </div>
+                        </div>
+
+                        {/* The charges kept back */}
+                        <h6 className="mb-2">Charges</h6>
+                        <div className="row g-3 mb-3">
+                            {Object.entries(charges).map(([key, name]) => (
+                                <div key={key} className="col-md-6">
+                                    <label className="form-label">{name}</label>
+                                    <div className="input-group">
+                                        <span className="input-group-text">{symbol}</span>
+                                        <input
+                                            type="number"
+                                            min="0"
+                                            step="0.01"
+                                            className="form-control"
+                                            value={values[key]}
+                                            onChange={(e) => setCharge(key, e.target.value)}
+                                        />
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Paid − charges = refund */}
+                        <div className="border rounded p-3 mb-3" style={{ background: 'var(--rgba-primary-1, #f5f3ff)' }}>
+                            <div className="d-flex justify-content-between small mb-1">
+                                <span className="text-muted">Total Paid</span><span>{money(invoice.paid_amount)}</span>
+                            </div>
+                            <div className="d-flex justify-content-between small mb-2">
+                                <span className="text-muted">Total Charges</span><span>- {money(totalCharges)}</span>
+                            </div>
+                            <div className="d-flex justify-content-between align-items-center border-top pt-2">
+                                <span className="fw-semibold">Amount To Refund</span>
+                                <span className={`fw-bold fs-5 ${calculated === null ? 'text-muted' : 'text-primary'}`}>
+                                    {calculated === null ? '—' : money(calculated)}
+                                </span>
+                            </div>
+                            <div className="text-end mt-2">
+                                <button type="button" className="btn btn-outline-primary btn-sm" onClick={calculate} disabled={tooMuch}>
+                                    <i className="fa-solid fa-calculator me-2"></i>Calculate Final Refund Amount
+                                </button>
+                            </div>
+                        </div>
+                        {tooMuch && (
+                            <div className="alert alert-danger py-2 small">
+                                The charges ({money(totalCharges)}) are more than the amount paid ({money(invoice.paid_amount)}).
+                            </div>
+                        )}
+
+                        <label className="form-label">Refund Mode</label>
+                        <select className="form-select mb-3" value={mode} onChange={(e) => setMode(e.target.value)}>
+                            {Object.entries(modes).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                        </select>
+
+                        <label className="form-label">Remarks</label>
+                        <textarea
+                            className="form-control"
+                            rows={3}
+                            placeholder="Reason for the refund"
+                            value={remarks}
+                            onChange={(e) => setRemarks(e.target.value)}
+                            maxLength={2000}
+                        />
+                    </div>
+                    <div className="modal-footer">
+                        <button type="button" className="btn btn-light" onClick={onClose} disabled={busy}>Close</button>
+                        <button
+                            type="button"
+                            className="btn btn-primary"
+                            disabled={busy || calculated === null || tooMuch}
+                            title={calculated === null ? 'Calculate the refund amount first' : undefined}
+                            onClick={() => onRefund(Object.fromEntries(Object.entries(values).map(([k, v]) => [k, Number(v) || 0])), remarks, mode)}
+                        >
+                            <i className="fa-solid fa-rotate-left me-2"></i>{busy ? 'Refunding…' : 'Refund'}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+/** Refunded Invoices: what was paid, what went back, and whether the client sees it. */
+function RefundedInvoicesTable({ rows, canRefund, busy, onView, onDetails, onToggle }: {
+    rows: InvoiceRow[];
+    canRefund: boolean;
+    busy: string | null;
+    onView: (inv: InvoiceRow) => void;
+    onDetails: (inv: InvoiceRow) => void;
+    onToggle: (inv: InvoiceRow) => void;
+}) {
+    return (
+        <div className="table-responsive">
+            <style>{`
+                .rf-table { font-size: 13px; }
+                .rf-table th { font-weight: 700; color: #212529; white-space: nowrap; background: #f8f9fb; }
+                .rf-table td { vertical-align: middle; color: #333; }
+            `}</style>
+            <table className="table table-bordered table-striped rf-table mb-0">
+                <thead>
+                    <tr>
+                        <th>Invoice No.</th>
+                        <th>Invoice Date</th>
+                        <th>Receiver Name</th>
+                        <th>Total</th>
+                        <th>Paid</th>
+                        <th>Total Refunded Amount</th>
+                        <th>Refunded Status</th>
+                        <th className="text-center">Refund Details</th>
+                        <th>Status</th>
+                        <th className="text-center">Action</th>
+                        <th className="text-center">Display Refund Info To Client</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {rows.map((inv) => {
+                        const r = inv.refund!;
+                        return (
+                            <tr key={inv.uid}>
+                                <td className="text-nowrap">{inv.invoice_number}</td>
+                                <td className="text-nowrap">{fmtDate(inv.invoice_date)}</td>
+                                <td className="text-uppercase">{inv.receiver?.name ?? 'N/A'}</td>
+                                <td className="text-nowrap">{inv.total}</td>
+                                <td className="text-nowrap">{inv.currency_symbol}{r.paid_amount.toFixed(2)}</td>
+                                <td className="text-nowrap">{inv.currency_symbol}{r.refund_amount.toFixed(2)}</td>
+                                {/* The money went back to the client when the refund was made */}
+                                <td className="text-success fw-bold">Paid</td>
+                                <td className="text-center">
+                                    <button type="button" className="btn btn-info btn-sm text-white" onClick={() => onDetails(inv)}>View Now</button>
+                                </td>
+                                <td className="text-danger fw-bold text-nowrap">{r.full ? 'Fully Refunded' : 'Partially Refunded'}</td>
+                                <td className="text-center">
+                                    <button type="button" className="btn btn-info btn-sm text-white" title="View invoice" onClick={() => onView(inv)}>
+                                        <i className="fa fa-eye"></i>
+                                    </button>
+                                </td>
+                                <td className="text-center">
+                                    {canRefund ? (
+                                        <button
+                                            type="button"
+                                            className={`btn btn-sm text-white ${r.show_to_client ? '' : 'btn-secondary'}`}
+                                            style={r.show_to_client ? { background: '#7cc22b' } : undefined}
+                                            onClick={() => onToggle(inv)}
+                                            disabled={busy !== null}
+                                            title={r.show_to_client ? 'The client sees the refund — click to hide it' : 'Hidden from the client — click to show it'}
+                                        >
+                                            {busy === `display-${inv.uid}` ? '…' : r.show_to_client ? 'UnDisplay' : 'Display'}
+                                        </button>
+                                    ) : (
+                                        <span className="small text-muted">{r.show_to_client ? 'Shown' : 'Hidden'}</span>
+                                    )}
+                                </td>
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </table>
+        </div>
+    );
+}
+
+/** Refund Details ("View Now"): the charges kept and the amount given back. */
+function RefundDetailsModal({ invoice, onClose }: { invoice: InvoiceRow; onClose: () => void }) {
+    const r = invoice.refund!;
+    const money = (n: number) => `${invoice.currency_symbol}${n.toFixed(2)}`;
+    return (
+        <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} onClick={onClose}>
+            <div className="modal-dialog modal-dialog-centered" onClick={(e) => e.stopPropagation()}>
+                <div className="modal-content">
+                    <div className="modal-header">
+                        <h5 className="modal-title d-flex align-items-center gap-2">
+                            <span className="d-inline-flex align-items-center justify-content-center rounded-circle bg-primary bg-opacity-10 text-primary" style={{ width: 36, height: 36 }}>
+                                <i className="fa-solid fa-receipt"></i>
+                            </span>
+                            Refund Details — {invoice.invoice_number}
+                        </h5>
+                        <button type="button" className="btn-close" onClick={onClose}></button>
+                    </div>
+                    <div className="modal-body">
+                        <table className="table table-sm mb-3">
+                            <tbody>
+                                <tr><td className="text-muted">Amount Paid</td><td className="text-end">{money(r.paid_amount)}</td></tr>
+                                {r.charge_lines.map((c) => (
+                                    <tr key={c.label}><td className="text-muted">Less: {c.label}</td><td className="text-end text-danger">- {money(c.amount)}</td></tr>
+                                ))}
+                                <tr className="fw-bold"><td>Refund Amount</td><td className="text-end text-primary">{money(r.refund_amount)}</td></tr>
+                            </tbody>
+                        </table>
+                        <div className="row g-2 small">
+                            <div className="col-6"><span className="text-muted">Refund Mode:</span> {r.mode_label}</div>
+                            <div className="col-6"><span className="text-muted">Refunded On:</span> {fmtDateTime(r.at)}</div>
+                            {r.by && <div className="col-6"><span className="text-muted">By:</span> {r.by}</div>}
+                            <div className="col-6"><span className="text-muted">Status:</span> {r.full ? 'Fully Refunded' : 'Partially Refunded'}</div>
+                            <div className="col-12"><span className="text-muted">Shown to the client:</span> {r.show_to_client ? 'Yes' : 'No'}</div>
+                            {r.remarks && <div className="col-12"><span className="text-muted">Remarks:</span> {r.remarks}</div>}
+                        </div>
+                    </div>
+                    <div className="modal-footer">
+                        <button type="button" className="btn btn-light" onClick={onClose}>Close</button>
                     </div>
                 </div>
             </div>

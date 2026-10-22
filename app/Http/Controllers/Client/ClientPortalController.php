@@ -191,7 +191,7 @@ class ClientPortalController extends Controller
     {
         $booking = $this->portal->findBooking($this->portal->currentClient($request), $uid);
 
-        return view('documents.invoice', $signService->invoiceData($booking));
+        return view('documents.invoice', $signService->invoiceData($booking) + ['forClient' => true]);
     }
 
     public function logout(Request $request)

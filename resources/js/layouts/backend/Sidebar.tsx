@@ -13,6 +13,7 @@ const INVOICES_MENU: MenuItem = {
     type: 'dropdown',
     icon: 'fa-solid fa-file-invoice-dollar',
     label: 'Invoices',
+    permission: 'invoice.list',
     children: [
         { label: 'Invoices', href: '/admin/invoices' },
         { label: 'Old Invoices', href: '/admin/invoices/old', soon: true },
@@ -21,7 +22,7 @@ const INVOICES_MENU: MenuItem = {
         { label: 'Visa Report', href: '/admin/invoices/visa-report', soon: true },
         { label: 'Expenses Report', href: '/admin/invoices/expenses-report', soon: true },
         { label: 'Document Movement Report', href: '/admin/invoices/document-movement', soon: true },
-        { label: 'Refunded Invoices', href: '/admin/invoices/refunded', soon: true },
+        { label: 'Refunded Invoices', href: '/admin/invoices/refunded' },
         { label: 'Paid Invoices Report', href: '/admin/invoices/paid', soon: true },
         { label: 'UnPaid Invoices Report', href: '/admin/invoices/unpaid', soon: true },
         { label: 'Summary Report', href: '/admin/invoices/summary', soon: true },

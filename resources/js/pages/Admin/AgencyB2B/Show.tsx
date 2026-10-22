@@ -4,6 +4,18 @@ import toast, { Toaster } from 'react-hot-toast';
 import ContactInfoForm from '../ContactInfo/Form';
 import { ContactInfo } from '@/services/contactInfoService';
 
+/** The invoice permissions, as the agency's Permissions tab names them. */
+const INVOICE_ACTION_LABELS: Record<string, string> = {
+    list: 'Invoice List',
+    view: 'View Invoice',
+    create: 'Create Invoice',
+    edit: 'Edit Invoice',
+    amendment: 'Amendment',
+    cancel: 'Cancel',
+    refund: 'Refund',
+    pay: 'Pay',
+};
+
 export default function AgencyB2BShow() {
     const { agency, permissionGroups } = usePage().props as any;
     const [activeTab, setActiveTab] = useState('overview');
@@ -510,6 +522,13 @@ export default function AgencyB2BShow() {
                                                     </button>
                                                 </div>
 
+                                                {/* Create Invoice: what the invoice permissions mean */}
+                                                {module === 'invoice' && (
+                                                    <p className="small text-muted mb-2">
+                                                        What this agency may do with invoices. Which invoice types it can create follows the
+                                                        <strong> services</strong> assigned to it (Visa, Hotel, Flight…), on the agency's Edit page.
+                                                    </p>
+                                                )}
                                                 <div className="d-flex flex-wrap gap-3">
                                                     {items.map((p: any) => (
                                                         <div className="form-check" key={p.id}>
@@ -525,7 +544,7 @@ export default function AgencyB2BShow() {
                                                                 )}
                                                             />
                                                             <label className="form-check-label text-capitalize" htmlFor={`ap-${p.id}`}>
-                                                                {p.action}
+                                                                {module === 'invoice' ? (INVOICE_ACTION_LABELS[p.action] ?? p.action) : p.action.replace(/-/g, ' ')}
                                                             </label>
                                                         </div>
                                                     ))}

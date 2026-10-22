@@ -15,7 +15,8 @@ use Illuminate\Validation\ValidationException;
  */
 class InvoiceService
 {
-    public const SERVICES = ['visa' => 'Visa Services', 'package' => 'Travel Package', 'flight' => 'Flight', 'hotel' => 'Hotel'];
+    // Every invoice type (Create Invoice), plus the travel packages made from accepted quotes
+    public const SERVICES = InvoiceTypeService::TYPES_LABELS + ['package' => 'Travel Package'];
     public const DATE_TYPES = ['invoice' => 'Invoice Date', 'travel' => 'Travel Date'];
     public const PER_PAGE = [10, 25, 50, 100];
     // "Pay": the ways a client can pay (an invoice can be split across them)
@@ -53,7 +54,7 @@ class InvoiceService
                 $this->date($r['return_date']),
                 $this->date($r['booking_date']),
                 $r['total'],
-                ['paid' => 'Paid', 'partial' => 'Partially Paid', 'unpaid' => 'Unpaid'][$r['payment_status']],
+                ['paid' => 'Paid', 'partial' => 'Partially Paid', 'unpaid' => 'Unpaid', 'refunded' => 'Refunded'][$r['payment_status']],
                 $r['confirmation_label'],
             ];
         }
@@ -80,6 +81,10 @@ class InvoiceService
         $booking = $this->owned()->where('uid', $uid)->firstOrFail();
         if (in_array($booking->status, ['rejected', 'cancelled'], true)) {
             throw ValidationException::withMessages(['invoice' => 'A rejected or cancelled invoice cannot be paid.']);
+        }
+
+        if (! empty($booking->details['refund'])) {
+            throw ValidationException::withMessages(['invoice' => 'A refunded invoice cannot be paid.']);
         }
 
         $methods = collect($methods)
@@ -110,7 +115,65 @@ class InvoiceService
     }
 
     /** What an edit of the booking must not lose: payments, the paper confirmation, the edit / amendment history and the original number. */
-    public const KEPT_ON_EDIT = ['payments', 'payment', 'paper_confirmed_at', 'edits', 'amendments', 'base_invoice_number'];
+    public const KEPT_ON_EDIT = ['payments', 'payment', 'paper_confirmed_at', 'edits', 'amendments', 'base_invoice_number', 'refund'];
+
+    /** Refund: the charges kept back from what the client paid. */
+    public const REFUND_CHARGES = [
+        'safi' => 'SAFI',
+        'atol' => 'ATOL',
+        'credit_charge' => 'Credit Charge 1%',
+        'service_charges' => 'Service Charges',
+        'penalty_charges' => 'Penalty Charges',
+        'admin_charges' => 'Admin Charges',
+        'other_charges' => 'Other Miscellaneous Charges',
+    ];
+
+    /**
+     * "Refund": gives back what the client paid, less the charges. The refund
+     * amount is worked out here (paid − charges), not taken from the form.
+     * The invoice is then Refunded and renumbered INV… → INVR…; it can't be
+     * paid, edited, amended or refunded again.
+     */
+    public function refund(string $uid, array $charges, ?string $remarks, string $mode = 'bank_transfer'): ServiceBooking
+    {
+        $booking = $this->owned()->where('uid', $uid)->firstOrFail();
+        $details = $booking->details ?? [];
+        if (! empty($details['refund'])) {
+            throw ValidationException::withMessages(['refund' => 'This invoice has already been refunded.']);
+        }
+        $paid = $this->paidAmount($details);
+        if ($paid <= 0) {
+            throw ValidationException::withMessages(['refund' => 'Nothing has been paid on this invoice, so there is nothing to refund.']);
+        }
+
+        $charges = collect(self::REFUND_CHARGES)->keys()
+            ->mapWithKeys(fn ($key) => [$key => round(max((float) ($charges[$key] ?? 0), 0), 2)])
+            ->all();
+        $totalCharges = round(array_sum($charges), 2);
+        if ($totalCharges > $paid + 0.005) {
+            throw ValidationException::withMessages(['charges' => 'The charges (' . $booking->currency_symbol . number_format($totalCharges, 2) . ') are more than the amount paid (' . $booking->currency_symbol . number_format($paid, 2) . ').']);
+        }
+
+        $by = \Illuminate\Support\Facades\Auth::guard('agency')->user() ?? \Illuminate\Support\Facades\Auth::guard('web')->user();
+        $details['base_invoice_number'] ??= $booking->invoice_number;
+        $details['refund'] = [
+            'paid_amount' => $paid,
+            'charges' => $charges,
+            'total_charges' => $totalCharges,
+            'refund_amount' => round($paid - $totalCharges, 2),
+            'remarks' => trim((string) $remarks) ?: null,
+            // How the money went back to the client
+            'mode' => isset(self::PAYMENT_MODES[$mode]) ? $mode : 'bank_transfer',
+            // The CANCELLATION part of the invoice: shown to the client only once "Display" is chosen
+            'show_to_client' => false,
+            'number_before' => $booking->invoice_number,
+            'at' => now()->toIso8601String(),
+            'by' => $by?->name,
+        ];
+        $booking->update(['details' => $details, 'invoice_number' => $this->changedNumber($details)]);
+
+        return $booking;
+    }
 
     /** Edit or Amendment: which one was clicked, remembered until the edit is saved. */
     public const CHANGE_MODES = ['edit' => 'edits', 'amend' => 'amendments'];
@@ -178,9 +241,23 @@ class InvoiceService
     private function changedNumber(array $details): string
     {
         $base = (string) $details['base_invoice_number'];
-        $letter = ! empty($details['amendments']) ? 'A' : 'E';
+        $letter = ! empty($details['refund']) ? 'R' : (! empty($details['amendments']) ? 'A' : 'E');
 
         return str_starts_with($base, 'INV') ? 'INV' . $letter . substr($base, 3) : $letter . $base;
+    }
+
+    /** "Display / UnDisplay Refund Info To Client": whether the client's invoice shows the CANCELLATION part. */
+    public function setRefundDisplay(string $uid, bool $show): ServiceBooking
+    {
+        $booking = $this->owned()->where('uid', $uid)->firstOrFail();
+        $details = $booking->details ?? [];
+        if (empty($details['refund'])) {
+            throw ValidationException::withMessages(['refund' => 'This invoice has not been refunded.']);
+        }
+        $details['refund']['show_to_client'] = $show;
+        $booking->update(['details' => $details]);
+
+        return $booking;
     }
 
     /** Every payment on the invoice (including one recorded before split payments existed). */
@@ -235,6 +312,10 @@ class InvoiceService
 
         return $this->owned()
             ->with('client:id,uid,cid,name,email,phone', 'client.address', 'signature', 'applications:id,service_booking_id,first_name,last_name')
+            // Refunded invoices have their own list (Refunded Invoices); the Invoices list leaves them out
+            ->when(($filters['scope'] ?? '') === 'refunded',
+                fn ($q) => $q->whereNotNull('details->refund'),
+                fn ($q) => $q->whereNull('details->refund'))
             ->when(isset(self::SERVICES[$service]), fn ($q) => $q->where('service', $service))
             ->when(! empty($filters['start']), fn ($q) => $q->whereDate($dateColumn, '>=', $filters['start']))
             ->when(! empty($filters['end']), fn ($q) => $q->whereDate($dateColumn, '<=', $filters['end']))
@@ -313,7 +394,18 @@ class InvoiceService
             'total_amount' => round((float) $b->total_amount, 2),
             'paid_amount' => $paid = $this->paidAmount($d),
             'pending_amount' => max(round((float) $b->total_amount - $paid, 2), 0),
-            'payment_status' => $paid <= 0 ? 'unpaid' : ($paid + 0.005 >= (float) $b->total_amount ? 'paid' : 'partial'),
+            'payment_status' => ! empty($d['refund']) ? 'refunded'
+                : ($paid <= 0 ? 'unpaid' : ($paid + 0.005 >= (float) $b->total_amount ? 'paid' : 'partial')),
+            // Refund: what was given back, and the charges kept
+            'refund' => ! empty($d['refund']) ? $d['refund'] + [
+                'mode_label' => self::PAYMENT_MODES[$d['refund']['mode'] ?? 'bank_transfer'] ?? 'Bank Transfer',
+                'charge_lines' => collect($d['refund']['charges'] ?? [])->filter(fn ($v) => (float) $v > 0)
+                    ->map(fn ($v, $k) => ['label' => self::REFUND_CHARGES[$k] ?? $k, 'amount' => (float) $v])->values()->all(),
+                // Fully refunded when nothing was kept back
+                'full' => (float) ($d['refund']['refund_amount'] ?? 0) + 0.005 >= (float) ($d['refund']['paid_amount'] ?? 0),
+            ] : null,
+            'refunded' => ! empty($d['refund']),
+            'card_paid_amount' => round(collect($this->payments($d))->sum(fn ($p) => ($p['methods']['credit_card'] ?? 0) + ($p['methods']['debit_card'] ?? 0)), 2),
             'paid' => $paid > 0 && $paid + 0.005 >= (float) $b->total_amount,
             'payment' => ($last = collect($this->payments($d))->last()) ? [
                 'mode' => collect(array_keys($last['methods'] ?? []))->map(fn ($m) => self::PAYMENT_MODES[$m] ?? ucfirst(str_replace('_', ' ', $m)))->implode(' + '),

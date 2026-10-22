@@ -50,6 +50,14 @@ class RolePermissionSeeder extends Seeder
             }
         }
 
+        // Create Invoice: invoice.create, and one permission per invoice type
+        // (Visa Services needs none — it comes with the agency's Visa service)
+        foreach (\App\Services\InvoiceTypeService::permissionNames() as $name) {
+            foreach (['web', 'agency'] as $guard) {
+                Permission::firstOrCreate(['name' => $name, 'guard_name' => $guard]);
+            }
+        }
+
         // The first user in the system is the super admin, and owns the
         // roles seeded below via the polymorphic creator.
         $firstUser = User::orderBy('id')->first();

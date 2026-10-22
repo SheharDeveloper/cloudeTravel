@@ -6,9 +6,12 @@ use Illuminate\Support\Facades\Route;
 
 // Invoices: one per booking, from the agency (or superadmin) to its client
 Route::get('invoices', [\App\Http\Controllers\Admin\InvoiceController::class, 'index'])->name('admin.invoices.index');
+Route::get('invoices/refunded', [\App\Http\Controllers\Admin\InvoiceController::class, 'refunded'])->name('admin.invoices.refunded');
 Route::get('invoices/export/{format}', [\App\Http\Controllers\Admin\InvoiceController::class, 'export'])->whereIn('format', ['xlsx', 'csv'])->name('admin.invoices.export');
 Route::get('invoices/{uid}', [\App\Http\Controllers\Admin\InvoiceController::class, 'show'])->name('admin.invoices.show');
 Route::get('invoices/{uid}/{mode}', [\App\Http\Controllers\Admin\InvoiceController::class, 'change'])->whereIn('mode', ['edit', 'amend'])->name('admin.invoices.change');
+Route::post('invoices/{uid}/refund-display', [\App\Http\Controllers\Admin\InvoiceController::class, 'refundDisplay'])->name('admin.invoices.refund-display');
+Route::post('invoices/{uid}/refund', [\App\Http\Controllers\Admin\InvoiceController::class, 'refund'])->name('admin.invoices.refund');
 Route::post('invoices/{uid}/pay', [\App\Http\Controllers\Admin\InvoiceController::class, 'pay'])->name('admin.invoices.pay');
 Route::post('invoices/{uid}/confirm-paper', [\App\Http\Controllers\Admin\InvoiceController::class, 'confirmPaper'])->name('admin.invoices.confirm-paper');
 

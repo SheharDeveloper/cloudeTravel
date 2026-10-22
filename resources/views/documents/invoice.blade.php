@@ -592,6 +592,60 @@
 
 
 
+   {{-- Refunded: the CANCELLATION part — on the client's copy only once "Display" is chosen --}}
+   @if(!empty($details['refund']) && (empty($forClient) || !empty($details['refund']['show_to_client'])))
+    @php
+        $refund = $details['refund'];
+        $refundMode = \App\Services\InvoiceService::PAYMENT_MODES[$refund['mode'] ?? 'bank_transfer'] ?? 'Bank Transfer';
+        $kept = (float) ($refund['paid_amount'] ?? 0) - (float) ($refund['refund_amount'] ?? 0);
+    @endphp
+    <div style="margin-top: 25px;">
+        <h3 style="font-size: 22px; font-weight: 700; color: #26ace2; margin-bottom: 10px;">CANCELLATION:</h3>
+        <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:30px;">
+            <table class="paymenttable table" style="width:auto; min-width:300px;">
+                <thead>
+                    <tr>
+                        <th>PAYMENT REFUND MODE</th>
+                        <th>AMOUNT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ $refundMode }}</td>
+                        <td>{{ $currency }}{{ number_format((float) $refund['refund_amount'], 2) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <table style="border:none; margin-left:auto;">
+                <tr>
+                    <td style="border:none; text-align:right; font-weight:bold; padding:2px 6px;">Cancellation and other Charges:</td>
+                    <td style="border:none; text-align:right; padding:2px 0;">{{ $currency }}{{ number_format((float) $refund['total_charges'], 2) }}</td>
+                </tr>
+                <tr>
+                    <td style="border:none; text-align:right; font-weight:bold; padding:2px 6px;">Total Refund Due:</td>
+                    <td style="border:none; text-align:right; padding:2px 0;">{{ $currency }}{{ number_format((float) $refund['refund_amount'], 2) }}</td>
+                </tr>
+                <tr>
+                    <td style="border:none; text-align:right; font-weight:bold; padding:2px 6px;">Issued Date:</td>
+                    <td style="border:none; text-align:right; padding:2px 0;">{{ \Carbon\Carbon::parse($refund['at'])->format('d F Y') }}</td>
+                </tr>
+                <tr>
+                    <td style="border:none; text-align:right; font-weight:bold; padding:2px 6px;">Invoice Balance:</td>
+                    <td style="border:none; text-align:right; padding:2px 0;">{{ $currency }}{{ number_format($kept, 2) }}</td>
+                </tr>
+                @if(!empty($refund['remarks']))
+                    <tr>
+                        <td style="border:none; text-align:right; font-weight:bold; padding:10px 6px 2px;" colspan="2">Remarks:</td>
+                    </tr>
+                    <tr>
+                        <td style="border:none; text-align:right; padding:2px 0;" colspan="2">{{ $refund['remarks'] }}</td>
+                    </tr>
+                @endif
+            </table>
+        </div>
+    </div>
+   @endif
+
    @if(!empty($booking->invoice_remark))
     <div style="margin-top: 40px;">
         <h4>Remark</h4>

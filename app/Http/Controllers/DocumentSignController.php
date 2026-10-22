@@ -66,7 +66,7 @@ class DocumentSignController extends Controller
     {
         $signature = $this->find($token);
 
-        return view('documents.invoice', $this->signService->invoiceData($signature->booking));
+        return view('documents.invoice', $this->signService->invoiceData($signature->booking) + ['forClient' => true]);
     }
 
     public function submit(Request $request, string $token)
