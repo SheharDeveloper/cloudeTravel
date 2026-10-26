@@ -9,6 +9,11 @@ export interface TeamMember {
     checked_out_at: string | null;
     work_type: 'office' | 'remote' | 'field' | null;
     leave_status: 'pending' | 'approved' | 'rejected' | null;
+    worked_minutes?: number | null;
+    lunch_over_minutes?: number;
+    late_minutes?: number;
+    day_pay?: number | null;
+    currency?: string | null;
 }
 
 /** One day of the team calendar: everyone on the team that day, by status. */
@@ -173,7 +178,11 @@ export default function TeamAttendanceCalendar({ month, days, onMonthChange, onS
                                                         <Avatar member={m} />
                                                         <div className="lh-sm" style={{ minWidth: 0 }}>
                                                             <div className="small fw-semibold text-truncate">{m.name}{group === 'half_day' && <span className="text-warning-emphasis fw-normal"> · Half day</span>}</div>
-                                                            <div className="text-muted" style={{ fontSize: 11 }}>{memberTime(m, group)}</div>
+                                                            <div className="text-muted" style={{ fontSize: 11 }}>
+                                                                {memberTime(m, group)}
+                                                                {(m.lunch_over_minutes ?? 0) > 0 && <span className="badge bg-danger ms-1">Lunch +{m.lunch_over_minutes}m</span>}
+                                                                {(m.late_minutes ?? 0) > 0 && <span className="badge bg-warning text-dark ms-1">Late</span>}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 ))}
@@ -226,6 +235,9 @@ export default function TeamAttendanceCalendar({ month, days, onMonthChange, onS
                                                             <div className="fw-semibold text-truncate">{m.name}</div>
                                                             <small className="text-muted">
                                                                 {memberTime(m, g.key)}
+                                                                {m.worked_minutes != null && <> · {Math.floor(m.worked_minutes / 60)}h {m.worked_minutes % 60}m</>}
+                                                                {m.day_pay != null && <> · {m.currency} {m.day_pay.toFixed(2)}</>}
+                                                                {(m.lunch_over_minutes ?? 0) > 0 && <span className="badge bg-danger ms-1">Lunch +{m.lunch_over_minutes}m</span>}
                                                                 {m.work_type && g.key !== 'absent' && g.key !== 'leave' && <> · <span className="text-capitalize">{m.work_type}</span></>}
                                                             </small>
                                                         </div>

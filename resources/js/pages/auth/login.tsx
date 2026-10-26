@@ -1,11 +1,13 @@
 import { useState } from 'react';
-import { Head, router } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 
 export default function Login() {
+    // Arriving with a message, e.g. signed out after checking out for the day
+    const { errors } = usePage().props as { errors?: Record<string, string> };
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+    const [error, setError] = useState(errors?.email ?? '');
 
     const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();

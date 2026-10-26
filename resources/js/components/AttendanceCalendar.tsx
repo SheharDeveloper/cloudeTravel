@@ -14,7 +14,25 @@ export interface AttendanceEntry {
     leave_reason: string | null;
     leave_status: 'pending' | 'approved' | 'rejected' | null;
     leave_batch_id: string | null;
+    // The day's time limit: check-in + shift length + any extension
+    extended_minutes?: number;
+    auto_checked_out?: boolean;
+    time_limit_at?: string | null;
+    // From the staff member's working hours and salary
+    worked_minutes?: number | null;
+    lunch_taken_minutes?: number | null;
+    lunch_allowed_minutes?: number | null;
+    lunch_over_minutes?: number;
+    late_minutes?: number;
+    early_minutes?: number;
+    shift?: string | null;
+    hourly_rate?: number | null;
+    day_pay?: number | null;
+    currency?: string | null;
 }
+
+/** 465 → "7h 45m" */
+export const hoursLabel = (minutes: number) => `${Math.floor(minutes / 60)}h${minutes % 60 ? ` ${minutes % 60}m` : ''}`;
 
 interface AttendanceCalendarProps {
     month: string; // 'YYYY-MM'
@@ -59,6 +77,13 @@ export default function AttendanceCalendar({ month, history, subjectName, staffU
     // directly instead of inferring from days-elapsed-in-month, which
     // doesn't know when the staff member actually joined.
     const absentCount = history.filter((h) => h.status === 'absent').length;
+    // The month: hours worked, pay earned, and days lunch ran over
+    const totalWorked = history.reduce((sum, h) => sum + (h.worked_minutes ?? 0), 0);
+    const totalPay = history.reduce((sum, h) => sum + (h.day_pay ?? 0), 0);
+    const lunchOverDays = history.filter((h) => (h.lunch_over_minutes ?? 0) > 0).length;
+    const lateDays = history.filter((h) => (h.late_minutes ?? 0) > 0).length;
+    const currency = history.find((h) => h.currency)?.currency ?? '';
+    const shift = history.find((h) => h.shift)?.shift;
 
     const goToMonth = (offset: number) => {
         const d = new Date(year, monthNum - 1 + offset, 1);
@@ -153,6 +178,14 @@ export default function AttendanceCalendar({ month, history, subjectName, staffU
                     <span className="badge bg-info bg-opacity-10 text-info-emphasis px-3 py-2">Leave: {leaveCount}</span>
                     <span className="badge bg-danger bg-opacity-10 text-danger px-3 py-2">Absent: {absentCount}</span>
                 </div>
+                {/* Hours, pay and lunch from the staff member's working hours */}
+                <div className="d-flex justify-content-center flex-wrap gap-3 mt-2 small">
+                    {shift && <span className="text-muted"><i className="fa-regular fa-clock me-1"></i>Shift {shift}</span>}
+                    <span><strong>Worked:</strong> {hoursLabel(totalWorked)}</span>
+                    {totalPay > 0 && <span><strong>Earned:</strong> {currency} {totalPay.toFixed(2)}</span>}
+                    {lunchOverDays > 0 && <span className="text-danger"><i className="fa-solid fa-utensils me-1"></i>Long lunch: {lunchOverDays} day{lunchOverDays > 1 ? 's' : ''}</span>}
+                    {lateDays > 0 && <span className="text-warning-emphasis"><i className="fa-solid fa-hourglass-half me-1"></i>Late: {lateDays} day{lateDays > 1 ? 's' : ''}</span>}
+                </div>
             </div>
             <div className="card-body">
                 <div className="row g-2 mb-2 text-center fw-semibold text-muted">
@@ -193,6 +226,25 @@ export default function AttendanceCalendar({ month, history, subjectName, staffU
                                                     <br />{entry.checked_in_at}
                                                     {entry.checked_out_at ? <><br />{entry.checked_out_at}</> : null}
                                                 </>
+                                            )}
+                                            {entry.worked_minutes != null && (
+                                                <span className="d-block text-dark fw-semibold mt-1">{hoursLabel(entry.worked_minutes)}</span>
+                                            )}
+                                            {entry.day_pay != null && (
+                                                <span className="d-block text-success">{entry.currency} {entry.day_pay.toFixed(2)}</span>
+                                            )}
+                                            {(entry.lunch_over_minutes ?? 0) > 0 && (
+                                                <span
+                                                    className="badge bg-danger mt-1"
+                                                    title={`Lunch ${entry.lunch_taken_minutes} min (allowed ${entry.lunch_allowed_minutes} min)`}
+                                                >
+                                                    Lunch +{entry.lunch_over_minutes}m
+                                                </span>
+                                            )}
+                                            {(entry.late_minutes ?? 0) > 0 && (
+                                                <span className="badge bg-warning text-dark mt-1 d-block" style={{ width: 'fit-content', marginInline: 'auto' }}>
+                                                    Late {hoursLabel(entry.late_minutes ?? 0)}
+                                                </span>
                                             )}
                                         </div>
                                     )}

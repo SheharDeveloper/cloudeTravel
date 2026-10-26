@@ -28,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
             ResolveTenantFromDomain::class,
         ], append: [
             HandleAppearance::class,
+            \App\Http\Middleware\BlockLoginAfterCheckout::class,
             HandleInertiaRequests::class,
             AddLinkHeadersForPreloadedAssets::class,
         ]);

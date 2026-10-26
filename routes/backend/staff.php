@@ -2,6 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 
+// Staff Settings: every staff member's working hours (shift, lunch allowed, working days)
+Route::get('staff-settings', [\App\Http\Controllers\Admin\StaffSettingsController::class, 'index'])->name('admin.staff-settings.index');
+Route::put('staff-settings/default', [\App\Http\Controllers\Admin\StaffSettingsController::class, 'updateDefault'])->name('admin.staff-settings.default');
+Route::put('staff-settings/{uid}', [\App\Http\Controllers\Admin\StaffSettingsController::class, 'update'])->name('admin.staff-settings.update');
+
 // Staff Management
 Route::get('staff', [\App\Http\Controllers\Admin\StaffController::class, 'index'])->name('admin.staff.index');
 Route::get('staff/create', [\App\Http\Controllers\Admin\StaffController::class, 'create'])->name('admin.staff.create');

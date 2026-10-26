@@ -48,7 +48,7 @@ class AttendanceController extends Controller
             'history' => $subject ? $this->attendanceService->monthlyHistory($subject, $month)->values() : [],
             // No staff member picked: the whole team's calendar (who was in, on leave or absent each day)
             'team' => !$isStaff && !$subject
-                ? $this->attendanceService->teamMonth($staffOptions->load('staffProfile'), $month)
+                ? $this->attendanceService->teamMonth($staffOptions->load('staffProfile', 'staffTiming', 'staffPayment'), $month)
                 : null,
         ]);
     }
@@ -68,6 +68,34 @@ class AttendanceController extends Controller
         $this->attendanceService->checkOut($this->attendanceService->currentPrincipal());
 
         return back();
+    }
+
+    /**
+     * The staff member's time is up (their popup counted down): checks them
+     * out if it really is — the server decides, not the browser's clock.
+     */
+    public function autoCheckOut()
+    {
+        $principal = $this->attendanceService->currentPrincipal();
+        abort_unless($principal && $this->attendanceService->isStaff($principal), 403);
+
+        $this->attendanceService->enforceTimeLimit($principal);
+
+        return back();
+    }
+
+    /** Owner/superadmin gives a staff member more time today (checking them back in if they'd been checked out automatically). */
+    public function extend(Request $request, string $uid)
+    {
+        abort_if($this->attendanceService->isStaff($this->attendanceService->currentPrincipal()), 403);
+
+        $validated = $request->validate(['minutes' => 'required|integer|min:1|max:720']);
+        $staff = $this->staffService->searchStaff('', 1000)->getCollection()->firstWhere('uid', $uid);
+        abort_unless($staff, 404);
+
+        $this->attendanceService->extendDay($staff, (int) $validated['minutes'], $this->attendanceService->currentPrincipal()?->name);
+
+        return back()->with('success', "{$staff->name}'s time extended by {$validated['minutes']} minutes.");
     }
 
     public function lunchStart()

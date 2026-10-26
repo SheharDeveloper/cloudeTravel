@@ -114,6 +114,16 @@ class HandleInertiaRequests extends Middleware
                     && !$service->hasMarkedToday($principal);
             },
 
+            // The signed-in staff member's time limit today (shift length from
+            // check-in, plus any extension): drives the 2-minute warning and the
+            // "checked out automatically" popup. Checks them out if it's passed.
+            'attendanceTimer' => function () {
+                $service = app(\App\Services\AttendanceService::class);
+                $principal = $service->currentPrincipal();
+
+                return $principal && $service->isStaff($principal) ? $service->timeLimitState($principal) : null;
+            },
+
             // True for an individual staff login (not superadmin, not an
             // agency owner) — used to hide admin-only sidebar links like
             // Leave Requests that a staff member can't act on for themselves.

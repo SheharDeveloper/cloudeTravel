@@ -33,6 +33,7 @@ class StaffService
     private const RELATIONS = [
         'staffProfile',
         'staffPayment',
+        'staffTiming',
         'staffPassport',
         'staffEmergencyContact',
         'staffEducations',
@@ -316,6 +317,7 @@ class StaffService
             $this->syncPassport($staff, $data);
             $this->syncEmergencyContact($staff, $data);
             $this->syncPayment($staff, $data);
+            $this->syncTiming($staff, $data);
             $this->syncEducations($staff, $data['educations'] ?? []);
             $this->syncTaxDeductions($staff, $data['tax_deductions'] ?? []);
             $this->storeDocuments($staff, $data['documents'] ?? []);
@@ -354,6 +356,7 @@ class StaffService
             $this->syncPassport($staff, $data);
             $this->syncEmergencyContact($staff, $data);
             $this->syncPayment($staff, $data);
+            $this->syncTiming($staff, $data);
             $this->syncEducations($staff, $data['educations'] ?? []);
             $this->syncTaxDeductions($staff, $data['tax_deductions'] ?? []);
             $this->storeDocuments($staff, $data['documents'] ?? []);
@@ -430,6 +433,45 @@ class StaffService
         );
     }
 
+    /** Create or update the staff member's working hours (for superadmin and agency staff alike). */
+    public function syncTiming(User|AgencyUser $staff, array $data): void
+    {
+        $blank = fn ($v) => $v === null || $v === '';
+        \App\Models\StaffTiming::updateOrCreate(
+            $this->staffableAttributes($staff),
+            $this->ownerAttributes() + [
+                'shift_start' => $blank($data['shift_start'] ?? null) ? null : $data['shift_start'],
+                'shift_end' => $blank($data['shift_end'] ?? null) ? null : $data['shift_end'],
+                'lunch_minutes' => $blank($data['lunch_minutes'] ?? null) ? null : (int) $data['lunch_minutes'],
+                'working_days' => $blank($data['working_days'] ?? null) ? null : (int) $data['working_days'],
+            ]
+        );
+    }
+
+    /** The current session's default working hours, used by every staff member without their own. */
+    public function defaultTiming(): ?\App\Models\StaffTiming
+    {
+        return \App\Models\StaffTiming::defaultFor($this->currentAgency());
+    }
+
+    /** Create or update the current session's default working hours. */
+    public function syncDefaultTiming(array $data): void
+    {
+        $blank = fn ($v) => $v === null || $v === '';
+        $values = [
+            'shift_start' => $blank($data['shift_start'] ?? null) ? null : $data['shift_start'],
+            'shift_end' => $blank($data['shift_end'] ?? null) ? null : $data['shift_end'],
+            'lunch_minutes' => $blank($data['lunch_minutes'] ?? null) ? null : (int) $data['lunch_minutes'],
+            'working_days' => $blank($data['working_days'] ?? null) ? null : (int) $data['working_days'],
+        ];
+
+        if ($default = $this->defaultTiming()) {
+            $default->update($values);
+        } else {
+            \App\Models\StaffTiming::create(['staffable_type' => null, 'staffable_id' => null] + $this->ownerAttributes() + $values);
+        }
+    }
+
     /**
      * Create or update the staff payment record
      */
@@ -492,6 +534,10 @@ class StaffService
                     'name' => $item['name'],
                     'value' => $item['value'] ?? 0,
                     'type' => $item['type'] ?? 'tax',
+                    // Percentage of the pay, or a fixed amount
+                    'calc' => in_array($item['calc'] ?? null, ['percent', 'fixed'], true)
+                        ? $item['calc']
+                        : (($item['type'] ?? 'tax') === 'deduction' ? 'fixed' : 'percent'),
                 ]
             );
         }
@@ -615,6 +661,11 @@ class StaffService
             'bank_name' => 'nullable|string|max:255',
             'account_number' => 'nullable|string|max:50',
             'ifsc_code' => 'nullable|string|max:20',
+            // Working hours (attendance: hours worked, the day's pay, lunch over)
+            'shift_start' => 'nullable|date_format:H:i|required_with:shift_end',
+            'shift_end' => 'nullable|date_format:H:i|required_with:shift_start|after:shift_start',
+            'lunch_minutes' => 'nullable|integer|min:0|max:240',
+            'working_days' => 'nullable|integer|min:1|max:31',
         ];
 
         $educationRules = [
@@ -628,6 +679,7 @@ class StaffService
             'tax_deductions.*.name' => 'nullable|string|max:255',
             'tax_deductions.*.value' => 'nullable|numeric|min:0',
             'tax_deductions.*.type' => 'nullable|string|in:tax,deduction',
+            'tax_deductions.*.calc' => 'nullable|string|in:percent,fixed',
         ];
 
         $documentRules = [

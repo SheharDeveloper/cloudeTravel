@@ -8,7 +8,7 @@ class StaffTaxDeduction extends Model
 {
     protected $table = 'staff_tax_deductions';
 
-    protected $fillable = ['staffable_type', 'staffable_id', 'owner_type', 'owner_id', 'name', 'value', 'type'];
+    protected $fillable = ['staffable_type', 'staffable_id', 'owner_type', 'owner_id', 'name', 'value', 'type', 'calc'];
 
     public function staffable()
     {

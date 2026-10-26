@@ -5,7 +5,7 @@ import DatePicker from '@/components/DatePicker';
 import { isExpiringSoon } from '@/lib/utils';
 
 type Education = { name: string; photo: File | null };
-type TaxDeduction = { name: string; value: string; type: string };
+type TaxDeduction = { name: string; value: string; type: string; calc: string };
 type StaffDoc = { document_name: string; document_type: string; file: File | null };
 
 const STEPS = ['1. Profile', '2. Address', '3. Emergency Contact', '4. Passport & Visa', '5. Payment', '6. Education', '7. Tax & Deduction', '8. Documents'];
@@ -41,6 +41,10 @@ export default function StaffCreate() {
         bank_name: '',
         account_number: '',
         ifsc_code: '',
+        shift_start: '',
+        shift_end: '',
+        lunch_minutes: '',
+        working_days: '26',
         place_of_issue: '',
         date_of_issue: '',
         expiry_date: '',
@@ -51,7 +55,7 @@ export default function StaffCreate() {
         visa_number: '',
         visa_expiry_date: '',
         educations: [{ name: '', photo: null }] as Education[],
-        tax_deductions: [{ name: '', value: '', type: 'tax' }] as TaxDeduction[],
+        tax_deductions: [{ name: '', value: '', type: 'tax', calc: 'percent' }] as TaxDeduction[],
         documents: [{ document_name: '', document_type: '', file: null }] as StaffDoc[],
         emergency_contact_name: '',
         emergency_relationship: '',
@@ -88,6 +92,7 @@ export default function StaffCreate() {
                 formData.append(`tax_deductions[${i}][name]`, row.name);
                 formData.append(`tax_deductions[${i}][value]`, row.value || '0');
                 formData.append(`tax_deductions[${i}][type]`, row.type);
+                formData.append(`tax_deductions[${i}][calc]`, row.calc);
             }
         });
         data.documents.forEach((row, i) => {
@@ -125,6 +130,10 @@ export default function StaffCreate() {
         formData.append('bank_name', data.bank_name);
         formData.append('account_number', data.account_number);
         formData.append('ifsc_code', data.ifsc_code);
+        formData.append('shift_start', data.shift_start);
+        formData.append('shift_end', data.shift_end);
+        formData.append('lunch_minutes', data.lunch_minutes);
+        formData.append('working_days', data.salary_type === 'per_month' ? data.working_days : '');
     };
 
     const appendPassport = (formData: FormData) => {
@@ -491,6 +500,59 @@ export default function StaffCreate() {
                                                 onChange={(e) => { set({ ifsc_code: e.target.value }); clearError('ifsc_code'); }} />
                                             {errors.ifsc_code && <div className="invalid-feedback d-block">{errors.ifsc_code}</div>}
                                         </div>
+
+                                        {/* Working hours: attendance works out hours worked, the day's pay and lunch over from these */}
+                                        <div className="col-12">
+                                            <h6 className="mb-1 mt-2"><i className="fa-regular fa-clock me-2 text-primary"></i>Working Hours</h6>
+                                            <p className="text-muted small mb-3">The day's pay is the hours actually worked (check-in to check-out, less lunch) × the hourly rate.</p>
+                                        </div>
+                                        <div className="col-sm-3 mb-4">
+                                            <label className="form-label">Start Time</label>
+                                            <input type="time" className={`form-control ${errors.shift_start ? 'is-invalid' : ''}`} value={data.shift_start}
+                                                onChange={(e) => { set({ shift_start: e.target.value }); clearError('shift_start'); }} />
+                                            {errors.shift_start && <div className="invalid-feedback d-block">{errors.shift_start}</div>}
+                                        </div>
+                                        <div className="col-sm-3 mb-4">
+                                            <label className="form-label">End Time</label>
+                                            <input type="time" className={`form-control ${errors.shift_end ? 'is-invalid' : ''}`} value={data.shift_end}
+                                                onChange={(e) => { set({ shift_end: e.target.value }); clearError('shift_end'); }} />
+                                            {errors.shift_end && <div className="invalid-feedback d-block">{errors.shift_end}</div>}
+                                        </div>
+                                        <div className="col-sm-3 mb-4">
+                                            <label className="form-label">Lunch Allowed (minutes)</label>
+                                            <input type="number" min="0" max="240" className={`form-control ${errors.lunch_minutes ? 'is-invalid' : ''}`} value={data.lunch_minutes}
+                                                onChange={(e) => { set({ lunch_minutes: e.target.value }); clearError('lunch_minutes'); }} placeholder="e.g. 45" />
+                                            {errors.lunch_minutes && <div className="invalid-feedback d-block">{errors.lunch_minutes}</div>}
+                                        </div>
+                                        {data.salary_type === 'per_month' && (
+                                            <div className="col-sm-3 mb-4">
+                                                <label className="form-label">Working Days / Month</label>
+                                                <input type="number" min="1" max="31" className={`form-control ${errors.working_days ? 'is-invalid' : ''}`} value={data.working_days}
+                                                    onChange={(e) => { set({ working_days: e.target.value }); clearError('working_days'); }} placeholder="e.g. 26" />
+                                                {errors.working_days && <div className="invalid-feedback d-block">{errors.working_days}</div>}
+                                            </div>
+                                        )}
+                                        {(() => {
+                                            const toMin = (t: string) => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+                                            if (!data.shift_start || !data.shift_end || toMin(data.shift_end) <= toMin(data.shift_start)) return null;
+                                            const shift = toMin(data.shift_end) - toMin(data.shift_start);
+                                            const paid = Math.max(shift - (Number(data.lunch_minutes) || 0), 0);
+                                            const hours = paid / 60;
+                                            const salary = Number(data.salary) || 0;
+                                            const rate = !salary || !hours ? 0
+                                                : data.salary_type === 'per_hour' ? salary
+                                                : data.salary_type === 'per_day' ? salary / hours
+                                                : salary / ((Number(data.working_days) || 26) * hours);
+                                            const hm = (m: number) => `${Math.floor(m / 60)}h${m % 60 ? ` ${m % 60}m` : ''}`;
+                                            return (
+                                                <div className="col-12 mb-4">
+                                                    <div className="alert alert-light border small mb-0">
+                                                        Shift <strong>{hm(shift)}</strong> · paid hours a day <strong>{hm(paid)}</strong>
+                                                        {rate > 0 && <> · hourly rate <strong>{data.currency} {rate.toFixed(2)}</strong></>}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
                                 )}
 
@@ -546,7 +608,7 @@ export default function StaffCreate() {
                                         <div className="d-flex justify-content-between align-items-center mb-3">
                                             <h6 className="mb-0">Tax &amp; Deduction</h6>
                                             <button type="button" className="btn btn-sm btn-primary"
-                                                onClick={() => set({ tax_deductions: [...data.tax_deductions, { name: '', value: '', type: 'tax' }] })}>
+                                                onClick={() => set({ tax_deductions: [...data.tax_deductions, { name: '', value: '', type: 'tax', calc: 'percent' }] })}>
                                                 <i className="fa fa-plus me-1"></i>Add More
                                             </button>
                                         </div>
@@ -554,7 +616,7 @@ export default function StaffCreate() {
                                         {data.tax_deductions.map((row, i) => (
                                             <div key={i} className="border rounded p-4 mb-3">
                                                 <div className="row">
-                                                    <div className="col-md-4 mb-3">
+                                                    <div className="col-md-6 mb-3">
                                                         <label className="form-label">Name</label>
                                                         <input type="text" className="form-control" placeholder="e.g. PF, TDS" value={row.name}
                                                             onChange={(e) => {
@@ -563,16 +625,19 @@ export default function StaffCreate() {
                                                                 set({ tax_deductions: next });
                                                             }} />
                                                     </div>
-                                                    <div className="col-md-3 mb-3">
+                                                    <div className="col-md-6 mb-3">
                                                         <label className="form-label">Value</label>
-                                                        <input type="number" step="0.01" className="form-control" value={row.value}
-                                                            onChange={(e) => {
-                                                                const next = [...data.tax_deductions];
-                                                                next[i] = { ...next[i], value: e.target.value };
-                                                                set({ tax_deductions: next });
-                                                            }} />
+                                                        <div className="input-group">
+                                                            <input type="number" step="0.01" min={0} max={row.calc === 'percent' ? 100 : undefined} className="form-control" value={row.value}
+                                                                onChange={(e) => {
+                                                                    const next = [...data.tax_deductions];
+                                                                    next[i] = { ...next[i], value: e.target.value };
+                                                                    set({ tax_deductions: next });
+                                                                }} />
+                                                            {row.calc === 'percent' && <span className="input-group-text">%</span>}
+                                                        </div>
                                                     </div>
-                                                    <div className="col-md-3 mb-3">
+                                                    <div className="col-md-5 mb-3">
                                                         <label className="form-label">Type</label>
                                                         <select className="form-select" value={row.type}
                                                             onChange={(e) => {
@@ -582,6 +647,19 @@ export default function StaffCreate() {
                                                             }}>
                                                             <option value="tax">Tax</option>
                                                             <option value="deduction">Deduction</option>
+                                                        </select>
+                                                    </div>
+                                                    {/* How the salary slip works it out */}
+                                                    <div className="col-md-5 mb-3">
+                                                        <label className="form-label">Calculated as</label>
+                                                        <select className="form-select" value={row.calc}
+                                                            onChange={(e) => {
+                                                                const next = [...data.tax_deductions];
+                                                                next[i] = { ...next[i], calc: e.target.value };
+                                                                set({ tax_deductions: next });
+                                                            }}>
+                                                            <option value="percent">Percentage (%)</option>
+                                                            <option value="fixed">Fixed amount</option>
                                                         </select>
                                                     </div>
                                                     <div className="col-md-2 mb-3 d-flex align-items-end">

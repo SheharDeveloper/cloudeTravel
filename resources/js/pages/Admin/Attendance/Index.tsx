@@ -27,6 +27,7 @@ export default function AttendanceIndex() {
     const [staffSearch, setStaffSearch] = useState('');
     const [pickerOpen, setPickerOpen] = useState(false);
     const [lunchProcessing, setLunchProcessing] = useState(false);
+    const [extending, setExtending] = useState(false);
 
     const filteredStaff = (staffOptions ?? []).filter((s) =>
         s.name.toLowerCase().includes(staffSearch.trim().toLowerCase())
@@ -50,6 +51,16 @@ export default function AttendanceIndex() {
         setLunchProcessing(true);
         router.post(`/admin/attendance/lunch-${start ? 'start' : 'end'}`, {}, {
             onFinish: () => setLunchProcessing(false),
+        });
+    };
+
+    // Owner/superadmin: more time today for the selected staff member
+    const handleExtend = (minutes: number) => {
+        if (!selectedUid) return;
+        setExtending(true);
+        router.post(`/admin/attendance/${selectedUid}/extend`, { minutes }, {
+            preserveScroll: true,
+            onFinish: () => setExtending(false),
         });
     };
 
@@ -85,6 +96,12 @@ export default function AttendanceIndex() {
                                     ) : null}
                                     {today.lunch_start_at && (
                                         <> &middot; Lunch {today.lunch_start_at}{today.lunch_end_at ? ` – ${today.lunch_end_at}` : ' (ongoing)'}</>
+                                    )}
+                                    {today.time_limit_at && (
+                                        <> &middot; Auto check-out at <strong>{today.time_limit_at}</strong></>
+                                    )}
+                                    {today.auto_checked_out && (
+                                        <span className="badge bg-danger ms-2">Checked out automatically</span>
                                     )}
                                 </span>
                             ) : (
@@ -181,6 +198,38 @@ export default function AttendanceIndex() {
                                 </div>
                             )}
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Owner/superadmin: the selected staff member's day today, and more time if they need it */}
+            {!isStaff && selectedUid && (
+                <div className="card mb-4">
+                    <div className="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div>
+                            <h6 className="mb-1">Today — {subjectName}</h6>
+                            {today?.checked_in_at ? (
+                                <span className="text-muted">
+                                    Checked in at <strong>{today.checked_in_at}</strong>
+                                    {today.checked_out_at && <> &middot; Checked out at <strong>{today.checked_out_at}</strong></>}
+                                    {today.time_limit_at && <> &middot; Auto check-out at <strong>{today.time_limit_at}</strong></>}
+                                    {(today.extended_minutes ?? 0) > 0 && <> &middot; Extended +{today.extended_minutes} min</>}
+                                    {today.auto_checked_out && <span className="badge bg-danger ms-2">Checked out automatically</span>}
+                                </span>
+                            ) : (
+                                <span className="text-muted">Not checked in today</span>
+                            )}
+                        </div>
+                        {today?.checked_in_at && (today.time_limit_at || today.checked_out_at) && (
+                            <div className="d-flex align-items-center gap-2 flex-wrap">
+                                <span className="small text-muted">{today.checked_out_at ? 'Check back in and extend:' : 'Extend time:'}</span>
+                                {[30, 60, 120].map((m) => (
+                                    <button key={m} type="button" className="btn btn-sm btn-outline-primary" onClick={() => handleExtend(m)} disabled={extending}>
+                                        +{m < 60 ? `${m}m` : `${m / 60}h`}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

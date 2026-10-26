@@ -47,6 +47,12 @@ class User extends Authenticatable
         return $this->morphOne(StaffPayment::class, 'staffable');
     }
 
+    /** Working hours (shift, lunch allowed) — used by attendance for hours, the day's pay and lunch over. */
+    public function staffTiming()
+    {
+        return $this->morphOne(StaffTiming::class, 'staffable');
+    }
+
     public function staffPassport()
     {
         return $this->morphOne(StaffPassport::class, 'staffable');

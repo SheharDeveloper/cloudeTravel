@@ -125,7 +125,7 @@ export default function RoleCreate() {
                                                     onChange={() => toggle(p.name)}
                                                 />
                                                 <label className="form-check-label text-capitalize" htmlFor={`p-${p.id}`}>
-                                                    {p.action}
+                                                    {p.action.replace(/-/g, ' ')}
                                                 </label>
                                             </div>
                                         ))}

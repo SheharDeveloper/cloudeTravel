@@ -63,6 +63,8 @@ const getSuperadminMenuItems = (companyName: string): MenuItem[] => [
 
     { type: 'link', icon: 'fa-solid fa-list-check', label: 'Task Board', href: '/admin/tasks' },
     { type: 'link', icon: 'fa-solid fa-calendar-check', label: 'Attendance', href: '/admin/attendance' },
+    { type: 'link', icon: 'fa-solid fa-user-clock', label: 'Staff Settings', href: '/admin/staff-settings', permission: 'staff.edit' },
+    { type: 'link', icon: 'fa-solid fa-file-invoice-dollar', label: 'Salary Slips', href: '/admin/salary-slips' },
     { type: 'link', icon: 'fa-solid fa-umbrella-beach', label: 'Leave', href: '/admin/leave' },
 
     { type: 'title', label: 'PEOPLE & ACCESS' },
@@ -115,6 +117,8 @@ const getAgencyMenuItems = (agencyName: string, serviceItems: MenuItem[]): MenuI
 
     { type: 'link', icon: 'fa-solid fa-list-check', label: 'Task Board', href: '/admin/tasks' },
     { type: 'link', icon: 'fa-solid fa-calendar-check', label: 'Attendance', href: '/admin/attendance' },
+    { type: 'link', icon: 'fa-solid fa-user-clock', label: 'Staff Settings', href: '/admin/staff-settings', permission: 'staff.edit' },
+    { type: 'link', icon: 'fa-solid fa-file-invoice-dollar', label: 'Salary Slips', href: '/admin/salary-slips' },
     { type: 'link', icon: 'fa-solid fa-umbrella-beach', label: 'Leave', href: '/admin/leave' },
 
     { type: 'title', label: 'PEOPLE & ACCESS' },

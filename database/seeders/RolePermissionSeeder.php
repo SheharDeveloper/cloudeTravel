@@ -58,6 +58,11 @@ class RolePermissionSeeder extends Seeder
             }
         }
 
+        // Login after checkout: a staff member may sign back in the same day after checking out
+        foreach (['web', 'agency'] as $guard) {
+            Permission::firstOrCreate(['name' => \App\Services\AttendanceService::LOGIN_AFTER_CHECKOUT, 'guard_name' => $guard]);
+        }
+
         // The first user in the system is the super admin, and owns the
         // roles seeded below via the polymorphic creator.
         $firstUser = User::orderBy('id')->first();

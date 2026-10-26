@@ -627,7 +627,7 @@ export default function StaffShow() {
                                             {taxDeductions.map((item: any) => (
                                                 <tr key={item.id}>
                                                     <td className="fw-semibold">{item.name}</td>
-                                                    <td>{item.value}</td>
+                                                    <td>{item.calc === 'percent' ? `${Number(item.value)}% of pay` : `${item.value} (fixed)`}</td>
                                                     <td>
                                                         <span className={`badge ${item.type === 'tax' ? 'bg-warning' : 'bg-secondary'}`}>
                                                             {item.type === 'tax' ? 'Tax' : 'Deduction'}
