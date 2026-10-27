@@ -39,7 +39,7 @@ class ApplicationFormService
 
         // Country fields (and country fields in a Yes / No follow-up) pick from Country Management
         $hasCountry = collect($sections)->flatMap(fn ($s) => $s['fields'])->contains(fn ($f) => $f['input'] === 'country'
-            || collect($f['follow_up']['fields'] ?? [])->contains('type', 'country'));
+            || $this->followUpHasCountry($f['follow_up'] ?? null));
 
         return [
             'sections' => $sections,
@@ -107,10 +107,9 @@ class ApplicationFormService
                 if (($data['answer'] ?? null) !== $field['follow_up']['show_when']) {
                     return [];
                 }
-                $missing = collect($field['follow_up']['fields'])
-                    ->first(fn ($f) => $f['required'] && trim((string) ($data['details'][$f['name']] ?? '')) === '');
+                $missing = $this->missingFollowUp($field['follow_up'], $data);
 
-                return $missing ? ["answers.{$field['id']}" => "{$missing['name']} is required."] : [];
+                return $missing ? ["answers.{$field['id']}" => "{$missing} is required."] : [];
             });
         if ($submit && $followUpErrors->isNotEmpty()) {
             throw ValidationException::withMessages($followUpErrors->all());
@@ -260,25 +259,72 @@ class ApplicationFormService
             return null;
         }
 
+        $section = $answer === $followUp['show_when'] ? $this->cleanFollowUpAnswers($followUp, $data) : ['details' => [], 'more' => []];
+
+        return json_encode(
+            ['answer' => $answer, 'details' => (object) $section['details']] + ($section['more'] ? ['more' => $section['more']] : []),
+            JSON_UNESCAPED_UNICODE
+        );
+    }
+
+    /**
+     * One follow-up section's answers: "details" holds each field's answer;
+     * "more" holds, for a Yes / No that opened its own section, that section's
+     * answers in the same shape.
+     *
+     * @return array{details: array<string, string>, more: array<string, array>}
+     */
+    private function cleanFollowUpAnswers(array $followUp, array $data): array
+    {
         $details = [];
-        if ($answer === $followUp['show_when']) {
-            foreach ($followUp['fields'] as $f) {
-                $v = trim((string) ($data['details'][$f['name']] ?? ''));
-                if ($v === '') {
-                    continue;
-                }
-                $v = match ($f['type']) {
-                    'country' => $this->cleanCountry($v),
-                    'yesno' => in_array($v, ['Yes', 'No'], true) ? $v : null,
-                    default => mb_substr($v, 0, 5000),
-                };
-                if ($v !== null) {
-                    $details[$f['name']] = $v;
+        $more = [];
+        foreach ($followUp['fields'] as $f) {
+            $v = trim((string) ($data['details'][$f['name']] ?? ''));
+            if ($v === '') {
+                continue;
+            }
+            $v = match ($f['type']) {
+                'country' => $this->cleanCountry($v),
+                'yesno' => in_array($v, ['Yes', 'No'], true) ? $v : null,
+                default => mb_substr($v, 0, 5000),
+            };
+            if ($v === null) {
+                continue;
+            }
+            $details[$f['name']] = $v;
+
+            if ($f['type'] === 'yesno' && ! empty($f['follow_up']) && $v === $f['follow_up']['show_when']) {
+                $nested = $this->cleanFollowUpAnswers($f['follow_up'], (array) ($data['more'][$f['name']] ?? []));
+                $more[$f['name']] = ['details' => (object) $nested['details']] + ($nested['more'] ? ['more' => $nested['more']] : []);
+            }
+        }
+
+        return ['details' => $details, 'more' => $more];
+    }
+
+    /** The first required follow-up field left empty, looking into the sections nested Yes / No answers opened. */
+    private function missingFollowUp(array $followUp, array $data): ?string
+    {
+        foreach ($followUp['fields'] as $f) {
+            $v = trim((string) ($data['details'][$f['name']] ?? ''));
+            if ($f['required'] && $v === '') {
+                return $f['name'];
+            }
+            if ($f['type'] === 'yesno' && ! empty($f['follow_up']) && $v === $f['follow_up']['show_when']) {
+                if ($missing = $this->missingFollowUp($f['follow_up'], (array) ($data['more'][$f['name']] ?? []))) {
+                    return $missing;
                 }
             }
         }
 
-        return json_encode(['answer' => $answer, 'details' => (object) $details], JSON_UNESCAPED_UNICODE);
+        return null;
+    }
+
+    private function followUpHasCountry(?array $followUp): bool
+    {
+        return collect($followUp['fields'] ?? [])->contains(
+            fn ($f) => $f['type'] === 'country' || $this->followUpHasCountry($f['follow_up'] ?? null)
+        );
     }
 
     /** Checkboxes: a JSON list of the ticked options, only real options kept. */

@@ -24,7 +24,33 @@ export interface FollowUpField {
     name: string;
     type: string;
     required: boolean;
+    // A Yes / No here can open its own follow-up section
+    follow_up?: FollowUp | null;
 }
+
+// How deep follow-ups go (matches VisaField::FOLLOW_UP_DEPTH)
+const FOLLOW_UP_DEPTH = 3;
+
+const newFollowUp = (): FollowUp => ({ show_when: 'Yes', fields: [{ name: 'Reason', type: 'textarea', required: true }] });
+
+/** Trimmed names; a follow-up kept only on a Yes / No */
+const cleanFollowUp = (followUp: FollowUp, level = 1): FollowUp => ({
+    show_when: followUp.show_when,
+    fields: followUp.fields.map((f) => {
+        // No Yes / No on the last level
+        const type = f.type === 'yesno' && level >= FOLLOW_UP_DEPTH ? 'text' : f.type;
+        return {
+            name: f.name.trim(),
+            type,
+            required: f.required,
+            ...(type === 'yesno' && f.follow_up ? { follow_up: cleanFollowUp(f.follow_up, level + 1) } : {}),
+        };
+    }),
+});
+
+/** Every follow-up field, at every level, has a name */
+const followUpNamed = (followUp: FollowUp): boolean =>
+    followUp.fields.every((f) => f.name.trim() !== '' && (f.type !== 'yesno' || !f.follow_up || followUpNamed(f.follow_up)));
 
 export interface FollowUp {
     show_when: 'Yes' | 'No';
@@ -513,27 +539,23 @@ function FieldEditor({ visaUid, draft, sectionName, fieldTypes, followUpTypes, o
 
     // Yes / No: "Ask for more details" opens a follow-up section on the chosen answer
     const [askMore, setAskMore] = useState(!!editing?.follow_up);
-    const [showWhen, setShowWhen] = useState<'Yes' | 'No'>(editing?.follow_up?.show_when ?? 'Yes');
-    const [followFields, setFollowFields] = useState<FollowUpField[]>(
-        editing?.follow_up?.fields?.length ? editing.follow_up.fields : [{ name: 'Reason', type: 'textarea', required: true }],
-    );
+    const [followUp, setFollowUp] = useState<FollowUp>(editing?.follow_up?.fields?.length ? editing.follow_up : newFollowUp());
     // Declaration: what the applicant accepts
     const [declarationText, setDeclarationText] = useState(
         editing?.declaration ?? 'I hereby declare that the information given in this application is true and correct to the best of my knowledge.',
     );
-    const patchFollow = (index: number, patch: Partial<FollowUpField>) =>
-        setFollowFields((list) => list.map((f, i) => (i === index ? { ...f, ...patch } : f)));
-
     const save = async () => {
+        if (type === 'yesno' && askMore && !followUpNamed(followUp)) {
+            setErrors({ follow_up: 'Every follow-up field needs a name.' });
+            return;
+        }
         setSaving(true);
         setErrors({});
         const body = {
             field_name: name.trim(),
             field_type: type,
             options: needsOptions ? optionsText.split('\n').map((o) => o.trim()).filter(Boolean) : [],
-            follow_up: type === 'yesno' && askMore
-                ? { show_when: showWhen, fields: followFields.map((f) => ({ ...f, name: f.name.trim() })) }
-                : null,
+            follow_up: type === 'yesno' && askMore ? cleanFollowUp(followUp) : null,
             declaration_text: type === 'declaration' ? declarationText.trim() : null,
             ...(draft.mode === 'add' && { visa_section_id: draft.sectionId }),
         };
@@ -554,7 +576,7 @@ function FieldEditor({ visaUid, draft, sectionName, fieldTypes, followUpTypes, o
 
     return (
         <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }} role="dialog" aria-modal="true" onClick={onClose}>
-            <div className="modal-dialog" onClick={(e) => e.stopPropagation()}>
+            <div className={`modal-dialog ${type === 'yesno' && askMore ? 'modal-lg' : ''}`} onClick={(e) => e.stopPropagation()}>
                 <div className="modal-content">
                     <div className="modal-header">
                         <h5 className="modal-title">{draft.mode === 'add' ? `Add Field to ${sectionName}` : 'Edit Field'}</h5>
@@ -631,56 +653,13 @@ function FieldEditor({ visaUid, draft, sectionName, fieldTypes, followUpTypes, o
                                 </div>
                                 {askMore && (
                                     <>
-                                        <div className="d-flex align-items-center gap-2 mt-3 mb-3 small">
-                                            <span>Show these fields when the answer is</span>
-                                            <select className="form-select form-select-sm" style={{ width: 110 }} value={showWhen} onChange={(e) => setShowWhen(e.target.value as 'Yes' | 'No')}>
-                                                <option value="Yes">Yes</option>
-                                                <option value="No">No</option>
-                                            </select>
-                                        </div>
-                                        <div className="d-flex flex-column gap-2">
-                                            {followFields.map((f, index) => (
-                                                <div key={index} className="d-flex gap-2 align-items-center">
-                                                    <input
-                                                        type="text"
-                                                        className={`form-control form-control-sm ${errors.follow_up && !f.name.trim() ? 'is-invalid' : ''}`}
-                                                        placeholder="Field name, e.g. Reason"
-                                                        value={f.name}
-                                                        maxLength={255}
-                                                        onChange={(e) => patchFollow(index, { name: e.target.value })}
-                                                    />
-                                                    <select className="form-select form-select-sm" style={{ width: 160, flexShrink: 0 }} value={f.type} onChange={(e) => patchFollow(index, { type: e.target.value })}>
-                                                        {Object.entries(followUpTypes).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-                                                    </select>
-                                                    <label className="d-flex align-items-center gap-1 mb-0 small text-muted text-nowrap">
-                                                        <input
-                                                            type="checkbox"
-                                                            className="form-check-input mt-0"
-                                                            checked={f.required}
-                                                            onChange={(e) => patchFollow(index, { required: e.target.checked })}
-                                                        />
-                                                        Required
-                                                    </label>
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-outline-danger btn-sm"
-                                                        onClick={() => setFollowFields((list) => list.filter((_, i) => i !== index))}
-                                                        disabled={followFields.length === 1}
-                                                        title="Remove field"
-                                                    >
-                                                        <i className="fa fa-trash"></i>
-                                                    </button>
-                                                </div>
-                                            ))}
-                                        </div>
-                                        <button
-                                            type="button"
-                                            className="btn btn-link btn-sm px-0 mt-2"
-                                            onClick={() => setFollowFields((list) => [...list, { name: '', type: 'text', required: false }])}
-                                            disabled={followFields.length >= 20}
-                                        >
-                                            <i className="fa fa-plus me-1"></i>Add another field
-                                        </button>
+                                        <FollowUpEditor
+                                            value={followUp}
+                                            onChange={setFollowUp}
+                                            followUpTypes={followUpTypes}
+                                            level={1}
+                                            showErrors={!!errors.follow_up}
+                                        />
                                         {errors.follow_up && <div className="invalid-feedback d-block">{errors.follow_up}</div>}
                                     </>
                                 )}
@@ -702,5 +681,111 @@ function FieldEditor({ visaUid, draft, sectionName, fieldTypes, followUpTypes, o
                 </div>
             </div>
         </div>
+    );
+}
+
+/**
+ * A follow-up section: which answer opens it and its fields. A Yes / No field
+ * here can ask for more details of its own — the same editor, one level in.
+ */
+function FollowUpEditor({ value, onChange, followUpTypes, level, showErrors }: {
+    value: FollowUp;
+    onChange: (value: FollowUp) => void;
+    followUpTypes: Record<string, string>;
+    level: number;
+    showErrors: boolean;
+}) {
+    const patch = (index: number, changes: Partial<FollowUpField>) =>
+        onChange({ ...value, fields: value.fields.map((f, i) => (i === index ? { ...f, ...changes } : f)) });
+    // The last level can't open another section, so no Yes / No there
+    const types = Object.entries(followUpTypes).filter(([type]) => level < FOLLOW_UP_DEPTH || type !== 'yesno');
+
+    return (
+        <>
+            <div className="d-flex align-items-center gap-2 mt-3 mb-3 small">
+                <span>Show these fields when the answer is</span>
+                <select className="form-select form-select-sm" style={{ width: 110 }} value={value.show_when} onChange={(e) => onChange({ ...value, show_when: e.target.value as 'Yes' | 'No' })}>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                </select>
+            </div>
+            <div className="d-flex flex-column gap-2">
+                {value.fields.map((f, index) => (
+                    <div key={index}>
+                        <div className="d-flex gap-2 align-items-center">
+                            <input
+                                type="text"
+                                className={`form-control form-control-sm ${showErrors && !f.name.trim() ? 'is-invalid' : ''}`}
+                                placeholder="Field name, e.g. Reason"
+                                value={f.name}
+                                maxLength={255}
+                                onChange={(e) => patch(index, { name: e.target.value })}
+                            />
+                            <select
+                                className="form-select form-select-sm"
+                                style={{ width: 160, flexShrink: 0 }}
+                                value={types.some(([type]) => type === f.type) ? f.type : 'text'}
+                                onChange={(e) => patch(index, { type: e.target.value })}
+                            >
+                                {types.map(([type, label]) => <option key={type} value={type}>{label}</option>)}
+                            </select>
+                            <label className="d-flex align-items-center gap-1 mb-0 small text-muted text-nowrap">
+                                <input
+                                    type="checkbox"
+                                    className="form-check-input mt-0"
+                                    checked={f.required}
+                                    onChange={(e) => patch(index, { required: e.target.checked })}
+                                />
+                                Required
+                            </label>
+                            <button
+                                type="button"
+                                className="btn btn-outline-danger btn-sm"
+                                onClick={() => onChange({ ...value, fields: value.fields.filter((_, i) => i !== index) })}
+                                disabled={value.fields.length === 1}
+                                title="Remove field"
+                            >
+                                <i className="fa fa-trash"></i>
+                            </button>
+                        </div>
+
+                        {/* A Yes / No here: ask for more details on its answer too */}
+                        {f.type === 'yesno' && level < FOLLOW_UP_DEPTH && (
+                            <div className="mt-2 ms-3 ps-3 py-2 pe-2 rounded" style={{ borderLeft: '3px solid #452B90', background: '#fff' }}>
+                                <div className="form-check form-switch mb-0">
+                                    <input
+                                        className="form-check-input"
+                                        type="checkbox"
+                                        id={`follow-up-${level}-${index}`}
+                                        checked={!!f.follow_up}
+                                        onChange={(e) => patch(index, { follow_up: e.target.checked ? newFollowUp() : null })}
+                                    />
+                                    <label className="form-check-label small fw-semibold" htmlFor={`follow-up-${level}-${index}`}>
+                                        Ask for more details on "{f.name.trim() || 'this question'}"
+                                    </label>
+                                </div>
+                                {f.follow_up && (
+                                    <FollowUpEditor
+                                        value={f.follow_up}
+                                        onChange={(nested) => patch(index, { follow_up: nested })}
+                                        followUpTypes={followUpTypes}
+                                        level={level + 1}
+                                        showErrors={showErrors}
+                                    />
+                                )}
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
+            <button
+                type="button"
+                className="btn btn-link btn-sm px-0 mt-2"
+                onClick={() => onChange({ ...value, fields: [...value.fields, { name: '', type: 'text', required: false }] })}
+                disabled={value.fields.length >= 20}
+            >
+                <i className="fa fa-plus me-1"></i>Add another field
+            </button>
+        </>
     );
 }

@@ -163,6 +163,38 @@ class VisaFieldConfigService
     }
 
     /**
+     * A Yes / No's follow-up section: which answer opens it and its fields. A
+     * Yes / No among those fields may open its own section, up to
+     * VisaField::FOLLOW_UP_DEPTH levels deep.
+     */
+    private function cleanFollowUp(?array $followUp, int $level): ?array
+    {
+        $fields = collect($followUp['fields'] ?? [])
+            ->map(function ($f) use ($level) {
+                $type = array_key_exists($f['type'] ?? '', VisaField::FOLLOW_UP_TYPES) ? $f['type'] : 'text';
+                // The last level can't open another section, so no Yes / No there
+                if ($type === 'yesno' && $level >= VisaField::FOLLOW_UP_DEPTH) {
+                    $type = 'text';
+                }
+                $nested = $type === 'yesno' && $level < VisaField::FOLLOW_UP_DEPTH && is_array($f['follow_up'] ?? null)
+                    ? $this->cleanFollowUp($f['follow_up'], $level + 1)
+                    : null;
+
+                return [
+                    'name' => trim((string) ($f['name'] ?? '')),
+                    'type' => $type,
+                    'required' => (bool) ($f['required'] ?? false),
+                ] + ($nested ? ['follow_up' => $nested] : []);
+            })
+            ->filter(fn ($f) => $f['name'] !== '')
+            ->unique(fn ($f) => mb_strtolower($f['name']))
+            ->values()
+            ->all();
+
+        return $fields ? ['show_when' => ($followUp['show_when'] ?? 'Yes') === 'No' ? 'No' : 'Yes', 'fields' => $fields] : null;
+    }
+
+    /**
      * What a field type stores in options: the choices for dropdown / radio /
      * checkboxes, the follow-up section for Yes / No, nothing otherwise.
      */
@@ -175,18 +207,7 @@ class VisaFieldConfigService
         }
 
         if ($type === 'yesno') {
-            $fields = collect($followUp['fields'] ?? [])
-                ->map(fn ($f) => [
-                    'name' => trim((string) ($f['name'] ?? '')),
-                    'type' => array_key_exists($f['type'] ?? '', VisaField::FOLLOW_UP_TYPES) ? $f['type'] : 'text',
-                    'required' => (bool) ($f['required'] ?? false),
-                ])
-                ->filter(fn ($f) => $f['name'] !== '')
-                ->unique(fn ($f) => mb_strtolower($f['name']))
-                ->values()
-                ->all();
-
-            return $fields ? ['show_when' => ($followUp['show_when'] ?? 'Yes') === 'No' ? 'No' : 'Yes', 'fields' => $fields] : null;
+            return $this->cleanFollowUp($followUp, 1);
         }
 
         if (! in_array($type, VisaField::CHOICE_TYPES, true)) {

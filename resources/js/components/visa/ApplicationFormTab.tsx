@@ -14,10 +14,13 @@ export interface FormField {
     // declaration: the text the applicant accepts with a tick
     text?: string;
     // yesno_details: the answer that opens the follow-up section, and its fields
-    follow_up?: {
-        show_when: 'Yes' | 'No';
-        fields: { name: string; type: string; required: boolean }[];
-    };
+    follow_up?: FollowUpDef;
+}
+
+/** A follow-up section; a Yes / No field in it can open its own */
+export interface FollowUpDef {
+    show_when: 'Yes' | 'No';
+    fields: { name: string; type: string; required: boolean; follow_up?: FollowUpDef }[];
 }
 
 interface CountryOption {
@@ -132,7 +135,7 @@ export default function ApplicationFormTab({ applicationUid, form, canEdit = tru
         if (f.input !== 'yesno_details' || !f.follow_up) return null;
         const data = parseYesNo(answers[f.id]);
         if (data.answer !== f.follow_up.show_when) return null;
-        return f.follow_up.fields.find((d) => d.required && (data.details[d.name] ?? '').trim() === '')?.name ?? null;
+        return missingInSection(f.follow_up, data);
     };
     const allFields = form.sections.flatMap(fieldsOf);
     const required = allFields.filter((f) => f.required);
@@ -660,20 +663,42 @@ function FieldInput({ appUrl, countries, field, value, error, onChange }: { appU
 
 // ─── Yes / No with a follow-up section ────────────────────────────────────────
 
-type YesNoAnswer = { answer: string; details: Record<string, string> };
+/**
+ * A follow-up section's answers: each field's answer in "details"; for a
+ * Yes / No that opened its own section, that section's answers in "more".
+ */
+type SectionAnswers = { details: Record<string, string>; more?: Record<string, SectionAnswers> };
+type YesNoAnswer = SectionAnswers & { answer: string };
 
-/** {"answer": "Yes", "details": {"Reason": "…"}}; a plain "Yes" / "No" (saved earlier) is the answer alone */
+/** {"answer": "Yes", "details": {"Reason": "…"}, "more": {…}}; a plain "Yes" / "No" (saved earlier) is the answer alone */
 function parseYesNo(value: string | undefined): YesNoAnswer {
     if (!value) return { answer: '', details: {} };
     try {
         const data = JSON.parse(value);
         if (data && typeof data === 'object') {
-            return { answer: typeof data.answer === 'string' ? data.answer : '', details: data.details && typeof data.details === 'object' ? data.details : {} };
+            return {
+                answer: typeof data.answer === 'string' ? data.answer : '',
+                details: data.details && typeof data.details === 'object' ? data.details : {},
+                more: data.more && typeof data.more === 'object' ? data.more : {},
+            };
         }
     } catch {
         // not JSON
     }
     return { answer: value === 'Yes' || value === 'No' ? value : '', details: {} };
+}
+
+/** The first required field left empty in a section, looking into the sections inner Yes / No answers opened */
+function missingInSection(def: FollowUpDef, data: SectionAnswers): string | null {
+    for (const d of def.fields) {
+        const v = (data.details[d.name] ?? '').trim();
+        if (d.required && v === '') return d.name;
+        if (d.type === 'yesno' && d.follow_up && v === d.follow_up.show_when) {
+            const inner = missingInSection(d.follow_up, data.more?.[d.name] ?? { details: {} });
+            if (inner) return inner;
+        }
+    }
+    return null;
 }
 
 function YesNoDetailsInput({ field, countries, value, error, onChange }: {
@@ -688,7 +713,6 @@ function YesNoDetailsInput({ field, countries, value, error, onChange }: {
     const open = data.answer === followUp.show_when;
     const id = `field-${field.id}`;
     const save = (next: YesNoAnswer) => onChange(next.answer ? JSON.stringify(next) : '');
-    const setDetail = (name: string, v: string) => save({ ...data, details: { ...data.details, [name]: v } });
 
     return (
         <>
@@ -718,85 +742,145 @@ function YesNoDetailsInput({ field, countries, value, error, onChange }: {
 
             {open && (
                 <div className="col-12 mb-3">
-                    <div className="border rounded p-3" style={{ background: '#f8f9fc', borderLeft: '3px solid #6d28d9' }}>
-                        <div className="small fw-semibold text-primary mb-2">
-                            <i className="fa fa-level-up-alt fa-rotate-90 me-2"></i>{field.name}: {followUp.show_when} — more details
-                        </div>
-                        <div className="row">
-                            {followUp.fields.map((detail) => {
-                                const detailId = `${id}-${detail.name.replace(/\W+/g, '-')}`;
-                                const detailValue = data.details[detail.name] ?? '';
-                                const invalid = !!error && detail.required && detailValue.trim() === '';
-                                const cls = `form-control ${invalid ? 'is-invalid' : ''}`;
-                                return (
-                                    <div key={detail.name} className={`${detail.type === 'textarea' ? 'col-12 col-md-6' : FIELD_COL} mb-2`}>
-                                        <label htmlFor={detailId} className="text-muted small mb-1">
-                                            {detail.name}
-                                            {detail.required && <span className="text-danger"> *</span>}
-                                        </label>
-                                        {detail.type === 'date' ? (
-                                            <DatePicker value={detailValue} onChange={(v) => setDetail(detail.name, v)} autoSelect={true} inputStyle={invalid ? { borderColor: '#dc3545' } : undefined} />
-                                        ) : detail.type === 'textarea' ? (
-                                            <textarea id={detailId} className={cls} rows={2} value={detailValue} onChange={(e) => setDetail(detail.name, e.target.value)} />
-                                        ) : detail.type === 'yesno' ? (
-                                            <div className="d-flex flex-wrap gap-3 pt-1" id={detailId}>
-                                                {['Yes', 'No'].map((option) => (
-                                                    <div key={option} className="form-check mb-0">
-                                                        <input
-                                                            className={`form-check-input ${invalid ? 'is-invalid' : ''}`}
-                                                            type="radio"
-                                                            id={`${detailId}-${option}`}
-                                                            name={detailId}
-                                                            checked={detailValue === option}
-                                                            onChange={() => setDetail(detail.name, option)}
-                                                        />
-                                                        <label className="form-check-label" htmlFor={`${detailId}-${option}`}>{option}</label>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ) : detail.type === 'country' ? (
-                                            <CountrySelect id={detailId} value={detailValue} onChange={(v) => setDetail(detail.name, v)} countries={countries} placeholder="Select country" regularSize invalid={invalid} />
-                                        ) : (
-                                            <input
-                                                id={detailId}
-                                                type={['email', 'tel', 'number'].includes(detail.type) ? detail.type : 'text'}
-                                                className={cls}
-                                                value={detailValue}
-                                                onChange={(e) => setDetail(detail.name, e.target.value)}
-                                            />
-                                        )}
-                                    </div>
-                                );
-                            })}
-                        </div>
-                        {error && <div className="invalid-feedback d-block">{error}</div>}
-                    </div>
+                    <FollowUpSection
+                        title={`${field.name}: ${followUp.show_when} — more details`}
+                        def={followUp}
+                        data={data}
+                        onChange={(section) => save({ ...data, ...section })}
+                        idPrefix={id}
+                        countries={countries}
+                        showErrors={!!error}
+                    />
+                    {error && <div className="invalid-feedback d-block">{error}</div>}
                 </div>
             )}
         </>
     );
 }
 
-/** On the review: "Yes" and, under it, each follow-up answer */
+/**
+ * The fields a Yes / No answer opened. A Yes / No among them opens its own
+ * section underneath when given the answer it asks about.
+ */
+function FollowUpSection({ title, def, data, onChange, idPrefix, countries, showErrors }: {
+    title: string;
+    def: FollowUpDef;
+    data: SectionAnswers;
+    onChange: (data: SectionAnswers) => void;
+    idPrefix: string;
+    countries: CountryOption[];
+    showErrors: boolean;
+}) {
+    // Changing an answer keeps what was typed further in, in case it is changed back
+    const setDetail = (name: string, v: string) => onChange({ ...data, details: { ...data.details, [name]: v } });
+    const setMore = (name: string, section: SectionAnswers) => onChange({ ...data, more: { ...(data.more ?? {}), [name]: section } });
+
+    return (
+        <div className="border rounded p-3" style={{ background: '#f8f9fc', borderLeft: '3px solid #6d28d9' }}>
+            <div className="small fw-semibold text-primary mb-2">
+                <i className="fa fa-level-up-alt fa-rotate-90 me-2"></i>{title}
+            </div>
+            <div className="row">
+                {def.fields.map((detail) => {
+                    const detailId = `${idPrefix}-${detail.name.replace(/\W+/g, '-')}`;
+                    const detailValue = data.details[detail.name] ?? '';
+                    const invalid = showErrors && detail.required && detailValue.trim() === '';
+                    const cls = `form-control ${invalid ? 'is-invalid' : ''}`;
+                    const nestedOpen = detail.type === 'yesno' && !!detail.follow_up && detailValue === detail.follow_up.show_when;
+                    return (
+                        <div key={detail.name} className={nestedOpen ? 'col-12' : `${detail.type === 'textarea' ? 'col-12 col-md-6' : FIELD_COL}`}>
+                            {/* With its section open the field takes the full row; the question keeps its usual width */}
+                            <div className={nestedOpen ? 'row' : ''}><div className={`${nestedOpen ? FIELD_COL : ''} mb-2`}>
+                                <label htmlFor={detailId} className="text-muted small mb-1">
+                                    {detail.name}
+                                    {detail.required && <span className="text-danger"> *</span>}
+                                </label>
+                                {detail.type === 'date' ? (
+                                    <DatePicker value={detailValue} onChange={(v) => setDetail(detail.name, v)} autoSelect={true} inputStyle={invalid ? { borderColor: '#dc3545' } : undefined} />
+                                ) : detail.type === 'textarea' ? (
+                                    <textarea id={detailId} className={cls} rows={2} value={detailValue} onChange={(e) => setDetail(detail.name, e.target.value)} />
+                                ) : detail.type === 'yesno' ? (
+                                    <div className="d-flex flex-wrap gap-3 pt-1" id={detailId}>
+                                        {['Yes', 'No'].map((option) => (
+                                            <div key={option} className="form-check mb-0">
+                                                <input
+                                                    className={`form-check-input ${invalid ? 'is-invalid' : ''}`}
+                                                    type="radio"
+                                                    id={`${detailId}-${option}`}
+                                                    name={detailId}
+                                                    checked={detailValue === option}
+                                                    onChange={() => setDetail(detail.name, option)}
+                                                />
+                                                <label className="form-check-label" htmlFor={`${detailId}-${option}`}>{option}</label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : detail.type === 'country' ? (
+                                    <CountrySelect id={detailId} value={detailValue} onChange={(v) => setDetail(detail.name, v)} countries={countries} placeholder="Select country" regularSize invalid={invalid} />
+                                ) : (
+                                    <input
+                                        id={detailId}
+                                        type={['email', 'tel', 'number'].includes(detail.type) ? detail.type : 'text'}
+                                        className={cls}
+                                        value={detailValue}
+                                        onChange={(e) => setDetail(detail.name, e.target.value)}
+                                    />
+                                )}
+                            </div></div>
+                            {/* This Yes / No's own follow-up */}
+                            {nestedOpen && (
+                                <div className="mb-2">
+                                    <FollowUpSection
+                                        title={`${detail.name}: ${detailValue} — more details`}
+                                        def={detail.follow_up!}
+                                        data={data.more?.[detail.name] ?? { details: {} }}
+                                        onChange={(section) => setMore(detail.name, section)}
+                                        idPrefix={detailId}
+                                        countries={countries}
+                                        showErrors={showErrors}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+/** On the review: "Yes" and, under it, each follow-up answer (and the answers nested under those) */
 function YesNoSummary({ field, value }: { field: FormField; value: string }) {
     const data = parseYesNo(value);
-    const shown = data.answer === field.follow_up?.show_when
-        ? (field.follow_up?.fields ?? []).filter((d) => (data.details[d.name] ?? '') !== '')
-        : [];
     return (
         <>
             <div>{data.answer}</div>
-            {shown.length > 0 && (
-                <div className="row mt-1">
-                    {shown.map((d) => (
-                        <div key={d.name} className={`${FIELD_COL} mt-1`}>
-                            <div className="text-muted small fw-normal">{d.name}</div>
-                            <div>{d.type === 'date' ? formatDate(data.details[d.name]) : data.details[d.name]}</div>
-                        </div>
-                    ))}
-                </div>
-            )}
+            {field.follow_up && data.answer === field.follow_up.show_when && <FollowUpSummary def={field.follow_up} data={data} />}
         </>
+    );
+}
+
+function FollowUpSummary({ def, data }: { def: FollowUpDef; data: SectionAnswers }) {
+    const shown = def.fields.filter((d) => (data.details[d.name] ?? '') !== '');
+    if (!shown.length) return null;
+    return (
+        <div className="row mt-1">
+            {shown.map((d) => {
+                const v = data.details[d.name];
+                const nested = d.type === 'yesno' && d.follow_up && v === d.follow_up.show_when ? d.follow_up : null;
+                return (
+                    <div key={d.name} className={`${nested ? 'col-12' : FIELD_COL} mt-1`}>
+                        <div className="text-muted small fw-normal">{d.name}</div>
+                        <div>{d.type === 'date' ? formatDate(v) : v}</div>
+                        {nested && (
+                            <div className="ps-3 ms-1" style={{ borderLeft: '2px solid #e5e0f5' }}>
+                                <FollowUpSummary def={nested} data={data.more?.[d.name] ?? { details: {} }} />
+                            </div>
+                        )}
+                    </div>
+                );
+            })}
+        </div>
     );
 }
 

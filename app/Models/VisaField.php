@@ -37,6 +37,9 @@ class VisaField extends Model
      * ['show_when' => 'Yes'|'No', 'fields' => [['name', 'type', 'required'], …]];
      * these are the types the follow-up fields can have.
      */
+    /** How deep follow-ups go: a Yes / No inside a follow-up can open its own, up to this many levels. */
+    public const FOLLOW_UP_DEPTH = 3;
+
     public const FOLLOW_UP_TYPES = [
         'text' => 'Text',
         'textarea' => 'Long Text',
