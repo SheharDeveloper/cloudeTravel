@@ -8,6 +8,8 @@ interface ConfirmDialogProps {
     cancelText?: string;
     isLoading?: boolean;
     confirmVariant?: 'danger' | 'primary';
+    // Shown on the confirm button while working (default "Deleting...")
+    loadingText?: string;
 }
 
 export default function ConfirmDialog({
@@ -20,6 +22,7 @@ export default function ConfirmDialog({
     cancelText = 'Cancel',
     isLoading = false,
     confirmVariant = 'danger',
+    loadingText = 'Deleting...',
 }: ConfirmDialogProps) {
     if (!isOpen) return null;
 
@@ -54,7 +57,7 @@ export default function ConfirmDialog({
                             onClick={onConfirm}
                             disabled={isLoading}
                         >
-                            {isLoading ? 'Deleting...' : confirmText}
+                            {isLoading ? loadingText : confirmText}
                         </button>
                     </div>
                 </div>

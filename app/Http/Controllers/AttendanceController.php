@@ -98,6 +98,48 @@ class AttendanceController extends Controller
         return back()->with('success', "{$staff->name}'s time extended by {$validated['minutes']} minutes.");
     }
 
+    /** Owner/superadmin changes today's extension to end at a given time ("HH:MM"). */
+    public function updateExtension(Request $request, string $uid)
+    {
+        abort_if($this->attendanceService->isStaff($this->attendanceService->currentPrincipal()), 403);
+
+        $validated = $request->validate(['until' => 'required|date_format:H:i']);
+        $staff = $this->staffService->searchStaff('', 1000)->getCollection()->firstWhere('uid', $uid);
+        abort_unless($staff, 404);
+
+        // The next time that clock time comes after the shift's end: tonight, or
+        // after midnight (e.g. 01:30 for a shift ending 18:00)
+        $until = Date::parse(Date::today()->toDateString() . ' ' . $validated['until']);
+        $shiftEnd = $this->attendanceService->shiftEndsAt($staff);
+        if ($shiftEnd && $until->lessThanOrEqualTo($shiftEnd)) {
+            $nextDay = $until->addDay();
+            if ($nextDay->diffInMinutes($shiftEnd, true) > 720) {
+                return back()->withErrors(['until' => "The new end time must be after the shift's end ({$shiftEnd->format('h:i A')}) and within 12 hours of it."]);
+            }
+            $until = $nextDay;
+        }
+        try {
+            $this->attendanceService->setExtensionUntil($staff, $until, $this->attendanceService->currentPrincipal()?->name);
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
+            return back()->withErrors(['until' => $e->getMessage()]);
+        }
+
+        return back()->with('success', "{$staff->name}'s day now ends at {$until->format('h:i A')}.");
+    }
+
+    /** Owner/superadmin cancels today's extension: back to the shift's End time. */
+    public function cancelExtension(string $uid)
+    {
+        abort_if($this->attendanceService->isStaff($this->attendanceService->currentPrincipal()), 403);
+
+        $staff = $this->staffService->searchStaff('', 1000)->getCollection()->firstWhere('uid', $uid);
+        abort_unless($staff, 404);
+
+        $this->attendanceService->cancelExtension($staff);
+
+        return back()->with('success', "{$staff->name}'s extension was cancelled.");
+    }
+
     public function lunchStart()
     {
         $this->attendanceService->startLunch($this->attendanceService->currentPrincipal());

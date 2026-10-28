@@ -330,6 +330,53 @@ class AttendanceService
         $this->logHistory($staff, $date, 'time_extended', notes: "Extended by {$minutes} min");
     }
 
+    /** When the staff member's working day ends today without any extension (their shift's End time). */
+    public function shiftEndsAt(User|AgencyUser $staff): ?\Carbon\CarbonInterface
+    {
+        $date = Date::today()->toDateString();
+
+        return $this->endsAt($staff, $date)?->subMinutes($this->extensionMinutes($staff, $date));
+    }
+
+    /**
+     * An admin changes today's extension so the day ends at $until (after
+     * the shift's End time). A checked-out staff member is checked back in
+     * when that's still ahead.
+     */
+    public function setExtensionUntil(User|AgencyUser $staff, \Carbon\CarbonInterface $until, ?string $grantedBy = null): void
+    {
+        $date = Date::today()->toDateString();
+        $shiftEnd = $this->shiftEndsAt($staff);
+        abort_unless($shiftEnd, 422, 'Set working hours for this staff member first (Staff Settings).');
+        abort_unless($until->greaterThan($shiftEnd), 422, "The new end time must be after the shift's end ({$shiftEnd->format('h:i A')}).");
+
+        AttendanceExtension::updateOrCreate(
+            $this->staffableAttributes($staff) + ['date' => $date],
+            $this->ownerAttributes($staff) + ['minutes' => (int) ceil($shiftEnd->diffInMinutes($until)), 'granted_by' => $grantedBy]
+        );
+
+        $attendance = $this->todayFor($staff);
+        if ($attendance?->checked_out_at && $until->greaterThan(Date::now())) {
+            $attendance->update(['checked_out_at' => null, 'auto_checked_out_at' => null]);
+        }
+        $this->logHistory($staff, $date, 'time_extended', notes: "Extension changed: until {$until->format('h:i A')}");
+        // Already past the new end: checked out at it
+        $this->enforceTimeLimit($staff);
+    }
+
+    /**
+     * An admin cancels today's extension: the day ends at the shift's End
+     * time again. If that has passed, a checked-in staff member is checked
+     * out (at that time) and can't sign in.
+     */
+    public function cancelExtension(User|AgencyUser $staff): void
+    {
+        $date = Date::today()->toDateString();
+        AttendanceExtension::where($this->staffableAttributes($staff))->whereDate('date', $date)->delete();
+        $this->logHistory($staff, $date, 'time_extended', notes: 'Extension cancelled');
+        $this->enforceTimeLimit($staff);
+    }
+
     /** The permission that lets a staff member sign back in after checking out for the day. */
     public const LOGIN_AFTER_CHECKOUT = 'attendance.login-after-checkout';
 

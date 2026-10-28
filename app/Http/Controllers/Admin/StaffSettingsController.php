@@ -67,8 +67,13 @@ class StaffSettingsController extends Controller
             return null;
         }
 
+        $shiftEnd = $this->attendance->shiftEndsAt($staff);
+
         return [
             'ends_at' => $endsAt?->format('h:i A'),
+            // For editing the extension: its end as "HH:MM", and the shift's own end
+            'ends_at_time' => $endsAt?->format('H:i'),
+            'shift_ends_at' => $shiftEnd?->format('h:i A'),
             'hours_over' => $endsAt !== null && now()->greaterThanOrEqualTo($endsAt),
             'checked_in_at' => $day?->checked_in_at?->format('h:i A'),
             'checked_out_at' => $day?->checked_out_at?->format('h:i A'),

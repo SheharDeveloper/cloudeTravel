@@ -9,6 +9,8 @@ Route::get('attendance', [\App\Http\Controllers\AttendanceController::class, 'in
 Route::post('attendance/check-out', [\App\Http\Controllers\AttendanceController::class, 'checkOut'])->name('admin.attendance.check-out');
 Route::post('attendance/auto-check-out', [\App\Http\Controllers\AttendanceController::class, 'autoCheckOut'])->name('admin.attendance.auto-check-out');
 Route::post('attendance/{uid}/extend', [\App\Http\Controllers\AttendanceController::class, 'extend'])->name('admin.attendance.extend');
+Route::put('attendance/{uid}/extend', [\App\Http\Controllers\AttendanceController::class, 'updateExtension'])->name('admin.attendance.extend.update');
+Route::delete('attendance/{uid}/extend', [\App\Http\Controllers\AttendanceController::class, 'cancelExtension'])->name('admin.attendance.extend.cancel');
 Route::post('attendance/lunch-start', [\App\Http\Controllers\AttendanceController::class, 'lunchStart'])->name('admin.attendance.lunch-start');
 Route::post('attendance/lunch-end', [\App\Http\Controllers\AttendanceController::class, 'lunchEnd'])->name('admin.attendance.lunch-end');
 Route::post('attendance/leave', [\App\Http\Controllers\AttendanceController::class, 'applyLeave'])->name('admin.attendance.apply-leave');

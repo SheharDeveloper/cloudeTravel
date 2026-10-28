@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Head, router, usePage } from '@inertiajs/react';
 import toast, { Toaster } from 'react-hot-toast';
 import { hoursLabel } from '@/components/AttendanceCalendar';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 interface StaffRow {
     uid: string;
@@ -18,6 +19,8 @@ interface StaffRow {
     // Today, for Extend: checked in / due out / checked out
     today?: {
         ends_at: string | null;
+        ends_at_time?: string | null;
+        shift_ends_at?: string | null;
         // Working hours have ended: can't sign in until extended
         hours_over: boolean;
         checked_in_at: string | null;
@@ -142,12 +145,62 @@ export default function StaffSettingsIndex({ staff, defaults }: { staff: StaffRo
         });
     };
 
+    // Change today's extension to end at a typed time ("HH:MM"), or cancel it
+    const [untilTime, setUntilTime] = useState<Record<string, string>>({});
+    // The row whose extension end time is being edited in the Today column
+    const [editingExtension, setEditingExtension] = useState<string | null>(null);
+    const updateExtension = (s: StaffRow) => {
+        setSaving(`extend-${s.uid}`);
+        router.put(`/admin/attendance/${s.uid}/extend`, { until: untilTime[s.uid] }, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => {
+                setUntilTime((u) => { const next = { ...u }; delete next[s.uid]; return next; });
+                setEditingExtension(null);
+                setExtensionError((e) => ({ ...e, [s.uid]: '' }));
+            },
+            // Not saved: say why under the picker (the toast alone is easy to miss)
+            onError: (errs) => setExtensionError((e) => ({ ...e, [s.uid]: errs.until ?? Object.values(errs)[0] ?? 'Could not save the time.' })),
+            onFinish: () => setSaving(null),
+        });
+    };
+    const [extensionError, setExtensionError] = useState<Record<string, string>>({});
+    // Cancel an extension: asked in the themed confirm popup first
+    const [cancelTarget, setCancelTarget] = useState<StaffRow | null>(null);
+    const cancelExtension = (s: StaffRow) => setCancelTarget(s);
+    const confirmCancelExtension = () => {
+        if (!cancelTarget) return;
+        const s = cancelTarget;
+        setSaving(`extend-${s.uid}`);
+        router.delete(`/admin/attendance/${s.uid}/extend`, {
+            preserveScroll: true,
+            preserveState: true,
+            onFinish: () => {
+                setSaving(null);
+                setCancelTarget(null);
+            },
+        });
+    };
+
     const shown = staff.filter((s) => `${s.name} ${s.email}`.toLowerCase().includes(search.trim().toLowerCase()));
     const defPaid = paidMinutes(def);
 
     return (
         <div>
             <Head title="Staff Settings" />
+            <ConfirmDialog
+                isOpen={!!cancelTarget}
+                title="Cancel extension?"
+                message={cancelTarget
+                    ? `${cancelTarget.name}'s day will end at ${cancelTarget.today?.shift_ends_at ?? 'the shift end'} again.${cancelTarget.today?.checked_in_at && !cancelTarget.today?.checked_out_at ? " If that time has passed, they are checked out now and can't sign in." : ''}`
+                    : ''}
+                confirmText="Cancel Extension"
+                cancelText="Keep It"
+                loadingText="Cancelling..."
+                isLoading={!!cancelTarget && saving === `extend-${cancelTarget.uid}`}
+                onConfirm={confirmCancelExtension}
+                onCancel={() => setCancelTarget(null)}
+            />
             <Toaster position="top-right" />
             <div className="page-title">
                 <nav aria-label="breadcrumb">
@@ -305,7 +358,71 @@ export default function StaffSettingsIndex({ staff, defaults }: { staff: StaffRo
                                                             {s.today.ends_at && <div className="text-muted mt-1">Hours end {s.today.ends_at}</div>}
                                                         </>
                                                     )}
-                                                    {(s.today?.extended_minutes ?? 0) > 0 && <div className="text-primary">Extended +{s.today?.extended_minutes} min</div>}
+                                                    {/* An extension today: edit its end time or cancel it, right here */}
+                                                    {(s.today?.extended_minutes ?? 0) > 0 && (
+                                                        editingExtension === s.uid ? (
+                                                            <div className="mt-1">
+                                                                <div className="d-flex gap-1 align-items-center">
+                                                                    <Time12
+                                                                        value={untilTime[s.uid] ?? s.today?.ends_at_time ?? ''}
+                                                                        onChange={(v) => {
+                                                                            setUntilTime((u) => ({ ...u, [s.uid]: v }));
+                                                                            setExtensionError((e) => ({ ...e, [s.uid]: '' }));
+                                                                        }}
+                                                                    />
+                                                                    <button
+                                                                        type="button"
+                                                                        className="btn btn-sm btn-primary px-2"
+                                                                        title="Save the new end time"
+                                                                        disabled={!untilTime[s.uid] || untilTime[s.uid] === s.today?.ends_at_time || saving === `extend-${s.uid}`}
+                                                                        onClick={() => updateExtension(s)}
+                                                                    >
+                                                                        {saving === `extend-${s.uid}` ? <span className="spinner-border spinner-border-sm"></span> : <i className="fa fa-check"></i>}
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        className="btn btn-sm btn-light px-2"
+                                                                        title="Close"
+                                                                        onClick={() => {
+                                                                            setEditingExtension(null);
+                                                                            setExtensionError((e) => ({ ...e, [s.uid]: '' }));
+                                                                        }}
+                                                                    >
+                                                                        <i className="fa fa-times"></i>
+                                                                    </button>
+                                                                </div>
+                                                                {/* Why it wasn't saved, until the time is changed */}
+                                                                {extensionError[s.uid] ? (
+                                                                    <div className="text-danger small mt-1 text-wrap" style={{ maxWidth: 260 }}>
+                                                                        <i className="fa fa-exclamation-circle me-1"></i>{extensionError[s.uid]}
+                                                                    </div>
+                                                                ) : (untilTime[s.uid] ?? s.today?.ends_at_time) === s.today?.ends_at_time && (
+                                                                    <div className="text-muted small mt-1">Pick a new end time, then press ✓</div>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <div className="d-flex align-items-center gap-2 mt-1">
+                                                                <span className="text-primary">Extended until {s.today?.ends_at}</span>
+                                                                <button
+                                                                    type="button"
+                                                                    className="btn btn-sm btn-outline-primary py-0 px-2"
+                                                                    title="Change the end time"
+                                                                    onClick={() => setEditingExtension(s.uid)}
+                                                                >
+                                                                    <i className="fa fa-pen me-1"></i>Edit
+                                                                </button>
+                                                                <button
+                                                                    type="button"
+                                                                    className="btn btn-sm btn-outline-danger py-0 px-2"
+                                                                    title="Cancel the extension"
+                                                                    disabled={saving === `extend-${s.uid}`}
+                                                                    onClick={() => cancelExtension(s)}
+                                                                >
+                                                                    <i className="fa fa-times me-1"></i>Cancel
+                                                                </button>
+                                                            </div>
+                                                        )
+                                                    )}
                                                 </td>
                                                 <td className="text-end text-nowrap">
                                                     {s.today?.ends_at && (
@@ -324,6 +441,36 @@ export default function StaffSettingsIndex({ staff, defaults }: { staff: StaffRo
                                                                 {saving === `extend-${s.uid}` ? 'Extending...' : 'Extend'}
                                                             </button>
                                                             <ul className="dropdown-menu dropdown-menu-end">
+                                                                {/* An extension already given today: change its end time, or cancel it */}
+                                                                {(s.today?.extended_minutes ?? 0) > 0 && (
+                                                                    <>
+                                                                        <li className="px-3 pt-1 pb-2" style={{ minWidth: 260 }}>
+                                                                            <div className="small text-muted mb-1">
+                                                                                Extended until <strong className="text-dark">{s.today?.ends_at}</strong>
+                                                                                {s.today?.shift_ends_at && <> (shift ends {s.today.shift_ends_at})</>}
+                                                                            </div>
+                                                                            <div className="d-flex gap-2">
+                                                                                <Time12
+                                                                                    value={untilTime[s.uid] ?? s.today?.ends_at_time ?? ''}
+                                                                                    onChange={(v) => setUntilTime((u) => ({ ...u, [s.uid]: v }))}
+                                                                                />
+                                                                                <button
+                                                                                    type="button"
+                                                                                    className="btn btn-sm btn-primary text-nowrap"
+                                                                                    disabled={!untilTime[s.uid] || untilTime[s.uid] === s.today?.ends_at_time}
+                                                                                    onClick={() => updateExtension(s)}
+                                                                                >
+                                                                                    Update
+                                                                                </button>
+                                                                            </div>
+                                                                            <button type="button" className="btn btn-sm btn-outline-danger w-100 mt-2" onClick={() => cancelExtension(s)}>
+                                                                                <i className="fa fa-times me-1"></i>Cancel extension
+                                                                            </button>
+                                                                        </li>
+                                                                        <li><hr className="dropdown-divider" /></li>
+                                                                        <li className="px-3 small text-muted">Add more time</li>
+                                                                    </>
+                                                                )}
                                                                 {[30, 60, 120, 240].map((m) => (
                                                                     <li key={m}>
                                                                         <button type="button" className="dropdown-item" onClick={() => extend(s, m)}>
@@ -408,6 +555,37 @@ export default function StaffSettingsIndex({ staff, defaults }: { staff: StaffRo
                     )}
                 </div>
             </div>
+        </div>
+    );
+}
+
+/**
+ * A time as hour, minute and AM / PM (like the rest of the page shows times),
+ * so 11:50 can't be taken as morning by mistake. Value is "HH:MM" (24-hour).
+ */
+function Time12({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+    const [h24, m] = (value || '00:00').split(':').map(Number);
+    const pm = h24 >= 12;
+    const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+    const emit = (hour12: number, minute: number, isPm: boolean) => {
+        const hour = (hour12 % 12) + (isPm ? 12 : 0);
+        onChange(`${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`);
+    };
+    const sel = 'form-select form-select-sm px-2';
+
+    return (
+        <div className="d-flex gap-1 align-items-center">
+            <select className={sel} style={{ width: 62 }} value={h12} onChange={(e) => emit(Number(e.target.value), m, pm)} aria-label="Hour">
+                {Array.from({ length: 12 }, (_, i) => i + 1).map((h) => <option key={h} value={h}>{h}</option>)}
+            </select>
+            <span>:</span>
+            <select className={sel} style={{ width: 62 }} value={m} onChange={(e) => emit(h12, Number(e.target.value), pm)} aria-label="Minute">
+                {Array.from({ length: 60 }, (_, i) => i).map((min) => <option key={min} value={min}>{String(min).padStart(2, '0')}</option>)}
+            </select>
+            <select className={sel} style={{ width: 66 }} value={pm ? 'PM' : 'AM'} onChange={(e) => emit(h12, m, e.target.value === 'PM')} aria-label="AM or PM">
+                <option value="AM">AM</option>
+                <option value="PM">PM</option>
+            </select>
         </div>
     );
 }

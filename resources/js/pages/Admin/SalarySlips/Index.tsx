@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import toast, { Toaster } from 'react-hot-toast';
 import { hoursLabel } from '@/components/AttendanceCalendar';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 interface SlipSummary {
     uid: string;
@@ -93,12 +94,18 @@ export default function SalarySlipsIndex() {
 
     const shownRows = rows.filter((r) => `${r.name} ${r.email}`.toLowerCase().includes(search.trim().toLowerCase()));
 
-    const generate = (uids: string[], key: string) => {
-        if (!confirm(uids.length === 1 ? 'Generate the salary slip up to now? The next one will start from now.' : `Generate salary slips for ${uids.length} staff, up to now?`)) return;
-        setProcessing(key);
-        router.post('/admin/salary-slips/generate', { uids }, {
+    // Generate: asked in the themed confirm popup first
+    const [toGenerate, setToGenerate] = useState<{ uids: string[]; key: string } | null>(null);
+    const generate = (uids: string[], key: string) => setToGenerate({ uids, key });
+    const confirmGenerate = () => {
+        if (!toGenerate) return;
+        setProcessing(toGenerate.key);
+        router.post('/admin/salary-slips/generate', { uids: toGenerate.uids }, {
             preserveScroll: true,
-            onFinish: () => setProcessing(null),
+            onFinish: () => {
+                setProcessing(null);
+                setToGenerate(null);
+            },
         });
     };
 
@@ -111,6 +118,21 @@ export default function SalarySlipsIndex() {
     return (
         <div>
             <Head title="Salary Slips" />
+            <ConfirmDialog
+                isOpen={!!toGenerate}
+                title={toGenerate && toGenerate.uids.length > 1 ? 'Generate salary slips?' : 'Generate salary slip?'}
+                message={toGenerate
+                    ? toGenerate.uids.length === 1
+                        ? `Generate ${rows.find((r) => r.uid === toGenerate.uids[0])?.name ?? 'this staff member'}'s salary slip up to now? Their next slip will start from now.`
+                        : `Generate salary slips for ${toGenerate.uids.length} staff, up to now? Each one's next slip will start from now.`
+                    : ''}
+                confirmText="Generate"
+                loadingText="Generating..."
+                confirmVariant="primary"
+                isLoading={!!toGenerate && processing === toGenerate.key}
+                onConfirm={confirmGenerate}
+                onCancel={() => setToGenerate(null)}
+            />
             <Toaster position="top-right" />
             <div className="page-title">
                 <nav aria-label="breadcrumb">
