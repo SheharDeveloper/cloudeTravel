@@ -29,6 +29,11 @@ class BlockLoginAfterCheckout
             return $next($request);
         }
 
+        // Deactivated (Staff → Status off): no access at all
+        if ($staff->status !== 'active') {
+            return $this->signOut($request, $staff, 'Your account has been deactivated. Please contact your administrator.');
+        }
+
         // Their time may have just run out
         $this->attendance->enforceTimeLimit($staff);
 
@@ -37,6 +42,12 @@ class BlockLoginAfterCheckout
             return $next($request);
         }
 
+        return $this->signOut($request, $staff, $message);
+    }
+
+    /** Signs the staff member out and sends them to their login page with the reason. */
+    private function signOut(Request $request, \App\Models\User|AgencyUser $staff, string $message): Response
+    {
         $isAgency = $staff instanceof AgencyUser;
         Auth::guard($isAgency ? 'agency' : 'web')->logout();
         $request->session()->invalidate();

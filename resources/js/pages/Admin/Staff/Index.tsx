@@ -24,11 +24,8 @@ export default function StaffIndex() {
     };
 
     const handleToggleStatus = (uid: string) => {
-        router.post(`/admin/staff/${uid}/toggle-status`, {}, {
-            onSuccess: () => {
-                router.reload();
-            },
-        });
+        // The list comes back with the new status after the redirect
+        router.post(`/admin/staff/${uid}/toggle-status`, {}, { preserveScroll: true });
     };
 
     const handleImpersonate = (uid: string) => {
@@ -155,7 +152,7 @@ export default function StaffIndex() {
                                                         <td>
                                                             <label
                                                                 className="toggle-switch"
-                                                                title={member.status ? "Click to deactivate" : "Click to activate"}
+                                                                title={member.status === 'active' ? 'Click to deactivate' : 'Click to activate'}
                                                                 style={{
                                                                     display: 'inline-block',
                                                                     position: 'relative',
@@ -166,7 +163,7 @@ export default function StaffIndex() {
                                                             >
                                                                 <input
                                                                     type="checkbox"
-                                                                    checked={member.status}
+                                                                    checked={member.status === 'active'}
                                                                     onChange={() => handleToggleStatus(member.uid)}
                                                                     style={{
                                                                         opacity: 0,
@@ -182,7 +179,7 @@ export default function StaffIndex() {
                                                                         left: 0,
                                                                         right: 0,
                                                                         bottom: 0,
-                                                                        backgroundColor: member.status ? '#28a745' : '#ccc',
+                                                                        backgroundColor: member.status === 'active' ? '#28a745' : '#ccc',
                                                                         transition: '.4s',
                                                                         borderRadius: '28px',
                                                                     }}
@@ -193,7 +190,7 @@ export default function StaffIndex() {
                                                                             position: 'absolute',
                                                                             height: '22px',
                                                                             width: '22px',
-                                                                            left: member.status ? '26px' : '3px',
+                                                                            left: member.status === 'active' ? '26px' : '3px',
                                                                             bottom: '3px',
                                                                             backgroundColor: '#fff',
                                                                             transition: '.4s',

@@ -1,6 +1,7 @@
 import { clearAuthToken } from '@/lib/api';
 import { useState, useRef, useEffect } from 'react';
 import { router, usePage } from '@inertiajs/react';
+import ShiftCountdown from '@/components/ShiftCountdown';
 
 export default function Navbar() {
     const { auth, name, authAgency, impersonating, isStaffSession } = usePage().props as any;
@@ -117,6 +118,9 @@ export default function Navbar() {
 
                             {/* Right side icons */}
                             <ul className="navbar-nav header-right align-items-center">
+
+                                {/* Staff: time left until the automatic check-out and sign-out */}
+                                {isStaffSession && <ShiftCountdown />}
 
                                 {/* Delete Due Items — admin/superadmin only, not staff */}
                                 {!isStaffSession && (
