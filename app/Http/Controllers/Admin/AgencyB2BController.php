@@ -59,7 +59,7 @@ class AgencyB2BController extends Controller
             'services' => $services,
             'zipCodes' => $zipCodes,
             'addressData' => $addressData,
-        ]);
+        ] + $this->b2bOptions());
     }
 
     /**
@@ -68,7 +68,15 @@ class AgencyB2BController extends Controller
     public function store(Request $request)
     {
         $rules = $this->agencyB2BService->validateStep(4, $request->all());
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, [], $this->b2bAttributes($request));
+
+        // Business verification: at least one document uploaded
+        $uploaded = collect($request->file('documents', []))->filter(fn ($doc) => ! empty($doc['file']));
+        if ($uploaded->isEmpty()) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'documents' => 'Upload at least one business verification document.',
+            ]);
+        }
 
         return DB::transaction(function () use ($request, $validated) {
             try {
@@ -113,7 +121,7 @@ class AgencyB2BController extends Controller
         return Inertia::render('Admin/AgencyB2B/Show', [
             'agency' => $agency,
             'permissionGroups' => app(\App\Services\RoleService::class)->permissionsByModule(),
-        ]);
+        ] + $this->b2bOptions());
     }
 
     /**
@@ -170,7 +178,7 @@ class AgencyB2BController extends Controller
             'services' => $services,
             'zipCodes' => $zipCodes,
             'addressData' => $addressData,
-        ]);
+        ] + $this->b2bOptions());
     }
 
     /**
@@ -180,7 +188,7 @@ class AgencyB2BController extends Controller
     {
         $agency = Agency::where('uid', $uid)->firstOrFail();
         $rules = $this->agencyB2BService->validateStep(4, $request->all(), $agency);
-        $validated = $request->validate($rules);
+        $validated = $request->validate($rules, [], $this->b2bAttributes($request));
 
         return DB::transaction(function () use ($request, $validated, $agency) {
             try {
@@ -254,6 +262,51 @@ class AgencyB2BController extends Controller
         }
     }
 
+    /** Field names in error messages, the tax one named as Tax Setup names it for the country (e.g. "GST number"). */
+    private function b2bAttributes(Request $request): array
+    {
+        $tax = \App\Models\TaxSetup::whereHas('country', fn ($q) => $q->where('countryName', $request->input('registration_country')))
+            ->value('tax_name') ?? 'tax';
+
+        return [
+            'vat_number' => "{$tax} registration number",
+            'vat_registered' => "{$tax} registered",
+            'registration_country' => 'country of registration',
+            'branches_count' => 'number of branches',
+            'expected_monthly_bookings' => 'expected monthly booking volume',
+            'payment_terms' => 'payment terms',
+            'authorised_rep_name' => 'authorised representative name',
+            'authorised_rep_position' => 'authorised representative position',
+            'contact_name' => 'main contact name',
+            'contact_position' => 'main contact position',
+            'terms_accepted' => 'B2B Agreement and platform terms',
+        ];
+    }
+
+    /** The choices on the B2B registration fields of the agency form. */
+    private function b2bOptions(): array
+    {
+        return [
+            'currencies' => config('currency.list', []),
+            // For the searchable country box (flag, name and code); flags by plain path, as on application forms
+            'countries' => \App\Models\Country::orderBy('countryName')->get(['id', 'countryName', 'countryCode'])
+                ->filter(fn ($c) => $c->countryName)
+                ->map(fn ($c) => [
+                    'id' => $c->id,
+                    'countryName' => $c->countryName,
+                    'countryCode' => (string) $c->countryCode,
+                    'flag_url' => '/assets/flags/64x48/' . strtolower((string) $c->countryCode) . '.png',
+                ])->values(),
+            'monthlyBookings' => Agency::MONTHLY_BOOKINGS,
+            'paymentTerms' => Agency::PAYMENT_TERMS,
+            'documentTypes' => Agency::DOCUMENT_TYPES,
+            // Country name => its tax's name (Tax Setup), e.g. India => GST, United Kingdom => VAT
+            'taxNames' => \App\Models\TaxSetup::with('country')->get()
+                ->filter(fn ($t) => $t->country)
+                ->mapWithKeys(fn ($t) => [$t->country->countryName => $t->tax_name]),
+        ];
+    }
+
     /**
      * Validate a specific step of the form
      */
@@ -271,7 +324,7 @@ class AgencyB2BController extends Controller
         $rules = $this->agencyB2BService->validateStep($step, $data, $existingAgency);
 
         try {
-            $validated = $request->validate($rules);
+            $validated = $request->validate($rules, [], $this->b2bAttributes($request));
             return response()->json([
                 'success' => true,
                 'message' => 'Step validation passed',

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { router, usePage } from '@inertiajs/react';
+import B2BFields, { appendB2B, b2bInitial, type B2BData } from '@/components/agency/B2BFields';
 import axios from 'axios';
 
 type AgencyDocument = {
@@ -24,11 +25,20 @@ const previewUrl = (domainName: string) =>
         : `${window.location.origin}/${domainName}`;
 
 export default function AgencyB2BEdit() {
-    const { agency, services, zipCodes, addressData } = usePage().props as any;
+    const { agency, services, zipCodes, addressData, currencies, countries, monthlyBookings, paymentTerms, documentTypes, taxNames } = usePage().props as any;
     const [step, setStep] = useState(1);
     const [processing, setProcessing] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [successMessage, setSuccessMessage] = useState('');
+    // B2B registration (Form A) fields
+    const [b2b, setB2b] = useState<B2BData>(() => b2bInitial(agency));
+    const patchB2b = (patch: Partial<B2BData>) => {
+        setB2b((current) => ({ ...current, ...patch }));
+        const cleared = { ...errors };
+        Object.keys(patch).forEach((key) => delete cleared[key]);
+        setErrors(cleared);
+    };
+    const b2bOptions = { currencies, countries, monthlyBookings, paymentTerms, taxNames };
 
     const [data, setData] = useState({
         agency_name: agency?.agency_name || '',
@@ -153,6 +163,8 @@ export default function AgencyB2BEdit() {
             });
         }
 
+        appendB2B(formData, b2b, step);
+
         try {
             const response = await axios.post('/admin/agency-b2b/validate-step', formData, {
                 headers: {
@@ -218,6 +230,7 @@ export default function AgencyB2BEdit() {
             if (data.logo) {
                 formData.append('logo', data.logo);
             }
+            appendB2B(formData, b2b);
 
             // Add documents
             data.documents.forEach((doc: AgencyDocument, index: number) => {
@@ -363,10 +376,10 @@ export default function AgencyB2BEdit() {
                                         1. Basic
                                     </span>
                                     <span className={`badge ${step === 2 ? 'bg-primary' : 'bg-light text-dark'}`}>
-                                        2. Address
+                                        2. Registered Address
                                     </span>
                                     <span className={`badge ${step === 3 ? 'bg-primary' : 'bg-light text-dark'}`}>
-                                        3. Other Info
+                                        3. Business Details
                                     </span>
                                     <span className={`badge ${step === 4 ? 'bg-primary' : 'bg-light text-dark'}`}>
                                         4. Documents
@@ -376,7 +389,7 @@ export default function AgencyB2BEdit() {
                                 {step === 1 && (
                                     <div className="row">
                                         <div className="col-sm-6 mb-4">
-                                            <label className="form-label">Agency Name</label>
+                                            <label className="form-label">Trading Name (Agency Name) <span className="text-danger">*</span></label>
                                             <input
                                                 type="text"
                                                 className={`form-control ${errors.agency_name ? 'is-invalid' : ''}`}
@@ -394,7 +407,7 @@ export default function AgencyB2BEdit() {
                                         </div>
 
                                         <div className="col-sm-6 mb-4">
-                                            <label className="form-label">Legal Name</label>
+                                            <label className="form-label">Legal Business Name <span className="text-danger">*</span></label>
                                             <input
                                                 type="text"
                                                 className={`form-control ${errors.legal_name ? 'is-invalid' : ''}`}
@@ -405,7 +418,7 @@ export default function AgencyB2BEdit() {
                                         </div>
 
                                         <div className="col-sm-6 mb-4">
-                                            <label className="form-label">Email</label>
+                                            <label className="form-label">Business Email <span className="text-danger">*</span></label>
                                             <input
                                                 type="email"
                                                 className={`form-control ${errors.email ? 'is-invalid' : ''}`}
@@ -416,7 +429,7 @@ export default function AgencyB2BEdit() {
                                         </div>
 
                                         <div className="col-sm-6 mb-4">
-                                            <label className="form-label">Phone</label>
+                                            <label className="form-label">Telephone Number <span className="text-danger">*</span></label>
                                             <input
                                                 type="text"
                                                 className={`form-control ${errors.phone_number ? 'is-invalid' : ''}`}
@@ -425,6 +438,8 @@ export default function AgencyB2BEdit() {
                                             />
                                             {errors.phone_number && <div className="invalid-feedback d-block">{errors.phone_number}</div>}
                                         </div>
+
+                                        <B2BFields step={1} data={b2b} onChange={patchB2b} errors={errors} options={b2bOptions} />
 
                                         <div className="col-12 col-sm-6 mb-4">
                                             <label className="form-label">Agency Logo</label>
@@ -601,13 +616,15 @@ export default function AgencyB2BEdit() {
                                                 style={{ backgroundColor: '#e9ecef' }}
                                             />
                                         </div>
+
+                                        <B2BFields step={2} data={b2b} onChange={patchB2b} errors={errors} options={b2bOptions} />
                                     </div>
                                 )}
 
                                 {step === 3 && (
                                     <div className="row">
                                         <div className="col-sm-12 mb-4">
-                                            <label className="form-label">Services</label>
+                                            <label className="form-label">Services Required <span className="text-danger">*</span></label>
                                             <div>
                                                 {data.services.length > 0 && (
                                                     <div className="mb-2 d-flex flex-wrap gap-2">
@@ -702,6 +719,8 @@ export default function AgencyB2BEdit() {
                                             </div>
                                         </div>
 
+                                        <B2BFields step={3} data={b2b} onChange={patchB2b} errors={errors} options={b2bOptions} />
+
                                         <div className="col-12 col-lg-4 mb-4">
                                             <label className="form-label">Tax Status</label>
                                             <select
@@ -723,7 +742,7 @@ export default function AgencyB2BEdit() {
                                         </div>
 
                                         <div className="col-12 col-lg-4 mb-4">
-                                            <label className="form-label">Registration Number</label>
+                                            <label className="form-label">Company Registration Number <small className="text-muted">(where applicable)</small></label>
                                             <input
                                                 type="text"
                                                 className={`form-control ${errors.registration_number ? 'is-invalid' : ''}`}
@@ -731,17 +750,6 @@ export default function AgencyB2BEdit() {
                                                 onChange={(e) => setData({ ...data, registration_number: e.target.value })}
                                             />
                                             {errors.registration_number && <div className="invalid-feedback d-block">{errors.registration_number}</div>}
-                                        </div>
-
-                                        <div className="col-12 col-lg-4 mb-4">
-                                            <label className="form-label">GST Number</label>
-                                            <input
-                                                type="text"
-                                                className={`form-control ${errors.gst_number ? 'is-invalid' : ''}`}
-                                                value={data.gst_number}
-                                                onChange={(e) => setData({ ...data, gst_number: e.target.value })}
-                                            />
-                                            {errors.gst_number && <div className="invalid-feedback d-block">{errors.gst_number}</div>}
                                         </div>
 
                                         <div className="col-12 col-lg-4 mb-4">
@@ -842,7 +850,7 @@ export default function AgencyB2BEdit() {
                                         )}
 
                                         <div className="d-flex justify-content-between align-items-center mb-3">
-                                            <h6 className="mb-0">Add New Documents</h6>
+                                            <h6 className="mb-0">Add Business Verification Documents</h6>
                                             <button type="button" className="btn btn-sm btn-primary" onClick={addDocument}>
                                                 <i className="fa fa-plus me-1"></i>Add More
                                             </button>
@@ -871,11 +879,9 @@ export default function AgencyB2BEdit() {
                                                             onChange={(e) => updateDocument(index, 'document_type', e.target.value)}
                                                         >
                                                             <option value="">Select Type</option>
-                                                            <option value="gst">GST</option>
-                                                            <option value="pan">PAN</option>
-                                                            <option value="license">License</option>
-                                                            <option value="agreement">Agreement</option>
-                                                            <option value="other">Other</option>
+                                                            {Object.entries(documentTypes as Record<string, string>).map(([value, label]) => (
+                                                                <option key={value} value={value}>{label}</option>
+                                                            ))}
                                                         </select>
                                                         {errors[`document_type_${index}`] && <div className="invalid-feedback d-block">{errors[`document_type_${index}`]}</div>}
                                                     </div>
@@ -924,6 +930,9 @@ export default function AgencyB2BEdit() {
                                                 )}
                                             </div>
                                         ))}
+                                        {errors.documents && <div className="alert alert-danger py-2 small">{errors.documents}</div>}
+
+                                        <B2BFields step={4} data={b2b} onChange={patchB2b} errors={errors} options={b2bOptions} termsAcceptedAt={agency?.terms_accepted_at ? new Date(agency.terms_accepted_at).toLocaleString() : null} />
                                     </div>
                                 )}
                             </div>

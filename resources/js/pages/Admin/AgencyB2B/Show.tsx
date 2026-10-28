@@ -17,7 +17,9 @@ const INVOICE_ACTION_LABELS: Record<string, string> = {
 };
 
 export default function AgencyB2BShow() {
-    const { agency, permissionGroups } = usePage().props as any;
+    const { agency, permissionGroups, currencies, monthlyBookings, paymentTerms, taxNames } = usePage().props as any;
+    // The tax's name for the agency's country of registration (Tax Setup): GST, VAT…
+    const taxName = taxNames?.[agency?.registration_country] || 'Tax';
     const [activeTab, setActiveTab] = useState('overview');
 
     const [selectedPerms, setSelectedPerms] = useState<string[]>(
@@ -279,8 +281,8 @@ export default function AgencyB2BShow() {
                                 </div>
                                 <div className="card-body" style={{ padding: '18px 20px' }}>
                                     <div className="row">
-                                        <Field label="Agency Name" value={agency?.agency_name} />
-                                        <Field label="Legal Name" value={agency?.legal_name} />
+                                        <Field label="Trading Name" value={agency?.agency_name} />
+                                        <Field label="Legal Business Name" value={agency?.legal_name} />
                                         <Field label="Email" value={agency?.email} />
                                         <Field label="Phone" value={agency?.phone_number} />
                                         <Field label="Alternate Phone" value={agency?.alternate_phone} />
@@ -344,10 +346,39 @@ export default function AgencyB2BShow() {
                                 <div className="card-body" style={{ padding: '18px 20px' }}>
                                     <div className="row">
                                         <Field label="Registration Number" value={agency?.registration_number} col="col-md-4" />
-                                        <Field label="GST Number" value={agency?.gst_number} col="col-md-4" />
+                                        {agency?.gst_number && <Field label="GST Number" value={agency.gst_number} col="col-md-4" />}
                                         <Field label="PAN Number" value={agency?.pan_number} col="col-md-4" />
                                         <Field label="Account Number" value={agency?.account_number} />
                                         <Field label="IFSC Code" value={agency?.ifsc_code} last />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="col-lg-6">
+                            {/* B2B registration (Form A) */}
+                            <div className="card mb-4" style={{ height: 'auto' }}>
+                                <div className="card-header" style={{ padding: '12px 20px' }}>
+                                    <h6 className="card-title mb-0">B2B Registration</h6>
+                                </div>
+                                <div className="card-body" style={{ padding: '18px 20px' }}>
+                                    <div className="row">
+                                        <Field label="Main Contact" value={agency?.contact_name && `${agency.contact_name}${agency.contact_position ? ` — ${agency.contact_position}` : ''}`} />
+                                        <Field label="Authorised Representative" value={agency?.authorised_rep_name && `${agency.authorised_rep_name}${agency.authorised_rep_position ? ` — ${agency.authorised_rep_position}` : ''}`} />
+                                        <Field label="Country of Registration" value={agency?.registration_country} />
+                                        <Field label="Number of Branches" value={agency?.branches_count} />
+                                        <Field label="Preferred Currency" value={agency?.preferred_currency && (currencies?.[agency.preferred_currency] ?? agency.preferred_currency)} />
+                                        <Field label="Expected Monthly Bookings" value={agency?.expected_monthly_bookings && (monthlyBookings?.[agency.expected_monthly_bookings] ?? agency.expected_monthly_bookings)} />
+                                        <Field label="Requested Payment Terms" value={agency?.payment_terms && (paymentTerms?.[agency.payment_terms] ?? agency.payment_terms)} />
+                                        <Field label={taxName} value={agency?.vat_registered ? `Registered${agency.vat_number ? ` — ${agency.vat_number}` : ''}` : `Not ${taxName} registered`} />
+                                        <Field
+                                            label="B2B Agreement & Platform Terms"
+                                            col="col-md-12"
+                                            last
+                                            value={agency?.terms_accepted_at
+                                                ? <span className="text-success"><i className="fa fa-check-circle me-1"></i>Accepted on {formatDate(agency.terms_accepted_at)}</span>
+                                                : <span className="text-danger">Not accepted</span>}
+                                        />
                                     </div>
                                 </div>
                             </div>

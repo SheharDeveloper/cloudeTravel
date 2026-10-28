@@ -238,7 +238,7 @@ class AgencyB2BService
             unset($data['documents']);
             unset($data['services']);
 
-            $agency = Agency::create($data);
+            $agency = Agency::create($this->b2bValues($data));
 
             $this->storeAgencyDocuments($agency->id, $documents);
             $this->storeAgencyServices($agency->id, $services);
@@ -318,7 +318,12 @@ class AgencyB2BService
             unset($data['documents']);
             unset($data['services']);
 
+            $data = $this->b2bValues($data, $agency);
             $filteredData = array_filter($data, fn($value) => !is_null($value) && $value !== '');
+            // Not VAT registered: the VAT number goes (array_filter would keep the old one)
+            if (array_key_exists('vat_registered', $data) && ! $data['vat_registered']) {
+                $filteredData['vat_number'] = null;
+            }
             $agency->update($filteredData);
 
             $this->storeAgencyDocuments($agency->id, $documents);
@@ -404,7 +409,7 @@ class AgencyB2BService
                     'logo' => $logoRule,
                     'has_domain' => 'nullable|boolean',
                     'domain_name' => ['required', 'string', 'max:255', $this->uniqueDomainRule($existingAgency)],
-                ];
+                ] + $this->b2bRules(1, $existingAgency);
                 break;
 
             case 2:
@@ -415,7 +420,7 @@ class AgencyB2BService
                     'address_id' => 'required|string|max:255',
                     'street_id' => 'required|string|max:255',
                     'county' => 'nullable|string|max:255',
-                ];
+                ] + $this->b2bRules(2, $existingAgency);
                 break;
 
             case 3:
@@ -429,7 +434,7 @@ class AgencyB2BService
                     'account_number' => 'nullable|string|max:255|regex:/^[0-9]{9,18}$/',
                     'ifsc_code' => 'nullable|string|max:255|regex:/^[A-Z]{4}0[A-Z0-9]{6}$/',
                     'note' => 'nullable|string|max:1000',
-                ];
+                ] + $this->b2bRules(3, $existingAgency);
                 break;
 
             case 4:
@@ -464,11 +469,66 @@ class AgencyB2BService
                     'county' => 'nullable|string|max:255',
                     'address' => 'nullable|string|max:500',
                     'domain_name' => ['required', 'string', 'max:255', $this->uniqueDomainRule($existingAgency)],
-                ];
+                ] + $this->b2bRules(1, $existingAgency) + $this->b2bRules(2, $existingAgency)
+                  + $this->b2bRules(3, $existingAgency) + $this->b2bRules(4, $existingAgency);
                 break;
         }
 
         return $rules;
+    }
+
+    /**
+     * B2B registration (Form A) fields, by the step they're on. Required for
+     * a new agency; an existing one may still have them blank.
+     */
+    private function b2bRules(int $step, ?Agency $existingAgency): array
+    {
+        $required = $existingAgency ? 'nullable' : 'required';
+
+        return match ($step) {
+            1 => [
+                'contact_name' => "{$required}|string|max:255",
+                'contact_position' => "{$required}|string|max:255",
+            ],
+            2 => [
+                'registration_country' => "{$required}|string|max:255",
+            ],
+            3 => [
+                'branches_count' => "{$required}|integer|min:1|max:100000",
+                'preferred_currency' => [$required, \Illuminate\Validation\Rule::in(array_keys(config('currency.list', [])))],
+                'expected_monthly_bookings' => [$required, \Illuminate\Validation\Rule::in(array_keys(Agency::MONTHLY_BOOKINGS))],
+                'payment_terms' => [$required, \Illuminate\Validation\Rule::in(array_keys(Agency::PAYMENT_TERMS))],
+                'vat_registered' => 'nullable|boolean',
+                'vat_number' => 'nullable|required_if:vat_registered,1|string|max:50',
+                'authorised_rep_name' => "{$required}|string|max:255",
+                'authorised_rep_position' => "{$required}|string|max:255",
+            ],
+            // A new agency accepts the B2B Agreement and platform terms
+            4 => [
+                'terms_accepted' => $existingAgency ? 'nullable|boolean' : 'accepted',
+            ],
+            default => [],
+        };
+    }
+
+    /**
+     * B2B registration values as stored: the VAT (GST…) number only when
+     * registered, and the terms acceptance as a time.
+     */
+    private function b2bValues(array $data, ?Agency $agency = null): array
+    {
+        if (array_key_exists('vat_registered', $data)) {
+            $data['vat_registered'] = (bool) $data['vat_registered'];
+            if (! $data['vat_registered']) {
+                $data['vat_number'] = null;
+            }
+        }
+        if (! empty($data['terms_accepted']) && ! $agency?->terms_accepted_at) {
+            $data['terms_accepted_at'] = now();
+        }
+        unset($data['terms_accepted']);
+
+        return $data;
     }
 
     /**
