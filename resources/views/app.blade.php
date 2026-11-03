@@ -44,6 +44,20 @@
         {{-- Font Awesome Icons --}}
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
+        {{-- Admin pages (MasterLayout) and the client portal (ClientLayout): the theme's stylesheets
+             load with the page, before it's drawn — added only by the layout's <Head> they arrive
+             late and the page flashes unstyled --}}
+        @php($component = $page['component'] ?? '')
+        @if (str_starts_with($component, 'Admin/') || in_array($component, ['admin/bookings', 'dashboard', 'ProfileSettings', 'ProfileOverview', 'ProfileEditDetails'], true))
+            <link rel="stylesheet" href="/backend/assets/vendor/bootstrap-select/dist/css/bootstrap-select.min_4.css">
+            <link rel="stylesheet" href="/backend/assets/css/switcher_4.css">
+            <link rel="stylesheet" href="/backend/assets/css/plugins_4.css">
+            <link rel="stylesheet" href="/backend/assets/css/style_4.css">
+        @elseif (str_starts_with($component, 'Client/'))
+            <link rel="stylesheet" href="/backend/assets/css/plugins_4.css">
+            <link rel="stylesheet" href="/backend/assets/css/style_4.css">
+        @endif
+
         @viteReactRefresh
        @vite('resources/js/app.tsx')
 

@@ -68,6 +68,7 @@ class StaffSettingsController extends Controller
         }
 
         $shiftEnd = $this->attendance->shiftEndsAt($staff);
+        $lunch = $this->attendance->lunchState($staff);
 
         return [
             'ends_at' => $endsAt?->format('h:i A'),
@@ -79,6 +80,13 @@ class StaffSettingsController extends Controller
             'checked_out_at' => $day?->checked_out_at?->format('h:i A'),
             'auto_checked_out' => $day?->auto_checked_out_at !== null,
             'extended_minutes' => $this->attendance->extensionMinutes($staff, now()->toDateString()),
+            // On lunch: when it ends, and by how much it ran over (needs approval)
+            'lunch' => $lunch ? [
+                'started_at' => $lunch['started_at']->format('h:i A'),
+                'due_at' => $lunch['due_at']->format('h:i A'),
+                'overrun' => $lunch['overrun'],
+                'over_minutes' => $lunch['over_minutes'],
+            ] : null,
         ];
     }
 

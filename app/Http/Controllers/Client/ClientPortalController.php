@@ -198,7 +198,8 @@ class ClientPortalController extends Controller
     {
         $this->portal->logout($request);
 
-        return redirect()->route('agency.client-login');
+        // A full page load, so the client pages' styles don't carry over onto the login page
+        return Inertia::location(route('agency.client-login'));
     }
 
     /** What every client page's layout shows: the agency's branding and the client's name. */

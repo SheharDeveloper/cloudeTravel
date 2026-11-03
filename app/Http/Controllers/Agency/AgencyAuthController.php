@@ -46,7 +46,7 @@ class AgencyAuthController extends Controller
     {
         // Already signed in on this domain -> no reason to show the form.
         if (Auth::guard('agency')->check()) {
-            return redirect()->intended('/dashboard');
+            return Inertia::location(redirect()->intended('/dashboard')->getTargetUrl());
         }
 
         $agency = $this->resolveAgency($request);
@@ -66,7 +66,7 @@ class AgencyAuthController extends Controller
     {
         // A client already signed in on this domain goes to their profile
         if ($portal->currentClient($request)) {
-            return redirect()->route('client.profile');
+            return Inertia::location(route('client.profile'));
         }
 
         $agency = $this->resolveAgency($request);
@@ -103,7 +103,8 @@ class AgencyAuthController extends Controller
         $portal->login($agency, $credentials['email'], $credentials['password'], $request->boolean('remember'));
         $request->session()->regenerate();
 
-        return redirect()->route('client.profile');
+        // A full page load, so the client pages' styles load with the first page
+        return Inertia::location(route('client.profile'));
     }
 
     /**
@@ -138,7 +139,9 @@ class AgencyAuthController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended('/dashboard');
+        // A full page load (not an in-page swap), so the admin theme's stylesheets
+        // load with the first page after login instead of it showing unstyled
+        return Inertia::location(redirect()->intended('/dashboard')->getTargetUrl());
     }
 
     public function logout(Request $request)
@@ -148,6 +151,7 @@ class AgencyAuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('agency.login');
+        // A full page load, so none of the admin theme carries over onto the login page
+        return Inertia::location(route('agency.login'));
     }
 }

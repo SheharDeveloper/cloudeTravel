@@ -140,6 +140,19 @@ class AttendanceController extends Controller
         return back()->with('success', "{$staff->name}'s extension was cancelled.");
     }
 
+    /** Owner/superadmin approves a staff member's late return from lunch, which lifts their block. */
+    public function approveLunch(string $uid)
+    {
+        abort_if($this->attendanceService->isStaff($this->attendanceService->currentPrincipal()), 403);
+
+        $staff = $this->staffService->searchStaff('', 1000)->getCollection()->firstWhere('uid', $uid);
+        abort_unless($staff, 404);
+
+        $this->attendanceService->approveLunchReturn($staff, $this->attendanceService->currentPrincipal()?->name);
+
+        return back()->with('success', "{$staff->name}'s return from lunch was approved.");
+    }
+
     public function lunchStart()
     {
         $this->attendanceService->startLunch($this->attendanceService->currentPrincipal());
@@ -276,6 +289,7 @@ class AttendanceController extends Controller
                 'id' => $t->id,
                 'name' => $t->name,
                 'days' => $t->days,
+                'is_paid' => (bool) $t->is_paid,
             ])->values(),
             'leaveBalances' => $isStaff ? $this->attendanceService->leaveBalancesFor($principal)->values() : [],
             'leaves' => $subject
@@ -297,9 +311,10 @@ class AttendanceController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'days' => 'required|integer|min:0|max:365',
+            'is_paid' => 'required|boolean',
         ]);
 
-        $this->attendanceService->createLeaveType($validated['name'], $validated['days']);
+        $this->attendanceService->createLeaveType($validated['name'], $validated['days'], (bool) $validated['is_paid']);
 
         return back()->with('success', 'Leave type created');
     }
@@ -313,10 +328,11 @@ class AttendanceController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'days' => 'required|integer|min:0|max:365',
+            'is_paid' => 'required|boolean',
         ]);
 
         $type = $this->attendanceService->findLeaveType($id);
-        $this->attendanceService->updateLeaveType($type, $validated['name'], $validated['days']);
+        $this->attendanceService->updateLeaveType($type, $validated['name'], $validated['days'], (bool) $validated['is_paid']);
 
         return back()->with('success', 'Leave type updated');
     }

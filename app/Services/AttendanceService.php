@@ -143,17 +143,18 @@ class AttendanceService
             ->firstOrFail();
     }
 
-    public function createLeaveType(string $name, int $days): LeaveType
+    public function createLeaveType(string $name, int $days, bool $paid = true): LeaveType
     {
         return LeaveType::create($this->currentOwnerAttributes() + [
             'name' => $name,
             'days' => $days,
+            'is_paid' => $paid,
         ]);
     }
 
-    public function updateLeaveType(LeaveType $type, string $name, int $days): LeaveType
+    public function updateLeaveType(LeaveType $type, string $name, int $days, bool $paid = true): LeaveType
     {
-        $type->update(['name' => $name, 'days' => $days]);
+        $type->update(['name' => $name, 'days' => $days, 'is_paid' => $paid]);
 
         return $type;
     }
@@ -437,7 +438,71 @@ class AttendanceService
 
     public function endLunch(User|AgencyUser $staff): void
     {
+        // Back after the lunch allowed ran out: only an administrator can let them back in
+        abort_if($this->lunchState($staff)['overrun'] ?? false, 403, 'Your lunch time is over. Please contact your administrator to approve your return.');
+
         $this->logHistory($staff, Date::today()->toDateString(), 'lunch_end');
+    }
+
+    /**
+     * Today's lunch, while the staff member is on it: when it started, when
+     * the lunch allowed (Staff Settings) runs out, and whether it has —
+     * they're then held until an administrator approves their return.
+     * Null when they're not on lunch or no lunch allowance is set.
+     */
+    public function lunchState(User|AgencyUser $staff): ?array
+    {
+        $date = Date::today()->toDateString();
+        $events = AttendanceHistory::where($this->staffableAttributes($staff))
+            ->whereDate('date', $date)
+            ->whereIn('event', ['lunch_start', 'lunch_end'])
+            ->orderBy('occurred_at')
+            ->get();
+        $start = $events->where('event', 'lunch_start')->last();
+        $end = $events->where('event', 'lunch_end')->last();
+        $onLunch = $start && (! $end || $end->occurred_at->lessThan($start->occurred_at));
+        $allowed = (int) $this->timingFor($staff)?->lunch_minutes;
+        if (! $onLunch || $allowed <= 0) {
+            return null;
+        }
+        $due = $start->occurred_at->copy()->addMinutes($allowed);
+
+        return [
+            'started_at' => $start->occurred_at,
+            'due_at' => $due,
+            'allowed_minutes' => $allowed,
+            'overrun' => Date::now()->greaterThanOrEqualTo($due),
+            'over_minutes' => max((int) floor($due->diffInMinutes(Date::now(), false)), 0),
+        ];
+    }
+
+    /** For the staff member's lunch popup: the warning before it ends, and the block once it has. */
+    public function lunchTimerState(User|AgencyUser $staff): ?array
+    {
+        $lunch = $this->lunchState($staff);
+
+        return $lunch ? [
+            'started_label' => $lunch['started_at']->format('h:i A'),
+            'due' => $lunch['due_at']->toIso8601String(),
+            'due_label' => $lunch['due_at']->format('h:i A'),
+            'allowed_minutes' => $lunch['allowed_minutes'],
+            'overrun' => $lunch['overrun'],
+            'now' => Date::now()->toIso8601String(),
+        ] : null;
+    }
+
+    /** An administrator lets a staff member back from a lunch that ran over: their lunch ends now. */
+    public function approveLunchReturn(User|AgencyUser $staff, ?string $approvedBy = null): void
+    {
+        $lunch = $this->lunchState($staff);
+        abort_unless($lunch, 422, 'This staff member is not on lunch.');
+
+        $this->logHistory(
+            $staff,
+            Date::today()->toDateString(),
+            'lunch_end',
+            notes: "Returned {$lunch['over_minutes']} min late from lunch — approved by " . ($approvedBy ?? 'an administrator')
+        );
     }
 
     /**
@@ -744,6 +809,7 @@ class AttendanceService
                     'staff_uid' => $first->staffable->uid,
                     'staff_name' => $first->staffable->name,
                     'leave_type' => $first->leaveType?->name,
+                    'leave_paid' => $first->leaveType?->is_paid,
                     'start_date' => $rows->min('date')->toDateString(),
                     'end_date' => $rows->max('date')->toDateString(),
                     'reason' => $first->notes,
@@ -794,6 +860,7 @@ class AttendanceService
                     'staff_uid' => $applied?->staffable->uid,
                     'staff_name' => $applied?->staffable->name,
                     'leave_type' => $applied?->leaveType?->name,
+                    'leave_paid' => $applied?->leaveType?->is_paid,
                     'leave_type_id' => $applied?->leave_type_id,
                     'start_date' => $rows->min('date')->toDateString(),
                     'end_date' => $rows->max('date')->toDateString(),
@@ -834,6 +901,7 @@ class AttendanceService
                 return [
                     'batch_id' => $batchId,
                     'leave_type' => $applied?->leaveType?->name,
+                    'leave_paid' => $applied?->leaveType?->is_paid,
                     'leave_type_id' => $applied?->leave_type_id,
                     'start_date' => $rows->min('date')->toDateString(),
                     'end_date' => $rows->max('date')->toDateString(),
@@ -1128,7 +1196,7 @@ class AttendanceService
             'shift' => $timing?->shift_start && $timing?->shift_end
                 ? substr($timing->shift_start, 0, 5) . ' – ' . substr($timing->shift_end, 0, 5) : null,
             'hourly_rate' => $rate,
-            'day_pay' => $rate !== null && $worked !== null && $paid ? round($worked / 60 * $rate, 2) : null,
+            'day_pay' => $rate !== null && $worked !== null && $paid ? round($this->payableMinutes($worked, $timing, $payment) / 60 * $rate, 2) : null,
             'currency' => $payment?->currency,
         ];
     }
@@ -1145,6 +1213,33 @@ class AttendanceService
             $staff->staffTiming,
             \App\Models\StaffTiming::defaultForStaff($staff)
         );
+    }
+
+    /**
+     * The minutes of a day that are paid: per hour, every minute worked; per
+     * day or per month, at most one full working day (shift less lunch) —
+     * a shorter day is paid by the minute, longer hours aren't overtime.
+     */
+    public function payableMinutes(int $worked, ?\App\Models\StaffTiming $timing, ?\App\Models\StaffPayment $payment): int
+    {
+        $fullDay = $timing?->workMinutes();
+        if (($payment?->salary_type ?? 'per_month') === 'per_hour' || ! $fullDay) {
+            return $worked;
+        }
+
+        return min($worked, $fullDay);
+    }
+
+    /** The staff member's working hours (their own, or the default), for working out pay. */
+    public function timingForPay(User|AgencyUser $staff): ?\App\Models\StaffTiming
+    {
+        return $this->timingFor($staff);
+    }
+
+    /** A full working day in paid minutes (shift less the lunch allowed): what a day of paid leave pays. */
+    public function paidMinutesPerDay(User|AgencyUser $staff): ?int
+    {
+        return $this->timingFor($staff)?->workMinutes();
     }
 
     /** The staff member's hourly rate now (salary and working hours, their own or the default). */

@@ -39,6 +39,8 @@ interface Row {
 interface DayDetail {
     date: string;
     status: string | null;
+    leave_type?: string | null;
+    leave_paid?: boolean;
     checked_in_at: string | null;
     checked_out_at: string | null;
     auto_checked_out: boolean;
@@ -59,6 +61,9 @@ interface Detail {
         shift: string | null;
         days_leave: number;
         days_absent: number;
+        paid_leave_days: number;
+        unpaid_leave_days: number;
+        paid_leave_pay: number;
         deductions: { name: string; type: string; calc: 'percent' | 'fixed'; value: number; amount: number }[];
     };
     days: DayDetail[];
@@ -361,7 +366,12 @@ function DetailModal({ detail, loading, name, onClose }: { detail: Detail | null
                                             {detail.days.length > 0 ? detail.days.map((d) => (
                                                 <tr key={d.date}>
                                                     <td className="text-nowrap">{dayLabel(d.date)}</td>
-                                                    <td>{d.status ? <span className={`badge ${STATUS_BADGE[d.status] ?? 'bg-secondary'}`}>{d.status.replace('_', ' ')}</span> : <span className="text-muted">—</span>}</td>
+                                                    <td>
+                                                        {d.status ? <span className={`badge ${STATUS_BADGE[d.status] ?? 'bg-secondary'}`}>{d.status.replace('_', ' ')}</span> : <span className="text-muted">—</span>}
+                                                        {d.status === 'leave' && (
+                                                            <small className={`d-block ${d.leave_paid ? 'text-success' : 'text-muted'}`}>{d.leave_type ?? 'Leave'} · {d.leave_paid ? 'Paid' : 'Unpaid'}</small>
+                                                        )}
+                                                    </td>
                                                     <td className="text-nowrap">
                                                         {d.checked_in_at ?? '—'}
                                                         {d.late_minutes > 0 && <span className="badge bg-warning text-dark ms-1">Late {hoursLabel(d.late_minutes)}</span>}
@@ -392,8 +402,17 @@ function DetailModal({ detail, loading, name, onClose }: { detail: Detail | null
                                             <tbody>
                                                 <tr>
                                                     <td>Pay for time worked<div className="small text-muted">{hoursLabel(s.worked_minutes)} ({s.worked_minutes} min){s.hourly_rate != null ? ` × ${money(cur, s.hourly_rate)}/hour` : ''}</div></td>
-                                                    <td className="text-end">{money(cur, s.gross)}</td>
+                                                    <td className="text-end">{money(cur, s.gross - (s.paid_leave_pay ?? 0))}</td>
                                                 </tr>
+                                                {(s.paid_leave_days > 0 || s.unpaid_leave_days > 0) && (
+                                                    <tr>
+                                                        <td>
+                                                            Paid leave <span className="text-muted">({s.paid_leave_days} day{s.paid_leave_days === 1 ? '' : 's'})</span>
+                                                            {s.unpaid_leave_days > 0 && <div className="small text-muted">Unpaid leave: {s.unpaid_leave_days} day{s.unpaid_leave_days === 1 ? '' : 's'} (no pay)</div>}
+                                                        </td>
+                                                        <td className="text-end">{money(cur, s.paid_leave_pay ?? 0)}</td>
+                                                    </tr>
+                                                )}
                                                 <tr className="fw-bold"><td>Gross</td><td className="text-end">{money(cur, s.gross)}</td></tr>
                                             </tbody>
                                         </table>

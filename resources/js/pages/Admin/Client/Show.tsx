@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import DatePicker from '@/components/DatePicker';
 import AlertBell from '@/components/AlertBell';
 import ReceivedDocumentsPanel from '@/components/ReceivedDocumentsPanel';
+import DocumentDownloadModal from '@/components/DocumentDownloadModal';
 import { isExpiringSoon } from '@/lib/utils';
 import DataTable from 'datatables.net-buttons-bs5';
 import JSZip from 'jszip';
@@ -268,6 +269,8 @@ const buildBreadcrumbs = (folders: ClientFolder[], currentId: number | null): Cl
 
 function DocumentsGrid({ clientUid, documents, folders }: { clientUid: string; documents: any[]; folders: ClientFolder[] }) {
     const [view, setView] = useState<'grid' | 'list'>('grid');
+    // The document open in the Download popup (see it, its size, convert, resize)
+    const [downloadDoc, setDownloadDoc] = useState<any>(null);
     const [documentType, setDocumentType] = useState('other');
     const [files, setFiles] = useState<File[]>([]);
     const [uploadDeleteDate, setUploadDeleteDate] = useState('');
@@ -467,6 +470,9 @@ function DocumentsGrid({ clientUid, documents, folders }: { clientUid: string; d
                                                 </div>
                                             )}
                                         </a>
+                                        <button type="button" className="btn btn-sm btn-outline-primary w-100 mt-2" onClick={() => setDownloadDoc(doc)}>
+                                            <i className="fa fa-download me-1"></i>Download
+                                        </button>
                                     </div>
                                 </div>
                             );
@@ -525,14 +531,21 @@ function DocumentsGrid({ clientUid, documents, folders }: { clientUid: string; d
                                             </div>
                                         </div>
                                     </a>
-                                    <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => setDeleteTarget({ type: 'document', id: doc.id })}>
-                                        <i className="fa fa-trash"></i>
-                                    </button>
+                                    <div className="d-flex gap-2 flex-shrink-0">
+                                        <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => setDownloadDoc(doc)}>
+                                            <i className="fa fa-download me-1"></i>Download
+                                        </button>
+                                        <button type="button" className="btn btn-sm btn-outline-danger" onClick={() => setDeleteTarget({ type: 'document', id: doc.id })}>
+                                            <i className="fa fa-trash"></i>
+                                        </button>
+                                    </div>
                                 </li>
                             );
                         })}
                     </ul>
                 )}
+
+                {downloadDoc && <DocumentDownloadModal doc={downloadDoc} onClose={() => setDownloadDoc(null)} />}
 
                 {showUploadModal && (
                     <div className="modal fade show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>

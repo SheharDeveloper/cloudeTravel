@@ -308,10 +308,17 @@ export default function StaffEdit() {
 
                         <div className="card-body">
                             <div className="d-flex gap-2 mb-4 flex-wrap">
+                                {/* Editing: click a step to go straight to it (the details are already filled in; saving checks everything) */}
                                 {STEPS.map((label, i) => (
-                                    <span key={label} className={`badge ${step === i + 1 ? 'bg-primary' : 'bg-light text-dark'}`}>
+                                    <button
+                                        key={label}
+                                        type="button"
+                                        className={`badge border-0 ${step === i + 1 ? 'bg-primary' : 'bg-light text-dark'}`}
+                                        style={{ cursor: 'pointer' }}
+                                        onClick={() => { setStep(i + 1); setErrors({}); }}
+                                    >
                                         {label}
-                                    </span>
+                                    </button>
                                 ))}
                             </div>
 
@@ -471,7 +478,7 @@ export default function StaffEdit() {
                                 {step === 5 && (
                                     <div className="row">
                                         <div className="col-sm-6 mb-4">
-                                            <label className="form-label">Salary (Rupees)</label>
+                                            <label className="form-label">Salary</label>
                                             <input type="number" step="0.01" className={`form-control ${errors.salary ? 'is-invalid' : ''}`} value={data.salary}
                                                 onChange={(e) => { set({ salary: e.target.value }); clearError('salary'); }} />
                                             {errors.salary && <div className="invalid-feedback d-block">{errors.salary}</div>}

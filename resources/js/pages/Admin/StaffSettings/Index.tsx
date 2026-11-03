@@ -27,6 +27,8 @@ interface StaffRow {
         checked_out_at: string | null;
         auto_checked_out: boolean;
         extended_minutes: number;
+        // On lunch: when it ends; over its time it needs an administrator's approval
+        lunch?: { started_at: string; due_at: string; overrun: boolean; over_minutes: number } | null;
     } | null;
 }
 
@@ -168,6 +170,16 @@ export default function StaffSettingsIndex({ staff, defaults }: { staff: StaffRo
     // Cancel an extension: asked in the themed confirm popup first
     const [cancelTarget, setCancelTarget] = useState<StaffRow | null>(null);
     const cancelExtension = (s: StaffRow) => setCancelTarget(s);
+
+    // A lunch that ran over: the staff member is held until approved here
+    const approveLunch = (s: StaffRow) => {
+        setSaving(`lunch-${s.uid}`);
+        router.post(`/admin/attendance/${s.uid}/lunch-approve`, {}, {
+            preserveScroll: true,
+            preserveState: true,
+            onFinish: () => setSaving(null),
+        });
+    };
     const confirmCancelExtension = () => {
         if (!cancelTarget) return;
         const s = cancelTarget;
@@ -357,6 +369,29 @@ export default function StaffSettingsIndex({ staff, defaults }: { staff: StaffRo
                                                             <span className="text-muted">Not checked in</span>
                                                             {s.today.ends_at && <div className="text-muted mt-1">Hours end {s.today.ends_at}</div>}
                                                         </>
+                                                    )}
+                                                    {/* On lunch; over its time they're held until approved here */}
+                                                    {s.today?.lunch && (
+                                                        s.today.lunch.overrun ? (
+                                                            <div className="mt-1">
+                                                                <span className="badge bg-danger">Lunch over by {s.today.lunch.over_minutes} min</span>
+                                                                <div className="d-flex align-items-center gap-2 mt-1">
+                                                                    <small className="text-muted">Waiting for approval</small>
+                                                                    <button
+                                                                        type="button"
+                                                                        className="btn btn-sm btn-success py-0 px-2"
+                                                                        onClick={() => approveLunch(s)}
+                                                                        disabled={saving === `lunch-${s.uid}`}
+                                                                    >
+                                                                        <i className="fa fa-check me-1"></i>{saving === `lunch-${s.uid}` ? 'Approving...' : 'Approve Return'}
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <div className="text-muted mt-1">
+                                                                <i className="fa-solid fa-utensils me-1"></i>At lunch since {s.today.lunch.started_at} (until {s.today.lunch.due_at})
+                                                            </div>
+                                                        )
                                                     )}
                                                     {/* An extension today: edit its end time or cancel it, right here */}
                                                     {(s.today?.extended_minutes ?? 0) > 0 && (

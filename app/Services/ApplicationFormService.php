@@ -21,7 +21,19 @@ use Illuminate\Validation\ValidationException;
  */
 class ApplicationFormService
 {
-    public function __construct(protected VisaFieldConfigService $fieldConfig)
+    /**
+     * Answers about one trip: not carried over to the person's next application.
+     */
+    private const TRIP_FIELDS = [
+        'purpose_of_travel', 'places_likely_to_be_visited', 'countries_to_visit', 'main_destination_country',
+        'number_of_entries_requested', 'intended_arrival_date', 'intended_departure_date', 'duration_of_stay',
+        'port_of_entry', 'port_of_exit', 'travel_itinerary', 'mode_of_transport', 'period_of_visa', 'visa_type',
+        'where_you_want_to_go', 'accommodation_type', 'hotel_name', 'accommodation_host_name', 'full_address_of_stay',
+        'contact_number_of_hotel', 'contact_number_of_host', 'travel_insurance_company', 'travel_insurance_policy_number',
+        'insurance_validity',
+    ];
+
+    public function __construct(protected VisaFieldConfigService $fieldConfig, protected ApplicationDocumentService $documents)
     {
     }
 
@@ -139,12 +151,17 @@ class ApplicationFormService
 
         return DB::transaction(function () use ($application, $visa, $fields, $values, $submit, $actor, $logRole) {
             $form = $application->form()->firstOrCreate([], ['visa_id' => $visa->id]);
+            $values = $this->syncFileCopies($application, $form, $fields, $values);
 
             // Changes to a submitted form go to the Visa Updation Log
             $logs = collect();
             if ($form->status === ApplicationForm::STATUS_SUBMITTED) {
                 $old = $form->answers()->whereNotNull('visa_field_id')->pluck('value', 'visa_field_id');
-                $logs = $fields->filter(fn ($field) => ($old[$field['id']] ?? null) !== $values[$field['id']])
+                // A file counts as changed by its path (the answer also holds its copy's id)
+                $same = fn ($field, $before, $after) => $field['input'] === 'file'
+                    ? (json_decode((string) $before, true)['path'] ?? null) === (json_decode((string) $after, true)['path'] ?? null)
+                    : $before === $after;
+                $logs = $fields->filter(fn ($field) => ! $same($field, $old[$field['id']] ?? null, $values[$field['id']]))
                     ->map(fn ($field) => $application->formLogs()->create([
                         'visa_field_id' => $field['id'],
                         'section_name' => $field['section_name'],
@@ -179,6 +196,34 @@ class ApplicationFormService
             ]);
 
             return $form->refresh()->setRelation('newLogs', $logs);
+        });
+    }
+
+    /**
+     * Uploaded files also go in the client's Documents, in the application's
+     * folder, like requested documents: a new file is copied there, and the
+     * copy of one replaced or removed goes. Answers keep their copy's id.
+     */
+    private function syncFileCopies(BookingApplication $application, ApplicationForm $form, $fields, $values)
+    {
+        $old = $form->answers()->whereNotNull('visa_field_id')->pluck('value', 'visa_field_id');
+
+        return $values->map(function ($value, $fieldId) use ($application, $fields, $old) {
+            $field = $fields->firstWhere('id', $fieldId);
+            if (($field['input'] ?? null) !== 'file') {
+                return $value;
+            }
+            $before = json_decode((string) ($old[$fieldId] ?? ''), true) ?: [];
+            $now = $value !== null ? json_decode($value, true) : null;
+
+            if (($before['path'] ?? null) === ($now['path'] ?? null) && ! empty($before['client_document_id'])) {
+                $copyId = $before['client_document_id'];
+            } else {
+                $this->documents->removeClientCopy($before['client_document_id'] ?? null);
+                $copyId = $now ? $this->documents->copyFileToClient($application, $now['path'], $now['name'], $field['name']) : null;
+            }
+
+            return $now ? json_encode($now + ['client_document_id' => $copyId], JSON_UNESCAPED_UNICODE) : null;
         });
     }
 
@@ -362,10 +407,62 @@ class ApplicationFormService
 
     public function ownsFile(BookingApplication $application, string $path): bool
     {
-        return $path !== ''
-            && str_starts_with($path, $this->fileFolder($application) . '/')
-            && ! str_contains($path, '..')
-            && \Illuminate\Support\Facades\Storage::disk('local')->exists($path);
+        if ($path === '' || str_contains($path, '..') || ! \Illuminate\Support\Facades\Storage::disk('local')->exists($path)) {
+            return false;
+        }
+
+        return str_starts_with($path, $this->fileFolder($application) . '/')
+            // A file carried over from the same person's earlier application
+            || $this->samePersonApplications($application)->contains(fn ($earlier) => str_starts_with($path, $this->fileFolder($earlier) . '/'));
+    }
+
+    /** The other applications of the same person: the booking's client themselves, or the same family member. */
+    private function samePersonApplications(BookingApplication $application)
+    {
+        $application->loadMissing('booking');
+        $clientId = $application->booking?->client_id;
+        $memberId = $application->client_family_member_id;
+        if (! $clientId || (! $memberId && $application->relation !== 'self')) {
+            return collect();
+        }
+
+        return BookingApplication::whereKeyNot($application->id)
+            ->whereHas('booking', fn ($q) => $q->where('client_id', $clientId))
+            ->when($memberId, fn ($q) => $q->where('client_family_member_id', $memberId))
+            ->when(! $memberId, fn ($q) => $q->whereNull('client_family_member_id')->where('relation', 'self'))
+            ->get();
+    }
+
+    /**
+     * What the same person answered on earlier applications, the latest
+     * first: by field id, and by slug for a similar field on another visa.
+     *
+     * @return array{by_id: array<int, string>, by_slug: array<string, string>}
+     */
+    private function earlierAnswers(BookingApplication $application): array
+    {
+        $byId = [];
+        $bySlug = [];
+        $forms = ApplicationForm::with('answers')
+            ->whereIn('booking_application_id', $this->samePersonApplications($application)->pluck('id'))
+            ->orderByDesc('updated_at')
+            ->get();
+
+        foreach ($forms as $form) {
+            foreach ($form->answers as $answer) {
+                if ($answer->value === null || $answer->value === '') {
+                    continue;
+                }
+                if ($answer->visa_field_id) {
+                    $byId[$answer->visa_field_id] ??= $answer->value;
+                }
+                if ($answer->field_slug) {
+                    $bySlug[$answer->field_slug] ??= $answer->value;
+                }
+            }
+        }
+
+        return ['by_id' => $byId, 'by_slug' => $bySlug];
     }
 
     /** Stores an uploaded answer file privately; returns the answer value for the field. */
@@ -519,11 +616,19 @@ class ApplicationFormService
             $known['passport_number'] = $known['passport_number'] ?: $member?->passport_number;
         }
 
+        // Then what the same person answered before (never a declaration, or details of one trip)
+        $earlier = $this->earlierAnswers($application);
+
         $answers = [];
         foreach ($sections as $section) {
             foreach ($section['fields'] as $field) {
                 if (! empty($known[$field['slug']])) {
                     $answers[$field['id']] = (string) $known[$field['slug']];
+                } elseif (! in_array($field['input'], ['declaration', 'heading'], true) && ! in_array($field['slug'], self::TRIP_FIELDS, true)) {
+                    $value = $earlier['by_id'][$field['id']] ?? $earlier['by_slug'][$field['slug']] ?? null;
+                    if ($value !== null) {
+                        $answers[$field['id']] = $value;
+                    }
                 }
             }
         }

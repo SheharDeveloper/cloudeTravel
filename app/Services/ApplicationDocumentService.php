@@ -156,10 +156,24 @@ class ApplicationDocumentService
      */
     public function copyToClient(BookingApplication $application, ApplicationDocument $document): void
     {
+        $copyId = $this->copyFileToClient($application, (string) $document->file_path, (string) $document->file_name, (string) $document->name);
+
+        if ($copyId) {
+            $document->update(['client_document_id' => $copyId]);
+        }
+    }
+
+    /**
+     * Copies a stored file into the client's Documents, in the application's
+     * folder (created the first time). The id of the copy, or null if there's
+     * no client or no file.
+     */
+    public function copyFileToClient(BookingApplication $application, string $path, string $fileName, string $label): ?int
+    {
         $application->loadMissing('booking.client');
         $client = $application->booking->client;
-        if (! $client || ! $document->file_path || ! Storage::disk(self::DISK)->exists($document->file_path)) {
-            return;
+        if (! $client || $path === '' || ! Storage::disk(self::DISK)->exists($path)) {
+            return null;
         }
 
         // The client's documents belong to the client's owner (the agency, or the superadmin)
@@ -171,22 +185,29 @@ class ApplicationDocumentService
 
         // Same storage the client's own documents use (public disk, the client's folder)
         $this->clientService->ensureClientFolder($client);
-        $extension = pathinfo($document->file_name, PATHINFO_EXTENSION) ?: pathinfo($document->file_path, PATHINFO_EXTENSION);
+        $extension = pathinfo($fileName, PATHINFO_EXTENSION) ?: pathinfo($path, PATHINFO_EXTENSION);
         $target = $this->clientService->clientFolderPath($client) . '/' . Str::random(40) . ($extension ? ".{$extension}" : '');
-        Storage::disk('public')->writeStream($target, Storage::disk(self::DISK)->readStream($document->file_path));
+        Storage::disk('public')->writeStream($target, Storage::disk(self::DISK)->readStream($path));
 
         $applicant = trim("{$application->first_name} {$application->last_name}");
-        $clientDocument = ClientDocument::create($owner + [
+        return ClientDocument::create($owner + [
             'documentable_type' => Client::class,
             'documentable_id' => $client->id,
             'folder_id' => $folder->id,
-            'document_name' => $document->name . ($applicant !== '' ? " - {$applicant}" : ''),
+            'document_name' => $label . ($applicant !== '' ? " - {$applicant}" : ''),
             'document_type' => 'Visa Document',
             'file_path' => '/storage/' . $target,
             'file_type' => $extension,
-        ]);
+        ])->id;
+    }
 
-        $document->update(['client_document_id' => $clientDocument->id]);
+    /** Removes a copy from the client's Documents, with its file. */
+    public function removeClientCopy(?int $clientDocumentId): void
+    {
+        if ($clientDocumentId && ($copy = ClientDocument::find($clientDocumentId))) {
+            Storage::disk('public')->delete(str_replace('/storage/', '', (string) $copy->file_path));
+            $copy->delete();
+        }
     }
 
     /** Removes the uploaded file; the request stays, waiting for a new upload. */
@@ -263,10 +284,7 @@ class ApplicationDocumentService
             Storage::disk(self::DISK)->delete($document->file_path);
         }
 
-        if ($document->client_document_id && ($copy = ClientDocument::find($document->client_document_id))) {
-            Storage::disk('public')->delete(str_replace('/storage/', '', (string) $copy->file_path));
-            $copy->delete();
-        }
+        $this->removeClientCopy($document->client_document_id);
         $document->client_document_id = null;
     }
 }

@@ -458,7 +458,7 @@ export default function StaffCreate() {
                                 {step === 5 && (
                                     <div className="row">
                                         <div className="col-sm-6 mb-4">
-                                            <label className="form-label">Salary (Rupees)</label>
+                                            <label className="form-label">Salary</label>
                                             <input type="number" step="0.01" className={`form-control ${errors.salary ? 'is-invalid' : ''}`} value={data.salary}
                                                 onChange={(e) => { set({ salary: e.target.value }); clearError('salary'); }} />
                                             {errors.salary && <div className="invalid-feedback d-block">{errors.salary}</div>}

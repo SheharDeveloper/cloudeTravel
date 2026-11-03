@@ -13,6 +13,7 @@ Route::put('attendance/{uid}/extend', [\App\Http\Controllers\AttendanceControlle
 Route::delete('attendance/{uid}/extend', [\App\Http\Controllers\AttendanceController::class, 'cancelExtension'])->name('admin.attendance.extend.cancel');
 Route::post('attendance/lunch-start', [\App\Http\Controllers\AttendanceController::class, 'lunchStart'])->name('admin.attendance.lunch-start');
 Route::post('attendance/lunch-end', [\App\Http\Controllers\AttendanceController::class, 'lunchEnd'])->name('admin.attendance.lunch-end');
+Route::post('attendance/{uid}/lunch-approve', [\App\Http\Controllers\AttendanceController::class, 'approveLunch'])->name('admin.attendance.lunch-approve');
 Route::post('attendance/leave', [\App\Http\Controllers\AttendanceController::class, 'applyLeave'])->name('admin.attendance.apply-leave');
 Route::put('attendance/leave/{batchId}', [\App\Http\Controllers\AttendanceController::class, 'updateLeave'])->name('admin.attendance.update-leave');
 Route::post('attendance/{uid}/leave-response', [\App\Http\Controllers\AttendanceController::class, 'respondLeave'])->name('admin.attendance.respond-leave');
@@ -22,6 +23,7 @@ Route::patch('attendance/{uid}/day', [\App\Http\Controllers\AttendanceController
 Route::get('salary-slips', [\App\Http\Controllers\Admin\SalarySlipController::class, 'index'])->name('admin.salary-slips.index');
 Route::post('salary-slips/generate', [\App\Http\Controllers\Admin\SalarySlipController::class, 'generate'])->name('admin.salary-slips.generate');
 Route::get('salary-slips/{uid}', [\App\Http\Controllers\Admin\SalarySlipController::class, 'show'])->name('admin.salary-slips.show');
+Route::post('salary-slips/{uid}/recalculate', [\App\Http\Controllers\Admin\SalarySlipController::class, 'recalculate'])->name('admin.salary-slips.recalculate');
 
 // Leave Management
 Route::get('leave', [\App\Http\Controllers\AttendanceController::class, 'leaveIndex'])->name('admin.leave.index');

@@ -124,6 +124,15 @@ class HandleInertiaRequests extends Middleware
                 return $principal && $service->isStaff($principal) ? $service->timeLimitState($principal) : null;
             },
 
+            // The signed-in staff member's lunch: the warning before the lunch allowed
+            // runs out, and the block (until an administrator approves) once it has
+            'lunchTimer' => function () {
+                $service = app(\App\Services\AttendanceService::class);
+                $principal = $service->currentPrincipal();
+
+                return $principal && $service->isStaff($principal) ? $service->lunchTimerState($principal) : null;
+            },
+
             // True for an individual staff login (not superadmin, not an
             // agency owner) — used to hide admin-only sidebar links like
             // Leave Requests that a staff member can't act on for themselves.

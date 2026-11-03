@@ -17,7 +17,8 @@ use Illuminate\Support\Facades\Date;
  * last slip (or their joining date) up to now — by the minute they actually
  * worked × their hourly rate, less their taxes and deductions as set on their
  * staff profile (each a percentage of the gross or a fixed amount). A day
- * still in progress counts up to now.
+ * still in progress counts up to now. A day of approved paid leave pays a
+ * full working day (shift less lunch); unpaid leave pays nothing.
  */
 class SalarySlipService
 {
@@ -58,6 +59,7 @@ class SalarySlipService
         $payment = $staff->staffPayment;
 
         $gross = round((float) $days->sum(fn ($d) => $d['day_pay'] ?? 0), 2);
+        $paidLeave = $days->where('status', 'leave')->where('leave_paid', true);
         $deductions = $staff->staffTaxDeductions
             ->map(function ($d) use ($gross) {
                 $percent = ($d->calc ?? ($d->type === 'deduction' ? 'fixed' : 'percent')) === 'percent';
@@ -85,7 +87,11 @@ class SalarySlipService
             'days_present' => $days->whereIn('status', ['present', 'half_day'])->count(),
             'days_leave' => $days->where('status', 'leave')->count(),
             'days_absent' => $days->where('status', 'absent')->count(),
-            'worked_minutes' => (int) $days->sum(fn ($d) => $d['worked_minutes'] ?? 0),
+            // Leave: paid days are paid as a full working day; unpaid ones aren't
+            'paid_leave_days' => $paidLeave->count(),
+            'unpaid_leave_days' => $days->where('status', 'leave')->where('leave_paid', false)->count(),
+            'paid_leave_pay' => round((float) $paidLeave->sum(fn ($d) => $d['day_pay'] ?? 0), 2),
+            'worked_minutes' => (int) $days->where('status', '!=', 'leave')->sum(fn ($d) => $d['worked_minutes'] ?? 0),
             'hourly_rate' => $this->attendanceService->rateFor($staff),
             'gross' => $gross,
             'deductions' => $deductions,
@@ -105,7 +111,7 @@ class SalarySlipService
             'name' => $staff->name,
             'summary' => $this->calculate($staff, $from, $to),
             'days' => $this->days($staff, $from, $to)->map(fn ($d) => collect($d)->only([
-                'date', 'status', 'checked_in_at', 'checked_out_at', 'auto_checked_out', 'in_progress',
+                'date', 'status', 'leave_type', 'leave_paid', 'checked_in_at', 'checked_out_at', 'auto_checked_out', 'in_progress',
                 'lunch_taken_minutes', 'lunch_over_minutes', 'late_minutes', 'worked_minutes', 'day_pay',
             ]))->values(),
         ];
@@ -130,6 +136,27 @@ class SalarySlipService
         );
     }
 
+    /**
+     * Works the slip out again for the same period with the staff member's
+     * current settings (salary and its type, rate, working hours, taxes and
+     * deductions) — after correcting one of them. Only their latest slip,
+     * so later slips' periods stay as they were.
+     */
+    public function recalculate(SalarySlip $slip, ?string $by): SalarySlip
+    {
+        $staff = $slip->staffable;
+        abort_unless($staff && $slip->period_start && $slip->period_end, 422, 'This slip can\'t be recalculated.');
+        abort_unless($this->latestSlip($staff)?->is($slip), 422, 'Only the latest slip can be recalculated.');
+
+        $staff->unsetRelation('staffPayment')->unsetRelation('staffTaxDeductions')->unsetRelation('staffTiming');
+        $slip->update(
+            collect($this->calculate($staff, $slip->period_start, $slip->period_end))->except(['period_label', 'period_start', 'period_end'])->all()
+            + ['generated_by' => $by, 'generated_at' => Date::now()]
+        );
+
+        return $slip->fresh();
+    }
+
     /** A staff member's own slips, newest first. */
     public function slipsFor(User|AgencyUser $staff)
     {
@@ -144,15 +171,77 @@ class SalarySlipService
         return $from->format('d M Y, h:i A') . ' – ' . $to->format('d M Y, h:i A');
     }
 
-    /** Who the slip is from: the agency, or the platform for superadmin staff. */
+    /**
+     * Who the slip is from, for its header: the agency (its logo, names and
+     * contact details — Contact Info first, then the agency's own), or the
+     * platform for superadmin staff (the superadmin's Contact Info).
+     */
     public function companyFor(SalarySlip $slip): array
     {
         $agency = $slip->owner_type === Agency::class ? Agency::find($slip->owner_id) : null;
+        $contact = $agency
+            ? \App\Models\ContactInfo::where('owner_type', Agency::class)->where('owner_id', $agency->id)->first()
+            : \App\Models\ContactInfo::where('owner_type', User::class)->orderBy('owner_id')->first();
+
+        $agencyAddress = $agency
+            ? collect([$agency->address, $agency->city, $agency->state, $agency->postal_code, $agency->country])->filter()->implode(', ')
+            : null;
 
         return [
             'name' => $agency?->agency_name ?? config('app.name'),
-            'email' => $agency?->email,
-            'phone' => $agency?->phone_number,
+            'legal_name' => $agency && $agency->legal_name && strcasecmp($agency->legal_name, $agency->agency_name) !== 0 ? $agency->legal_name : null,
+            'logo' => $agency?->logo ?: ($contact?->logo ?: '/images/logo.png'),
+            'email' => $contact?->email ?: $agency?->email,
+            'phone' => $contact?->phone ?: $agency?->phone_number,
+            'address' => $agencyAddress ?: $contact?->address,
+        ];
+    }
+
+    /** The employee block: number, contact details and address lines. */
+    public function employeeFor(SalarySlip $slip): array
+    {
+        $staff = $slip->staffable;
+        $profile = $staff?->staffProfile;
+
+        return [
+            'name' => $slip->staff_name,
+            // A short staff number: "EMP-0007" (agency staff "AEMP-")
+            'number' => $staff ? (($staff instanceof AgencyUser ? 'AEMP-' : 'EMP-') . str_pad((string) $staff->id, 4, '0', STR_PAD_LEFT)) : null,
+            'email' => $staff?->email,
+            'phone' => $staff?->phone,
+            'joining_date' => $profile?->joining_date?->format('d M Y'),
+            'address_lines' => collect([$profile?->address, $profile?->city, $profile?->county, $profile?->country])->filter()->values()->all(),
+        ];
+    }
+
+    /**
+     * Year to date: this slip and the staff member's earlier ones in the same
+     * calendar year — pay, each deduction, and net.
+     */
+    public function yearToDate(SalarySlip $slip): array
+    {
+        $end = $slip->period_end ?? $slip->generated_at ?? Date::now();
+        $slips = SalarySlip::where('staffable_type', $slip->staffable_type)
+            ->where('staffable_id', $slip->staffable_id)
+            ->whereYear('period_end', $end->year)
+            ->where('period_end', '<=', $end)
+            ->get();
+
+        $deductions = [];
+        foreach ($slips as $s) {
+            foreach ($s->deductions ?? [] as $d) {
+                $deductions[$d['name']] = round(($deductions[$d['name']] ?? 0) + (float) ($d['amount'] ?? 0), 2);
+            }
+        }
+
+        return [
+            'year' => $end->year,
+            'slips' => $slips->count(),
+            'gross' => round((float) $slips->sum('gross'), 2),
+            'deductions' => $deductions,
+            'total_deductions' => round((float) $slips->sum('total_deductions'), 2),
+            'net' => round((float) $slips->sum('net'), 2),
+            'worked_minutes' => (int) $slips->sum('worked_minutes'),
         ];
     }
 
@@ -167,6 +256,8 @@ class SalarySlipService
         $fromDate = $from->toDateString();
         $toDate = $to->toDateString();
         $rate = $this->attendanceService->rateFor($staff);
+        $timing = $this->attendanceService->timingForPay($staff);
+        $payment = $staff->staffPayment;
 
         // The calendar's days, month by month across the period
         $calendar = collect();
@@ -180,8 +271,28 @@ class SalarySlipService
         $lunch = AttendanceHistory::where($key)->whereBetween('date', [$fromDate, $toDate])
             ->whereIn('event', ['lunch_start', 'lunch_end'])->orderBy('occurred_at')->get()
             ->groupBy(fn ($h) => $h->date->toDateString());
+        // Each leave day's type (paid or not), from the leave request's events
+        $leaveTypes = AttendanceHistory::with('leaveType')->where($key)->whereBetween('date', [$fromDate, $toDate])
+            ->whereNotNull('leave_type_id')->orderBy('occurred_at')->get()
+            ->groupBy(fn ($h) => $h->date->toDateString())
+            ->map(fn ($events) => $events->last()->leaveType);
+        $paidDayMinutes = $this->attendanceService->paidMinutesPerDay($staff);
 
-        return $calendar->sortKeys()->map(function ($day, $date) use ($attendance, $lunch, $from, $to, $rate) {
+        return $calendar->sortKeys()->map(function ($day, $date) use ($attendance, $lunch, $leaveTypes, $paidDayMinutes, $from, $to, $rate, $timing, $payment) {
+            // An approved leave day: a full working day's pay if its leave type is paid
+            if ($day['status'] === 'leave') {
+                $type = $leaveTypes->get($date);
+                $paid = (bool) $type?->is_paid;
+
+                return [
+                    'worked_minutes' => $paid ? $paidDayMinutes : null,
+                    'day_pay' => $paid && $rate !== null && $paidDayMinutes ? round($paidDayMinutes / 60 * $rate, 2) : null,
+                    'in_progress' => false,
+                    'leave_type' => $type?->name,
+                    'leave_paid' => $paid,
+                ] + $day;
+            }
+
             $a = $attendance->get($date);
             $isToday = $date === Date::today()->toDateString();
             $in = $a?->checked_in_at;
@@ -207,8 +318,10 @@ class SalarySlipService
 
             return [
                 'worked_minutes' => $worked,
-                // Pay by the minute
-                'day_pay' => $rate !== null && $worked !== null && $paid ? round($worked / 60 * $rate, 2) : null,
+                // Pay by the minute; a day or month salary pays at most one full day a day
+                'day_pay' => $rate !== null && $worked !== null && $paid
+                    ? round($this->attendanceService->payableMinutes($worked, $timing, $payment) / 60 * $rate, 2)
+                    : null,
                 'in_progress' => $in && ! $a->checked_out_at && $isToday,
             ] + $day;
         })->values();

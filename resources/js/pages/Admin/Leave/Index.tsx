@@ -11,6 +11,8 @@ interface LeaveType {
     id: number;
     name: string;
     days: number;
+    // Paid: an approved day is paid as a full working day on the salary slip
+    is_paid: boolean;
 }
 
 interface LeaveEntry {
@@ -19,6 +21,7 @@ interface LeaveEntry {
     staff_name?: string;
     leave_type: string | null;
     leave_type_id: number | null;
+    leave_paid?: boolean | null;
     start_date: string;
     end_date: string;
     reason: string;
@@ -74,6 +77,7 @@ export default function LeaveIndex() {
     // Leave Type settings tab
     const [typeName, setTypeName] = useState('');
     const [typeDays, setTypeDays] = useState('');
+    const [typePaid, setTypePaid] = useState(true);
     const [editingTypeId, setEditingTypeId] = useState<number | null>(null);
     const [savingType, setSavingType] = useState(false);
 
@@ -156,17 +160,19 @@ export default function LeaveIndex() {
         setEditingTypeId(null);
         setTypeName('');
         setTypeDays('');
+        setTypePaid(true);
     };
 
     const editType = (type: LeaveType) => {
         setEditingTypeId(type.id);
         setTypeName(type.name);
         setTypeDays(String(type.days));
+        setTypePaid(type.is_paid);
     };
 
     const saveType = () => {
         setSavingType(true);
-        const payload = { name: typeName, days: typeDays };
+        const payload = { name: typeName, days: typeDays, is_paid: typePaid };
         const onDone = {
             onSuccess: () => resetTypeForm(),
             onFinish: () => setSavingType(false),
@@ -337,7 +343,12 @@ export default function LeaveIndex() {
                                         {leaves.map((l) => (
                                             <tr key={l.batch_id}>
                                                 {showStaffColumn && <td>{l.staff_name ?? <span className="text-muted">—</span>}</td>}
-                                                <td>{l.leave_type ?? <span className="text-muted">—</span>}</td>
+                                                <td>
+                                                    {l.leave_type ?? <span className="text-muted">—</span>}
+                                                    {l.leave_type && l.leave_paid != null && (
+                                                        <span className={`badge ms-1 ${l.leave_paid ? 'bg-success' : 'bg-secondary'}`}>{l.leave_paid ? 'Paid' : 'Unpaid'}</span>
+                                                    )}
+                                                </td>
                                                 <td>{formatRange(l.start_date, l.end_date)}</td>
                                                 <td className="text-muted">{l.reason}</td>
                                                 <td>
@@ -413,7 +424,7 @@ export default function LeaveIndex() {
                                     <select className="form-select" value={leaveTypeId} onChange={(e) => setLeaveTypeId(e.target.value)}>
                                         <option value="">--SELECT TYPE--</option>
                                         {leaveTypes.map((t) => (
-                                            <option key={t.id} value={t.id}>{t.name} ({t.days}d)</option>
+                                            <option key={t.id} value={t.id}>{t.name} ({t.days}d · {t.is_paid ? 'Paid' : 'Unpaid'})</option>
                                         ))}
                                     </select>
                                     {selectedBalance && (
@@ -504,7 +515,7 @@ export default function LeaveIndex() {
                 {activeTab === 'settings' && canManageLeaveTypes && (
                     <div className="card-body">
                         <div className="row g-2 align-items-end mb-4">
-                            <div className="col-sm-5">
+                            <div className="col-sm-4">
                                 <label className="form-label small">Type Name</label>
                                 <input
                                     type="text"
@@ -514,7 +525,7 @@ export default function LeaveIndex() {
                                     onChange={(e) => setTypeName(e.target.value)}
                                 />
                             </div>
-                            <div className="col-sm-3">
+                            <div className="col-sm-2">
                                 <label className="form-label small">Days per Year</label>
                                 <input
                                     type="number"
@@ -524,6 +535,14 @@ export default function LeaveIndex() {
                                     value={typeDays}
                                     onChange={(e) => setTypeDays(e.target.value)}
                                 />
+                            </div>
+                            {/* Paid leave days are paid as full working days on the salary slip */}
+                            <div className="col-sm-2">
+                                <label className="form-label small">Salary</label>
+                                <select className="form-select" value={typePaid ? 'paid' : 'unpaid'} onChange={(e) => setTypePaid(e.target.value === 'paid')}>
+                                    <option value="paid">Paid</option>
+                                    <option value="unpaid">Unpaid</option>
+                                </select>
                             </div>
                             <div className="col-sm-2">
                                 <button
@@ -551,6 +570,7 @@ export default function LeaveIndex() {
                                         <tr>
                                             <th>Name</th>
                                             <th>Days</th>
+                                            <th>Salary</th>
                                             <th className="text-end">Action</th>
                                         </tr>
                                     </thead>
@@ -559,6 +579,10 @@ export default function LeaveIndex() {
                                             <tr key={t.id}>
                                                 <td>{t.name}</td>
                                                 <td>{t.days}</td>
+                                                <td>
+                                                    <span className={`badge ${t.is_paid ? 'bg-success' : 'bg-secondary'}`}>{t.is_paid ? 'Paid' : 'Unpaid'}</span>
+                                                    <small className="text-muted d-block">{t.is_paid ? 'Paid as a full working day' : 'No pay for these days'}</small>
+                                                </td>
                                                 <td className="text-end">
                                                     <div className="d-flex gap-2 justify-content-end">
                                                         <button type="button" className="btn btn-sm btn-outline-primary" onClick={() => editType(t)}>
@@ -605,7 +629,7 @@ export default function LeaveIndex() {
                                         <select className="form-select" value={leaveTypeId} onChange={(e) => setLeaveTypeId(e.target.value)}>
                                             <option value="">--SELECT TYPE--</option>
                                             {leaveTypes.map((t) => (
-                                                <option key={t.id} value={t.id}>{t.name} ({t.days}d)</option>
+                                                <option key={t.id} value={t.id}>{t.name} ({t.days}d · {t.is_paid ? 'Paid' : 'Unpaid'})</option>
                                             ))}
                                         </select>
                                         {selectedBalance && (

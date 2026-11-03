@@ -145,11 +145,11 @@ export default function ApplicationFormTab({ applicationUid, form, canEdit = tru
         topRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
 
-    const persist = (submit: boolean, quiet: boolean, onSuccess?: () => void) => {
+    const persist = (submit: boolean, quiet: boolean, onSuccess?: () => void, values: Record<string, string> = answers) => {
         if (!quiet) setSaving(submit ? 'submit' : 'draft');
         router.put(
             `${appUrl}/form`,
-            { answers, submit, quiet },
+            { answers: values, submit, quiet },
             {
                 preserveScroll: true,
                 preserveState: true,
@@ -377,6 +377,10 @@ export default function ApplicationFormTab({ applicationUid, form, canEdit = tru
                                     error={fieldErrors[field.id] ?? errors[`answers.${field.id}`]}
                                     onChange={(value) => {
                                         setAnswers((prev) => ({ ...prev, [field.id]: value }));
+                                        // A file saves straight away, like Upload Document: its copy goes in the client's folder
+                                        if (field.input === 'file') {
+                                            persist(false, true, undefined, { ...answers, [field.id]: value });
+                                        }
                                         // Typing clears that field's message
                                         if (fieldErrors[field.id]) {
                                             setFieldErrors(({ [field.id]: _cleared, ...rest }) => rest);

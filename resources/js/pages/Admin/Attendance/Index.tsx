@@ -64,6 +64,17 @@ export default function AttendanceIndex() {
         });
     };
 
+    // Owner/superadmin: let the selected staff member back from lunch (ends their lunch now)
+    const [approvingLunch, setApprovingLunch] = useState(false);
+    const handleApproveLunch = () => {
+        if (!selectedUid) return;
+        setApprovingLunch(true);
+        router.post(`/admin/attendance/${selectedUid}/lunch-approve`, {}, {
+            preserveScroll: true,
+            onFinish: () => setApprovingLunch(false),
+        });
+    };
+
     const handleReset = () => {
         setStaffSearch('');
         setPickerOpen(false);
@@ -215,6 +226,15 @@ export default function AttendanceIndex() {
                                     {today.time_limit_at && <> &middot; Auto check-out at <strong>{today.time_limit_at}</strong></>}
                                     {(today.extended_minutes ?? 0) > 0 && <> &middot; Extended +{today.extended_minutes} min</>}
                                     {today.auto_checked_out && <span className="badge bg-danger ms-2">Checked out automatically</span>}
+                                    {/* On lunch right now (if it ran over, they're held until approved) */}
+                                    {today.lunch_start_at && !today.lunch_end_at && (
+                                        <span className="d-inline-flex align-items-center gap-2 ms-2">
+                                            <span className="badge bg-warning text-dark"><i className="fa-solid fa-utensils me-1"></i>On lunch since {today.lunch_start_at}</span>
+                                            <button type="button" className="btn btn-sm btn-success py-0 px-2" onClick={handleApproveLunch} disabled={approvingLunch}>
+                                                <i className="fa fa-check me-1"></i>{approvingLunch ? 'Approving...' : 'Approve Return'}
+                                            </button>
+                                        </span>
+                                    )}
                                 </span>
                             ) : (
                                 <span className="text-muted">Not checked in today</span>

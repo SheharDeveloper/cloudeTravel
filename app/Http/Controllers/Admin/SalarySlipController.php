@@ -103,8 +103,6 @@ class SalarySlipController extends Controller
             : $this->ownStaff()->contains(fn ($s) => get_class($s) === $slip->staffable_type && $s->id === $slip->staffable_id);
         abort_unless($allowed, 404);
 
-        $staff = $slip->staffable;
-
         return Inertia::render('Admin/SalarySlips/Show', [
             'slip' => $this->slipSummary($slip) + [
                 'salary' => $slip->salary,
@@ -112,21 +110,46 @@ class SalarySlipController extends Controller
                 'shift' => $slip->shift,
                 'days_leave' => $slip->days_leave,
                 'days_absent' => $slip->days_absent,
+                'paid_leave_days' => $slip->paid_leave_days,
+                'unpaid_leave_days' => $slip->unpaid_leave_days,
+                'paid_leave_pay' => (float) $slip->paid_leave_pay,
                 'hourly_rate' => $slip->hourly_rate,
                 'deductions' => $slip->deductions ?? [],
                 'total_deductions' => $slip->total_deductions,
                 'generated_by' => $slip->generated_by,
                 'generated_at' => $slip->generated_at?->format('d M Y, h:i A'),
             ],
-            'staff' => [
-                'name' => $slip->staff_name,
-                'email' => $staff?->email,
-                'phone' => $staff?->phone,
-                'joining_date' => $staff?->staffProfile?->joining_date?->format('d M Y'),
-            ],
+            'staff' => $this->slips->employeeFor($slip),
             'company' => $this->slips->companyFor($slip),
+            'ytd' => $this->slips->yearToDate($slip),
+            'period' => [
+                'start' => $slip->period_start?->format('d M Y'),
+                'end' => $slip->period_end?->format('d M Y'),
+                'pay_date' => $slip->generated_at?->format('d M Y'),
+                // Calendar days the slip covers, both ends included
+                'days' => $slip->period_start && $slip->period_end
+                    ? (int) $slip->period_start->copy()->startOfDay()->diffInDays($slip->period_end->copy()->startOfDay()) + 1
+                    : null,
+            ],
             'isStaff' => $this->attendanceService->isStaff($principal),
+            // The latest slip can be recalculated (with the current salary settings)
+            'canRecalculate' => ! $this->attendanceService->isStaff($principal)
+                && $slip->staffable
+                && $this->slips->latestSlip($slip->staffable)?->is($slip),
         ]);
+    }
+
+    /** Recalculates the latest slip for its period with the staff member's current settings. */
+    public function recalculate(string $uid)
+    {
+        abort_if($this->attendanceService->isStaff($this->attendanceService->currentPrincipal()), 403);
+
+        $slip = SalarySlip::where('uid', $uid)->firstOrFail();
+        abort_unless($this->ownStaff()->contains(fn ($s) => get_class($s) === $slip->staffable_type && $s->id === $slip->staffable_id), 404);
+
+        $this->slips->recalculate($slip, $this->attendanceService->currentPrincipal()?->name);
+
+        return back()->with('success', 'Salary slip recalculated with the current salary settings.');
     }
 
     private function slipSummary(SalarySlip $slip): array

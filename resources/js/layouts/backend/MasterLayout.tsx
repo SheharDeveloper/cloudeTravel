@@ -5,6 +5,7 @@ import Sidebar from './Sidebar';
 import Loader from '@/components/Loader';
 import AttendanceGate from '@/components/AttendanceGate';
 import AttendanceTimer from '@/components/AttendanceTimer';
+import LunchGate from '@/components/LunchGate';
 
 // Set body attributes immediately (outside component) so CSS selectors work on first paint
 function applyBodyAttrs() {
@@ -162,6 +163,7 @@ export default function MasterLayout({ children, title }: MasterLayoutProps) {
 
             <AttendanceGate />
             <AttendanceTimer />
+            <LunchGate />
 
         </>
     );

@@ -11,6 +11,7 @@ class SalarySlip extends Model
     protected $fillable = [
         'uid', 'staffable_type', 'staffable_id', 'owner_type', 'owner_id', 'month', 'period_start', 'period_end', 'staff_name',
         'salary', 'salary_type', 'currency', 'shift', 'days_present', 'days_leave', 'days_absent',
+        'paid_leave_days', 'unpaid_leave_days', 'paid_leave_pay',
         'worked_minutes', 'hourly_rate', 'gross', 'deductions', 'total_deductions', 'net',
         'generated_by', 'generated_at',
     ];
@@ -22,6 +23,7 @@ class SalarySlip extends Model
         'gross' => 'float',
         'total_deductions' => 'float',
         'net' => 'float',
+        'paid_leave_pay' => 'float',
         'generated_at' => 'datetime',
         'period_start' => 'datetime',
         'period_end' => 'datetime',
